@@ -1,11 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="org.noorganization.ikaufliste">
+    xmlns:tools="http://schemas.android.com/tools"
+    package="org.noorganization.instalist">
 
-    <application android:allowBackup="true"
-                 android:label="@string/app_name"
-                 android:icon="@mipmap/ic_launcher"
-                 android:theme="@style/AppTheme">
+    <application
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:theme="@style/AppTheme"
+        tools:replace="android:icon">
+        <activity
+            android:name="org.noorganization.instalist.view.MainActivity"
+            android:label="@string/title_activity_main" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
 
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <!-- SugarORM Settings -->
+        <meta-data android:name="DATABASE" android:value="shopping.db" />
+        <meta-data android:name="VERSION" android:value="1" />
+        <meta-data android:name="QUERY_LOG" android:value="true" /> <!-- for dev = true -->
+        <meta-data android:name="DOMAIN_PACKAGE_NAME" android:value="org.noorganization" />
     </application>
 
 </manifest>
