@@ -10,8 +10,10 @@ public class ListEntry extends SugarRecord<ListEntry> {
 
     ShoppingList mList;
     Product      mProduct;
-    float        mAmount; //< The amount of product that's listed
-    boolean      mStruck; //< Whether a product is struck through, i.e. because it's already bought.
+    /** The amount of product that's listed */
+    float        mAmount;
+    /** Whether a product is struck through, i.e. because it's already bought. */
+    boolean      mStruck;
 
     public ListEntry() {
         mList    = null;

@@ -9,9 +9,12 @@ import com.orm.SugarRecord;
 public class Product extends SugarRecord<Product> {
 
     String mName;
-    Unit   mUnit;          //< The unit of the product. Can also be null if the products has no unit.
-    float  mDefaultAmount; //< The default amount is usually 1.0f
-    float  mStepAmount;    //< The amount to increase or decrease over quick buttons. Usually 1.0f.
+    /** The unit of the product. Can also be null if the products has no unit. */
+    Unit   mUnit;
+    /** The default amount is usually 1.0f */
+    float  mDefaultAmount;
+    /** The amount to increase or decrease over quick buttons. Usually 1.0f. */
+    float  mStepAmount;
 
     public Product() {
         mUnit          = null;
