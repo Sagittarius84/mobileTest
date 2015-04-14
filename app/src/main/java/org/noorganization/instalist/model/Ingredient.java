@@ -3,6 +3,7 @@ package org.noorganization.instalist.model;
 import com.orm.SugarRecord;
 
 /**
+ * Represents a product as ingredient in a recipe.
  * Created by michi on 14.04.15.
  */
 public class Ingredient extends SugarRecord<Ingredient> {
