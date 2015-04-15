@@ -8,7 +8,7 @@ import com.orm.SugarRecord;
  */
 public class Tag extends SugarRecord<Tag> {
 
-    String mName;
+    public String mName;
 
     public Tag() {
         mName = "";

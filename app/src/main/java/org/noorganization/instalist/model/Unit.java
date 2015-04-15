@@ -1,5 +1,7 @@
 package org.noorganization.instalist.model;
 
+import android.content.Context;
+
 import com.orm.SugarRecord;
 
 /**
@@ -8,7 +10,7 @@ import com.orm.SugarRecord;
  */
 public class Unit extends SugarRecord<Unit> {
 
-    String mName;
+    public String mName;
 
     public Unit() {
         mName = "";

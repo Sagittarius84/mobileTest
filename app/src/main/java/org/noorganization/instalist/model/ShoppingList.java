@@ -8,7 +8,7 @@ import com.orm.SugarRecord;
  */
 public class ShoppingList extends SugarRecord<ShoppingList> {
 
-    String mName;
+    public String mName;
 
     public ShoppingList() {
         mName = "";

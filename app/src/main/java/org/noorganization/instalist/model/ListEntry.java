@@ -8,12 +8,12 @@ import com.orm.SugarRecord;
  */
 public class ListEntry extends SugarRecord<ListEntry> {
 
-    ShoppingList mList;
-    Product      mProduct;
+    public ShoppingList mList;
+    public Product      mProduct;
     /** The amount of product that's listed */
-    float        mAmount;
+    public float        mAmount;
     /** Whether a product is struck through, i.e. because it's already bought. */
-    boolean      mStruck;
+    public boolean      mStruck;
 
     public ListEntry() {
         mList    = null;

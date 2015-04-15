@@ -8,9 +8,9 @@ import com.orm.SugarRecord;
  */
 public class Ingredient extends SugarRecord<Ingredient> {
 
-    Product mProduct;
-    Recipe  mRecipe;
-    float   mAmount;
+    public Product mProduct;
+    public Recipe  mRecipe;
+    public float   mAmount;
 
     public Ingredient() {
         mProduct = null;
@@ -23,5 +23,4 @@ public class Ingredient extends SugarRecord<Ingredient> {
         mRecipe  = _recipe;
         mAmount  = _amount;
     }
-
 }

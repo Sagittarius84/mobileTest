@@ -10,8 +10,8 @@ import com.orm.SugarRecord;
  */
 public class TaggedProduct extends SugarRecord<TaggedProduct> {
 
-    Tag     mTag;
-    Product mProduct;
+    public Tag     mTag;
+    public Product mProduct;
 
     public TaggedProduct() {
         mTag     = null;
