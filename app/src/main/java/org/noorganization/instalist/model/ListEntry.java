@@ -36,4 +36,32 @@ public class ListEntry extends SugarRecord<ListEntry> {
         mAmount  = _amount;
         mStruck  = _struck;
     }
+
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        ListEntry that = (ListEntry) o;
+
+        if (!getId().equals(that.getId()) ||
+                Float.compare(that.mAmount, mAmount) != 0 ||
+                mStruck != that.mStruck ||
+                !mList.getId().equals(that.mList.getId()) ||
+                !mProduct.getId().equals(that.mProduct.getId())) {
+            return false;
+        }
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        return getId().intValue();
+    }
 }
