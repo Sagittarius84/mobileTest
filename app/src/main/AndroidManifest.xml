@@ -1,18 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="org.noorganization.instalist">
+    package="org.noorganization.instalist" >
 
     <application
+        android:name="com.orm.SugarApp"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/AppTheme"
-        tools:replace="android:icon"
-        android:name="com.orm.SugarApp">
-
+        tools:replace="android:icon" >
         <activity
-            android:name="org.noorganization.instalist.view.MainActivity"
+            android:name=".view.MainActivity"
             android:label="@string/title_activity_main" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -22,10 +21,23 @@
         </activity>
 
         <!-- SugarORM Settings -->
-        <meta-data android:name="DATABASE" android:value="shopping.db" />
-        <meta-data android:name="VERSION" android:value="1" />
-        <meta-data android:name="QUERY_LOG" android:value="true" /> <!-- for dev = true -->
-        <meta-data android:name="DOMAIN_PACKAGE_NAME" android:value="org.noorganization.instalist.model" />
+        <meta-data
+            android:name="DATABASE"
+            android:value="shopping.db" />
+        <meta-data
+            android:name="VERSION"
+            android:value="1" />
+        <meta-data
+            android:name="QUERY_LOG"
+            android:value="true" /> <!-- for dev = true -->
+        <meta-data
+            android:name="DOMAIN_PACKAGE_NAME"
+            android:value="org.noorganization.instalist.model" />
+
+        <activity
+            android:name=".view.MainShoppingListView"
+            android:label="@string/title_activity_main_shopping_list_view" >
+        </activity>
     </application>
 
 </manifest>
