@@ -79,7 +79,7 @@ public class ShoppingListAdapter extends ArrayAdapter<ListEntry> {
         productViewHolder.mProductAmount.setText(String.valueOf(singleEntry.mAmount));
         productViewHolder.mProductName.setText(String.valueOf(singleEntry.mProduct.mName));
 
-        //shoppingListView.setOnClickListener(onProductClickListener);
+        shoppingListView.setOnClickListener(onProductClickListener);
         shoppingListView.setOnTouchListener(new OnSwipeListener(this.getContext(), shoppingListView){
 
             @Override

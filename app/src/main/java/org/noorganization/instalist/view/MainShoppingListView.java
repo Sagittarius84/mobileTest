@@ -84,11 +84,14 @@ public class MainShoppingListView extends ActionBarActivity {
             ShoppingListAdapter shoppingListAdapter;
 
             shoppingListView = (ListView) getActivity().findViewById(R.id.fragment_shopping_list);
-            ListEntry listEntry = new ListEntry();
-            listEntry.mProduct = new Product();
-            listEntry.mProduct.mName = "Sugar";
             List<ListEntry> listOfEntries = new ArrayList<>();
-            listOfEntries.add(listEntry);
+
+            for(int i = 0; i < 50; ++ i) {
+                ListEntry listEntry = new ListEntry();
+                listEntry.mProduct = new Product();
+                listEntry.mProduct.mName = "Sugar " + String.valueOf(i);
+                listOfEntries.add(listEntry);
+            }
 
             shoppingListAdapter = new ShoppingListAdapter(getActivity(), listOfEntries);
             shoppingListView.setAdapter(shoppingListAdapter);
