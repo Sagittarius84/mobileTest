@@ -18,6 +18,13 @@ import org.noorganization.instalist.view.listadapter.ShoppingListAdapter;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * MainShoppingListView handles the display of an selected shoppinglist, so that the corresponding
+ * items of this list are shown to the user.
+ *
+ * Is dependant on the selected list.
+ * @author TS
+ */
 public class MainShoppingListView extends ActionBarActivity {
 
     @Override
@@ -62,6 +69,8 @@ public class MainShoppingListView extends ActionBarActivity {
      * A placeholder fragment containing a simple view.
      */
     public static class PlaceholderFragment extends Fragment {
+
+        private String mCurrentListName;
 
         public PlaceholderFragment() {
         }

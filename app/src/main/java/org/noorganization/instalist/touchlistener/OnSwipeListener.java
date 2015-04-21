@@ -5,19 +5,23 @@ import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
 
+import org.noorganization.instalist.model.ListEntry;
+
 /**
  * Created by TS on 20.04.2015.
  * Holds an simple swipe listener.
  * TODO: some animations!
  */
 public class OnSwipeListener implements View.OnTouchListener {
-
-    private final GestureDetector mGestureDetector;
     public View mView;
+    public ListEntry mEntry;
+    private final GestureDetector mGestureDetector;
 
-    public OnSwipeListener(Context context, View view){
+
+    public OnSwipeListener(Context context, View view, ListEntry entry){
         mGestureDetector = new GestureDetector(context, new GestureListener());
-        mView = view;
+        mView   = view;
+        mEntry  = entry;
     }
 
     public boolean onTouch(final View view, final MotionEvent motionEvent) {
