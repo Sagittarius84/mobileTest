@@ -70,6 +70,35 @@ public class ListModificationListenerTest extends TestCase {
         assertEquals(createdEntry2, returnedEntry2);
     }
 
+    public void testStrikeItem() throws Exception {
+        assertNull(mLML4Test.strikeItem(mListHome, mProductBread));
+
+        ListEntry changedFirstListEntry = mLML4Test.strikeItem(mListWork, mProductButter);
+        assertNotNull(changedFirstListEntry);
+        assertEquals(true, changedFirstListEntry.mStruck);
+
+        ListEntry changedSecondListEntry = mLML4Test.strikeItem(mListEntryButterForWork);
+        assertNotNull(changedSecondListEntry);
+        assertEquals(changedFirstListEntry, changedSecondListEntry);
+    }
+
+    public void testUnstrikeItem() throws Exception {
+
+        mListEntryButterForWork.mStruck = true;
+        mListEntryButterForWork.save();
+
+        assertNull(mLML4Test.unstrikeItem(mListHome, mProductBread));
+
+        ListEntry changedFirstListEntry = mLML4Test.unstrikeItem(mListWork, mProductButter);
+        assertNotNull(changedFirstListEntry);
+        assertEquals(true, changedFirstListEntry.mStruck);
+
+        ListEntry changedSecondListEntry = mLML4Test.unstrikeItem(mListEntryButterForWork);
+        assertNotNull(changedSecondListEntry);
+        assertEquals(changedFirstListEntry, changedSecondListEntry);
+
+    }
+
     public void testRemoveItem() throws Exception {
         assertFalse(mLML4Test.removeItem(mListHome, mProductBread));
 

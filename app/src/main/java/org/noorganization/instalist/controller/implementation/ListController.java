@@ -1,5 +1,6 @@
 package org.noorganization.instalist.controller.implementation;
 
+import com.orm.SugarRecord;
 import com.orm.query.Condition;
 import com.orm.query.Select;
 
@@ -45,6 +46,64 @@ public class ListController implements ListModificationListener {
         item.save();
 
         return item;
+    }
+
+    @Override
+    public ListEntry strikeItem(ShoppingList _list, Product _product) {
+        if (_list == null || _product == null) {
+            return null;
+        }
+
+        ListEntry toChange = Select.from(ListEntry.class).where(
+                Condition.prop("m_list").eq(_list.getId()),
+                Condition.prop("m_product").eq(_product.getId())).first();
+        return strikeItem(toChange, false);
+    }
+
+    @Override
+    public ListEntry unstrikeItem(ShoppingList _list, Product _product) {
+        if (_list == null || _product == null) {
+            return null;
+        }
+
+        ListEntry toChange = Select.from(ListEntry.class).where(
+                Condition.prop("m_list").eq(_list.getId()),
+                Condition.prop("m_product").eq(_product.getId())).first();
+        return unstrikeItem(toChange, false);
+    }
+
+    private ListEntry unstrikeItem(ListEntry _toChange, boolean _reload) {
+        if (_toChange == null) {
+            return null;
+        }
+
+        ListEntry rtn = (_reload ? SugarRecord.findById(ListEntry.class,_toChange.getId()) : _toChange);
+        rtn.mStruck = true;
+        rtn.save();
+
+        return rtn;
+    }
+
+    private ListEntry strikeItem(ListEntry _item, boolean _reload) {
+        if (_item == null) {
+            return null;
+        }
+
+        ListEntry rtn = (_reload ? SugarRecord.findById(ListEntry.class,_item.getId()) : _item);
+        rtn.mStruck = true;
+        rtn.save();
+
+        return rtn;
+    }
+
+    @Override
+    public ListEntry strikeItem(ListEntry _item) {
+        return strikeItem(_item, true);
+    }
+
+    @Override
+    public ListEntry unstrikeItem(ListEntry _item) {
+        return unstrikeItem(_item, true);
     }
 
     @Override
