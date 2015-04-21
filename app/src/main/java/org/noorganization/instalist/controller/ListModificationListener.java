@@ -22,6 +22,37 @@ public interface ListModificationListener {
      * returned.
      */
     public ListEntry addOrChangeItem(ShoppingList _list, Product _product, float _amount);
+
+    /**
+     * Strikes a ListEntry.
+     * @param _list A valid ShoppingList, not null.
+     * @param _product A valid Product, not null.
+     * @return The changed item or null, if not found or parameters invalid.
+     */
+    public ListEntry strikeItem(ShoppingList _list, Product _product);
+
+    /**
+     * Removes the virtual stroke from a ListEntry.
+     * @param _list A valid ShoppingList, not null.
+     * @param _product A valid Product, not null.
+     * @return The changed item or null, if not found or parameters invalid.
+     */
+    public ListEntry unstrikeItem(ShoppingList _list, Product _product);
+
+    /**
+     * Alias for {@link #strikeItem(org.noorganization.instalist.model.ShoppingList, org.noorganization.instalist.model.Product)}.
+     * @param _item A valid ListEntry, not null.
+     * @return The changed item or null, if _item was invalid.
+     */
+    public ListEntry strikeItem(ListEntry _item);
+
+    /**
+     * Alias for {@link #unstrikeItem(org.noorganization.instalist.model.ShoppingList, org.noorganization.instalist.model.Product)}.
+     * @param _item A valid ListEntry, not null.
+     * @return The changed item or null if _item was invalid.
+     */
+    public ListEntry unstrikeItem(ListEntry _item);
+
     public boolean removeItem(ShoppingList _list, Product _product);
     public boolean removeItem(ListEntry _item);
 
