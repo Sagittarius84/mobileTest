@@ -26,6 +26,10 @@ public class ShoppingList extends SugarRecord<ShoppingList> {
         return Select.from(ListEntry.class).where(Condition.prop("m_list").eq(getId())).list();
     }
 
+    public static String getShoppingListPropertyName(){
+        return "m_name";
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o){

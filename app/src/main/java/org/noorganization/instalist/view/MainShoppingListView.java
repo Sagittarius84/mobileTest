@@ -10,10 +10,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
 
+import org.noorganization.instalist.GlobalApplication;
 import org.noorganization.instalist.R;
 import org.noorganization.instalist.model.ListEntry;
 import org.noorganization.instalist.model.Product;
-import org.noorganization.instalist.view.listadapter.ShoppingListAdapter;
+import org.noorganization.instalist.model.ShoppingList;
+import org.noorganization.instalist.view.listadapter.ShoppingListAdapter;;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -89,19 +91,26 @@ public class MainShoppingListView extends ActionBarActivity {
         @Override
         public void onResume() {
             super.onResume();
+
+
             ListView shoppingListView;
             ShoppingListAdapter shoppingListAdapter;
 
             shoppingListView = (ListView) getActivity().findViewById(R.id.fragment_shopping_list);
-            List<ListEntry> listOfEntries = new ArrayList<>();
 
-            for(int i = 0; i < 50; ++ i) {
+            GlobalApplication globalApplication = GlobalApplication.getInstance();
+            List<ShoppingList> shoppingLists    = globalApplication.getShoppingListNames();
+
+            globalApplication.setCurrentShoppingListName(shoppingLists.get(0).mName);
+            List<ListEntry> listOfEntries = globalApplication.getListEntries(globalApplication.getCurrentShoppingListName());
+
+/*            for(int i = 0; i < 50; ++ i) {
                 ListEntry listEntry = new ListEntry();
                 listEntry.mProduct = new Product();
                 listEntry.mProduct.mName = "Sugar " + String.valueOf(i);
                 listOfEntries.add(listEntry);
             }
-
+*/
             shoppingListAdapter = new ShoppingListAdapter(getActivity(), listOfEntries);
             shoppingListView.setAdapter(shoppingListAdapter);
         }
