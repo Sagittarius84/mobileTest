@@ -2,7 +2,6 @@ package org.noorganization.instalist.controller.database_seed;
 
 import android.util.Log;
 
-import com.orm.Database;
 import com.orm.query.Condition;
 import com.orm.query.Select;
 
@@ -30,6 +29,7 @@ public class DatabaseSeeder {
     private final String    SAMPLE_TAG              = "SAMPLE";
     private final int       PRODUCT_TEST_DATA_SIZE  = 10;
     private final long      PRODUCT_LIST_SEED       = 324982340237840L;
+
     private ListModificationListener mListController;
 
     public static DatabaseSeeder getInstance(){
