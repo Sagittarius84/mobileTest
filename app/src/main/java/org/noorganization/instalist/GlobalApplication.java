@@ -1,7 +1,10 @@
 package org.noorganization.instalist;
 
 import android.app.Application;
+import android.os.Bundle;
+import android.support.v4.widget.DrawerLayout;
 import android.util.Log;
+import android.widget.ListView;
 
 import com.orm.SugarApp;
 import com.orm.query.Condition;
@@ -24,7 +27,6 @@ public class GlobalApplication extends SugarApp {
     private DatabaseSeeder mDatabaseSeeder;
     private String mCurrentShoppingListName;
 
-
     @Override
     public void onCreate() {
         super.onCreate();
@@ -32,6 +34,7 @@ public class GlobalApplication extends SugarApp {
 
         mDatabaseSeeder = DatabaseSeeder.getInstance();
         mDatabaseSeeder.startUp();
+
     }
 
     @Override
@@ -46,10 +49,10 @@ public class GlobalApplication extends SugarApp {
 
     public List<ListEntry> getListEntries(String listName){
 
-        ShoppingList shoppingList   = Select.from(ShoppingList.class).where(Condition.prop(ShoppingList.getShoppingListPropertyName()).eq(listName)).first();
+        ShoppingList shoppingList = Select.from(ShoppingList.class).where(Condition.prop(ShoppingList.LIST_NAME_ATTR).eq(listName)).first();
 
-            List<ListEntry> entries = shoppingList.getEntries();
-            Log.d(LOG_TAG, "Get list entries of list: " + shoppingList.mName + " number of elements: " + entries.size());
+        List<ListEntry> entries = shoppingList.getEntries();
+        Log.d(LOG_TAG, "Get list entries of list: " + shoppingList.mName + " number of elements: " + entries.size());
 
 
         return entries;

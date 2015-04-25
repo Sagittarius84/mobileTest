@@ -11,6 +11,7 @@ import java.util.List;
  * Created by michi on 14.04.15.
  */
 public class ShoppingList extends SugarRecord<ShoppingList> {
+    public final static String LIST_NAME_ATTR = "m_name";
 
     public String mName;
 
@@ -24,10 +25,6 @@ public class ShoppingList extends SugarRecord<ShoppingList> {
 
     public List<ListEntry> getEntries() {
         return Select.from(ListEntry.class).where(Condition.prop("m_list").eq(getId())).list();
-    }
-
-    public static String getShoppingListPropertyName(){
-        return "m_name";
     }
 
     @Override

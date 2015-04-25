@@ -7,6 +7,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.Scroller;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -79,11 +80,26 @@ public class ShoppingListAdapter extends ArrayAdapter<ListEntry> {
         productViewHolder.mProductAmount.setText(String.valueOf(singleEntry.mAmount));
         productViewHolder.mProductName.setText(String.valueOf(singleEntry.mProduct.mName));
 
+        if(singleEntry.mStruck){
+            // element is striked
+            productViewHolder.mProductAmount.setPaintFlags(productViewHolder.mProductAmount.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+            productViewHolder.mProductName.setPaintFlags(productViewHolder.mProductName.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+        } else{
+            // element is unstriked#
+            productViewHolder.mProductAmount.setPaintFlags(productViewHolder.mProductAmount.getPaintFlags() & (~ Paint.STRIKE_THRU_TEXT_FLAG));
+            productViewHolder.mProductName.setPaintFlags(productViewHolder.mProductName.getPaintFlags() & (~ Paint.STRIKE_THRU_TEXT_FLAG));
+        }
+
         shoppingListView.setOnClickListener(onProductClickListener);
-        shoppingListView.setOnTouchListener(new OnSwipeListener(this.getContext(), shoppingListView){
+        shoppingListView.setOnTouchListener(new OnSwipeListener(this.getContext(), shoppingListView, singleEntry){
 
             @Override
             public void onSwipeRight(){
+
+                // send event to change current product  to striked through
+                this.mEntry.mStruck = true;
+                // notify
+
                 Log.i(ShoppingListAdapter.class.getName(), "Strike!");
                 ShoppingListProductViewHolder viewHolder = (ShoppingListProductViewHolder) this.mView.getTag();
                 viewHolder.mProductAmount.setPaintFlags(viewHolder.mProductAmount.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
@@ -94,6 +110,8 @@ public class ShoppingListAdapter extends ArrayAdapter<ListEntry> {
 
             @Override
             public void onSwipeLeft(){
+                this.mEntry.mStruck = false;
+
                 Log.i(ShoppingListAdapter.class.getName(), "Unstrike!");
                 ShoppingListProductViewHolder viewHolder = (ShoppingListProductViewHolder) this.mView.getTag();
                 // ~ negates the flag, so all other stuff beside the strike through will be the same
@@ -105,7 +123,6 @@ public class ShoppingListAdapter extends ArrayAdapter<ListEntry> {
 
         return shoppingListView;
     }
-
 
     @Override
     public int getCount() {
