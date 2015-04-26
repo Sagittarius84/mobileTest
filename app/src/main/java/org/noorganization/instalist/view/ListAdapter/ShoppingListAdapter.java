@@ -7,17 +7,17 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.Scroller;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import org.noorganization.instalist.R;
 import org.noorganization.instalist.model.ListEntry;
-import org.noorganization.instalist.touchlistener.OnSwipeListener;
+import org.noorganization.instalist.touchlistener.OnGestureListener;
 
 import java.util.List;
 
 /**
+ * The Adapter for rendering the shopping list entries to the user.
  * Created by TS on 20.04.2015.
  */
 public class ShoppingListAdapter extends ArrayAdapter<ListEntry> {
@@ -37,16 +37,6 @@ public class ShoppingListAdapter extends ArrayAdapter<ListEntry> {
     // -----------------------------------------------------------
     // Listeners
     // -----------------------------------------------------------
-
-    private View.OnClickListener onProductClickListener = new View.OnClickListener() {
-        @Override
-        public void onClick(View view) {
-            ShoppingListProductViewHolder holder = (ShoppingListProductViewHolder)view.getTag();
-            Toast.makeText(view.getContext(), "Selected " + holder.mProductAmount.getText() + " " + holder.mProductName.getText() , Toast.LENGTH_LONG).show();
-            Log.i(LOG_TAG, "Item clicked");
-        }
-    };
-
 
     // -----------------------------------------------------------
 
@@ -90,8 +80,7 @@ public class ShoppingListAdapter extends ArrayAdapter<ListEntry> {
             productViewHolder.mProductName.setPaintFlags(productViewHolder.mProductName.getPaintFlags() & (~ Paint.STRIKE_THRU_TEXT_FLAG));
         }
 
-        shoppingListView.setOnClickListener(onProductClickListener);
-        shoppingListView.setOnTouchListener(new OnSwipeListener(this.getContext(), shoppingListView, singleEntry){
+        shoppingListView.setOnTouchListener(new OnGestureListener(this.getContext(), shoppingListView, singleEntry){
 
             @Override
             public void onSwipeRight(){
@@ -104,8 +93,7 @@ public class ShoppingListAdapter extends ArrayAdapter<ListEntry> {
                 ShoppingListProductViewHolder viewHolder = (ShoppingListProductViewHolder) this.mView.getTag();
                 viewHolder.mProductAmount.setPaintFlags(viewHolder.mProductAmount.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
                 viewHolder.mProductName.setPaintFlags(viewHolder.mProductName.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
-                Toast.makeText(getContext(), "Swiped right !", Toast.LENGTH_LONG).show();
-
+                Toast.makeText(getContext(), "Swiped right !", Toast.LENGTH_SHORT).show();
             }
 
             @Override
@@ -117,7 +105,14 @@ public class ShoppingListAdapter extends ArrayAdapter<ListEntry> {
                 // ~ negates the flag, so all other stuff beside the strike through will be the same
                 viewHolder.mProductAmount.setPaintFlags(viewHolder.mProductAmount.getPaintFlags() & (~ Paint.STRIKE_THRU_TEXT_FLAG));
                 viewHolder.mProductName.setPaintFlags(viewHolder.mProductName.getPaintFlags() & (~ Paint.STRIKE_THRU_TEXT_FLAG));
-                Toast.makeText(getContext(), "Swiped Left!", Toast.LENGTH_LONG).show();
+                Toast.makeText(getContext(), "Swiped Left!", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onSingleTap() {
+                super.onSingleTap();
+                ShoppingListProductViewHolder holder = (ShoppingListProductViewHolder)mView.getTag();
+                Toast.makeText(mContext, "Selected " + holder.mProductAmount.getText() + " " + holder.mProductName.getText() , Toast.LENGTH_SHORT).show();
             }
         });
 

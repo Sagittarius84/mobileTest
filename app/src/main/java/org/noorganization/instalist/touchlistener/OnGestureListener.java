@@ -9,17 +9,17 @@ import org.noorganization.instalist.model.ListEntry;
 
 /**
  * Created by TS on 20.04.2015.
- * Holds an simple swipe listener.
+ * Holds an combined touch and swipe listener.
  * TODO: some animations!
  */
-public class OnSwipeListener implements View.OnTouchListener {
+public class OnGestureListener implements View.OnTouchListener {
     public View mView;
     public ListEntry mEntry;
     private final GestureDetector mGestureDetector;
 
 
-    public OnSwipeListener(Context context, View view, ListEntry entry){
-        mGestureDetector = new GestureDetector(context, new GestureListener());
+    public OnGestureListener(Context context, View view, ListEntry entry){
+        mGestureDetector = new GestureDetector(context, new GestureListener(this));
         mView   = view;
         mEntry  = entry;
     }
@@ -28,12 +28,26 @@ public class OnSwipeListener implements View.OnTouchListener {
         return mGestureDetector.onTouchEvent(motionEvent);
     }
 
-    private final class GestureListener extends GestureDetector.SimpleOnGestureListener {
+    public void onSwipeRight() {}
+    public void onSwipeLeft() {}
+    public void onSingleTap(){}
+
+    private static final class GestureListener extends GestureDetector.SimpleOnGestureListener {
 
         private static final int SWIPE_THRESHOLD = 80;
         private static final int SWIPE_VELOCITY_THRESHOLD = 20;
 
+        private OnGestureListener mGestureListener;
 
+        public GestureListener(OnGestureListener _OnGestureListener){
+            mGestureListener = _OnGestureListener;
+        }
+
+        @Override
+        public boolean onSingleTapUp(MotionEvent e) {
+            mGestureListener.onSingleTap();
+            return true;
+        }
 
         @Override
         public boolean onDown(MotionEvent e) {
@@ -49,14 +63,13 @@ public class OnSwipeListener implements View.OnTouchListener {
                 if (Math.abs(diffX) > SWIPE_THRESHOLD && Math.abs(velocityX) > SWIPE_VELOCITY_THRESHOLD) {
 
                     if (diffX > 0) {
-                        onSwipeRight();
+                        mGestureListener.onSwipeRight();
                     } else {
-                        onSwipeLeft();
+                        mGestureListener.onSwipeLeft();
                     }
                 }
             return false;
         }
     }
-    public void onSwipeRight() {}
-    public void onSwipeLeft() {}
+
 }
