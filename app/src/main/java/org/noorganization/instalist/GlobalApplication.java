@@ -14,6 +14,7 @@ import org.noorganization.instalist.controller.database_seed.DatabaseSeeder;
 import org.noorganization.instalist.model.ListEntry;
 import org.noorganization.instalist.model.ShoppingList;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -25,7 +26,6 @@ public class GlobalApplication extends SugarApp {
 
     private static GlobalApplication mInstance;
     private DatabaseSeeder mDatabaseSeeder;
-    private String mCurrentShoppingListName;
 
     @Override
     public void onCreate() {
@@ -48,26 +48,21 @@ public class GlobalApplication extends SugarApp {
     }
 
     public List<ListEntry> getListEntries(String listName){
-
         ShoppingList shoppingList = Select.from(ShoppingList.class).where(Condition.prop(ShoppingList.LIST_NAME_ATTR).eq(listName)).first();
-
         List<ListEntry> entries = shoppingList.getEntries();
         Log.d(LOG_TAG, "Get list entries of list: " + shoppingList.mName + " number of elements: " + entries.size());
-
-
         return entries;
     }
 
-    public List<ShoppingList> getShoppingListNames(){
-        return Select.from(ShoppingList.class).list();
-    }
+    public List<String> getShoppingListNames(){
+        List<ShoppingList> shoppingLists = Select.from(ShoppingList.class).list();
+        List<String> shoppingListNames = new ArrayList<>();
 
-    public String getCurrentShoppingListName() {
-        return mCurrentShoppingListName;
-    }
+        for (ShoppingList shoppingList : shoppingLists) {
+            // fill navbar with some sample data
+            shoppingListNames.add(shoppingList.mName);
+        }
 
-    public void setCurrentShoppingListName(String mCurrentShoppingListName) {
-        this.mCurrentShoppingListName = mCurrentShoppingListName;
+        return shoppingListNames;
     }
-
 }

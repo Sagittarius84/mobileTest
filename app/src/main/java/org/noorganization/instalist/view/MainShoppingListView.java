@@ -21,6 +21,7 @@ import android.widget.ListView;
 import com.orm.query.Condition;
 import com.orm.query.Select;
 
+import org.noorganization.instalist.GlobalApplication;
 import org.noorganization.instalist.R;
 import org.noorganization.instalist.model.ShoppingList;
 import org.noorganization.instalist.view.listadapter.ShoppingListAdapter;
@@ -32,20 +33,38 @@ import java.util.List;
 /**
  * MainShoppingListView handles the display of an selected shoppinglist, so that the corresponding
  * items of this list are shown to the user.
- *
+ * <p/>
  * Is dependant on the selected list.
+ *
  * @author TS
  */
 public class MainShoppingListView extends ActionBarActivity {
 
     public final static String KEY_LISTNAME = "list_name";
 
-    private Toolbar     mToolbar;
-    private ListView    mLeftSideListView;
+    private Toolbar mToolbar;
+    private ListView mLeftSideListView;
+
+    /**
+     * For creation an icon at the toolbar for toggling the navbar in and out.
+     */
     private ActionBarDrawerToggle mNavBarToggle;
+
+    /**
+     * Layout reference of the side drawer navbar.
+     */
     private DrawerLayout mDrawerLayout;
 
+    /**
+     * Title of the toolbar.
+     */
     private String mTitle;
+
+    /**
+     * Name of the current list
+     */
+    private String mCurrentListName;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,19 +79,11 @@ public class MainShoppingListView extends ActionBarActivity {
         setSupportActionBar(mToolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        mDrawerLayout       = (DrawerLayout) findViewById(R.id.main_drawer_layout_container);
-        mLeftSideListView   = (ListView) findViewById(R.id.list_view_left_side_navigation);
+        mDrawerLayout = (DrawerLayout) findViewById(R.id.main_drawer_layout_container);
+        mLeftSideListView = (ListView) findViewById(R.id.list_view_left_side_navigation);
 
-
-        List<ShoppingList> shoppingLists    = Select.from(ShoppingList.class).list();
-        List<String> shoppingListNames     = new ArrayList<>();
-
-        for(ShoppingList shoppingList : shoppingLists){
-            // fill navbar with some sample data
-            shoppingListNames.add(shoppingList.mName);
-        }
-
-        mLeftSideListView.setAdapter(new ShoppingListOverviewAdapter(this, shoppingListNames));
+        // fill the list with selectable lists
+        mLeftSideListView.setAdapter(new ShoppingListOverviewAdapter(this, GlobalApplication.getInstance().getShoppingListNames()));
 
         mDrawerLayout.setFitsSystemWindows(true);
 
@@ -83,7 +94,7 @@ public class MainShoppingListView extends ActionBarActivity {
                 mToolbar,
                 R.string.nav_drawer_open,
                 R.string.nav_drawer_close
-        ){
+        ) {
 
             @Override
             public void onDrawerClosed(View drawerView) {
@@ -96,7 +107,7 @@ public class MainShoppingListView extends ActionBarActivity {
             @Override
             public void onDrawerOpened(View drawerView) {
                 super.onDrawerOpened(drawerView);
-                if(mToolbar.getTitle() != null) {
+                if (mToolbar.getTitle() != null) {
                     mTitle = mToolbar.getTitle().toString();
                     mToolbar.setTitle("Choose List");
                 }
@@ -108,9 +119,7 @@ public class MainShoppingListView extends ActionBarActivity {
         mDrawerLayout.setDrawerListener(mNavBarToggle);
 
         if (savedInstanceState == null) {
-            getFragmentManager().beginTransaction()
-                    .add(R.id.container, new ShoppingListOverviewFragment())
-                    .commit();
+            selectList(GlobalApplication.getInstance().getShoppingListNames().get(0));
         }
     }
 
@@ -124,23 +133,23 @@ public class MainShoppingListView extends ActionBarActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
 
-            // Handle action bar item clicks here. The action bar will
-            // automatically handle clicks on the Home/Up button, so long
-            // as you specify a parent activity in AndroidManifest.xml.
-            int id = item.getItemId();
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
 
-            // The action bar home/up action should open or close the navbar.
-            // ActionBarDrawerToggle will take care of this.
-  /*      if(mNavBarToggle.onOptionsItemSelected(item)){
+        // The action bar home/up action should open or close the navbar.
+        // ActionBarDrawerToggle will take care of this.
+        if (mNavBarToggle.onOptionsItemSelected(item)) {
             return true;
         }
-*/
-            //noinspection SimplifiableIfStatement
-            if (id == R.id.action_settings) {
-                return true;
-            }
 
-            return super.onOptionsItemSelected(item);
+        //noinspection SimplifiableIfStatement
+        if (id == R.id.action_settings) {
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -157,16 +166,47 @@ public class MainShoppingListView extends ActionBarActivity {
         mNavBarToggle.onConfigurationChanged(newConfig);
     }
 
+    @Override
+    public void onBackPressed() {
+
+        if(getFragmentManager().getBackStackEntryCount() > 1){
+            getFragmentManager().popBackStack();
+        }else {
+            super.onBackPressed();
+        }
+
+    }
+
     // --------------------------------------------------------------------------------
-    // private
+    // own public methods
     // --------------------------------------------------------------------------------
 
-    public void selectList(String listName){
+    /**
+     *
+     * Creates a new fragment with the listentries of the given listname.
+     * @param listName, name of the list that content should be shown.
+     */
+    public void selectList(String listName) {
 
-        Bundle args = new Bundle();
+        // always close the drawer
+        mDrawerLayout.closeDrawer(mLeftSideListView);
+
+        // list is the same as the current one
+        // no need to do then something
+        if(listName == mCurrentListName)
+            return;
+
+        // decl
+        Bundle args;
+        Fragment fragment;
+
+        // init
+        mCurrentListName = listName;
+
+        args = new Bundle();
         args.putString(KEY_LISTNAME, listName);
 
-        Fragment fragment = new ShoppingListOverviewFragment();
+        fragment = new ShoppingListOverviewFragment();
         fragment.setArguments(args);
 
         // create transaction to new fragment
@@ -176,14 +216,14 @@ public class MainShoppingListView extends ActionBarActivity {
         transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
         transaction.commit();
 
-        mDrawerLayout.closeDrawer(mLeftSideListView);
     }
 
     /**
      * Sets the text of the toolbar title, when activity is updated.
+     *
      * @param _Title, the title of the toolbar
      */
-    public void setToolbarTitle(String _Title){
+    public void setToolbarTitle(String _Title) {
         mTitle = _Title;
     }
 
@@ -203,8 +243,9 @@ public class MainShoppingListView extends ActionBarActivity {
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
 
+            // get bundle args to get the listname that should be shown
             Bundle bundle = this.getArguments();
-            if(bundle == null){
+            if (bundle == null) {
                 return;
             }
             mCurrentListName = bundle.getString(MainShoppingListView.KEY_LISTNAME);
@@ -214,7 +255,7 @@ public class MainShoppingListView extends ActionBarActivity {
         public void onActivityCreated(Bundle savedInstanceState) {
             super.onActivityCreated(savedInstanceState);
             // get in here the actionbar
-            mActionBar = ((ActionBarActivity)getActivity()).getSupportActionBar();
+            mActionBar = ((ActionBarActivity) getActivity()).getSupportActionBar();
             // not needed to check for null, because we have a actionbar always assigned
             mActionBar.setTitle(mCurrentListName);
             // set the title in "main" activity so that the current list name is shown on the actionbar
@@ -230,28 +271,28 @@ public class MainShoppingListView extends ActionBarActivity {
         public void onResume() {
             super.onResume();
 
+            // decl
             ListView shoppingListView;
             ShoppingListAdapter shoppingListAdapter;
-            ShoppingList shoppingList;
 
-            shoppingListView    = (ListView) getActivity().findViewById(R.id.fragment_shopping_list);
+            // init
+            shoppingListView = (ListView) getActivity().findViewById(R.id.fragment_shopping_list);
 
-            if(mCurrentListName == null){
-                shoppingList = Select.from(ShoppingList.class).first();
-            }else {
-                shoppingList = Select.from(ShoppingList.class).where(Condition.prop(
-                        ShoppingList.LIST_NAME_ATTR).eq(mCurrentListName)).first();
+            // assign other listname if none is assigned
+            if (mCurrentListName == null) {
+                if (Select.from(ShoppingList.class).count() > 0) {
+                    mCurrentListName = Select.from(ShoppingList.class).first().mName;
+                } else {
+                    // do something to show that there are no shoppinglists!
+                    return;
+                }
             }
-            if(shoppingList == null){
-                return;
-            }
-
-            shoppingListAdapter = new ShoppingListAdapter(getActivity(), shoppingList.getEntries());
+            shoppingListAdapter = new ShoppingListAdapter(getActivity(), GlobalApplication.getInstance().getListEntries(mCurrentListName));
             shoppingListView.setAdapter(shoppingListAdapter);
         }
 
         @Override
-        public View onCreateView (LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState){
+        public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
             return inflater.inflate(R.layout.fragment_main_shopping_list_view, container, false);
 
         }
