@@ -104,6 +104,5 @@ public class ListModificationListenerTest extends TestCase {
         ShoppingList changedList2 = mLML4Test.renameList(mListWork, "_TEST_forMom");
         assertEquals("_TEST_forMom", changedList2.mName);
         assertEquals(changedList2, SugarRecord.findById(ShoppingList.class, mListWork.getId()));
-
     }
 }
