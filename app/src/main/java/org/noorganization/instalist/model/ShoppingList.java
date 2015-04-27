@@ -11,6 +11,7 @@ import java.util.List;
  * Created by michi on 14.04.15.
  */
 public class ShoppingList extends SugarRecord<ShoppingList> {
+    public final static String LIST_NAME_ATTR = "m_name";
 
     public String mName;
 

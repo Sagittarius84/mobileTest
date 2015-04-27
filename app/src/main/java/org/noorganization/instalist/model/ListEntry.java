@@ -38,6 +38,7 @@ public class ListEntry extends SugarRecord<ListEntry> {
     }
 
 
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {

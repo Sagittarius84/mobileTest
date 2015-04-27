@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/list_product_shopping_view"
+    style="@style/single_line_product_list_view"
+    >
+    <TextView
+        android:id = "@+id/list_product_shopping_product_amount"
+        style="@style/single_line_product_text_view"
+    />
+    <TextView
+        android:id = "@+id/list_product_shopping_product_name"
+        style="@style/single_line_product_text_view"
+        android:paddingLeft="6dp"
+    />
+
+</LinearLayout>
