@@ -1,15 +1,15 @@
 package org.noorganization.instalist.controller;
 
-import com.orm.SugarRecord;
+import android.test.AndroidTestCase;
 
-import junit.framework.TestCase;
+import com.orm.SugarRecord;
 
 import org.noorganization.instalist.controller.implementation.ListController;
 import org.noorganization.instalist.model.ListEntry;
 import org.noorganization.instalist.model.Product;
 import org.noorganization.instalist.model.ShoppingList;
 
-public class ListModificationListenerTest extends TestCase {
+public class ListModificationListenerTest extends AndroidTestCase {
 
     private ShoppingList mListWork;
     private ShoppingList mListHome;
