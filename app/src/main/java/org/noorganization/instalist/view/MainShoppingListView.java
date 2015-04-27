@@ -72,10 +72,9 @@ public class MainShoppingListView extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_shopping_list_view);
 
-        mTitle = "MainActivity";
         // init and setup toolbar
         mToolbar = (Toolbar) findViewById(R.id.toolbar);
-        mToolbar.setTitle(mTitle);
+
         setSupportActionBar(mToolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
@@ -84,7 +83,6 @@ public class MainShoppingListView extends ActionBarActivity {
 
         // fill the list with selectable lists
         mLeftSideListView.setAdapter(new ShoppingListOverviewAdapter(this, GlobalApplication.getInstance().getShoppingListNames()));
-
         mDrawerLayout.setFitsSystemWindows(true);
 
         // navbar custom design of toolbar
@@ -109,7 +107,7 @@ public class MainShoppingListView extends ActionBarActivity {
                 super.onDrawerOpened(drawerView);
                 if (mToolbar.getTitle() != null) {
                     mTitle = mToolbar.getTitle().toString();
-                    mToolbar.setTitle("Choose List");
+                    mToolbar.setTitle(R.string.choose_list);
                 }
                 // check if options menu has changed
                 invalidateOptionsMenu();
@@ -127,6 +125,7 @@ public class MainShoppingListView extends ActionBarActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
+        mToolbar.inflateMenu(R.menu.menu_toolbar_main_listview);
         return true;
     }
 
@@ -145,7 +144,11 @@ public class MainShoppingListView extends ActionBarActivity {
         }
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        if (id == R.id.list_items_sort_by_name) {
+            return true;
+        }
+
+        if (id == R.id.list_items_sort_by_name) {
             return true;
         }
 

@@ -8,4 +8,10 @@
 
     <string name="nav_drawer_open">Open list overview</string>
     <string name="nav_drawer_close">Close list overview</string>
+    <string name="choose_list">Choose List</string>
+
+    <string name="menu_sort_by_product_name">Name</string>
+    <string name="menu_sort_by_amount">Amount</string>
+    <string name="action_search_product">Search Product</string>
+
 </resources>

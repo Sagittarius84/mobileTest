@@ -58,14 +58,13 @@ public class MainActivity extends ActionBarActivity {
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        // The action bar home/up action should open or close the navbar.
-        // ActionBarDrawerToggle will take care of this.
-  /*      if(mNavBarToggle.onOptionsItemSelected(item)){
+
+        //noinspection SimplifiableIfStatement
+        if (id == R.id.list_items_sort_by_name) {
             return true;
         }
-*/
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+
+        if (id == R.id.list_items_sort_by_name) {
             return true;
         }
 
