@@ -1,11 +1,11 @@
 package org.noorganization.instalist.controller.implementation;
 
-import org.noorganization.instalist.controller.ProductModificationListener;
+import org.noorganization.instalist.controller.IProductController;
 import org.noorganization.instalist.model.Product;
 import org.noorganization.instalist.model.Tag;
 import org.noorganization.instalist.model.Unit;
 
-public class ProductController implements ProductModificationListener {
+public class ProductController implements IProductController {
     @Override
     public Product createProduct(String _name, Unit _unit, float _defaultAmount, float _stepAmount) {
         // TODO This method is a stub.

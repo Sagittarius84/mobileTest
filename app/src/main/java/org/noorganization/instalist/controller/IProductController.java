@@ -9,7 +9,7 @@ import org.noorganization.instalist.model.Unit;
  * modify data over this interface for keeping integrity.
  * Created by michi on 27.04.2015.
  */
-public interface ProductModificationListener {
+public interface IProductController {
 
     /**
      * Creates a new product.

@@ -9,7 +9,7 @@ import org.noorganization.instalist.model.ListEntry;
 import org.noorganization.instalist.model.Product;
 import org.noorganization.instalist.model.ShoppingList;
 
-public class ListModificationListenerTest extends AndroidTestCase {
+public class IListControllerTest extends AndroidTestCase {
 
     private ShoppingList mListWork;
     private ShoppingList mListHome;
@@ -17,7 +17,7 @@ public class ListModificationListenerTest extends AndroidTestCase {
     private Product mProductBread;
     private Product mProductButter;
 
-    private ListModificationListener mLML4Test;
+    private IListController mLML4Test;
 
     public void setUp() throws Exception {
         super.setUp();

@@ -5,7 +5,7 @@ import android.util.Log;
 import com.orm.query.Condition;
 import com.orm.query.Select;
 
-import org.noorganization.instalist.controller.ListModificationListener;
+import org.noorganization.instalist.controller.IListController;
 import org.noorganization.instalist.controller.implementation.ListController;
 import org.noorganization.instalist.model.ListEntry;
 import org.noorganization.instalist.model.Product;
@@ -30,7 +30,7 @@ public class DatabaseSeeder {
     private final int       PRODUCT_TEST_DATA_SIZE  = 100;
     private final long      PRODUCT_LIST_SEED       = 324982340237840L;
 
-    private ListModificationListener mListController;
+    private IListController mListController;
 
     public static DatabaseSeeder getInstance(){
 

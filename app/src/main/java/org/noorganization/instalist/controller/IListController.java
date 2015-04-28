@@ -5,14 +5,14 @@ import org.noorganization.instalist.model.Product;
 import org.noorganization.instalist.model.ShoppingList;
 
 /**
- * ListModificationListener is the (by software engineering created) interface for modifying
+ * IListController is the (by software engineering created) interface for modifying
  * shopping lists. If there is no documentation for the methods, following is always valid:
  * - for parameters, null's are not allowed. If set to null, no modification will be made and false
  *   will be returned.
  * - it will be always returned whether the modification worked.
  * Created by michi on 20.04.2015.
  */
-public interface ListModificationListener {
+public interface IListController {
     /**
      * Adds or updates an item to an existing list.
      * @param _list A valid ShoppingList, not null.

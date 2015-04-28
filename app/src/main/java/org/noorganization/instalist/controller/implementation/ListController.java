@@ -4,17 +4,17 @@ import com.orm.SugarRecord;
 import com.orm.query.Condition;
 import com.orm.query.Select;
 
-import org.noorganization.instalist.controller.ListModificationListener;
+import org.noorganization.instalist.controller.IListController;
 import org.noorganization.instalist.model.ListEntry;
 import org.noorganization.instalist.model.Product;
 import org.noorganization.instalist.model.ShoppingList;
 
 
 /**
- * Implementation of {@link org.noorganization.instalist.controller.ListModificationListener} as
+ * Implementation of {@link org.noorganization.instalist.controller.IListController} as
  * singleton. Please retrieve your instance per {@link #getInstance()}.
  */
-public class ListController implements ListModificationListener {
+public class ListController implements IListController {
 
     private static ListController mInstance;
 

@@ -13,7 +13,7 @@ import org.noorganization.instalist.model.Tag;
 import org.noorganization.instalist.model.TaggedProduct;
 import org.noorganization.instalist.model.Unit;
 
-public class ProductModificationListenerTest extends AndroidTestCase {
+public class IProductControllerTest extends AndroidTestCase {
 
     Unit mLiter;
     Product mMilk;
