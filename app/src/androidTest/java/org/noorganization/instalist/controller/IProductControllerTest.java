@@ -3,6 +3,8 @@ package org.noorganization.instalist.controller;
 import android.test.AndroidTestCase;
 
 import com.orm.SugarRecord;
+import com.orm.query.Condition;
+import com.orm.query.Select;
 
 import org.noorganization.instalist.controller.implementation.ListController;
 import org.noorganization.instalist.controller.implementation.ProductController;
@@ -20,6 +22,8 @@ public class IProductControllerTest extends AndroidTestCase {
     Product mBroccoli;
     ShoppingList mList;
     Tag mTag;
+
+    IProductController mController2Test;
 
     @Override
     public void setUp() throws Exception {
@@ -40,6 +44,8 @@ public class IProductControllerTest extends AndroidTestCase {
         ListController.getInstance().addOrChangeItem(mList, mMilk, 1.0f);
 
         new TaggedProduct(mTag, mBroccoli).save();
+
+        mController2Test = ProductController.getInstance();
     }
 
     @Override
@@ -63,22 +69,64 @@ public class IProductControllerTest extends AndroidTestCase {
     }
 
     public void testCreateProduct() throws Exception {
-        fail("This test is a stub");
+        // Should not work because milk already exists.
+        assertNull(mController2Test.createProduct("_TEST_milk", mLiter, 1.0f, 1.0f));
+        // Should not work because a parameter is not ok.
+        assertNull(mController2Test.createProduct("_TEST_butter", mLiter, 0.0f, 1.0f));
+
+        Product createdProduct = mController2Test.createProduct("_TEST_butter", null, 1.0f, 0.25f);
+        assertNotNull(createdProduct);
+        Product savedProduct = SugarRecord.findById(Product.class, createdProduct.getId());
+        assertNotNull(savedProduct);
+        assertEquals(createdProduct, savedProduct);
+        assertEquals("_TEST_butter", createdProduct.mName);
+        assertNull(createdProduct.mUnit);
+        assertEquals(1.0f, createdProduct.mDefaultAmount, 0.001f);
+        assertEquals(0.25f, createdProduct.mStepAmount, 0.001f);
     }
 
     public void testModifyProduct() throws Exception {
-        fail("This test is a stub");
+        mMilk.mDefaultAmount = -200.0f;
+        Product returnedProduct = mController2Test.modifyProduct(mMilk);
+        assertFalse(mMilk.equals(returnedProduct));
+        assertNotNull(returnedProduct);
+        assertEquals(1.0f, returnedProduct.mDefaultAmount, 0.001f);
+
+        mMilk.mDefaultAmount = 200.0f;
+        returnedProduct = mController2Test.modifyProduct(mMilk);
+        assertEquals(returnedProduct, mMilk);
     }
 
     public void testRemoveProduct() throws Exception {
-        fail("This test is a stub");
+        assertFalse(mController2Test.removeProduct(mMilk, false));
+        assertNotNull(SugarRecord.findById(Product.class, mMilk.getId()));
+        assertEquals(1, Select.from(ListEntry.class).where(
+                Condition.prop("m_product").eq(mMilk.getId())).count());
+
+        assertTrue(mController2Test.removeProduct(mBroccoli, false));
+        assertNull(SugarRecord.findById(Product.class, mBroccoli.getId()));
+        assertEquals(0, Select.from(TaggedProduct.class).where(
+                Condition.prop("m_product").eq(mBroccoli.getId())).count());
+
+        assertFalse(mController2Test.removeProduct(mMilk, true));
+        assertNull(SugarRecord.findById(Product.class, mMilk.getId()));
+        assertEquals(0, Select.from(ListEntry.class).where(
+                Condition.prop("m_product").eq(mMilk.getId())).count());
+
     }
 
     public void testAddTagToProduct() throws Exception {
-        fail("This test is a stub");
+        assertTrue(mController2Test.addTagToProduct(mMilk, mTag));
+        assertNotNull(Select.from(TaggedProduct.class).
+                where(Condition.prop("m_product").eq(mMilk.getId())).
+                and(Condition.prop("m_tag").eq(mTag.getId())).first());
     }
 
     public void testRemoveTagFromProduct() throws Exception {
-        fail("This test is a stub");
+        mController2Test.removeTagFromProduct(mBroccoli, mTag);
+
+        assertEquals(0, Select.from(TaggedProduct.class).
+                where(Condition.prop("m_product").eq(mBroccoli.getId())).
+                and(Condition.prop("m_tag").eq(mTag.getId())).count());
     }
 }

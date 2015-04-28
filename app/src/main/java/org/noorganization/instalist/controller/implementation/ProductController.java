@@ -6,6 +6,16 @@ import org.noorganization.instalist.model.Tag;
 import org.noorganization.instalist.model.Unit;
 
 public class ProductController implements IProductController {
+
+    private static ProductController mInstance;
+
+    public static ProductController getInstance() {
+        if (mInstance == null) {
+            mInstance = new ProductController();
+        }
+        return mInstance;
+    }
+
     @Override
     public Product createProduct(String _name, Unit _unit, float _defaultAmount, float _stepAmount) {
         // TODO This method is a stub.
