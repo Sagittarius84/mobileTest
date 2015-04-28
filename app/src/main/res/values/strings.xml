@@ -14,4 +14,10 @@
     <string name="menu_sort_by_amount">Amount</string>
     <string name="action_search_product">Search Product</string>
 
+    <string name="product_details_product_name">Name</string>
+    <string name="product_details_product_name_hint">Name of product</string>
+    <string name="product_details_tag_textview_text">Tags</string>
+    <string name="product_details_tag_edittext_hint">Name of tags (comma separated)</string>
+    <string name="product_details_action_add">Add</string>
+    <string name="product_details_product_amount_hint">Amount</string>
 </resources>
