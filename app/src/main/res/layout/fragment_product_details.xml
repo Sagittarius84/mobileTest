@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    style="@style/match_parent_width_height"
+    >
+    
+    <TextView
+        android:id="@+id/product_details_product_name_textview"
+        android:text="@string/product_details_product_name"
+        style="@style/InstalistTheme1.base_text_view_style" />
+    
+    <EditText
+        android:id="@+id/product_details_product_name_edittext"
+        android:hint="@string/product_details_product_name_hint"
+        android:layout_below="@id/product_details_product_name_textview"
+        style="@style/InstalistTheme1.base_edit_text_style"
+        />
+
+    <Button
+        android:id="@+id/product_details_dec_amount"
+        android:text="-"
+        android:layout_below="@id/product_details_product_name_edittext"
+        android:layout_alignParentLeft="true"
+        style="@style/InstalistTheme1.base_button"
+        />
+    <EditText
+        android:id="@+id/product_details_amount_edittext"
+        android:layout_width="wrap_content"
+        android:hint="@string/product_details_product_amount_hint"
+        android:layout_below="@id/product_details_product_name_edittext"
+        android:layout_toRightOf="@id/product_details_dec_amount"
+        style="@style/InstalistTheme1.base_edit_text_style"
+        />
+    <Button
+        android:id="@+id/product_details_inc_amount"
+        android:layout_below="@id/product_details_product_name_edittext"
+        android:text="+"
+        android:layout_toRightOf="@id/product_details_amount_edittext"
+        style="@style/InstalistTheme1.base_button"
+        />
+
+    <TextView
+        android:id="@+id/product_details_tag_textview"
+        android:text="@string/product_details_tag_textview_text"
+        android:layout_below="@id/product_details_amount_edittext"
+        style="@style/InstalistTheme1.base_text_view_style"
+        />
+    <EditText
+        android:id="@+id/product_details_tag_edittext"
+        android:hint="@string/product_details_tag_edittext_hint"
+        android:layout_below="@id/product_details_tag_textview"
+        style="@style/InstalistTheme1.base_edit_text_style"
+        />
+
+    <Button
+        android:id="@+id/product_details_action_new_or_update"
+        android:text="@string/product_details_action_add"
+        android:layout_below="@id/product_details_tag_edittext"
+        android:layout_alignParentRight="true"
+        style="@style/InstalistTheme1.base_flatten_button"
+        />
+</RelativeLayout>

@@ -24,6 +24,7 @@ import com.orm.query.Select;
 import org.noorganization.instalist.GlobalApplication;
 import org.noorganization.instalist.R;
 import org.noorganization.instalist.model.ShoppingList;
+import org.noorganization.instalist.view.fragment.ProductCreationFragment;
 import org.noorganization.instalist.view.listadapter.ShoppingListAdapter;
 import org.noorganization.instalist.view.listadapter.ShoppingListOverviewAdapter;
 
@@ -40,6 +41,7 @@ import java.util.List;
  */
 public class MainShoppingListView extends ActionBarActivity {
 
+    private final static String LOG_TAG = MainShoppingListView.class.getName();
     public final static String KEY_LISTNAME = "list_name";
 
     private Toolbar mToolbar;
@@ -124,7 +126,7 @@ public class MainShoppingListView extends ActionBarActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
+        //getMenuInflater().inflate(R.menu.menu_main, menu);
         mToolbar.inflateMenu(R.menu.menu_toolbar_main_listview);
         return true;
     }
@@ -143,13 +145,16 @@ public class MainShoppingListView extends ActionBarActivity {
             return true;
         }
 
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.list_items_sort_by_name) {
-            return true;
-        }
-
-        if (id == R.id.list_items_sort_by_name) {
-            return true;
+        // swtich which action item was pressed
+        switch(id){
+            case R.id.list_items_sort_by_amount:
+                // say controller there is a statechange
+                getFragmentManager().beginTransaction().replace(R.id.container, new ProductCreationFragment()).addToBackStack(null).commit();
+                break;
+            case R.id.list_items_sort_by_name:
+                break;
+            default:
+                break;
         }
 
         return super.onOptionsItemSelected(item);
