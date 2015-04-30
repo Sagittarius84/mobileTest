@@ -94,7 +94,7 @@ public class IProductControllerTest extends AndroidTestCase {
 
         mMilk.mDefaultAmount = 200.0f;
         returnedProduct = mController2Test.modifyProduct(mMilk);
-        assertEquals(returnedProduct, mMilk);
+        assertEquals(mMilk, returnedProduct);
     }
 
     public void testRemoveProduct() throws Exception {
@@ -108,7 +108,7 @@ public class IProductControllerTest extends AndroidTestCase {
         assertEquals(0, Select.from(TaggedProduct.class).where(
                 Condition.prop("m_product").eq(mBroccoli.getId())).count());
 
-        assertFalse(mController2Test.removeProduct(mMilk, true));
+        assertTrue(mController2Test.removeProduct(mMilk, true));
         assertNull(SugarRecord.findById(Product.class, mMilk.getId()));
         assertEquals(0, Select.from(ListEntry.class).where(
                 Condition.prop("m_product").eq(mMilk.getId())).count());

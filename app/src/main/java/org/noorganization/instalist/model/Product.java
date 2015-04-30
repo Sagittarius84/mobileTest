@@ -37,4 +37,49 @@ public class Product extends SugarRecord<Product> {
         mDefaultAmount = 1.0f;
         mStepAmount    = 1.0f;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        Product anotherProduct = (Product) o;
+
+        if (Float.compare(anotherProduct.mDefaultAmount, mDefaultAmount) != 0) {
+            return false;
+        }
+        if (Float.compare(anotherProduct.mStepAmount, mStepAmount) != 0) {
+            return false;
+        }
+        if (!mName.equals(anotherProduct.mName)) {
+            return false;
+        }
+        if ((mUnit == null && anotherProduct.mUnit == null) ||
+                (mUnit != null && anotherProduct.mUnit != null &&
+                        mUnit.getId().compareTo(anotherProduct.mUnit.getId()) == 0)) {
+            return true;
+        }
+
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        return getId().intValue();
+    }
+
+
+    @Override
+    public String toString() {
+        return "Product{" +
+                "mName='" + mName + '\'' +
+                ", mUnit=" + (mUnit == null ? "null" : "id:"+mUnit.getId()) +
+                ", mDefaultAmount=" + mDefaultAmount +
+                ", mStepAmount=" + mStepAmount +
+                '}';
+    }
 }
