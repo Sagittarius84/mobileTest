@@ -8,9 +8,9 @@ import org.noorganization.instalist.model.Unit;
  * Created by michi on 03.05.2015.
  */
 public interface IUnitController {
-    public static final int MODE_BREAK_DELETION = 0;
-    public static final int MODE_UNLINK_REFERENCES = 1;
-    public static final int MODE_DELETE_REFERENCES = 2;
+    int MODE_BREAK_DELETION = 0;
+    int MODE_UNLINK_REFERENCES = 1;
+    int MODE_DELETE_REFERENCES = 2;
 
     /**
      * Creates a Unit with given name or fails, if it already exists.
@@ -18,7 +18,7 @@ public interface IUnitController {
      * @return The new Unit or null, if the parameter is invalid or a Unit with that name already
      * exists.
      */
-    public Unit createUnit(String _name);
+    Unit createUnit(String _name);
 
     /**
      * Rename the Unit, if possible.
@@ -27,7 +27,7 @@ public interface IUnitController {
      * @return The modified Unit if everything went ok, the last saved unit if renaming was not
      * possible or null if the unit could not be found.
      */
-    public Unit renameUnit(Unit _unit, String _newName);
+    Unit renameUnit(Unit _unit, String _newName);
 
     /**
      * Deletes a unit. Deletion can be controlled with the mode parameter.
@@ -37,7 +37,7 @@ public interface IUnitController {
      * @return False if nothing was deleted (can happen if mode is set to BREAK_DELETION) or mode is
      * invalid, else true. Also true if unit was already deleted.
      */
-    public boolean deleteUnit(Unit _unit, int _mode);
+    boolean deleteUnit(Unit _unit, int _mode);
 
 
 }

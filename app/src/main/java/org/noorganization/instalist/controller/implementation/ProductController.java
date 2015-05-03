@@ -12,7 +12,6 @@ import org.noorganization.instalist.model.Tag;
 import org.noorganization.instalist.model.TaggedProduct;
 import org.noorganization.instalist.model.Unit;
 
-import java.util.Iterator;
 
 public class ProductController implements IProductController {
 

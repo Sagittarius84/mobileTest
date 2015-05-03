@@ -23,7 +23,7 @@ public interface IProductController {
      *                    positive number.
      * @return Either the created product, if something did not work.
      */
-    public Product createProduct(String _name, Unit _unit, float _defaultAmount, float _stepAmount);
+    Product createProduct(String _name, Unit _unit, float _defaultAmount, float _stepAmount);
 
     /**
      * Changes a product.
@@ -32,7 +32,7 @@ public interface IProductController {
      * @return Either the changed Product, the Product that was last time successfully saved (in
      * case something is wrong with the parameter) or null if Product was not found.
      */
-    public Product modifyProduct(Product _toChange);
+    Product modifyProduct(Product _toChange);
 
     /**
      * Deletes the given Product.
@@ -42,7 +42,7 @@ public interface IProductController {
      *                          the product is not used, it will always get deleted.
      * @return Whether product was deleted.
      */
-    public boolean removeProduct(Product _toRemove, boolean _deleteCompletely);
+    boolean removeProduct(Product _toRemove, boolean _deleteCompletely);
 
 
     /**
@@ -51,13 +51,12 @@ public interface IProductController {
      * @param _tag The valid tag, not null.
      * @return If saving worked.
      */
-    public boolean addTagToProduct(Product _product, Tag _tag);
+    boolean addTagToProduct(Product _product, Tag _tag);
 
     /**
      * Removes a tag from the product, if tagged.
      * @param _product The valid product, not null.
      * @param _tag The valid tag, not null.
-     * @return If saving worked.
      */
-    public void removeTagFromProduct(Product _product, Tag _tag);
+    void removeTagFromProduct(Product _product, Tag _tag);
 }

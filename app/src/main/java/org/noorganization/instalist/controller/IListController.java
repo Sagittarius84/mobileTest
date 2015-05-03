@@ -21,7 +21,7 @@ public interface IListController {
      * @return The created or updated ListEntry. If not worked, null or the old item will be
      * returned.
      */
-    public ListEntry addOrChangeItem(ShoppingList _list, Product _product, float _amount);
+    ListEntry addOrChangeItem(ShoppingList _list, Product _product, float _amount);
 
     /**
      * Strikes a ListEntry.
@@ -29,7 +29,7 @@ public interface IListController {
      * @param _product A valid Product, not null.
      * @return The changed item or null, if not found or parameters invalid.
      */
-    public ListEntry strikeItem(ShoppingList _list, Product _product);
+    ListEntry strikeItem(ShoppingList _list, Product _product);
 
     /**
      * Removes the virtual stroke from a ListEntry.
@@ -37,32 +37,32 @@ public interface IListController {
      * @param _product A valid Product, not null.
      * @return The changed item or null, if not found or parameters invalid.
      */
-    public ListEntry unstrikeItem(ShoppingList _list, Product _product);
+    ListEntry unstrikeItem(ShoppingList _list, Product _product);
 
     /**
      * Alias for {@link #strikeItem(org.noorganization.instalist.model.ShoppingList, org.noorganization.instalist.model.Product)}.
      * @param _item A valid ListEntry, not null.
      * @return The changed item or null, if _item was invalid.
      */
-    public ListEntry strikeItem(ListEntry _item);
+    ListEntry strikeItem(ListEntry _item);
 
     /**
      * Alias for {@link #unstrikeItem(org.noorganization.instalist.model.ShoppingList, org.noorganization.instalist.model.Product)}.
      * @param _item A valid ListEntry, not null.
      * @return The changed item or null if _item was invalid.
      */
-    public ListEntry unstrikeItem(ListEntry _item);
+    ListEntry unstrikeItem(ListEntry _item);
 
-    public boolean removeItem(ShoppingList _list, Product _product);
-    public boolean removeItem(ListEntry _item);
+    boolean removeItem(ShoppingList _list, Product _product);
+    boolean removeItem(ListEntry _item);
 
     /**
      * Creates a list and returns it.
      * @param _name The name of the new list. Not null, not empty.
      * @return The new list or null, if creation failed.
      */
-    public ShoppingList addList(String _name);
-    public boolean removeList(ShoppingList _list);
+    ShoppingList addList(String _name);
+    boolean removeList(ShoppingList _list);
 
     /**
      * Renames a list and returns it. The name must be unique or the rename will fail.
@@ -70,5 +70,5 @@ public interface IListController {
      * @param _newName A new name for the list. Not null, not empty.
      * @return The modified list or the old list.
      */
-    public ShoppingList renameList(ShoppingList _list, String _newName);
+    ShoppingList renameList(ShoppingList _list, String _newName);
 }
