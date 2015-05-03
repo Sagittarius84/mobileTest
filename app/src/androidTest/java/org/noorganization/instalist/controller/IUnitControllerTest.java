@@ -68,15 +68,15 @@ public class IUnitControllerTest extends AndroidTestCase {
     }
 
     public void testDeleteUnit() throws Exception {
-        assertTrue(mUnitController.deleteUnit(null, IUnitController.DeletionMode.DELETE_REFERENCES));
+        assertTrue(mUnitController.deleteUnit(null, IUnitController.MODE_DELETE_REFERENCES));
 
-        assertFalse(mUnitController.deleteUnit(mLiter, IUnitController.DeletionMode.BREAK_DELETION));
-        assertTrue(mUnitController.deleteUnit(mGram, IUnitController.DeletionMode.BREAK_DELETION));
+        assertFalse(mUnitController.deleteUnit(mLiter, IUnitController.MODE_BREAK_DELETION));
+        assertTrue(mUnitController.deleteUnit(mGram, IUnitController.MODE_BREAK_DELETION));
 
-        assertTrue(mUnitController.deleteUnit(mLiter, IUnitController.DeletionMode.DELETE_REFERENCES));
-        assertNull(SugarRecord.findById(Unit.class, mMilk.getId()));
+        assertTrue(mUnitController.deleteUnit(mLiter, IUnitController.MODE_DELETE_REFERENCES));
+        assertNull(SugarRecord.findById(Product.class, mMilk.getId()));
 
-        assertTrue(mUnitController.deleteUnit(mMeter, IUnitController.DeletionMode.UNLINK_REFERENCES));
+        assertTrue(mUnitController.deleteUnit(mMeter, IUnitController.MODE_UNLINK_REFERENCES));
         Product changedProduct = SugarRecord.findById(Product.class, mShelf.getId());
         assertNotNull(changedProduct);
         assertNull(changedProduct.mUnit);

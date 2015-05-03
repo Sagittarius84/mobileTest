@@ -20,4 +20,23 @@ public class Unit extends SugarRecord<Unit> {
         mName = _name;
     }
 
+
+    @Override
+    public boolean equals(Object other) {
+        if (this == other) {
+            return true;
+        }
+        if (other == null || getClass() != other.getClass()) {
+            return false;
+        }
+
+        Unit anotherUnit = (Unit) other;
+
+        return mName.equals(anotherUnit.mName);
+    }
+
+    @Override
+    public int hashCode() {
+        return getId().intValue();
+    }
 }

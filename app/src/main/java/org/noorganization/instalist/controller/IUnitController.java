@@ -8,11 +8,9 @@ import org.noorganization.instalist.model.Unit;
  * Created by michi on 03.05.2015.
  */
 public interface IUnitController {
-    public enum DeletionMode {
-        BREAK_DELETION,
-        UNLINK_REFERENCES,
-        DELETE_REFERENCES
-    }
+    public static final int MODE_BREAK_DELETION = 0;
+    public static final int MODE_UNLINK_REFERENCES = 1;
+    public static final int MODE_DELETE_REFERENCES = 2;
 
     /**
      * Creates a Unit with given name or fails, if it already exists.
@@ -34,11 +32,12 @@ public interface IUnitController {
     /**
      * Deletes a unit. Deletion can be controlled with the mode parameter.
      * @param _unit The valid unit to delete. Not null.
-     * @param _mode Mode for handling conflicts.
-     * @return False if nothing was deleted (can happen if mode is set to BREAK_DELETION), else
-     * true. Also true if unit was already deleted.
+     * @param _mode Mode for handling conflicts. Must be one of {@link #MODE_BREAK_DELETION},
+     *              {@link #MODE_DELETE_REFERENCES} or {@link #MODE_UNLINK_REFERENCES}.
+     * @return False if nothing was deleted (can happen if mode is set to BREAK_DELETION) or mode is
+     * invalid, else true. Also true if unit was already deleted.
      */
-    public boolean deleteUnit(Unit _unit, DeletionMode _mode);
+    public boolean deleteUnit(Unit _unit, int _mode);
 
 
 }
