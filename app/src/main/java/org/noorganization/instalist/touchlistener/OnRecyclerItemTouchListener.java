@@ -16,9 +16,9 @@ public class OnRecyclerItemTouchListener implements RecyclerView.OnItemTouchList
     public View mView;
     private final GestureDetector mGestureDetector;
 
-    public OnRecyclerItemTouchListener(Context context, View view, RecyclerView recyclerView){
+    public OnRecyclerItemTouchListener(Context context, RecyclerView recyclerView){
         mGestureDetector = new GestureDetector(context, new GestureListener(this, recyclerView));
-        mView   = view;
+        mView   = recyclerView;
 
     }
     @Override
@@ -28,6 +28,7 @@ public class OnRecyclerItemTouchListener implements RecyclerView.OnItemTouchList
 
     @Override
     public boolean onInterceptTouchEvent(RecyclerView rv, MotionEvent e) {
+        // maybe here are some performance tweaks possible
         return mGestureDetector.onTouchEvent(e);
     }
 
