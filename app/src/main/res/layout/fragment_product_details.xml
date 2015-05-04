@@ -53,7 +53,7 @@
         />
 
     <Button
-        android:id="@+id/product_details_action_new_or_update"
+        android:id="@+id/product_details_action_button_new_or_update"
         android:text="@string/product_details_action_add"
         android:layout_below="@id/product_details_tag_edittext"
         android:layout_alignParentRight="true"

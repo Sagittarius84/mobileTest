@@ -4,26 +4,37 @@ import android.app.Fragment;
 import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.res.Configuration;
+import android.graphics.Paint;
+import android.graphics.drawable.GradientDrawable;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import com.orm.query.Condition;
 import com.orm.query.Select;
 
 import org.noorganization.instalist.GlobalApplication;
 import org.noorganization.instalist.R;
+import org.noorganization.instalist.model.ListEntry;
 import org.noorganization.instalist.model.ShoppingList;
+import org.noorganization.instalist.touchlistener.OnGestureListener;
+import org.noorganization.instalist.touchlistener.OnRecyclerItemTouchListener;
 import org.noorganization.instalist.view.fragment.ProductCreationFragment;
 import org.noorganization.instalist.view.listadapter.ShoppingListAdapter;
 import org.noorganization.instalist.view.listadapter.ShoppingListOverviewAdapter;
@@ -244,6 +255,8 @@ public class MainShoppingListView extends ActionBarActivity {
         private ActionBar mActionBar;
         private Context mContext;
 
+        private LinearLayoutManager mLayoutManager;
+
         public ShoppingListOverviewFragment() {
         }
 
@@ -256,7 +269,8 @@ public class MainShoppingListView extends ActionBarActivity {
             if (bundle == null) {
                 return;
             }
-            mCurrentListName = bundle.getString(MainShoppingListView.KEY_LISTNAME);
+            mCurrentListName    = bundle.getString(MainShoppingListView.KEY_LISTNAME);
+            mContext            = this.getActivity();
         }
 
         @Override
@@ -280,11 +294,11 @@ public class MainShoppingListView extends ActionBarActivity {
             super.onResume();
 
             // decl
-            ListView shoppingListView;
+            RecyclerView shoppingListView;
             ShoppingListAdapter shoppingListAdapter;
 
             // init
-            shoppingListView = (ListView) getActivity().findViewById(R.id.fragment_shopping_list);
+            shoppingListView = (RecyclerView) getActivity().findViewById(R.id.fragment_shopping_list);
 
             // assign other listname if none is assigned
             if (mCurrentListName == null) {
@@ -295,8 +309,47 @@ public class MainShoppingListView extends ActionBarActivity {
                     return;
                 }
             }
+
             shoppingListAdapter = new ShoppingListAdapter(getActivity(), GlobalApplication.getInstance().getListEntries(mCurrentListName));
+            // use a linear layout manager
+            mLayoutManager = new LinearLayoutManager(this.getActivity());
+            mLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
+
+            shoppingListView.setLayoutManager(mLayoutManager);
             shoppingListView.setAdapter(shoppingListAdapter);
+            shoppingListView.addOnItemTouchListener(new OnRecyclerItemTouchListener(mContext, shoppingListView, shoppingListView){
+
+                @Override
+                public void onSwipeRight(View childView, int position) {
+                    super.onSwipeRight(childView, position);
+                    //int entryPosition = (int) shoppingListAdapter.getItemId(position);
+                    ListEntry entry = GlobalApplication.getInstance().getListEntries(mCurrentListName).get(position);
+                    TextView test = ((TextView) childView.findViewById(R.id.list_product_shopping_product_name));
+                    test.setPaintFlags(
+                            test.getPaintFlags() |
+                            Paint.STRIKE_THRU_TEXT_FLAG);
+
+                }
+
+                @Override
+                public void onSwipeLeft(View childView, int position) {
+                    super.onSwipeLeft(childView, position);
+                    //int entryPosition = (int) shoppingListAdapter.getItemId(position);
+                    GlobalApplication.getInstance().getListEntries(mCurrentListName).get(position);
+                }
+
+                @Override
+                public void onSingleTap(View childView, int position) {
+                    super.onSingleTap(childView, position);
+                    //int entryPosition = (int) shoppingListAdapter.getItemId(position);
+                    ListEntry entry = GlobalApplication.getInstance().getListEntries(mCurrentListName).get(position);
+
+                    Toast.makeText(getActivity(), "Item selected: " + entry.mProduct.mName, Toast.LENGTH_LONG);
+                    /*ShoppingListAdapter.ShoppingListProductViewHolder holder = (ShoppingListAdapter.ShoppingListProductViewHolder)childView.getTag();
+                    Toast.makeText(mContext, "Selected " + holder.m.getText() + " " + holder.mProductName.getText() , Toast.LENGTH_SHORT).show();*/
+                }
+
+            });
         }
 
         @Override
