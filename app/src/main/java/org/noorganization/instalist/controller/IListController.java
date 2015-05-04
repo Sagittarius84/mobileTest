@@ -24,6 +24,18 @@ public interface IListController {
     ListEntry addOrChangeItem(ShoppingList _list, Product _product, float _amount);
 
     /**
+     * Strikes all items on a list.
+     * @param _list The valid shopping list to strike. Not null.
+     */
+    void strikeAllItems(ShoppingList _list);
+
+    /**
+     * Unstrikes all items on a list.
+     * @param _list The valid shopping list to strike. Not null.
+     */
+    void unstrikeAllItems(ShoppingList _list);
+
+    /**
      * Strikes a ListEntry.
      * @param _list A valid ShoppingList, not null.
      * @param _product A valid Product, not null.

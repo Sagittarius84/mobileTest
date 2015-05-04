@@ -70,6 +70,30 @@ public class IListControllerTest extends AndroidTestCase {
         assertEquals(createdEntry2, returnedEntry2);
     }
 
+    public void testStrikeAllItems() throws Exception {
+        ListEntry breadForWork = new ListEntry(mListWork, mProductBread, 1.0f, false);
+        breadForWork.save();
+
+        mLML4Test.strikeAllItems(mListWork);
+
+        assertTrue(SugarRecord.findById(ListEntry.class, mListEntryButterForWork.getId()).mStruck);
+        assertTrue(SugarRecord.findById(ListEntry.class, breadForWork.getId()).mStruck);
+    }
+
+    public void testUnstrikeAllItems() throws Exception {
+
+        ListEntry breadForWork = new ListEntry(mListWork, mProductBread, 1.0f, true);
+        breadForWork.save();
+
+        mListEntryButterForWork.mStruck = true;
+        mListEntryButterForWork.save();
+
+        mLML4Test.unstrikeAllItems(mListWork);
+
+        assertFalse(SugarRecord.findById(ListEntry.class, mListEntryButterForWork.getId()).mStruck);
+        assertFalse(SugarRecord.findById(ListEntry.class, breadForWork.getId()).mStruck);
+    }
+
     public void testStrikeItem() throws Exception {
         assertNull(mLML4Test.strikeItem(mListHome, mProductBread));
 

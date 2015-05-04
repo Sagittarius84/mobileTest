@@ -9,6 +9,8 @@ import org.noorganization.instalist.model.ListEntry;
 import org.noorganization.instalist.model.Product;
 import org.noorganization.instalist.model.ShoppingList;
 
+import java.util.List;
+
 
 /**
  * Implementation of {@link org.noorganization.instalist.controller.IListController} as
@@ -46,6 +48,40 @@ public class ListController implements IListController {
         item.save();
 
         return item;
+    }
+
+    @Override
+    public void strikeAllItems(ShoppingList _list) {
+        if (_list == null) {
+            return;
+        }
+        ShoppingList toChange = SugarRecord.findById(ShoppingList.class, _list.getId());
+        if (toChange == null) {
+            return;
+        }
+
+        List<ListEntry> entries = toChange.getEntries();
+        for (ListEntry entry : entries) {
+            entry.mStruck = true;
+        }
+        SugarRecord.saveInTx(entries);
+    }
+
+    @Override
+    public void unstrikeAllItems(ShoppingList _list) {
+        if (_list == null) {
+            return;
+        }
+        ShoppingList toChange = SugarRecord.findById(ShoppingList.class, _list.getId());
+        if (toChange == null) {
+            return;
+        }
+
+        List<ListEntry> entries = toChange.getEntries();
+        for (ListEntry entry : entries) {
+            entry.mStruck = false;
+        }
+        SugarRecord.saveInTx(entries);
     }
 
     @Override
