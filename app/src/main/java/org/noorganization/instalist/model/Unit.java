@@ -31,8 +31,7 @@ public class Unit extends SugarRecord<Unit> {
         }
 
         Unit anotherUnit = (Unit) other;
-
-        return mName.equals(anotherUnit.mName);
+        return mName.equals(anotherUnit.mName) && getId().compareTo(anotherUnit.getId()) == 0;
     }
 
     @Override

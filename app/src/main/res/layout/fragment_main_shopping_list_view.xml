@@ -2,9 +2,9 @@
     xmlns:tools="http://schemas.android.com/tools"
     style = "@style/style_fragment_general"
     tools:context="org.noorganization.instalist.view.MainShoppingListView$PlaceholderFragment">
-    <ListView
+    <android.support.v7.widget.RecyclerView
         android:layout_width="match_parent"
         android:layout_height="fill_parent"
+        android:scrollbars ="vertical"
         android:id="@+id/fragment_shopping_list"/>
-
 </RelativeLayout>

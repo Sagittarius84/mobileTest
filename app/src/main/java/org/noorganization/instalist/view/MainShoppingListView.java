@@ -4,26 +4,40 @@ import android.app.Fragment;
 import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.res.Configuration;
+import android.graphics.Paint;
+import android.graphics.drawable.GradientDrawable;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.widget.DefaultItemAnimator;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import com.orm.query.Condition;
 import com.orm.query.Select;
 
 import org.noorganization.instalist.GlobalApplication;
 import org.noorganization.instalist.R;
+import org.noorganization.instalist.controller.implementation.ListController;
+import org.noorganization.instalist.model.ListEntry;
 import org.noorganization.instalist.model.ShoppingList;
+import org.noorganization.instalist.touchlistener.OnGestureListener;
+import org.noorganization.instalist.touchlistener.OnRecyclerItemTouchListener;
+import org.noorganization.instalist.view.decoration.DividerItemListDecoration;
 import org.noorganization.instalist.view.fragment.ProductCreationFragment;
 import org.noorganization.instalist.view.listadapter.ShoppingListAdapter;
 import org.noorganization.instalist.view.listadapter.ShoppingListOverviewAdapter;
@@ -240,9 +254,13 @@ public class MainShoppingListView extends ActionBarActivity {
      */
     public static class ShoppingListOverviewFragment extends Fragment {
 
-        private String mCurrentListName;
+        private String  mCurrentListName;
+        private ShoppingList    mCurrentShoppingList;
+
         private ActionBar mActionBar;
         private Context mContext;
+
+        private LinearLayoutManager mLayoutManager;
 
         public ShoppingListOverviewFragment() {
         }
@@ -256,7 +274,8 @@ public class MainShoppingListView extends ActionBarActivity {
             if (bundle == null) {
                 return;
             }
-            mCurrentListName = bundle.getString(MainShoppingListView.KEY_LISTNAME);
+            mCurrentListName    = bundle.getString(MainShoppingListView.KEY_LISTNAME);
+            mContext            = this.getActivity();
         }
 
         @Override
@@ -275,28 +294,78 @@ public class MainShoppingListView extends ActionBarActivity {
             super.onPause();
         }
 
+        ShoppingListAdapter mShoppingListAdapter;
+
+
         @Override
         public void onResume() {
             super.onResume();
 
             // decl
-            ListView shoppingListView;
-            ShoppingListAdapter shoppingListAdapter;
+            final RecyclerView shoppingListView;
 
             // init
-            shoppingListView = (ListView) getActivity().findViewById(R.id.fragment_shopping_list);
+            shoppingListView = (RecyclerView) getActivity().findViewById(R.id.fragment_shopping_list);
 
             // assign other listname if none is assigned
             if (mCurrentListName == null) {
-                if (Select.from(ShoppingList.class).count() > 0) {
-                    mCurrentListName = Select.from(ShoppingList.class).first().mName;
+
+                List<ShoppingList> mShoppingLists = ShoppingList.listAll(ShoppingList.class);
+                if (mShoppingLists.size() > 0) {
+                    mCurrentShoppingList   = mShoppingLists.get(0);
+                    mCurrentListName = mCurrentShoppingList.mName;
                 } else {
                     // do something to show that there are no shoppinglists!
                     return;
                 }
             }
-            shoppingListAdapter = new ShoppingListAdapter(getActivity(), GlobalApplication.getInstance().getListEntries(mCurrentListName));
-            shoppingListView.setAdapter(shoppingListAdapter);
+
+            mShoppingListAdapter = new ShoppingListAdapter(getActivity(), GlobalApplication.getInstance().getListEntries(mCurrentListName));
+            // use a linear layout manager
+            mLayoutManager = new LinearLayoutManager(this.getActivity());
+            mLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
+
+            shoppingListView.setLayoutManager(mLayoutManager);
+            shoppingListView.addItemDecoration(new DividerItemListDecoration(getResources().getDrawable(R.drawable.abc_list_divider_mtrl_alpha), false, false));
+            shoppingListView.setAdapter(mShoppingListAdapter);
+            shoppingListView.setItemAnimator(new DefaultItemAnimator());
+            shoppingListView.addOnItemTouchListener(new OnRecyclerItemTouchListener(mContext, shoppingListView){
+
+                @Override
+                public void onSwipeRight(View childView, int position) {
+                    super.onSwipeRight(childView, position);
+                    //int entryPosition = (int) shoppingListAdapter.getItemId(position);
+                    ListEntry entry = GlobalApplication.getInstance().getListEntries(mCurrentListName).get(position);
+                    TextView test = ((TextView) childView.findViewById(R.id.list_product_shopping_product_name));
+                    test.setPaintFlags(
+                            test.getPaintFlags() |
+                            Paint.STRIKE_THRU_TEXT_FLAG);
+
+                    ListController.getInstance().strikeItem(mCurrentShoppingList, entry.mProduct);
+
+                    ListController.getInstance().removeItem(mCurrentShoppingList, entry.mProduct);
+                    // just for showcasing
+                    mShoppingListAdapter.removeItem(position);
+                }
+
+                @Override
+                public void onSwipeLeft(View childView, int position) {
+                    super.onSwipeLeft(childView, position);
+                    //int entryPosition = (int) shoppingListAdapter.getItemId(position);
+                    ListEntry entry = GlobalApplication.getInstance().getListEntries(mCurrentListName).get(position);
+                    GlobalApplication.getInstance().getListController().unstrikeItem(mCurrentShoppingList, entry.mProduct);
+                }
+
+                @Override
+                public void onSingleTap(View childView, int position) {
+                    super.onSingleTap(childView, position);
+                    //int entryPosition = (int) shoppingListAdapter.getItemId(position);
+                    ListEntry entry = GlobalApplication.getInstance().getListEntries(mCurrentListName).get(position);
+
+                    Toast.makeText(getActivity(), "Item selected: " + entry.mProduct.mName, Toast.LENGTH_LONG);
+                }
+
+            });
         }
 
         @Override

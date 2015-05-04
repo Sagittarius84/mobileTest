@@ -23,4 +23,33 @@ public class Ingredient extends SugarRecord<Ingredient> {
         mRecipe  = _recipe;
         mAmount  = _amount;
     }
+
+    @Override
+    public boolean equals(Object anotherObject) {
+        if (this == anotherObject) {
+            return true;
+        }
+        if (anotherObject == null || getClass() != anotherObject.getClass()) {
+            return false;
+        }
+
+        Ingredient anotherIngredient = (Ingredient) anotherObject;
+
+        if (Float.compare(anotherIngredient.mAmount, mAmount) != 0) {
+            return false;
+        }
+        if (!mProduct.equals(anotherIngredient.mProduct)) {
+            return false;
+        }
+        if (!mRecipe.equals(anotherIngredient.mRecipe)) {
+            return false;
+        }
+        return getId().compareTo(anotherIngredient.getId()) == 0;
+
+    }
+
+    @Override
+    public int hashCode() {
+        return getId().intValue();
+    }
 }

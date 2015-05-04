@@ -10,7 +10,11 @@ import com.orm.SugarApp;
 import com.orm.query.Condition;
 import com.orm.query.Select;
 
+import org.noorganization.instalist.controller.IListController;
+import org.noorganization.instalist.controller.IProductController;
 import org.noorganization.instalist.controller.database_seed.DatabaseSeeder;
+import org.noorganization.instalist.controller.implementation.ListController;
+import org.noorganization.instalist.controller.implementation.ProductController;
 import org.noorganization.instalist.model.ListEntry;
 import org.noorganization.instalist.model.ShoppingList;
 
@@ -27,10 +31,17 @@ public class GlobalApplication extends SugarApp {
     private static GlobalApplication mInstance;
     private DatabaseSeeder mDatabaseSeeder;
 
+    private IListController mListController;
+    private IProductController mProductController;
+
     @Override
     public void onCreate() {
         super.onCreate();
         mInstance = this;
+
+        mListController = ListController.getInstance();
+        mProductController = new ProductController();
+
 
         mDatabaseSeeder = DatabaseSeeder.getInstance();
         mDatabaseSeeder.startUp();
@@ -64,5 +75,21 @@ public class GlobalApplication extends SugarApp {
         }
 
         return shoppingListNames;
+    }
+
+    /**
+     *
+     * @return global instance of IListController implmentation.
+     */
+    public IListController getListController(){
+        return mListController;
+    }
+
+    /**
+     *
+     * @return an instance of a productController.
+     */
+    public IProductController getProductController(){
+        return mProductController;
     }
 }
