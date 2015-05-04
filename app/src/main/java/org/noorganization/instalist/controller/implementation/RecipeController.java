@@ -6,6 +6,15 @@ import org.noorganization.instalist.model.Product;
 import org.noorganization.instalist.model.Recipe;
 
 public class RecipeController implements IRecipeController {
+    private static RecipeController mInstance;
+
+    public static IRecipeController getInstance() {
+        if (mInstance == null) {
+            mInstance = new RecipeController();
+        }
+        return mInstance;
+    }
+
     @Override
     public Recipe createRecipe(String _name) {
         // TODO This method is a stub.
@@ -37,5 +46,8 @@ public class RecipeController implements IRecipeController {
     @Override
     public void removeIngredient(Ingredient _toRemove) {
         // TODO This method is a stub.
+    }
+
+    private RecipeController() {
     }
 }

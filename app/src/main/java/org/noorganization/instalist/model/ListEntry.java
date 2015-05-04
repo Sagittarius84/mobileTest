@@ -53,8 +53,8 @@ public class ListEntry extends SugarRecord<ListEntry> {
         if (!getId().equals(that.getId()) ||
                 Float.compare(that.mAmount, mAmount) != 0 ||
                 mStruck != that.mStruck ||
-                !mList.getId().equals(that.mList.getId()) ||
-                !mProduct.getId().equals(that.mProduct.getId())) {
+                !mList.equals(that.mList) ||
+                !mProduct.equals(that.mProduct)) {
             return false;
         }
 
