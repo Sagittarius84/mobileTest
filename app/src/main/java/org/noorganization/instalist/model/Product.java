@@ -58,13 +58,11 @@ public class Product extends SugarRecord<Product> {
         if (!mName.equals(anotherProduct.mName)) {
             return false;
         }
-        if ((mUnit == null && anotherProduct.mUnit == null) ||
-                (mUnit != null && anotherProduct.mUnit != null &&
-                        mUnit.getId().compareTo(anotherProduct.mUnit.getId()) == 0)) {
-            return true;
+        if ((mUnit == null && anotherProduct.mUnit != null) || (mUnit != null && !mUnit.equals(anotherProduct.mUnit))) {
+            return false;
         }
 
-        return false;
+        return getId().compareTo(anotherProduct.getId()) == 0;
     }
 
     @Override
