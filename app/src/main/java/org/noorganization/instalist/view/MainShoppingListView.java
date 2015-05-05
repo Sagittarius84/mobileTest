@@ -345,7 +345,7 @@ public class MainShoppingListView extends ActionBarActivity {
 
                     ListController.getInstance().removeItem(mCurrentShoppingList, entry.mProduct);
                     // just for showcasing
-                    mShoppingListAdapter.removeItem(position);
+                    // mShoppingListAdapter.removeItem(position);
                 }
 
                 @Override
