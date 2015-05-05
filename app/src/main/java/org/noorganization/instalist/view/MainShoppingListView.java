@@ -208,8 +208,9 @@ public class MainShoppingListView extends ActionBarActivity {
 
         // list is the same as the current one
         // no need to do then something
-        if(listName.compareTo(mCurrentListName) == 0)
+        if(listName == mCurrentListName){
             return;
+        }
 
         // decl
         Bundle args;
