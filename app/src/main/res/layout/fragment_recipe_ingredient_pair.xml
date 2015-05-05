@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    style="@style/single_line_product_list_view"
+    >
+
+    <EditText
+        android:id="@+id/fragment_recipe_ingredient_pair_amount"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        />
+    <Spinner
+        android:id="@+id/fragment_recipe_ingredient_pair_amount_type"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"></Spinner>
+    <EditText
+        android:id="@+id/fragment_recipe_ingredient_pair_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        />
+    <Button
+        android:id="@+id/fragment_recipe_ingredient_pair_remove_entry_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+</LinearLayout>
