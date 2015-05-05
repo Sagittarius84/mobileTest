@@ -374,17 +374,13 @@ public class MainShoppingListView extends ActionBarActivity {
         public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
             View view = inflater.inflate(R.layout.fragment_main_shopping_list_view, container, false);
             mAddButton = (ActionButton) view.findViewById(R.id.add_item_main_list_view);
-            mAddButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
+            mAddButton.setOnClickListener(v -> {
 
-                    Fragment fragment = new ProductCreationFragment();
-                    FragmentTransaction transaction = getFragmentManager().beginTransaction();
-                    transaction.replace(R.id.container, fragment);
-                    transaction.addToBackStack(null);
-                    transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
-                    transaction.commit();
-                }
+                Fragment fragment = new ProductCreationFragment();
+                FragmentTransaction transaction = getFragmentManager().beginTransaction();
+                transaction.replace(R.id.container, fragment);
+                transaction.addToBackStack(null);
+                transaction.commit();
             });
             return view;
 

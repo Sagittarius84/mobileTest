@@ -7,6 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Spinner;
 
 import org.noorganization.instalist.R;
 import org.noorganization.instalist.controller.implementation.ProductController;
@@ -18,22 +19,73 @@ import org.noorganization.instalist.model.Tag;
  */
 public class ProductCreationFragment extends Fragment {
 
+    private InputParamsHolder mInputParams;
 
+    /**
+     * Holds the input parameter views. Also delivers methods to retrieve the content of these
+     * views.
+     */
     private final static class InputParamsHolder{
         private EditText mProductNameEditText;
         private EditText mProductAmountEditText;
         private EditText mProductTagsEditText;
+        private View     mView;
 
         public InputParamsHolder(View view){
-            mProductNameEditText    = (EditText) view.findViewById(R.id.product_details_product_name_edittext);
-            mProductAmountEditText  = (EditText) view.findViewById(R.id.product_details_amount_edittext);
-            mProductTagsEditText    = (EditText) view.findViewById(R.id.product_details_tag_edittext);
+            assignContextToEditViews(view);
+            this.mView              = view;
         }
 
+        /**
+         *
+         * @param view          the view of the calling element.
+         * @param productName   the name of the product that should be displayed.
+         * @param productAmount the amount of products that should be displayed.
+         * @param tags          the tags separated by comma.
+         */
+        public InputParamsHolder(View view, String productName, float productAmount, String tags){
+            assignContextToEditViews(view);
+            this.mView              = view;
+        }
+
+        /**
+         * Checks if all editable fields are filled. Recommended to check before accessing product amount.
+         * @return true, if all elements are filled. false, if at least one element is not filled.
+         */
+        public boolean isFilled(){
+            boolean returnValue = false;
+            returnValue |= getProductName().length() == 0;
+            returnValue |= mProductAmountEditText.getText().length() == 0;
+            returnValue |= mProductTagsEditText.getText().length() == 0;
+            return returnValue;
+        }
+
+        /**
+         * call to show which elements aren't filled.
+         */
+        public void showUnFilledError(){
+
+        }
+
+        /**
+         * checks if the input is correct.
+         * @return true if  all is fine, false when some value is curious.
+         */
         public boolean isValid(){
-            return false;
+            return true;
         }
 
+        /**
+         * Show the elements that aren't valid.
+         */
+        public void showInvalid(){
+
+        }
+
+        /**
+         * Gets the product name.
+         * @return name of the product.
+         */
         public String getProductName(){
             return mProductNameEditText.getText().toString();
         }
@@ -47,12 +99,30 @@ public class ProductCreationFragment extends Fragment {
             return tag.split(",");
         }
 
+        /**
+         * Assigns the context to the edit view elements in this class. (like EditText)
+         */
+        private void assignContextToEditViews(View view){
+            mProductNameEditText    = (EditText) view.findViewById(R.id.product_details_product_name_edittext);
+            mProductAmountEditText  = (EditText) view.findViewById(R.id.product_details_amount_edittext);
+            mProductTagsEditText    = (EditText) view.findViewById(R.id.product_details_tag_edittext);
+        }
     }
 
 
     private View.OnClickListener mClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
+
+            if(! mInputParams.isFilled()) {
+                mInputParams.showUnFilledError();
+                return;
+            }
+            if(!mInputParams.isValid()){
+                mInputParams.showInvalid();
+                return;
+            }
+
             Product product = ProductController.getInstance().createProduct(
                     mInputParams.getProductName(),
                     null,
@@ -66,8 +136,6 @@ public class ProductCreationFragment extends Fragment {
             }
         }
     };
-
-    private InputParamsHolder mInputParams;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
