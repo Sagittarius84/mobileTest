@@ -1,19 +1,15 @@
-package org.noorganization.instalist.view.listadapter;
+package org.noorganization.instalist.view.ListAdapter;
 
 import android.app.Activity;
 import android.graphics.Paint;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import org.noorganization.instalist.GlobalApplication;
 import org.noorganization.instalist.R;
 import org.noorganization.instalist.model.ListEntry;
-import org.noorganization.instalist.touchlistener.OnGestureListener;
 
 import java.util.List;
 
@@ -90,5 +86,23 @@ public class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingListAdapte
     @Override
     public int getItemCount() {
         return mListOfEntries.size();
+    }
+
+    /**
+     * Removes an item from the given position. Update of the view included.
+     * @param position position of the element that should be deleted.
+     */
+    public void removeItem(int position){
+        mListOfEntries.remove(position);
+        notifyItemRemoved(position);
+    }
+
+    /**
+     * Adds the given item to the list. Update of the view included.
+     * @param entry entry element that should be added.
+     */
+    public void addItem(ListEntry entry){
+        mListOfEntries.add(entry);
+        notifyItemInserted(mListOfEntries.size()-1);
     }
 }
