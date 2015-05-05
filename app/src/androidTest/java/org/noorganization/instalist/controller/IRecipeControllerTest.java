@@ -50,8 +50,9 @@ public class IRecipeControllerTest extends AndroidTestCase {
 
     public void tearDown() throws Exception {
         SugarRecord.deleteAll(Ingredient.class, "m_product = ? or m_product = ? or m_product = ? " +
-                        "or m_recipe = ?",
-                mFlour.getId()+"", mEgg.getId()+"", mCurd.getId()+"", mCheeseCake.getId()+"");
+                        "or m_recipe = ? or m_recipe = ?",
+                mFlour.getId()+"", mEgg.getId()+"", mCurd.getId()+"", mCheeseCake.getId()+"",
+                mPuffPastries.getId()+"");
 
         SugarRecord.deleteAll(Recipe.class, "m_name LIKE '_TEST_%'");
         SugarRecord.deleteAll(Product.class, "m_name LIKE '_TEST_%'");
