@@ -33,8 +33,8 @@ import org.noorganization.instalist.model.ShoppingList;
 import org.noorganization.instalist.touchlistener.OnRecyclerItemTouchListener;
 import org.noorganization.instalist.view.decoration.DividerItemListDecoration;
 import org.noorganization.instalist.view.fragment.ProductCreationFragment;
-import org.noorganization.instalist.view.listadapter2.ShoppingListAdapter;
-import org.noorganization.instalist.view.listadapter2.ShoppingListOverviewAdapter;
+import org.noorganization.instalist.view.listadapter.ShoppingListAdapter;
+import org.noorganization.instalist.view.listadapter.ShoppingListOverviewAdapter;
 
 import java.util.List;
 
