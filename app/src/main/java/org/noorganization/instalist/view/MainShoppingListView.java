@@ -33,8 +33,8 @@ import org.noorganization.instalist.model.ShoppingList;
 import org.noorganization.instalist.touchlistener.OnRecyclerItemTouchListener;
 import org.noorganization.instalist.view.decoration.DividerItemListDecoration;
 import org.noorganization.instalist.view.fragment.ProductCreationFragment;
-import org.noorganization.instalist.view.listadapter.ShoppingListAdapter;
-import org.noorganization.instalist.view.listadapter.ShoppingListOverviewAdapter;
+import org.noorganization.instalist.view.ListAdapter.ShoppingListAdapter;
+import org.noorganization.instalist.view.ListAdapter.ShoppingListOverviewAdapter;
 
 import java.util.List;
 
@@ -208,7 +208,7 @@ public class MainShoppingListView extends ActionBarActivity {
 
         // list is the same as the current one
         // no need to do then something
-        if(listName.compareTo(mCurrentListName) == 0)
+        if(listName == mCurrentListName)
             return;
 
         // decl
@@ -347,7 +347,7 @@ public class MainShoppingListView extends ActionBarActivity {
 
                     ListController.getInstance().removeItem(mCurrentShoppingList, entry.mProduct);
                     // just for showcasing
-                    // mShoppingListAdapter.removeItem(position);
+                    mShoppingListAdapter.removeItem(position);
                 }
 
                 @Override
