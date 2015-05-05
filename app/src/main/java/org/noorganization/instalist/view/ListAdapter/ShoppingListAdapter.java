@@ -39,6 +39,8 @@ public class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingListAdapte
             mProductAmount = (TextView) _ItemView.findViewById(R.id.list_product_shopping_product_amount);
             mProductName = (TextView) _ItemView.findViewById(R.id.list_product_shopping_product_name);
         }
+
+
     }
 
     // -----------------------------------------------------------

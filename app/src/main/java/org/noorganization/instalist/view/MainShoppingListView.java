@@ -5,44 +5,37 @@ import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Paint;
-import android.graphics.drawable.GradientDrawable;
+import android.os.Bundle;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
-import android.os.Bundle;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.orm.query.Condition;
-import com.orm.query.Select;
+import com.software.shell.fab.ActionButton;
 
 import org.noorganization.instalist.GlobalApplication;
 import org.noorganization.instalist.R;
 import org.noorganization.instalist.controller.implementation.ListController;
 import org.noorganization.instalist.model.ListEntry;
 import org.noorganization.instalist.model.ShoppingList;
-import org.noorganization.instalist.touchlistener.OnGestureListener;
 import org.noorganization.instalist.touchlistener.OnRecyclerItemTouchListener;
 import org.noorganization.instalist.view.decoration.DividerItemListDecoration;
 import org.noorganization.instalist.view.fragment.ProductCreationFragment;
 import org.noorganization.instalist.view.listadapter.ShoppingListAdapter;
 import org.noorganization.instalist.view.listadapter.ShoppingListOverviewAdapter;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -215,7 +208,7 @@ public class MainShoppingListView extends ActionBarActivity {
 
         // list is the same as the current one
         // no need to do then something
-        if(listName == mCurrentListName)
+        if(listName.compareTo(mCurrentListName) == 0)
             return;
 
         // decl
@@ -231,13 +224,21 @@ public class MainShoppingListView extends ActionBarActivity {
         fragment = new ShoppingListOverviewFragment();
         fragment.setArguments(args);
 
+        changeFragment(fragment);
+    }
+
+    /**
+     * Changes from the current fragment to the given fragment.
+     * Adds the current fragment to the backstack.
+     * @param fragment the fragment that should be created.
+     */
+    public void changeFragment(Fragment fragment){
         // create transaction to new fragment
         FragmentTransaction transaction = getFragmentManager().beginTransaction();
         transaction.replace(R.id.container, fragment);
         transaction.addToBackStack(null);
         transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
         transaction.commit();
-
     }
 
     /**
@@ -260,6 +261,8 @@ public class MainShoppingListView extends ActionBarActivity {
         private ActionBar mActionBar;
         private Context mContext;
 
+        private ActionButton mAddButton;
+
         private LinearLayoutManager mLayoutManager;
 
         public ShoppingListOverviewFragment() {
@@ -276,6 +279,7 @@ public class MainShoppingListView extends ActionBarActivity {
             }
             mCurrentListName    = bundle.getString(MainShoppingListView.KEY_LISTNAME);
             mContext            = this.getActivity();
+
         }
 
         @Override
@@ -303,10 +307,8 @@ public class MainShoppingListView extends ActionBarActivity {
 
             // decl
             final RecyclerView shoppingListView;
-
             // init
             shoppingListView = (RecyclerView) getActivity().findViewById(R.id.fragment_shopping_list);
-
             // assign other listname if none is assigned
             if (mCurrentListName == null) {
 
@@ -370,7 +372,21 @@ public class MainShoppingListView extends ActionBarActivity {
 
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-            return inflater.inflate(R.layout.fragment_main_shopping_list_view, container, false);
+            View view = inflater.inflate(R.layout.fragment_main_shopping_list_view, container, false);
+            mAddButton = (ActionButton) view.findViewById(R.id.add_item_main_list_view);
+            mAddButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+
+                    Fragment fragment = new ProductCreationFragment();
+                    FragmentTransaction transaction = getFragmentManager().beginTransaction();
+                    transaction.replace(R.id.container, fragment);
+                    transaction.addToBackStack(null);
+                    transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+                    transaction.commit();
+                }
+            });
+            return view;
 
         }
 
