@@ -1,4 +1,4 @@
-package org.noorganization.instalist.view.listadapter;
+package org.noorganization.instalist.view.ListAdapter;
 
 import android.app.Activity;
 import android.graphics.Paint;
