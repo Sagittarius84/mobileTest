@@ -1,8 +1,10 @@
 package org.noorganization.instalist.view;
 
+import android.app.AlertDialog;
 import android.app.Fragment;
 import android.app.FragmentTransaction;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.res.Configuration;
 import android.graphics.Paint;
 import android.os.Bundle;
@@ -19,6 +21,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -29,10 +32,13 @@ import org.noorganization.instalist.GlobalApplication;
 import org.noorganization.instalist.R;
 import org.noorganization.instalist.controller.implementation.ListController;
 import org.noorganization.instalist.model.ListEntry;
+import org.noorganization.instalist.model.Product;
 import org.noorganization.instalist.model.ShoppingList;
 import org.noorganization.instalist.touchlistener.OnRecyclerItemTouchListener;
 import org.noorganization.instalist.view.decoration.DividerItemListDecoration;
 import org.noorganization.instalist.view.fragment.ProductCreationFragment;
+import org.noorganization.instalist.view.fragment.RecipeCreationFragment;
+import org.noorganization.instalist.view.listadapter.SelectableProductListAdapter;
 import org.noorganization.instalist.view.listadapter.ShoppingListAdapter;
 import org.noorganization.instalist.view.listadapter.ShoppingListOverviewAdapter;
 
@@ -256,11 +262,11 @@ public class MainShoppingListView extends ActionBarActivity {
      */
     public static class ShoppingListOverviewFragment extends Fragment {
 
-        private String  mCurrentListName;
+        private String          mCurrentListName;
         private ShoppingList    mCurrentShoppingList;
 
-        private ActionBar mActionBar;
-        private Context mContext;
+        private ActionBar   mActionBar;
+        private Context     mContext;
 
         private ActionButton mAddButton;
 
@@ -371,21 +377,58 @@ public class MainShoppingListView extends ActionBarActivity {
             });
         }
 
+        private AlertDialog.Builder adb;
+
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
             View view = inflater.inflate(R.layout.fragment_main_shopping_list_view, container, false);
             mAddButton = (ActionButton) view.findViewById(R.id.add_item_main_list_view);
-            mAddButton.setOnClickListener(v -> {
 
-                Fragment fragment = new ProductCreationFragment();
-                FragmentTransaction transaction = getFragmentManager().beginTransaction();
-                transaction.replace(R.id.container, fragment);
-                transaction.addToBackStack(null);
-                transaction.commit();
+            ListAdapter mAdapater;
+            // create alertdialog
+            adb = new AlertDialog.Builder(mContext);
+
+            mAdapater = new SelectableProductListAdapter(getActivity(), Product.listAll(Product.class));
+
+            String options[]        = new String[]{"Create recipes", "Create Item"};
+            adb.setAdapter(mAdapater, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    dialog.dismiss();
+                    Fragment fragment;
+                    switch (which) {
+                        case 0:
+                            fragment = new RecipeCreationFragment();
+                            break;
+                        case 1:
+                            fragment = new ProductCreationFragment();
+                            break;
+                        default:
+                            return;
+                    }
+
+                    FragmentTransaction transaction = getFragmentManager().beginTransaction();
+                    transaction.replace(R.id.container, fragment);
+                    transaction.addToBackStack(null);
+                    transaction.commit();
+                }
+            });
+
+            adb.setNegativeButton("Cancel", null);
+            adb.setTitle("What to add??");
+
+
+            mAddButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    adb.show();
+                }
             });
             return view;
 
         }
+
+
 
     }
 }
