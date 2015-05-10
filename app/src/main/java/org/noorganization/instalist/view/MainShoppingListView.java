@@ -1,6 +1,7 @@
 package org.noorganization.instalist.view;
 
 import android.app.AlertDialog;
+import android.app.DialogFragment;
 import android.app.Fragment;
 import android.app.FragmentTransaction;
 import android.content.Context;
@@ -35,8 +36,10 @@ import org.noorganization.instalist.model.ListEntry;
 import org.noorganization.instalist.model.Product;
 import org.noorganization.instalist.model.ShoppingList;
 import org.noorganization.instalist.touchlistener.OnRecyclerItemTouchListener;
+import org.noorganization.instalist.view.datahandler.SelectedProductDataHandler;
 import org.noorganization.instalist.view.decoration.DividerItemListDecoration;
 import org.noorganization.instalist.view.fragment.ProductCreationFragment;
+import org.noorganization.instalist.view.fragment.ProductListDialogFragment;
 import org.noorganization.instalist.view.fragment.RecipeCreationFragment;
 import org.noorganization.instalist.view.listadapter.SelectableProductListAdapter;
 import org.noorganization.instalist.view.listadapter.ShoppingListAdapter;
@@ -258,6 +261,13 @@ public class MainShoppingListView extends ActionBarActivity {
     }
 
     /**
+     * Add the selected products to list? or say that we should update the view.
+     */
+    public void addProductsToList() {
+
+    }
+
+    /**
      * A ShoppingListOverviewFragment containing a list view.
      */
     public static class ShoppingListOverviewFragment extends Fragment {
@@ -271,6 +281,8 @@ public class MainShoppingListView extends ActionBarActivity {
         private ActionButton mAddButton;
 
         private LinearLayoutManager mLayoutManager;
+
+        ShoppingListAdapter mShoppingListAdapter;
 
         public ShoppingListOverviewFragment() {
         }
@@ -286,7 +298,6 @@ public class MainShoppingListView extends ActionBarActivity {
             }
             mCurrentListName    = bundle.getString(MainShoppingListView.KEY_LISTNAME);
             mContext            = this.getActivity();
-
         }
 
         @Override
@@ -304,9 +315,6 @@ public class MainShoppingListView extends ActionBarActivity {
         public void onPause() {
             super.onPause();
         }
-
-        ShoppingListAdapter mShoppingListAdapter;
-
 
         @Override
         public void onResume() {
@@ -377,51 +385,19 @@ public class MainShoppingListView extends ActionBarActivity {
             });
         }
 
-        private AlertDialog.Builder adb;
-
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
             View view = inflater.inflate(R.layout.fragment_main_shopping_list_view, container, false);
             mAddButton = (ActionButton) view.findViewById(R.id.add_item_main_list_view);
 
-            ListAdapter mAdapater;
-            // create alertdialog
-            adb = new AlertDialog.Builder(mContext);
-
-            mAdapater = new SelectableProductListAdapter(getActivity(), Product.listAll(Product.class));
-
-            String options[]        = new String[]{"Create recipes", "Create Item"};
-            adb.setAdapter(mAdapater, new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    dialog.dismiss();
-                    Fragment fragment;
-                    switch (which) {
-                        case 0:
-                            fragment = new RecipeCreationFragment();
-                            break;
-                        case 1:
-                            fragment = new ProductCreationFragment();
-                            break;
-                        default:
-                            return;
-                    }
-
-                    FragmentTransaction transaction = getFragmentManager().beginTransaction();
-                    transaction.replace(R.id.container, fragment);
-                    transaction.addToBackStack(null);
-                    transaction.commit();
-                }
-            });
-
-            adb.setNegativeButton("Cancel", null);
-            adb.setTitle("What to add??");
-
-
             mAddButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    adb.show();
+                    // reset selected product items ... (lazy loading!)
+                    SelectedProductDataHandler.getInstance().clearListEntries();
+
+                    DialogFragment fragment = ProductListDialogFragment.newInstance(mCurrentListName);
+                    fragment.show(getFragmentManager(), "dialog");
                 }
             });
             return view;

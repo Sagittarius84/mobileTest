@@ -27,7 +27,7 @@ public class DatabaseSeeder {
     private static DatabaseSeeder mInstance;
 
     private final String    SAMPLE_TAG              = "SAMPLE";
-    private final int       PRODUCT_TEST_DATA_SIZE  = 100;
+    private final int       PRODUCT_TEST_DATA_SIZE  = 10;
     private final long      PRODUCT_LIST_SEED       = 324982340237840L;
 
     private IListController mListController;
@@ -52,7 +52,7 @@ public class DatabaseSeeder {
      * Fill the database with some sample data.
      */
     public void startUp(){
-
+        tearDown();
         List<ShoppingList>  shoppingList  = ShoppingList.listAll(ShoppingList.class);
 
         for(ShoppingList list : shoppingList)
@@ -121,13 +121,16 @@ public class DatabaseSeeder {
     public void tearDown(){
         List<ShoppingList>  shoppingLists  = ShoppingList.listAll(ShoppingList.class);
         List<ListEntry>     listEntries    = ListEntry.listAll(ListEntry.class);
-
+        List<Product>       products        = Product.listAll(Product.class);
         for(ListEntry listEntry : listEntries)
             mListController.removeItem(listEntry);
 
         for( ShoppingList shoppingList : shoppingLists)
             mListController.removeList(shoppingList);
 
+        for(Product product : products){
+            product.delete();
+        }
 
     }
 }

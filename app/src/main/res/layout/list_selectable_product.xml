@@ -3,18 +3,22 @@
     android:orientation="horizontal"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:weightSum="1">
+    android:weightSum="1"
+    style="@style/single_line_product_list_view"
+    >
 
     <CheckBox
         android:id="@+id/product_list_product_selected"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:background="@color/primary_color_dark"
+        />
 
     <TextView
         android:id="@+id/product_list_product_name"
-        android:layout_width="190dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_weight="0.25"
-        android:textSize="16dp" />
+        style="@style/single_line_product_text_view"
+        />
 
 </LinearLayout>
