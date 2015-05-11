@@ -31,6 +31,6 @@ public class ControllerFactory {
     }
 
     public static ITagController getTagController() {
-        return null;
+        return TagController.getInstance();
     }
 }
