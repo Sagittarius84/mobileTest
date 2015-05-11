@@ -9,6 +9,8 @@ import org.noorganization.instalist.model.ListEntry;
 import org.noorganization.instalist.model.Product;
 import org.noorganization.instalist.model.ShoppingList;
 
+import java.util.List;
+
 public class IListControllerTest extends AndroidTestCase {
 
     private ShoppingList mListWork;
@@ -53,9 +55,10 @@ public class IListControllerTest extends AndroidTestCase {
         assertNull(mLML4Test.addOrChangeItem(mListHome, null, 1.0f));
         assertNull(mLML4Test.addOrChangeItem(mListHome, mProductButter, -1.0f));
 
-        assertNull(mLML4Test.addOrChangeItem(mListWork, mProductButter, -1.0f));
+        ListEntry returnedUnchangedEntry = mLML4Test.addOrChangeItem(mListWork, mProductButter, -1.0f);
         ListEntry unchangedEntry = SugarRecord.findById(ListEntry.class, mListEntryButterForWork.getId());
         assertEquals(unchangedEntry, mListEntryButterForWork);
+        assertEquals(unchangedEntry, returnedUnchangedEntry);
 
         ListEntry returnedEntry = mLML4Test.addOrChangeItem(mListWork, mProductButter, 2.0f);
         ListEntry changedEntry = SugarRecord.findById(ListEntry.class, mListEntryButterForWork.getId());
@@ -66,8 +69,25 @@ public class IListControllerTest extends AndroidTestCase {
         assertEquals(changedEntry, returnedEntry);
 
         ListEntry returnedEntry2 = mLML4Test.addOrChangeItem(mListHome, mProductButter, 2.0f);
+        assertEquals(mListHome, returnedEntry2.mList);
+        assertEquals(mProductButter, returnedEntry2.mProduct);
+        assertEquals(2.0f, returnedEntry2.mAmount, 0.001f);
+        assertFalse(returnedEntry.mStruck);
         ListEntry createdEntry2 = SugarRecord.findById(ListEntry.class, returnedEntry2.getId());
         assertEquals(createdEntry2, returnedEntry2);
+
+        ListEntry returnedSecondEntry = mLML4Test.addOrChangeItem(mListHome, mProductBread, 1.0f);
+        assertEquals(mListHome, returnedSecondEntry.mList);
+        assertEquals(mProductBread, returnedSecondEntry.mProduct);
+        assertEquals(1.0f, returnedSecondEntry.mAmount, 0.001f);
+        assertFalse(returnedSecondEntry.mStruck);
+        ListEntry createdSecondEntry = SugarRecord.findById(ListEntry.class, returnedSecondEntry.getId());
+        assertEquals(returnedSecondEntry, createdSecondEntry);
+
+        List<ListEntry> allEntriesOfHomeList = mListHome.getEntries();
+        assertEquals(2, allEntriesOfHomeList.size());
+        assertTrue(allEntriesOfHomeList.contains(createdEntry2));
+        assertTrue(allEntriesOfHomeList.contains(createdSecondEntry));
     }
 
     public void testStrikeAllItems() throws Exception {

@@ -65,4 +65,11 @@ public class ListEntry extends SugarRecord<ListEntry> {
     public int hashCode() {
         return getId().intValue();
     }
+
+    @Override
+    public String toString() {
+        return "ListEntry { id = " + getId() + ", mList.id = " + (mList == null ? "none" : mList.getId()) +
+                ", mProduct.id = " + (mProduct == null ? "none" : mProduct.getId()) +
+                ", mStruck = " + mStruck + ", mAmount" + mAmount + " }";
+    }
 }
