@@ -10,6 +10,7 @@ import android.widget.TextView;
 
 import org.noorganization.instalist.R;
 import org.noorganization.instalist.controller.IListController;
+import org.noorganization.instalist.controller.implementation.ControllerFactory;
 import org.noorganization.instalist.controller.implementation.ListController;
 import org.noorganization.instalist.model.ListEntry;
 import org.noorganization.instalist.touchlistener.OnSimpleSwipeGestureListener;
@@ -42,7 +43,7 @@ public class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingListAdapte
             mProductAmount = (TextView) _ItemView.findViewById(R.id.list_product_shopping_product_amount);
             mProductName = (TextView) _ItemView.findViewById(R.id.list_product_shopping_product_name);
 
-            mListController = ListController.getInstance();
+            mListController = ControllerFactory.getListController();
             mViewHolderRef = this;
 
             _ItemView.setOnTouchListener(new OnSimpleSwipeGestureListener(_ItemView.getContext(), _ItemView) {

@@ -25,6 +25,7 @@ import com.software.shell.fab.ActionButton;
 import org.noorganization.instalist.GlobalApplication;
 import org.noorganization.instalist.R;
 import org.noorganization.instalist.controller.IListController;
+import org.noorganization.instalist.controller.implementation.ControllerFactory;
 import org.noorganization.instalist.controller.implementation.ListController;
 import org.noorganization.instalist.model.ShoppingList;
 import org.noorganization.instalist.view.datahandler.SelectedProductDataHandler;
@@ -295,7 +296,7 @@ public class MainShoppingListView extends ActionBarActivity {
             }
             mCurrentListName    = bundle.getString(MainShoppingListView.KEY_LISTNAME);
             mContext            = this.getActivity();
-            mListController     = ListController.getInstance();
+            mListController     = ControllerFactory.getListController();
         }
 
 

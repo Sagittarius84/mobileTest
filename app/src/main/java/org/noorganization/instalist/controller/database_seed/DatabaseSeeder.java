@@ -85,7 +85,7 @@ public class DatabaseSeeder {
            // singleUnit      = new Unit(listUnitNames[rand.nextInt(listUnitNames.length)]);
            // singleUnit.save();
 
-            singleProduct   = ProductController.getInstance().createProduct(productName, null, 1.0f, 1.0f);// new Product(productName, null, 1.0f, 1.0f);
+            singleProduct   = ControllerFactory.getProductController().createProduct(productName, null, 1.0f, 1.0f);// new Product(productName, null, 1.0f, 1.0f);
 
             //singleProduct.save();
             productList.add(singleProduct);
@@ -97,7 +97,7 @@ public class DatabaseSeeder {
             //mListController.addOrChangeItem(shoppingLists[rand.nextInt(shoppingLists.length)], product, rand.nextFloat());
             ShoppingList list = shoppingLists.get(rand.nextInt(shoppingLists.size()));
             Log.d(LOG_TAG, "List name: " + list.mName);
-            ListEntry listEntry = ListController.getInstance().addOrChangeItem(list, product, rand.nextFloat() * 100.0f);
+            ListEntry listEntry = ControllerFactory.getListController().addOrChangeItem(list, product, rand.nextFloat() * 100.0f);
             listEntry.mStruck = false;
             listEntry=null;
         }
