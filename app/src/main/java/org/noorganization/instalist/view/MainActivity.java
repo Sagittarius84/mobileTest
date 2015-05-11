@@ -30,15 +30,10 @@ import java.util.List;
 
 public class MainActivity extends ActionBarActivity {
 
-
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_shopping_list_view);
-
-
-
         Intent in = new Intent(this, MainShoppingListView.class);
         startActivity(in);
     }

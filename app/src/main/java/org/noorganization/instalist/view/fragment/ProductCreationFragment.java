@@ -144,6 +144,8 @@ public class ProductCreationFragment extends Fragment {
             }else{
                 Toast.makeText(getActivity(),"Addition of product succeeded!", Toast.LENGTH_LONG);
             }
+
+            // go to the last fragment where the creationwas initiated
             getFragmentManager().popBackStack();
         }
     };
