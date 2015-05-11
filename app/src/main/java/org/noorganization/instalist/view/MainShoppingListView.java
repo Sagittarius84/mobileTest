@@ -27,6 +27,7 @@ import com.software.shell.fab.ActionButton;
 
 import org.noorganization.instalist.GlobalApplication;
 import org.noorganization.instalist.R;
+import org.noorganization.instalist.controller.implementation.ControllerFactory;
 import org.noorganization.instalist.controller.implementation.ListController;
 import org.noorganization.instalist.model.ListEntry;
 import org.noorganization.instalist.model.ShoppingList;
@@ -344,9 +345,9 @@ public class MainShoppingListView extends ActionBarActivity {
                             test.getPaintFlags() |
                             Paint.STRIKE_THRU_TEXT_FLAG);
 
-                    ListController.getInstance().strikeItem(mCurrentShoppingList, entry.mProduct);
+                    ControllerFactory.getListController().strikeItem(mCurrentShoppingList, entry.mProduct);
 
-                    ListController.getInstance().removeItem(mCurrentShoppingList, entry.mProduct);
+                    ControllerFactory.getListController().removeItem(mCurrentShoppingList, entry.mProduct);
                     // just for showcasing
                     mShoppingListAdapter.removeItem(position);
                 }

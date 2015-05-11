@@ -6,6 +6,7 @@ import com.orm.query.Condition;
 import com.orm.query.Select;
 
 import org.noorganization.instalist.controller.IListController;
+import org.noorganization.instalist.controller.implementation.ControllerFactory;
 import org.noorganization.instalist.controller.implementation.ListController;
 import org.noorganization.instalist.model.ListEntry;
 import org.noorganization.instalist.model.Product;
@@ -45,7 +46,7 @@ public class DatabaseSeeder {
     // -----------------------------------------------------------------------
 
     private DatabaseSeeder(){
-        mListController = ListController.getInstance();
+        mListController = ControllerFactory.getListController();
     }
 
     /**

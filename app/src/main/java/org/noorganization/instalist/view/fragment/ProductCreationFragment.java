@@ -9,6 +9,7 @@ import android.widget.Button;
 import android.widget.EditText;
 
 import org.noorganization.instalist.R;
+import org.noorganization.instalist.controller.implementation.ControllerFactory;
 import org.noorganization.instalist.controller.implementation.ProductController;
 import org.noorganization.instalist.model.Product;
 import org.noorganization.instalist.model.Tag;
@@ -53,7 +54,7 @@ public class ProductCreationFragment extends Fragment {
     private View.OnClickListener mClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            Product product = ProductController.getInstance().createProduct(
+            Product product = ControllerFactory.getProductController().createProduct(
                     mInputParams.getProductName(),
                     null,
                     mInputParams.getProductAmount(),
@@ -62,7 +63,7 @@ public class ProductCreationFragment extends Fragment {
             String[] tagArray = mInputParams.getTags();
             for(int Index = 0; Index < tagArray.length; ++ Index){
                 Tag tag = new Tag(tagArray[Index]);
-                ProductController.getInstance().addTagToProduct(product, tag);
+                ControllerFactory.getProductController().addTagToProduct(product, tag);
             }
         }
     };

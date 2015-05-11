@@ -13,6 +13,7 @@ import com.orm.query.Select;
 import org.noorganization.instalist.controller.IListController;
 import org.noorganization.instalist.controller.IProductController;
 import org.noorganization.instalist.controller.database_seed.DatabaseSeeder;
+import org.noorganization.instalist.controller.implementation.ControllerFactory;
 import org.noorganization.instalist.controller.implementation.ListController;
 import org.noorganization.instalist.controller.implementation.ProductController;
 import org.noorganization.instalist.model.ListEntry;
@@ -39,7 +40,7 @@ public class GlobalApplication extends SugarApp {
         super.onCreate();
         mInstance = this;
 
-        mListController = ListController.getInstance();
+        mListController = ControllerFactory.getListController();
         mProductController = new ProductController();
 
 

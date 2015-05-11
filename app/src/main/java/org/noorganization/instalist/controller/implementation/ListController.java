@@ -23,7 +23,7 @@ public class ListController implements IListController {
     private ListController() {
     }
 
-    public static ListController getInstance() {
+    static ListController getInstance() {
         if (mInstance == null) {
             mInstance = new ListController();
         }
