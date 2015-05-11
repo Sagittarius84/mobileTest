@@ -34,17 +34,30 @@ public class ListController implements IListController {
 
     @Override
     public ListEntry addOrChangeItem(ShoppingList _list, Product _product, float _amount) {
-        if (_list == null || _product == null || _amount < 0.001f) {
+        if (_list == null || _product == null) {
             return null;
         }
 
-        ListEntry item = Select.from(ListEntry.class).where(Condition.prop("m_list").
-                eq(_list.getId())).first();
-        if (item == null) {
-            item = new ListEntry(_list, _product, _amount);
+        ShoppingList savedList = SugarRecord.findById(ShoppingList.class, _list.getId());
+        Product savedProduct = SugarRecord.findById(Product.class, _product.getId());
+        if (savedList == null || savedProduct == null) {
+            return null;
         }
 
-        item.mAmount = _amount;
+        ListEntry item = Select.from(ListEntry.class).where(
+                Condition.prop("m_list").eq(savedList.getId()),
+                Condition.prop("m_product").eq(savedProduct.getId())).first();
+        if (item == null) {
+            if (_amount < 0.001f) {
+                return null;
+            }
+            item = new ListEntry(_list, _product, _amount);
+        } else {
+            if (_amount < 0.001f) {
+                return item;
+            }
+            item.mAmount = _amount;
+        }
         item.save();
 
         return item;
