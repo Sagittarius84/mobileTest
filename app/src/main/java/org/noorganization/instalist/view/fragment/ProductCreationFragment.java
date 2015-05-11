@@ -8,6 +8,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
+import android.widget.Toast;
 
 import org.noorganization.instalist.R;
 import org.noorganization.instalist.controller.implementation.ProductController;
@@ -57,7 +58,7 @@ public class ProductCreationFragment extends Fragment {
             returnValue |= getProductName().length() == 0;
             returnValue |= mProductAmountEditText.getText().length() == 0;
             returnValue |= mProductTagsEditText.getText().length() == 0;
-            return returnValue;
+            return !returnValue;
         }
 
         /**
@@ -129,11 +130,21 @@ public class ProductCreationFragment extends Fragment {
                     mInputParams.getProductAmount(),
                     0.1f
             );
-            String[] tagArray = mInputParams.getTags();
-            for(int Index = 0; Index < tagArray.length; ++ Index){
-                Tag tag = new Tag(tagArray[Index]);
-                ProductController.getInstance().addTagToProduct(product, tag);
+
+            if(product != null) {
+                String[] tagArray = mInputParams.getTags();
+                for (int Index = 0; Index < tagArray.length; ++Index) {
+                    Tag tag = new Tag(tagArray[Index]);
+                    ProductController.getInstance().addTagToProduct(product, tag);
+                }
             }
+
+            if(product == null){
+                Toast.makeText(getActivity(),"Addition of product failed!", Toast.LENGTH_LONG);
+            }else{
+                Toast.makeText(getActivity(),"Addition of product succeeded!", Toast.LENGTH_LONG);
+            }
+            getFragmentManager().popBackStack();
         }
     };
 

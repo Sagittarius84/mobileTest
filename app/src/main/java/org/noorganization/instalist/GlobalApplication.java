@@ -43,8 +43,12 @@ public class GlobalApplication extends SugarApp {
         mProductController = new ProductController();
 
 
-        mDatabaseSeeder = DatabaseSeeder.getInstance();
-        mDatabaseSeeder.startUp();
+        // do this only in debug mode!
+        // else it would destroy the database of a user and that would be the kill factor
+        if(BuildConfig.DEBUG) {
+            mDatabaseSeeder = DatabaseSeeder.getInstance();
+            mDatabaseSeeder.startUp();
+        }
 
     }
 

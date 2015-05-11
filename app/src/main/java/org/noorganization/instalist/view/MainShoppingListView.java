@@ -165,7 +165,7 @@ public class MainShoppingListView extends ActionBarActivity {
         switch(id){
             case R.id.list_items_sort_by_amount:
                 // say controller there is a statechange
-                getFragmentManager().beginTransaction().replace(R.id.container, new ProductCreationFragment()).addToBackStack(null).commit();
+
                 break;
             case R.id.list_items_sort_by_name:
                 break;
@@ -401,10 +401,6 @@ public class MainShoppingListView extends ActionBarActivity {
                 }
             });
             return view;
-
         }
-
-
-
     }
 }
