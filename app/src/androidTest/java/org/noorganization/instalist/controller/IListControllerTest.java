@@ -4,7 +4,7 @@ import android.test.AndroidTestCase;
 
 import com.orm.SugarRecord;
 
-import org.noorganization.instalist.controller.implementation.ListController;
+import org.noorganization.instalist.controller.implementation.ControllerFactory;
 import org.noorganization.instalist.model.ListEntry;
 import org.noorganization.instalist.model.Product;
 import org.noorganization.instalist.model.ShoppingList;
@@ -35,7 +35,7 @@ public class IListControllerTest extends AndroidTestCase {
         mListEntryButterForWork = new ListEntry(mListWork, mProductButter, 1.0f);
         mListEntryButterForWork.save();
 
-        mLML4Test = ListController.getInstance();
+        mLML4Test = ControllerFactory.getListController();
     }
 
     public void tearDown() throws Exception {

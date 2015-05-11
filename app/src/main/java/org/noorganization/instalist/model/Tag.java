@@ -35,4 +35,24 @@ public class Tag extends SugarRecord<Tag> {
 
         return rtn;
     }
+
+    @Override
+    public boolean equals(Object otherObject) {
+        if (this == otherObject) {
+            return true;
+        }
+        if (otherObject == null || getClass() != otherObject.getClass()) {
+            return false;
+        }
+
+        Tag otherTag = (Tag) otherObject;
+
+        return mName.equals(otherTag.mName) && getId().compareTo(otherTag.getId()) == 0;
+
+    }
+
+    @Override
+    public int hashCode() {
+        return getId().intValue();
+    }
 }
