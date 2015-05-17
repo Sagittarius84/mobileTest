@@ -24,6 +24,10 @@ public class IListControllerTest extends AndroidTestCase {
     public void setUp() throws Exception {
         super.setUp();
 
+
+
+        //Thread.sleep(1000);
+
         mListWork = new ShoppingList("_TEST_work");
         mListWork.save();
         mListHome = new ShoppingList("_TEST_home");
@@ -56,12 +60,17 @@ public class IListControllerTest extends AndroidTestCase {
         assertNull(mLML4Test.addOrChangeItem(mListHome, mProductButter, -1.0f));
 
         ListEntry returnedUnchangedEntry = mLML4Test.addOrChangeItem(mListWork, mProductButter, -1.0f);
+        assertNotNull(returnedUnchangedEntry);
         ListEntry unchangedEntry = SugarRecord.findById(ListEntry.class, mListEntryButterForWork.getId());
-        assertEquals(unchangedEntry, mListEntryButterForWork);
-        assertEquals(unchangedEntry, returnedUnchangedEntry);
+        assertEquals(mListEntryButterForWork, unchangedEntry);
+        assertEquals(returnedUnchangedEntry, unchangedEntry);
 
         ListEntry returnedEntry = mLML4Test.addOrChangeItem(mListWork, mProductButter, 2.0f);
+        assertNotNull(returnedEntry);
         ListEntry changedEntry = SugarRecord.findById(ListEntry.class, mListEntryButterForWork.getId());
+        assertNotNull(changedEntry);
+        assertNotNull(changedEntry.mProduct);
+        assertNotNull(changedEntry.mList);
         assertEquals(2.0f, changedEntry.mAmount, 0.001f);
         assertFalse(changedEntry.mStruck);
         assertEquals(mListWork.getId(), changedEntry.mList.getId());
@@ -69,6 +78,7 @@ public class IListControllerTest extends AndroidTestCase {
         assertEquals(changedEntry, returnedEntry);
 
         ListEntry returnedEntry2 = mLML4Test.addOrChangeItem(mListHome, mProductButter, 2.0f);
+        assertNotNull(returnedEntry2);
         assertEquals(mListHome, returnedEntry2.mList);
         assertEquals(mProductButter, returnedEntry2.mProduct);
         assertEquals(2.0f, returnedEntry2.mAmount, 0.001f);
@@ -77,6 +87,7 @@ public class IListControllerTest extends AndroidTestCase {
         assertEquals(createdEntry2, returnedEntry2);
 
         ListEntry returnedSecondEntry = mLML4Test.addOrChangeItem(mListHome, mProductBread, 1.0f);
+        assertNotNull(returnedSecondEntry);
         assertEquals(mListHome, returnedSecondEntry.mList);
         assertEquals(mProductBread, returnedSecondEntry.mProduct);
         assertEquals(1.0f, returnedSecondEntry.mAmount, 0.001f);
@@ -86,8 +97,8 @@ public class IListControllerTest extends AndroidTestCase {
 
         List<ListEntry> allEntriesOfHomeList = mListHome.getEntries();
         assertEquals(2, allEntriesOfHomeList.size());
-        assertTrue(allEntriesOfHomeList.contains(createdEntry2));
-        assertTrue(allEntriesOfHomeList.contains(createdSecondEntry));
+        assertTrue(allEntriesOfHomeList.contains(returnedEntry2));
+        assertTrue(allEntriesOfHomeList.contains(returnedSecondEntry));
     }
 
     public void testStrikeAllItems() throws Exception {

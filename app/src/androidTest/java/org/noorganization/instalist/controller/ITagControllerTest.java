@@ -1,6 +1,7 @@
 package org.noorganization.instalist.controller;
 
 import android.test.AndroidTestCase;
+import android.util.Log;
 
 import com.orm.SugarRecord;
 
@@ -10,6 +11,8 @@ import org.noorganization.instalist.model.Tag;
 import org.noorganization.instalist.model.TaggedProduct;
 
 public class ITagControllerTest extends AndroidTestCase {
+
+    static final String TEST_MILK_PRODUCT = "_TEST_milkProduct";
 
     Tag mMetalware;
     Tag mMilkProduct;
@@ -23,7 +26,7 @@ public class ITagControllerTest extends AndroidTestCase {
         mMetalware = new Tag("_TEST_metalware");
         mMetalware.save();
 
-        mMilkProduct = new Tag("_TEST_milk product");
+        mMilkProduct = new Tag(TEST_MILK_PRODUCT);
         mMilkProduct.save();
 
         mCheese = new Product("_TEST_cheese", null);
@@ -44,7 +47,7 @@ public class ITagControllerTest extends AndroidTestCase {
 
     public void testCreateTag() throws Exception {
         assertNull(mTagController.createTag(null));
-        assertNull(mTagController.createTag("TEST_milk product"));
+        assertNull(mTagController.createTag(TEST_MILK_PRODUCT));
 
         Tag createdTag = mTagController.createTag("_TEST_vegetable");
         assertNotNull(createdTag);
