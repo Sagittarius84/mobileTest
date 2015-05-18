@@ -27,4 +27,6 @@
     <string name="product_list_dialog_cancel">Cancel</string>
     <string name="product_list_dialog_title">Add product to list</string>
     <string name="product_list_dialog_add_new_product">Add new product!</string>
+    <string name="recipe_details_add">Add</string>
+    <string name="recipe_details_cancel">Cancel</string>
 </resources>
