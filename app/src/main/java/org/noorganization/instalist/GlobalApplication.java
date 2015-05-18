@@ -2,6 +2,7 @@ package org.noorganization.instalist;
 
 import android.app.Application;
 import android.os.Bundle;
+import android.os.Looper;
 import android.support.v4.widget.DrawerLayout;
 import android.util.Log;
 import android.widget.ListView;
@@ -18,6 +19,7 @@ import org.noorganization.instalist.controller.implementation.ListController;
 import org.noorganization.instalist.controller.implementation.ProductController;
 import org.noorganization.instalist.model.ListEntry;
 import org.noorganization.instalist.model.ShoppingList;
+import org.noorganization.instalist.view.MessageHandler;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -43,6 +45,10 @@ public class GlobalApplication extends SugarApp {
         mListController = ControllerFactory.getListController();
         mProductController = new ProductController();
 
+        // Create a handler and attach it to current thread.
+        MessageHandler myHandler = new MessageHandler();
+        // publish handler to Controller-module
+        ControllerFactory.setHandler(myHandler);
 
         // do this only in debug mode!
         // else it would destroy the database of a user and that would be the kill factor

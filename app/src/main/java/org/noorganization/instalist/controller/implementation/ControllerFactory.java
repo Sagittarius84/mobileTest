@@ -5,6 +5,7 @@ import org.noorganization.instalist.controller.IProductController;
 import org.noorganization.instalist.controller.IRecipeController;
 import org.noorganization.instalist.controller.ITagController;
 import org.noorganization.instalist.controller.IUnitController;
+import org.noorganization.instalist.view.MessageHandler;
 
 /**
  * Holds instances of IXController (insert something for X), which themself are singletons. This
@@ -13,6 +14,12 @@ import org.noorganization.instalist.controller.IUnitController;
  * Created by Michi on 11.05.2015.
  */
 public class ControllerFactory {
+
+    static MessageHandler mHandler;
+
+    public static void setHandler(MessageHandler _handler) {
+        mHandler = _handler;
+    }
 
     public static IListController getListController() {
         return ListController.getInstance();

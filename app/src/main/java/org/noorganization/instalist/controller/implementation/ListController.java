@@ -1,5 +1,8 @@
 package org.noorganization.instalist.controller.implementation;
 
+import android.os.Bundle;
+import android.os.Message;
+
 import com.orm.SugarRecord;
 import com.orm.query.Condition;
 import com.orm.query.Select;
@@ -8,6 +11,7 @@ import org.noorganization.instalist.controller.IListController;
 import org.noorganization.instalist.model.ListEntry;
 import org.noorganization.instalist.model.Product;
 import org.noorganization.instalist.model.ShoppingList;
+import org.noorganization.instalist.view.MessageHandler;
 
 import java.util.List;
 
@@ -59,6 +63,9 @@ public class ListController implements IListController {
             item.mAmount = _amount;
         }
         item.save();
+
+        Message toFire = Message.obtain(ControllerFactory.mHandler, MessageHandler.LIST_ENTRY_ADDED, item);
+        toFire.sendToTarget();
 
         return item;
     }
