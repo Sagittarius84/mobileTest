@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<org.noorganization.instalist.view.customview.StrikeableRelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/list_product_shopping_view"
     style="@style/single_line_product_list_view"
     >
@@ -19,4 +20,4 @@
         android:layout_toRightOf="@id/list_product_shopping_product_amount"
     />
 
-</RelativeLayout>
+</org.noorganization.instalist.view.customview.StrikeableRelativeLayout>
