@@ -16,8 +16,8 @@
         android:layout_alignParentRight="true"
         android:layout_marginRight="@dimen/fab_margin"
         android:layout_marginBottom="@dimen/fab_margin"
-        fab:button_color="@color/fab_material_lime_500"
-        fab:button_colorPressed="@color/fab_material_lime_900"
+        fab:button_color="@color/secondary_color"
+        fab:button_colorPressed="@color/secondary_color_dark"
         fab:image="@drawable/fab_plus_icon"
         fab:image_size="24dp"
         >

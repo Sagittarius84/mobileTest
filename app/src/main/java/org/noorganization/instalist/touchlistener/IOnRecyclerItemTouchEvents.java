@@ -4,7 +4,7 @@ import android.view.View;
 
 /**
  * Created by TS on 04.05.2015.
- * Interface for usage of @link{OnRecyclerItemTouchListener}. Delivers the methods for callbacks.
+ * Interface for usage of @link{OnSimpleSwipeGestureListener}. Delivers the methods for callbacks.
  */
 public interface IOnRecyclerItemTouchEvents {
 

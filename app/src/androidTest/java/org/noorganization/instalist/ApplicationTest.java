@@ -10,4 +10,12 @@ public class ApplicationTest extends ApplicationTestCase<Application> {
     public ApplicationTest() {
         super(Application.class);
     }
+
+    @Override
+    public void setUp() throws Exception {
+        super.setUp();
+
+        // SugarORM seems to need some time to start up, else tests will fail because db is closed...
+        Thread.sleep(3000);
+    }
 }

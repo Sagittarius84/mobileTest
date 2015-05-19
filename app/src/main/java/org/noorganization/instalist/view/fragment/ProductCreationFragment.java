@@ -8,12 +8,18 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import com.orm.StringUtil;
+
 import org.noorganization.instalist.R;
+import org.noorganization.instalist.controller.implementation.ControllerFactory;
+import org.noorganization.instalist.controller.implementation.ControllerFactory;
 import org.noorganization.instalist.controller.implementation.ProductController;
 import org.noorganization.instalist.model.Product;
 import org.noorganization.instalist.model.Tag;
+import org.noorganization.instalist.view.utils.ViewUtils;
 
 /**
  * Created by TS on 28.04.2015.
@@ -51,37 +57,25 @@ public class ProductCreationFragment extends Fragment {
 
         /**
          * Checks if all editable fields are filled. Recommended to check before accessing product amount.
+         * Marks an unfilled entry as not filled.
          * @return true, if all elements are filled. false, if at least one element is not filled.
          */
         public boolean isFilled(){
-            boolean returnValue = false;
-            returnValue |= getProductName().length() == 0;
-            returnValue |= mProductAmountEditText.getText().length() == 0;
-            returnValue |= mProductTagsEditText.getText().length() == 0;
-            return !returnValue;
+            boolean returnValue = true;
+            returnValue &= ViewUtils.checkTextViewIsFilled(mProductNameEditText);
+            returnValue &= ViewUtils.checkTextViewIsFilled(mProductAmountEditText);
+            returnValue &= ViewUtils.checkTextViewIsFilled(mProductTagsEditText);
+            return returnValue;
         }
 
         /**
-         * call to show which elements aren't filled.
-         */
-        public void showUnFilledError(){
-
-        }
-
-        /**
-         * checks if the input is correct.
+         * checks if the input matches the conventions.
          * @return true if  all is fine, false when some value is curious.
          */
         public boolean isValid(){
             return true;
         }
 
-        /**
-         * Show the elements that aren't valid.
-         */
-        public void showInvalid(){
-
-        }
 
         /**
          * Gets the product name.
@@ -115,16 +109,11 @@ public class ProductCreationFragment extends Fragment {
         @Override
         public void onClick(View v) {
 
-            if(! mInputParams.isFilled()) {
-                mInputParams.showUnFilledError();
-                return;
-            }
-            if(!mInputParams.isValid()){
-                mInputParams.showInvalid();
+            if(!mInputParams.isFilled()){
                 return;
             }
 
-            Product product = ProductController.getInstance().createProduct(
+            Product product = ControllerFactory.getProductController().createProduct(
                     mInputParams.getProductName(),
                     null,
                     mInputParams.getProductAmount(),
@@ -135,7 +124,7 @@ public class ProductCreationFragment extends Fragment {
                 String[] tagArray = mInputParams.getTags();
                 for (int Index = 0; Index < tagArray.length; ++Index) {
                     Tag tag = new Tag(tagArray[Index]);
-                    ProductController.getInstance().addTagToProduct(product, tag);
+                    ControllerFactory.getProductController().addTagToProduct(product, tag);
                 }
             }
 
@@ -144,6 +133,8 @@ public class ProductCreationFragment extends Fragment {
             }else{
                 Toast.makeText(getActivity(),"Addition of product succeeded!", Toast.LENGTH_LONG);
             }
+
+            // go to the last fragment where the creationwas initiated
             getFragmentManager().popBackStack();
         }
     };

@@ -23,7 +23,7 @@ public class ListController implements IListController {
     private ListController() {
     }
 
-    public static ListController getInstance() {
+    static ListController getInstance() {
         if (mInstance == null) {
             mInstance = new ListController();
         }
@@ -51,7 +51,7 @@ public class ListController implements IListController {
             if (_amount < 0.001f) {
                 return null;
             }
-            item = new ListEntry(_list, _product, _amount);
+            item = new ListEntry(savedList, savedProduct, _amount);
         } else {
             if (_amount < 0.001f) {
                 return item;
@@ -174,11 +174,13 @@ public class ListController implements IListController {
             return false;
         }
 
+        Long listId = _item.mList.getId();
+        Long productId = _item.mProduct.getId();
         _item.delete();
 
          long deletedEntryCount = Select.from(ListEntry.class).where(
-                Condition.prop("m_list").eq(_item.mList.getId()),
-                Condition.prop("m_product").eq(_item.mProduct.getId())).count();
+                Condition.prop("m_list").eq(listId),
+                Condition.prop("m_product").eq(productId)).count();
 
         return deletedEntryCount == 0;
     }

@@ -13,7 +13,7 @@ import org.noorganization.instalist.model.Recipe;
 public class RecipeController implements IRecipeController {
     private static RecipeController mInstance;
 
-    public static IRecipeController getInstance() {
+    static IRecipeController getInstance() {
         if (mInstance == null) {
             mInstance = new RecipeController();
         }

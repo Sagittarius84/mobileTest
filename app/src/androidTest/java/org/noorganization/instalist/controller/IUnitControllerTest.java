@@ -4,7 +4,7 @@ import android.test.AndroidTestCase;
 
 import com.orm.SugarRecord;
 
-import org.noorganization.instalist.controller.implementation.UnitController;
+import org.noorganization.instalist.controller.implementation.ControllerFactory;
 import org.noorganization.instalist.model.Product;
 import org.noorganization.instalist.model.Unit;
 
@@ -33,7 +33,7 @@ public class IUnitControllerTest extends AndroidTestCase {
         mShelf = new Product("_TEST_shelf", mMeter);
         mShelf.save();
 
-        mUnitController = UnitController.getInstance();
+        mUnitController = ControllerFactory.getUnitController();
     }
 
     public void tearDown() throws Exception {
