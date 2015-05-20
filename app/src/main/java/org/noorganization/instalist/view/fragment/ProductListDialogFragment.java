@@ -33,18 +33,18 @@ import java.util.List;
 public class ProductListDialogFragment extends Fragment{
 
     private Context mParentContext;
-    private String mListName;
+    private ShoppingList mCurrentShoppingList;
 
 
     /**
      * Creates an instance of an ProductListDialogFragment.
-     * @param listName the name of the list where the products should be added.
+     * @param _ListName the name of the list where the products should be added.
      * @return the new instance of this fragment.
      */
-    public static ProductListDialogFragment newInstance(String listName){
+    public static ProductListDialogFragment newInstance(String _ListName){
         ProductListDialogFragment fragment = new ProductListDialogFragment();
         Bundle args = new Bundle();
-        args.putString("listName", listName);
+        args.putString("listName", _ListName);
         fragment.setArguments(args);
         return fragment;
     }
@@ -52,7 +52,7 @@ public class ProductListDialogFragment extends Fragment{
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mListName = getArguments().getString("listName");
+        mCurrentShoppingList = ShoppingList.find(ShoppingList.class, ShoppingList.LIST_NAME_ATTR + "=?", getArguments().getString("listName")).get(0);
     }
 
 
@@ -62,7 +62,7 @@ public class ProductListDialogFragment extends Fragment{
         ListAdapter adapter;
         View view = inflater.inflate(R.layout.fragment_product_list_dialog, container, false);
 
-        adapter = new SelectableProductListAdapter(getActivity(), Product.listAll(Product.class));
+        adapter = new SelectableProductListAdapter(getActivity(), Product.listAll(Product.class), mCurrentShoppingList);
 
         Button addNewProductButton  = (Button) view.findViewById(R.id.fragment_product_list_dialog_add_new_product);
         Button cancelButton         = (Button) view.findViewById(R.id.fragment_product_list_dialog_cancel);
@@ -72,7 +72,7 @@ public class ProductListDialogFragment extends Fragment{
         ListView listView           = (ListView)view.findViewById(R.id.fragment_product_list_dialog_product_list_view);
 
         listView.setAdapter(adapter);
-        headingText.setText(getString(R.string.product_list_dialog_title) + " " + mListName);
+        headingText.setText(getString(R.string.product_list_dialog_title) + " " + mCurrentShoppingList.mName);
 
         addNewProductButton.setOnClickListener(onAddNewProductClickListener);
         cancelButton.setOnClickListener(onCancelClickListener);
@@ -90,12 +90,11 @@ public class ProductListDialogFragment extends Fragment{
         public void onClick(View v) {
             ((MainShoppingListView) getActivity()).addProductsToList();
             List<ListEntry> listEntries = SelectedProductDataHandler.getInstance().getListEntries();
-            ShoppingList list = ShoppingList.find(ShoppingList.class, ShoppingList.LIST_NAME_ATTR + "=?", mListName).get(0);
             IListController mListController = ControllerFactory.getListController();
 
             for(ListEntry listEntry : listEntries){
                 if(listEntry.mStruck){
-                    ListEntry listEntryIntern = mListController.addOrChangeItem(list, listEntry.mProduct, 1.0f);
+                    ListEntry listEntryIntern = mListController.addOrChangeItem(mCurrentShoppingList, listEntry.mProduct, 1.0f);
                     if(listEntryIntern == null){
                         Log.e(ProductListDialogFragment.class.getName(), "Insertion failed.");
                     }
@@ -126,7 +125,7 @@ public class ProductListDialogFragment extends Fragment{
         public void onClick(View v) {
             getFragmentManager()
                     .beginTransaction()
-                    .replace(R.id.container, new ProductCreationFragment())
+                    .replace(R.id.container, new ProductCreationFragment().newInstance(mCurrentShoppingList.mName))
                     .commit();
         }
     };

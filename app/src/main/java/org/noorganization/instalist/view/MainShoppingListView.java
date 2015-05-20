@@ -256,6 +256,10 @@ public class MainShoppingListView extends ActionBarActivity {
 
     }
 
+    // -----------------------------------------------------------------------
+    // Public static class area
+    // -----------------------------------------------------------------------
+
     /**
      * A ShoppingListOverviewFragment containing a list view.
      */
@@ -357,7 +361,6 @@ public class MainShoppingListView extends ActionBarActivity {
             shoppingListView.addItemDecoration(new DividerItemListDecoration(getResources().getDrawable(R.drawable.abc_list_divider_mtrl_alpha), false, false));
             shoppingListView.setAdapter(mShoppingListAdapter);
             shoppingListView.setItemAnimator(new DefaultItemAnimator());
-
 
         }
 

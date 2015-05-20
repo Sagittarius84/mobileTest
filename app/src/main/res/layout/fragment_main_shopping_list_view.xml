@@ -5,7 +5,7 @@
     tools:context="org.noorganization.instalist.view.MainShoppingListView$PlaceholderFragment">
     <android.support.v7.widget.RecyclerView
         android:layout_width="match_parent"
-        android:layout_height="fill_parent"
+        android:layout_height="match_parent"
         android:scrollbars ="vertical"
         android:id="@+id/fragment_shopping_list"/>
     <com.software.shell.fab.ActionButton

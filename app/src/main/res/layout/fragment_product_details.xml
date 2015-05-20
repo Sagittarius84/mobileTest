@@ -29,7 +29,7 @@
         android:hint="@string/product_details_product_amount_hint"
         android:layout_below="@id/product_details_product_name_edittext"
         android:layout_toRightOf="@id/product_details_dec_amount"
-        style="@style/InstalistTheme1.base_edit_text_style"
+        style="@style/InstalistTheme1.base_edit_text_numeric_style"
         />
     <Button
         android:id="@+id/product_details_inc_amount"

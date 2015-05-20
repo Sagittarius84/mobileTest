@@ -8,7 +8,6 @@
         <!-- Following for toolbar displaying correctly-->
         <item name="android:windowNoTitle">true</item>
         <item name="windowActionBar">false</item>
-
     </style>
 
 </resources>

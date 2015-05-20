@@ -61,4 +61,5 @@ public class SugarORMTest extends AndroidTestCase {
         assertEquals("kg", testProduct.mUnit.mName);
         assertEquals(justAUnit.getId(), testProduct.mUnit.getId());
     }
+
 }

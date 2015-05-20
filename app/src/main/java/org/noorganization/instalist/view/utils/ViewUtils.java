@@ -9,17 +9,17 @@ public class ViewUtils {
 
     /**
      * Checks if the given textview is filled with some text. If it is not filled then there will be an message be shown
-     * @param _TextView the textview that should be tested.
+     * @param _EditText the textview that should be tested.
      * @return
      */
-    public static boolean checkTextViewIsFilled(EditText _TextView){
-        if(_TextView.length() == 0
-                || (_TextView.getText().toString().replaceAll("(\\s)*","").length() == 0) ){
+    public static boolean checkTextViewIsFilled(EditText _EditText){
+        if(_EditText.length() == 0
+                || (_EditText.getText().toString().replaceAll("(\\s)*","").length() == 0) ){
 
-            _TextView.setError("Not filled");
+            _EditText.setError("Not filled");
             return false;
         }
 
-        _TextView.setError(null);
+        _EditText.setError(null);
         return true;
     }}
