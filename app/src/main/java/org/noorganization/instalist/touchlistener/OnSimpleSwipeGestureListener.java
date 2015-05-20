@@ -43,11 +43,11 @@ public class OnSimpleSwipeGestureListener implements View.OnTouchListener, IOnIt
         /**
          * Creates a new instance of a GestureListener.
          * @param _OnGestureListener The listener, that listens to those events.
-         * @param recyclerView the recyclerview attached to layout.
+         * @param _RecyclerView the recyclerview attached to layout.
          */
-        public GestureListener(OnSimpleSwipeGestureListener _OnGestureListener, View recyclerView){
+        public GestureListener(OnSimpleSwipeGestureListener _OnGestureListener, View _RecyclerView){
             this.mGestureListener   = _OnGestureListener;
-            this.mRecyclerView      = recyclerView;
+            this.mRecyclerView      = _RecyclerView;
         }
 
         @Override

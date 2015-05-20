@@ -7,6 +7,9 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.os.Build;
+import android.os.Bundle;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.support.v7.internal.widget.ViewUtils;
 import android.util.AttributeSet;
 import android.widget.LinearLayout;
@@ -23,7 +26,7 @@ public class StrikeableRelativeLayout extends RelativeLayout {
     private float   mRelativePaddingLeftAndRight    = 48.0f;
     private float   mLineThickness                  = 8.0f;
     private int     mLineColor                      = Color.BLUE;
-
+    private boolean mStroked                        = false;
 
     /**
      * Creates an StrikeableRelativeLayout and only uses default params.
@@ -51,30 +54,74 @@ public class StrikeableRelativeLayout extends RelativeLayout {
 
 
     @Override
-    protected void dispatchDraw(Canvas canvas) {
+    public Parcelable onSaveInstanceState() {
+        Parcelable superState = super.onSaveInstanceState();
+        SavedState ss = new SavedState(superState);
+        ss.state = mStroked ? 1 : 0;
+        return ss;
+    }
 
-        // draw all other stuff inside this
-        super.dispatchDraw(canvas);
+    @Override
+    public void onRestoreInstanceState(Parcelable state) {
+        SavedState ss = (SavedState) state;
+        super.onRestoreInstanceState(ss.getSuperState());
+        setStroked(ss.state == 0 ? false : true);
+    }
 
+    static class SavedState extends BaseSavedState {
+        int state;
 
-        // get the width and height of this LinearLayout
-        float screenWidth   = canvas.getWidth();
-        float screenHeight  = canvas.getHeight();
+        SavedState(Parcelable superState) {
+            super(superState);
+        }
 
-        float startX        = mRelativePaddingLeftAndRight;
-        float endX          = screenWidth - mRelativePaddingLeftAndRight;
-        // strike through the middle of the layout
-        float positionY     = (screenHeight + mLineThickness) / 2.0f;
-        Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        paint.setStrokeWidth(mLineThickness);
+        private SavedState(Parcel in) {
+            super(in);
+            state = in.readInt();
+        }
 
-        canvas.drawLine(startX, positionY, endX, positionY, paint);
+        @Override
+        public void writeToParcel(Parcel out, int flags) {
+            super.writeToParcel(out, flags);
+            out.writeInt(state);
+        }
 
+        public static final Parcelable.Creator<SavedState> CREATOR
+                = new Parcelable.Creator<SavedState>() {
+            public SavedState createFromParcel(Parcel in) {
+                return new SavedState(in);
+            }
+
+            public SavedState[] newArray(int size) {
+                return new SavedState[size];
+            }
+        };
     }
 
 
+    @Override
+    protected void dispatchDraw(Canvas _Canvas) {
+
+        // draw all other stuff inside this
+        super.dispatchDraw(_Canvas);
+
+        if(mStroked){
+            drawStrokeText(_Canvas);
+        }
+
+
+    }
+
+    /**
+     * Set the StrikeableRelativeLayout as stroke.
+     * @param _Stroked true if to stroke the item in list, false then not.
+     */
+    public void setStroked(boolean _Stroked){
+        mStroked = _Stroked;
+    }
+
     // ----------------------------------------------------------------------------------------------
-    // priivate declared methods
+    // private declared methods
     // ----------------------------------------------------------------------------------------------
 
     /**
@@ -85,6 +132,26 @@ public class StrikeableRelativeLayout extends RelativeLayout {
         mRelativePaddingLeftAndRight    = _AttributeSet.getFloat(R.styleable.StrikeableLinearLayoutOptions_strike_padding_left_and_right, mRelativePaddingLeftAndRight);
         mLineThickness                  = _AttributeSet.getFloat(R.styleable.StrikeableLinearLayoutOptions_strike_thickness, mLineThickness);
         mLineColor                      = _AttributeSet.getColor(R.styleable.StrikeableLinearLayoutOptions_strike_color , mLineColor);
+        _AttributeSet.recycle();
+    }
 
+    /**
+     * Draws a line over the whole layout.
+     * @param _Canvas the canvas where the line should be drawn.
+     */
+    private void drawStrokeText(Canvas _Canvas){
+
+        // get the width and height of this LinearLayout
+        float screenWidth   = _Canvas.getWidth();
+        float screenHeight  = _Canvas.getHeight();
+
+        float startX        = mRelativePaddingLeftAndRight;
+        float endX          = screenWidth - mRelativePaddingLeftAndRight;
+        // strike through the middle of the layout
+        float positionY     = (screenHeight + mLineThickness) / 2.0f;
+        Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        paint.setStrokeWidth(mLineThickness);
+        paint.setColor(mLineColor);
+        _Canvas.drawLine(startX, positionY, endX, positionY, paint);
     }
 }

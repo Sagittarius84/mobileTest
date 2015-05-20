@@ -1,17 +1,18 @@
 package org.noorganization.instalist.view.listadapter;
 
 import android.app.Activity;
+import android.content.Context;
 import android.graphics.Paint;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.noorganization.instalist.R;
 import org.noorganization.instalist.controller.IListController;
 import org.noorganization.instalist.controller.implementation.ControllerFactory;
-import org.noorganization.instalist.controller.implementation.ListController;
 import org.noorganization.instalist.model.ListEntry;
 import org.noorganization.instalist.touchlistener.OnSimpleSwipeGestureListener;
 
@@ -28,6 +29,8 @@ public class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingListAdapte
     private static List<ListEntry> mListOfEntries = null;
     private final Activity mActivity;
 
+    private OnSimpleSwipeGestureListener mOnSimpleSwipeGestureListener;
+
     // -----------------------------------------------------------
 
     public final static class ShoppingListProductViewHolder extends RecyclerView.ViewHolder{
@@ -37,7 +40,9 @@ public class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingListAdapte
         private IListController mListController;
         private ShoppingListProductViewHolder mViewHolderRef;
 
-        public ShoppingListProductViewHolder(View _ItemView) {
+        private Context mContext;
+
+        public ShoppingListProductViewHolder(View _ItemView, Context _Context) {
             super(_ItemView);
 
             mProductAmount = (TextView) _ItemView.findViewById(R.id.list_product_shopping_product_amount);
@@ -45,35 +50,25 @@ public class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingListAdapte
 
             mListController = ControllerFactory.getListController();
             mViewHolderRef = this;
+            mContext = _Context;
 
             _ItemView.setOnTouchListener(new OnSimpleSwipeGestureListener(_ItemView.getContext(), _ItemView) {
 
                 @Override
                 public void onSwipeRight(View childView) {
                     super.onSwipeRight(childView);
-                    //int entryPosition = (int) shoppingListAdapter.getItemId(position);
                     ListEntry entry = mListOfEntries.get(mViewHolderRef.getAdapterPosition());
-                    TextView test = ((TextView) childView.findViewById(R.id.list_product_shopping_product_name));
-                    test.setPaintFlags(
-                            test.getPaintFlags() |
-                                    Paint.STRIKE_THRU_TEXT_FLAG);
                     mListController.strikeItem(entry);
-                    entry.mStruck = true;
+                    Toast.makeText( mContext, "Item striked: " + entry.mProduct.mName, Toast.LENGTH_SHORT).show();
+
                 }
 
                 @Override
                 public void onSwipeLeft(View childView) {
                     super.onSwipeLeft(childView);
-
                     ListEntry entry = mListOfEntries.get(mViewHolderRef.getAdapterPosition());
-
-                    TextView test = ((TextView) childView.findViewById(R.id.list_product_shopping_product_name));
-                    test.setPaintFlags(
-                            test.getPaintFlags() &~
-                                    Paint.STRIKE_THRU_TEXT_FLAG);
-
                     mListController.unstrikeItem(entry);
-                    entry.mStruck = false;
+                    Toast.makeText( mContext, "Item unstriked: " + entry.mProduct.mName, Toast.LENGTH_SHORT).show();
 
                 }
 
@@ -81,8 +76,7 @@ public class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingListAdapte
                 public void onSingleTap(View childView) {
                     super.onSingleTap(childView);
                     ListEntry entry = mListOfEntries.get(mViewHolderRef.getAdapterPosition());
-
-                    // Toast.makeText(getActivity(), "Item selected: " + entry.mProduct.mName, Toast.LENGTH_LONG);
+                    Toast.makeText( mContext, "Item selected: " + entry.mProduct.mName, Toast.LENGTH_SHORT).show();
                 }
 
             });
@@ -108,7 +102,7 @@ public class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingListAdapte
     @Override
     public ShoppingListProductViewHolder onCreateViewHolder(ViewGroup _ViewGroup, int _ViewType){
         View view = LayoutInflater.from(_ViewGroup.getContext()).inflate(R.layout.list_shopping_product_entry, _ViewGroup, false);
-        return new ShoppingListProductViewHolder(view);
+        return new ShoppingListProductViewHolder(view, mActivity);
     }
 
     @Override
@@ -123,7 +117,7 @@ public class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingListAdapte
             _ProductViewHolder.mProductAmount.setPaintFlags(_ProductViewHolder.mProductAmount.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
             _ProductViewHolder.mProductName.setPaintFlags(_ProductViewHolder.mProductName.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
         } else{
-            // element is unstriked#
+            // element is unstriked
             _ProductViewHolder.mProductAmount.setPaintFlags(_ProductViewHolder.mProductAmount.getPaintFlags() & (~ Paint.STRIKE_THRU_TEXT_FLAG));
             _ProductViewHolder.mProductName.setPaintFlags(_ProductViewHolder.mProductName.getPaintFlags() & (~ Paint.STRIKE_THRU_TEXT_FLAG));
         }
@@ -140,24 +134,37 @@ public class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingListAdapte
     }
 
     /**
-     * Removes an item from the given position. Update of the view included.
-     * @param position position of the element that should be deleted.
+     * Removes the given entry from list and notfies the adapter that this object has been removed.
+     * @param _Entry the entry of the element that should be deleted.
      */
-    public void removeItem(int position){
-        mListOfEntries.remove(position);
-        notifyItemRemoved(position);
+    public void removeItem(ListEntry _Entry){
+
+        int position = mListOfEntries.indexOf(_Entry);
+        // check if element was removed, if yes so update the specific viewholder.
+        if(mListOfEntries.remove(_Entry)){
+            notifyItemRemoved(position);
+        }
     }
 
     /**
-     * Adds the given item to the list. Update of the view included.
-     * @param entry entry element that should be added.
+     * Adds the given entry to the list and notifies the adapter to update the view for this element.
+     * @param _Entry entry element that should be added.
      */
-    public void addItem(ListEntry entry){
-        mListOfEntries.add(entry);
+    public void addItem(ListEntry _Entry){
+        mListOfEntries.add(_Entry);
         notifyItemInserted(mListOfEntries.size()-1);
     }
 
-    public void changeItem(int position){
-        notifyItemChanged(position);
+    /**
+     * Call to render the given entry in the view.
+     * @param _Entry the entry where the display should be updated.
+     */
+    public void changeItem(ListEntry _Entry){
+        // replace entry with changed entry
+        mListOfEntries.set(mListOfEntries.indexOf(_Entry), _Entry);
+        notifyItemChanged(mListOfEntries.indexOf(_Entry));
     }
+
+
+
 }
