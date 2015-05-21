@@ -146,7 +146,7 @@ public class IListControllerTest extends AndroidTestCase {
 
         ListEntry changedFirstListEntry = mLML4Test.unstrikeItem(mListWork, mProductButter);
         assertNotNull(changedFirstListEntry);
-        assertEquals(true, changedFirstListEntry.mStruck);
+        assertFalse(changedFirstListEntry.mStruck);
 
         ListEntry changedSecondListEntry = mLML4Test.unstrikeItem(mListEntryButterForWork);
         assertNotNull(changedSecondListEntry);

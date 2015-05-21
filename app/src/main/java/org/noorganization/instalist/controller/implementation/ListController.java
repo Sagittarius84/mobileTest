@@ -1,17 +1,18 @@
 package org.noorganization.instalist.controller.implementation;
 
-import android.os.Bundle;
 import android.os.Message;
 
 import com.orm.SugarRecord;
 import com.orm.query.Condition;
 import com.orm.query.Select;
 
+import org.noorganization.instalist.GlobalApplication;
 import org.noorganization.instalist.controller.IListController;
 import org.noorganization.instalist.model.ListEntry;
 import org.noorganization.instalist.model.Product;
 import org.noorganization.instalist.model.ShoppingList;
-import org.noorganization.instalist.view.MessageHandler;
+import org.noorganization.instalist.view.ChangeHandler;
+import org.noorganization.instalist.view.IChangeHandler;
 
 import java.util.List;
 
@@ -56,16 +57,24 @@ public class ListController implements IListController {
                 return null;
             }
             item = new ListEntry(savedList, savedProduct, _amount);
+            item.save();
+
+            IChangeHandler target = GlobalApplication.getChangeHandler();
+            if (target != null) {
+                Message.obtain(target, IChangeHandler.ITEM_ADDED_TO_LIST, item).sendToTarget();
+            }
         } else {
             if (_amount < 0.001f) {
                 return item;
             }
             item.mAmount = _amount;
-        }
-        item.save();
+            item.save();
 
-        Message toFire = Message.obtain(ControllerFactory.mHandler, MessageHandler.LIST_ENTRY_ADDED, item);
-        toFire.sendToTarget();
+            IChangeHandler target = GlobalApplication.getChangeHandler();
+            if (target != null) {
+                Message.obtain(target, IChangeHandler.ITEM_UPDATED, item).sendToTarget();
+            }
+        }
 
         return item;
     }
@@ -85,6 +94,13 @@ public class ListController implements IListController {
             entry.mStruck = true;
         }
         SugarRecord.saveInTx(entries);
+
+        IChangeHandler target = GlobalApplication.getChangeHandler();
+        if (target != null) {
+            for (ListEntry entry : entries) {
+                Message.obtain(target, IChangeHandler.ITEM_UPDATED, entry).sendToTarget();
+            }
+        }
     }
 
     @Override
@@ -102,6 +118,13 @@ public class ListController implements IListController {
             entry.mStruck = false;
         }
         SugarRecord.saveInTx(entries);
+
+        IChangeHandler target = GlobalApplication.getChangeHandler();
+        if (target != null) {
+            for (ListEntry entry : entries) {
+                Message.obtain(target, IChangeHandler.ITEM_UPDATED, entry).sendToTarget();
+            }
+        }
     }
 
     @Override
@@ -134,8 +157,13 @@ public class ListController implements IListController {
         }
 
         ListEntry rtn = (_reload ? SugarRecord.findById(ListEntry.class,_toChange.getId()) : _toChange);
-        rtn.mStruck = true;
+        rtn.mStruck = false;
         rtn.save();
+
+        IChangeHandler target = GlobalApplication.getChangeHandler();
+        if (target != null) {
+            Message.obtain(target, IChangeHandler.ITEM_UPDATED, rtn).sendToTarget();
+        }
 
         return rtn;
     }
@@ -148,6 +176,11 @@ public class ListController implements IListController {
         ListEntry rtn = (_reload ? SugarRecord.findById(ListEntry.class,_item.getId()) : _item);
         rtn.mStruck = true;
         rtn.save();
+
+        IChangeHandler target = GlobalApplication.getChangeHandler();
+        if (target != null) {
+            Message.obtain(target, IChangeHandler.ITEM_UPDATED, rtn).sendToTarget();
+        }
 
         return rtn;
     }
@@ -185,6 +218,11 @@ public class ListController implements IListController {
         Long productId = _item.mProduct.getId();
         _item.delete();
 
+        IChangeHandler target = GlobalApplication.getChangeHandler();
+        if (target != null) {
+            Message.obtain(target, IChangeHandler.ITEM_DELETED, _item).sendToTarget();
+        }
+
          long deletedEntryCount = Select.from(ListEntry.class).where(
                 Condition.prop("m_list").eq(listId),
                 Condition.prop("m_product").eq(productId)).count();
@@ -200,6 +238,11 @@ public class ListController implements IListController {
 
         ShoppingList rtn = new ShoppingList(_name);
         rtn.save();
+
+        IChangeHandler target = GlobalApplication.getChangeHandler();
+        if (target != null) {
+            Message.obtain(target, IChangeHandler.LISTS_CHANGED).sendToTarget();
+        }
 
         return rtn;
     }
@@ -220,6 +263,11 @@ public class ListController implements IListController {
         Long oldId = _list.getId();
         _list.delete();
 
+        IChangeHandler target = GlobalApplication.getChangeHandler();
+        if (target != null) {
+            Message.obtain(target, IChangeHandler.LISTS_CHANGED).sendToTarget();
+        }
+
         return ShoppingList.findById(ShoppingList.class, oldId) == null;
     }
 
@@ -233,6 +281,11 @@ public class ListController implements IListController {
         ShoppingList rtn = ShoppingList.findById(ShoppingList.class, _list.getId());
         rtn.mName = _newName;
         rtn.save();
+
+        IChangeHandler target = GlobalApplication.getChangeHandler();
+        if (target != null) {
+            Message.obtain(target, IChangeHandler.LISTS_CHANGED).sendToTarget();
+        }
 
         return rtn;
     }
