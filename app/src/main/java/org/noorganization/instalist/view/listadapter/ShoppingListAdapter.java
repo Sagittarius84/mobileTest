@@ -146,11 +146,24 @@ public class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingListAdapte
      */
     public void removeItem(ListEntry _Entry){
 
+        for(ListEntry listEntry : mListOfEntries){
+
+            // somehow only this works for finding the equal ids
+            long id1 = _Entry.getId();
+            long id2 = listEntry.getId();
+            if( id1 == id2){
+
+                int index = mListOfEntries.indexOf(listEntry);
+                mListOfEntries.remove(index);
+                notifyItemRemoved(index);
+            }
+        }
+        /*
         int position = mListOfEntries.indexOf(_Entry);
         // check if element was removed, if yes so update the specific viewholder.
         if(mListOfEntries.remove(_Entry)){
             notifyItemRemoved(position);
-        }
+        }*/
     }
 
     /**
@@ -168,8 +181,20 @@ public class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingListAdapte
      */
     public void changeItem(ListEntry _Entry){
         // replace entry with changed entry
-        mListOfEntries.set(mListOfEntries.indexOf(_Entry), _Entry);
-        notifyItemChanged(mListOfEntries.indexOf(_Entry));
+
+        for(ListEntry listEntry : mListOfEntries){
+
+            // somehow only this works for finding the equal ids
+            long id1 = _Entry.getId();
+            long id2 = listEntry.getId();
+            if( id1 == id2){
+
+                int index = mListOfEntries.indexOf(listEntry);
+                listEntry = _Entry;
+                mListOfEntries.set(index, listEntry);
+                notifyItemChanged(index);
+            }
+        }
     }
 
 
