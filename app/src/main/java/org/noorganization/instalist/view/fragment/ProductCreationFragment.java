@@ -25,7 +25,7 @@ import java.util.List;
  * Fragment where the creation and the editing of an product is handled.
  * Created by TS on 28.04.2015.
  */
-public class ProductCreationFragment extends Fragment {
+public class ProductCreationFragment extends BaseCustomFragment {
 
     public static final String ARGS_LIST_NAME = "listName";
     public static final String ARGS_PRODUCT_ID = "productId";
@@ -220,10 +220,7 @@ public class ProductCreationFragment extends Fragment {
                     newFragment = ProductListDialogFragment.newInstance(mCurrentShoppingList.mName);
                 }
 
-                // go to before choosed fragment
-                FragmentTransaction transaction = getFragmentManager().beginTransaction();
-                transaction.replace(R.id.container, newFragment);
-                transaction.commit();
+                changeFragment(newFragment);
 
             }else {
                 if(mProduct == null){
@@ -342,6 +339,7 @@ public class ProductCreationFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        super.onCreateView(inflater, container, savedInstanceState);
         View view = inflater.inflate(R.layout.fragment_product_details, container, false);
         if(mProduct == null) {
             mInputParams = new InputParamsHolder(view, getActivity());

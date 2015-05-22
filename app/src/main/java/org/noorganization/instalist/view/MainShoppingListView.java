@@ -1,43 +1,22 @@
 package org.noorganization.instalist.view;
 
-import android.app.Activity;
 import android.app.Fragment;
-import android.app.FragmentManager;
 import android.app.FragmentTransaction;
-import android.content.Context;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.widget.DefaultItemAnimator;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.ListView;
-
-import com.software.shell.fab.ActionButton;
 
 import org.noorganization.instalist.GlobalApplication;
 import org.noorganization.instalist.R;
-import org.noorganization.instalist.controller.IListController;
-import org.noorganization.instalist.controller.implementation.ControllerFactory;
-import org.noorganization.instalist.controller.implementation.ListController;
-import org.noorganization.instalist.model.ShoppingList;
-import org.noorganization.instalist.view.datahandler.SelectedProductDataHandler;
-import org.noorganization.instalist.view.decoration.DividerItemListDecoration;
-import org.noorganization.instalist.view.fragment.ProductListDialogFragment;
 import org.noorganization.instalist.view.fragment.ShoppingListOverviewFragment;
-import org.noorganization.instalist.view.listadapter.ShoppingListAdapter;
 import org.noorganization.instalist.view.listadapter.ShoppingListOverviewAdapter;
-
-import java.util.List;
 
 /**
  * MainShoppingListView handles the display of an selected shoppinglist, so that the corresponding
@@ -74,6 +53,7 @@ public class MainShoppingListView extends ActionBarActivity {
      * Name of the current list
      */
     private String mCurrentListName;
+
 
 
     @Override
@@ -183,13 +163,11 @@ public class MainShoppingListView extends ActionBarActivity {
 
     @Override
     public void onBackPressed() {
-
         if (getFragmentManager().getBackStackEntryCount() > 1) {
             getFragmentManager().popBackStack();
         } else {
             super.onBackPressed();
         }
-
     }
 
     // --------------------------------------------------------------------------------
@@ -243,16 +221,17 @@ public class MainShoppingListView extends ActionBarActivity {
     public DrawerLayout getDrawerLayout(){
         return mDrawerLayout;
     }
+
     /**
      * Changes from the current fragment to the given fragment.
      * Adds the current fragment to the backstack.
      *
-     * @param fragment the fragment that should be created.
+     * @param _Fragment the fragment that should be created.
      */
-    public void changeFragment(Fragment fragment) {
+    public void changeFragment(Fragment _Fragment) {
         // create transaction to new fragment
         FragmentTransaction transaction = getFragmentManager().beginTransaction();
-        transaction.replace(R.id.container, fragment);
+        transaction.replace(R.id.container, _Fragment);
         transaction.addToBackStack(null);
         transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
         transaction.commit();
@@ -273,4 +252,5 @@ public class MainShoppingListView extends ActionBarActivity {
     public void addProductsToList() {
 
     }
+
 }

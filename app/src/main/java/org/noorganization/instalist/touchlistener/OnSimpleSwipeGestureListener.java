@@ -28,7 +28,7 @@ public class OnSimpleSwipeGestureListener implements View.OnTouchListener, IOnIt
     public void onSwipeRight(View childView) {}
     public void onSwipeLeft(View childView) {}
     public void onSingleTap(View childView){}
-
+    public void onLongTap(View childView) {}
 
 
 
@@ -54,6 +54,11 @@ public class OnSimpleSwipeGestureListener implements View.OnTouchListener, IOnIt
         public boolean onSingleTapUp(MotionEvent e) {
             mGestureListener.onSingleTap(mRecyclerView);
             return true;
+        }
+
+        @Override
+        public void onLongPress(MotionEvent e) {
+            mGestureListener.onLongTap(mRecyclerView);
         }
 
         @Override

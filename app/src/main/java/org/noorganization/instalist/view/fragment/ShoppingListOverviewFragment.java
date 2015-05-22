@@ -48,10 +48,6 @@ public class ShoppingListOverviewFragment extends BaseCustomFragment {
 
     private IListController mListController;
 
-    private Toolbar mToolbar;
-    private DrawerLayout mDrawerLayout;
-    private Activity mainShoppingListViewActivity;
-
     // --------------------------------------------------------------------------------------------
 
 
@@ -174,11 +170,7 @@ public class ShoppingListOverviewFragment extends BaseCustomFragment {
                 SelectedProductDataHandler.getInstance().clearListEntries();
 
                 Fragment fragment = ProductListDialogFragment.newInstance(mCurrentListName);
-                getFragmentManager()
-                        .beginTransaction()
-                        .replace(R.id.container, fragment)
-                        .addToBackStack(null)
-                        .commit();
+                changeFragment(fragment);
             }
         });
         return view;

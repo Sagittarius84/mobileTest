@@ -79,6 +79,13 @@ public class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingListAdapte
                     Toast.makeText( mContext, "Item selected: " + entry.mProduct.mName, Toast.LENGTH_SHORT).show();
                 }
 
+                @Override
+                public void onLongTap(View childView) {
+                    super.onLongTap(childView);
+                    ListEntry entry = mListOfEntries.get(mViewHolderRef.getAdapterPosition());
+                    Toast.makeText(mContext, "Item deleted: " + entry.mProduct.mName, Toast.LENGTH_SHORT).show();
+                    ControllerFactory.getListController().removeItem(entry);
+                }
             });
         }
 

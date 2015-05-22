@@ -14,6 +14,7 @@ import org.noorganization.instalist.view.MainShoppingListView;
 
 /**
  * Designed to hold the toolbar, drawerlayout and a activity that must be of type MainShoppingListView.
+ * Supports the onBackPressedEvent
  * Created by tinos_000 on 21.05.2015.
  */
 public class BaseCustomFragment extends Fragment {
@@ -21,7 +22,6 @@ public class BaseCustomFragment extends Fragment {
     protected Toolbar mToolbar;
     protected DrawerLayout mDrawerLayout;
     protected Activity mActivity;
-
 
     @Nullable
     @Override
@@ -56,5 +56,17 @@ public class BaseCustomFragment extends Fragment {
      */
     protected void setToolbarTitle(String _Title){
         mToolbar.setTitle(_Title);
+    }
+
+    /**
+     * Changes the current Fragment to the give fragment.
+     * @param fragment
+     */
+    protected void changeFragment(Fragment fragment){
+        ((MainShoppingListView) mActivity).changeFragment(fragment);
+    }
+
+    protected void onBackPressed(){
+        ((MainShoppingListView) mActivity).onBackPressed();
     }
 }

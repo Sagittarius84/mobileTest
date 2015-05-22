@@ -28,4 +28,10 @@ public interface IOnItemTouchEvents {
      */
     public void onSingleTap(View view);
 
+    /**
+     * Event fired when long tap on an element.
+     * @param view the affected view.
+     */
+    public void onLongTap(View view);
+
 }

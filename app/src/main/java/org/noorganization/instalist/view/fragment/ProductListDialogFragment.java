@@ -74,7 +74,7 @@ public class ProductListDialogFragment extends BaseCustomFragment{
         mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mActivity.getFragmentManager().popBackStack();
+                onBackPressed();
             }
         });
     }
@@ -86,7 +86,15 @@ public class ProductListDialogFragment extends BaseCustomFragment{
         ListAdapter adapter;
         View view = inflater.inflate(R.layout.fragment_product_list_dialog, container, false);
 
-        adapter = new SelectableProductListAdapter(getActivity(), Product.listAll(Product.class), mCurrentShoppingList);
+        List<Product> productList = Product.listAll(Product.class);
+
+        List<ListEntry> listEntries = mCurrentShoppingList.getEntries();
+        // remove all inserted list entries
+        for(ListEntry listEntry : listEntries){
+            productList.remove(listEntry.mProduct);
+        }
+
+        adapter = new SelectableProductListAdapter(getActivity(), productList, mCurrentShoppingList);
 
         mAddNewProductButton = (Button) view.findViewById(R.id.fragment_product_list_dialog_add_new_product);
         mCancelButton = (Button) view.findViewById(R.id.fragment_product_list_dialog_cancel);
@@ -125,7 +133,7 @@ public class ProductListDialogFragment extends BaseCustomFragment{
                 }
             }
             // go back to old fragment
-            getFragmentManager().popBackStack();
+            changeFragment(ShoppingListOverviewFragment.newInstance(mCurrentListName));
         }
     };
 
@@ -136,7 +144,7 @@ public class ProductListDialogFragment extends BaseCustomFragment{
 
         @Override
         public void onClick(View v) {
-            getFragmentManager().popBackStack();
+            onBackPressed();
         }
     };
 
@@ -148,10 +156,7 @@ public class ProductListDialogFragment extends BaseCustomFragment{
         @Override
         public void onClick(View v) {
             ProductCreationFragment creationFragment = ProductCreationFragment.newInstance(mCurrentShoppingList.mName);
-            getFragmentManager()
-                    .beginTransaction()
-                    .replace(R.id.container, creationFragment)
-                    .commit();
+            changeFragment(creationFragment);
         }
     };
 
