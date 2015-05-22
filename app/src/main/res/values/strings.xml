@@ -27,4 +27,8 @@
     <string name="product_list_dialog_cancel">Cancel</string>
     <string name="product_list_dialog_title">Add product to list</string>
     <string name="product_list_dialog_add_new_product">Add new product!</string>
+    <string name="recipe_details_add">Add</string>
+    <string name="recipe_details_cancel">Cancel</string>
+    <string name="product_creation_fragment">Illegal amount type. Choose values greater than 0.</string>
+    <string name="shopping_list_overview_fragment_no_list_available">No list created.</string>
 </resources>

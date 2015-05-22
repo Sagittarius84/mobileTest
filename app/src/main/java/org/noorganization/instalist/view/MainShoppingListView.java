@@ -2,39 +2,21 @@ package org.noorganization.instalist.view;
 
 import android.app.Fragment;
 import android.app.FragmentTransaction;
-import android.content.Context;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.widget.DefaultItemAnimator;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.ListView;
-
-import com.software.shell.fab.ActionButton;
 
 import org.noorganization.instalist.GlobalApplication;
 import org.noorganization.instalist.R;
-import org.noorganization.instalist.controller.IListController;
-import org.noorganization.instalist.controller.implementation.ControllerFactory;
-import org.noorganization.instalist.controller.implementation.ListController;
-import org.noorganization.instalist.model.ShoppingList;
-import org.noorganization.instalist.view.datahandler.SelectedProductDataHandler;
-import org.noorganization.instalist.view.decoration.DividerItemListDecoration;
-import org.noorganization.instalist.view.fragment.ProductListDialogFragment;
-import org.noorganization.instalist.view.listadapter.ShoppingListAdapter;
+import org.noorganization.instalist.view.fragment.ShoppingListOverviewFragment;
 import org.noorganization.instalist.view.listadapter.ShoppingListOverviewAdapter;
-
-import java.util.List;
 
 /**
  * MainShoppingListView handles the display of an selected shoppinglist, so that the corresponding
@@ -71,6 +53,7 @@ public class MainShoppingListView extends ActionBarActivity {
      * Name of the current list
      */
     private String mCurrentListName;
+
 
 
     @Override
@@ -180,13 +163,11 @@ public class MainShoppingListView extends ActionBarActivity {
 
     @Override
     public void onBackPressed() {
-
         if (getFragmentManager().getBackStackEntryCount() > 1) {
             getFragmentManager().popBackStack();
         } else {
             super.onBackPressed();
         }
-
     }
 
     // --------------------------------------------------------------------------------
@@ -226,15 +207,31 @@ public class MainShoppingListView extends ActionBarActivity {
     }
 
     /**
+     * Get the assigned toolbar reference.
+     * @return the reference of the toolbar.
+     */
+    public Toolbar getToolbar(){
+        return mToolbar;
+    }
+
+    /**
+     * Get the assigned DrawerLayout, use it for locking it on fragments.
+     * @return the reference to the DrawerLayout.
+     */
+    public DrawerLayout getDrawerLayout(){
+        return mDrawerLayout;
+    }
+
+    /**
      * Changes from the current fragment to the given fragment.
      * Adds the current fragment to the backstack.
      *
-     * @param fragment the fragment that should be created.
+     * @param _Fragment the fragment that should be created.
      */
-    public void changeFragment(Fragment fragment) {
+    public void changeFragment(Fragment _Fragment) {
         // create transaction to new fragment
         FragmentTransaction transaction = getFragmentManager().beginTransaction();
-        transaction.replace(R.id.container, fragment);
+        transaction.replace(R.id.container, _Fragment);
         transaction.addToBackStack(null);
         transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
         transaction.commit();
@@ -255,140 +252,5 @@ public class MainShoppingListView extends ActionBarActivity {
     public void addProductsToList() {
 
     }
-
-    /**
-     * A ShoppingListOverviewFragment containing a list view.
-     */
-    public static class ShoppingListOverviewFragment extends Fragment {
-
-        private String mCurrentListName;
-        private ShoppingList mCurrentShoppingList;
-
-        private ActionBar mActionBar;
-        private Context mContext;
-
-        private ActionButton mAddButton;
-
-        private LinearLayoutManager mLayoutManager;
-
-        private ShoppingListAdapter mShoppingListAdapter;
-
-        private IListController mListController;
-
-        // --------------------------------------------------------------------------------------------
-
-
-        public ShoppingListOverviewFragment() {
-        }
-
-
-        // --------------------------------------------------------------------------------------------
-
-
-        @Override
-        public void onCreate(Bundle savedInstanceState) {
-            super.onCreate(savedInstanceState);
-
-            // get bundle args to get the listname that should be shown
-            Bundle bundle = this.getArguments();
-            if (bundle == null) {
-                return;
-            }
-            mCurrentListName    = bundle.getString(MainShoppingListView.KEY_LISTNAME);
-            mContext            = this.getActivity();
-            mListController     = ControllerFactory.getListController();
-        }
-
-
-        // --------------------------------------------------------------------------------------------
-
-
-        @Override
-        public void onActivityCreated(Bundle savedInstanceState) {
-            super.onActivityCreated(savedInstanceState);
-            // get in here the actionbar
-            mActionBar = ((ActionBarActivity) getActivity()).getSupportActionBar();
-            // not needed to check for null, because we have a actionbar always assigned
-            mActionBar.setTitle(mCurrentListName);
-            // set the title in "main" activity so that the current list name is shown on the actionbar
-            ((MainShoppingListView) getActivity()).setToolbarTitle(mCurrentListName);
-        }
-
-
-        // --------------------------------------------------------------------------------------------
-
-
-        @Override
-        public void onPause() {
-            super.onPause();
-        }
-
-
-        // --------------------------------------------------------------------------------------------
-
-
-        @Override
-        public void onResume() {
-            super.onResume();
-
-            // decl
-            final RecyclerView shoppingListView;
-            // init
-            shoppingListView = (RecyclerView) getActivity().findViewById(R.id.fragment_shopping_list);
-            // assign other listname if none is assigned
-            if (mCurrentListName == null) {
-
-                List<ShoppingList> mShoppingLists = ShoppingList.listAll(ShoppingList.class);
-                if (mShoppingLists.size() > 0) {
-                    mCurrentShoppingList = mShoppingLists.get(0);
-                    mCurrentListName = mCurrentShoppingList.mName;
-                } else {
-                    // do something to show that there are no shoppinglists!
-                    return;
-                }
-            }
-
-            mShoppingListAdapter = new ShoppingListAdapter(getActivity(), GlobalApplication.getInstance().getListEntries(mCurrentListName));
-            // use a linear layout manager
-            mLayoutManager = new LinearLayoutManager(this.getActivity());
-            mLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
-
-            shoppingListView.setLayoutManager(mLayoutManager);
-            shoppingListView.addItemDecoration(new DividerItemListDecoration(getResources().getDrawable(R.drawable.abc_list_divider_mtrl_alpha), false, false));
-            shoppingListView.setAdapter(mShoppingListAdapter);
-            shoppingListView.setItemAnimator(new DefaultItemAnimator());
-
-
-        }
-
-
-        // --------------------------------------------------------------------------------------------
-
-
-        @Override
-        public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-            View view = inflater.inflate(R.layout.fragment_main_shopping_list_view, container, false);
-            mAddButton = (ActionButton) view.findViewById(R.id.add_item_main_list_view);
-
-            mAddButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    // reset selected product items ... (lazy resetting!)
-                    SelectedProductDataHandler.getInstance().clearListEntries();
-
-                    Fragment fragment = ProductListDialogFragment.newInstance(mCurrentListName);
-                    getFragmentManager()
-                            .beginTransaction()
-                            .replace(R.id.container, fragment)
-                            .addToBackStack(null)
-                            .commit();
-                }
-            });
-            return view;
-        }
-    }
-
-    // --------------------------------------------------------------------------------------------
-
 
 }
