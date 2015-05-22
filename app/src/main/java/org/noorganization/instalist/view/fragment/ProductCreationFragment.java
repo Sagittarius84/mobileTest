@@ -17,8 +17,6 @@ import org.noorganization.instalist.model.Product;
 import org.noorganization.instalist.model.ShoppingList;
 import org.noorganization.instalist.model.Tag;
 import org.noorganization.instalist.model.TaggedProduct;
-import org.noorganization.instalist.view.MainShoppingListView;
-import org.noorganization.instalist.view.listadapter.SelectableProductListAdapter;
 import org.noorganization.instalist.view.utils.ViewUtils;
 
 import java.util.List;
@@ -39,6 +37,11 @@ public class ProductCreationFragment extends Fragment {
      * used when product values should be rendered into view.
      */
     private Product             mProduct;
+
+    private Button mAddButton;
+    private Button mDecAmountButton;
+    private Button mIncAmountButton;
+
 
     /**
      * Holds the input parameter views. Also delivers methods to retrieve the content of these
@@ -210,7 +213,7 @@ public class ProductCreationFragment extends Fragment {
                 Fragment newFragment;
                 if(mProduct == null){
                     Toast.makeText(getActivity(),"Addition of product succeeded!", Toast.LENGTH_LONG).show();
-                    newFragment = new MainShoppingListView.ShoppingListOverviewFragment();
+                    newFragment = ShoppingListOverviewFragment.newInstance(mCurrentShoppingList.mName);
 
                 }else{
                     Toast.makeText(getActivity(),"Update of product succeeded!", Toast.LENGTH_LONG).show();
@@ -248,20 +251,14 @@ public class ProductCreationFragment extends Fragment {
             if(product == null) {
                 return false;
             }
-                String[] tagArray = mInputParams.getTags();
-                for (int Index = 0; Index < tagArray.length; ++Index) {
-                    Tag tag = ControllerFactory.getTagController().createTag(tagArray[Index]);
-                    if(tag == null){
-                        tag = Tag.find(Tag.class,"m_name = ?", tagArray[Index]).get(0);
-                    }
-                    if(!ControllerFactory.getProductController().addTagToProduct(product, tag)){
-                        return false;
-                    }
-                }
+
+            if(saveTags(product)) {
                 // add entry to list overview
                 ControllerFactory.getListController().addOrChangeItem(mCurrentShoppingList, product, product.mDefaultAmount);
+                return true;
+            }
 
-            return true;
+            return false;
         }
 
         /**
@@ -277,17 +274,25 @@ public class ProductCreationFragment extends Fragment {
                 return false;
             }
 
+            return saveTags(product);
+        }
+
+        /**
+         * Saves all the given tags.
+         * @param _Product the product where they should be associated.
+         * @return true if all goes well, false if something is wrong.
+         */
+        private boolean saveTags(Product _Product){
             String[] tagArray = mInputParams.getTags();
             for (int Index = 0; Index < tagArray.length; ++Index) {
                 Tag tag = ControllerFactory.getTagController().createTag(tagArray[Index]);
                 if(tag == null){
                     tag = Tag.find(Tag.class,"m_name = ?", tagArray[Index]).get(0);
                 }
-                if(!ControllerFactory.getProductController().addTagToProduct(product, tag)){
+                if(!ControllerFactory.getProductController().addTagToProduct(_Product, tag)){
                     return false;
                 }
             }
-
             return true;
         }
     };
@@ -343,25 +348,31 @@ public class ProductCreationFragment extends Fragment {
         } else{
             mInputParams = new InputParamsHolder(view, getActivity(), mProduct);
         }
-        Button addButton = (Button) view.findViewById(R.id.product_details_action_button_new_or_update);
-        Button decAmountButton = (Button) view.findViewById(R.id.product_details_dec_amount);
-        Button incAmountButton = (Button) view.findViewById(R.id.product_details_inc_amount);
-        incAmountButton.setOnClickListener(new View.OnClickListener() {
+        mAddButton = (Button) view.findViewById(R.id.product_details_action_button_new_or_update);
+        mDecAmountButton = (Button) view.findViewById(R.id.product_details_dec_amount);
+        mIncAmountButton = (Button) view.findViewById(R.id.product_details_inc_amount);
+        mIncAmountButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 mInputParams.incProductAmount();
             }
         });
 
-        decAmountButton.setOnClickListener(new View.OnClickListener() {
+        mDecAmountButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 mInputParams.decProductAmount();
             }
         });
-        addButton.setOnClickListener(mOnCreateProductClickListener);
+        mAddButton.setOnClickListener(mOnCreateProductClickListener);
         return view;
     }
 
-
+    @Override
+    public void onPause() {
+        super.onPause();
+        mDecAmountButton.setOnClickListener(null);
+        mIncAmountButton.setOnClickListener(null);
+        mIncAmountButton.setOnClickListener(null);
+    }
 }
