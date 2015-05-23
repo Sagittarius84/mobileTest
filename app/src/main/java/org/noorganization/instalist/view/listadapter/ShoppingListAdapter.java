@@ -166,7 +166,7 @@ public class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingListAdapte
         }*/
     }
 
-    /**
+    /**--
      * Adds the given entry to the list and notifies the adapter to update the view for this element.
      * @param _Entry entry element that should be added.
      */

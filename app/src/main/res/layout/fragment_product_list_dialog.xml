@@ -53,4 +53,15 @@
         android:layout_alignParentStart="true"
         android:layout_alignRight="@+id/fragment_product_list_dialog_add_products_to_list"
         android:layout_alignEnd="@+id/fragment_product_list_dialog_add_products_to_list" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="TestAddRecipe"
+        android:id="@+id/testRecipeButton"
+        android:layout_above="@+id/fragment_product_list_dialog_add_new_product"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true" />
 </RelativeLayout>

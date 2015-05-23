@@ -109,7 +109,13 @@ public class ProductListDialogFragment extends BaseCustomFragment{
         mAddNewProductButton.setOnClickListener(onAddNewProductClickListener);
         mCancelButton.setOnClickListener(onCancelClickListener);
         mAddProductsButton.setOnClickListener(onAddProductsClickListener);
-
+        Button testRecipeButton = (Button) view.findViewById(R.id.testRecipeButton);
+        testRecipeButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                changeFragment(RecipeCreationFragment.newInstance(mCurrentShoppingList.mName));
+            }
+        });
         return view;
     }
 
