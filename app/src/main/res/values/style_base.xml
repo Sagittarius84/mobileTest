@@ -35,14 +35,14 @@
     </style>
     <style name="InstalistTheme1.base_list_entry" parent="InstalistTheme1.base_text_style">
         <item name="android:layout_width">match_parent</item>
-        <item name="android:layout_height">@dimen/base_list_entry_width</item>
-        <item name="android:paddingLeft">@dimen/base_list_entry_padding_left</item>
+        <item name="android:layout_height">@dimen/base_list_entry_height</item>
+      <!--  <item name="android:paddingLeft">@dimen/base_list_entry_padding_left</item>
         <item name="android:paddingRight">@dimen/base_list_entry_padding_right</item>
-        <item name="android:paddingTop">@dimen/base_list_entry_padding_top</item>
+        <item name="android:paddingTop">@dimen/base_list_entry_padding_top</item>-->
     </style>
 
-    <dimen name="base_list_entry_width">48dp</dimen>
     <dimen name="base_list_entry_padding_left">16dp</dimen>
     <dimen name="base_list_entry_padding_right">16dp</dimen>
     <dimen name="base_list_entry_padding_top">16dp</dimen>
+    <dimen name="base_list_entry_height">48dp</dimen>
 </resources>

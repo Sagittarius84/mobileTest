@@ -18,6 +18,7 @@ import org.noorganization.instalist.model.Ingredient;
 import org.noorganization.instalist.model.Product;
 import org.noorganization.instalist.model.Recipe;
 import org.noorganization.instalist.model.ShoppingList;
+import org.noorganization.instalist.view.datahandler.IngredientDataHandler;
 import org.noorganization.instalist.view.listadapter.IngredientListAdapter;
 import org.noorganization.instalist.view.utils.ViewUtils;
 
@@ -42,6 +43,7 @@ public class RecipeCreationFragment extends BaseCustomFragment {
     private Button mCancelButton;
 
     private IngredientListAdapter mIngredientListAdapter;
+    private static RecipeCreationFragment mInstance;
 
     private View.OnClickListener mOnAddRecipeClickListener = new View.OnClickListener() {
 
@@ -159,6 +161,7 @@ public class RecipeCreationFragment extends BaseCustomFragment {
         args.putString(ARGS_LIST_NAME, _ListName);
         args.putLong(ARGS_RECIPE_ID, -1L);
         fragment.setArguments(args);
+        mInstance = fragment;
         return fragment;
     }
 
@@ -175,9 +178,13 @@ public class RecipeCreationFragment extends BaseCustomFragment {
         args.putString(ARGS_LIST_NAME, _ListName);
         args.putLong(ARGS_RECIPE_ID, _RecipeId);
         fragment.setArguments(args);
+        mInstance = fragment;
         return fragment;
     }
 
+    public static RecipeCreationFragment getInstance(){
+        return mInstance;
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -201,11 +208,14 @@ public class RecipeCreationFragment extends BaseCustomFragment {
         mAddRecipeButton     = (Button) view.findViewById(R.id.fragment_recipe_details_add_recipe);
         mCancelButton        = (Button) view.findViewById(R.id.fragment_recipe_details_cancel_recipe);
 
+
         mAddIngredientButton.setOnClickListener(new View.OnClickListener(){
 
             @Override
             public void onClick(View v) {
-                mViewAccessor.addIngredient();
+               // mViewAccessor.addIngredient();
+                mViewAccessor.saveIngredients();
+                changeFragment(IngredientCreationFragment.newInstance());
             }
         });
 
@@ -237,7 +247,7 @@ public class RecipeCreationFragment extends BaseCustomFragment {
 
         private IngredientListAdapter mIngredientListAdapter;
         private Recipe      mRecipe;
-
+        private IngredientDataHandler mIngredientDataHandler;
         /**
          * Initializes all views and sets the view reference.
          * @param _View the view that is currently used.
@@ -247,8 +257,17 @@ public class RecipeCreationFragment extends BaseCustomFragment {
             this.mView = _View;
             this.mContext = _Context;
             assignIds();
-            mIngredientListAdapter = new IngredientListAdapter((Activity) _Context, new ArrayList<Ingredient>());
+
+            mIngredientDataHandler = IngredientDataHandler.getInstance();
+            List<Ingredient> ingredientList = mIngredientDataHandler.getIngredients();
+            if(ingredientList.size() > 0){
+                mIngredientListAdapter = new IngredientListAdapter((Activity) _Context, ingredientList);
+            }
+            else{
+                mIngredientListAdapter = new IngredientListAdapter((Activity) _Context, new ArrayList<Ingredient>());
+            }
             this.mRecipe = null;
+            mIngredientListView.setAdapter(mIngredientListAdapter);
         }
 
         /**
@@ -263,11 +282,20 @@ public class RecipeCreationFragment extends BaseCustomFragment {
             this.mContext = _Context;
             assignIds();
             this.mRecipe = _Recipe;
+            mIngredientDataHandler = IngredientDataHandler.getInstance();
 
             mRecipeNameText.setText(_Recipe.mName);
             // mRecipeTagText.setText();
-            mIngredientListAdapter = new IngredientListAdapter((Activity) _Context, _Recipe.getIngredients());
+
+            mIngredientDataHandler = IngredientDataHandler.getInstance();
+            if(mIngredientDataHandler.getIngredients() != null){
+                mIngredientListAdapter = new IngredientListAdapter((Activity) _Context, mIngredientDataHandler.getIngredients());
+            }
+            else{
+                mIngredientListAdapter = new IngredientListAdapter((Activity) _Context, _Recipe.getIngredients());
+            }
             mIngredientListView.setAdapter(mIngredientListAdapter);
+
         }
 
         public void addIngredient(){
@@ -327,6 +355,11 @@ public class RecipeCreationFragment extends BaseCustomFragment {
          */
         public boolean isValid() {
             return true;
+        }
+
+        public void saveIngredients(){
+            List<Ingredient> ingredients = getRecipeIngredients();
+            mIngredientDataHandler.setIngredients(ingredients);
         }
 
     }

@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/fragment_ingredient_creation_root_layout">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/fragment_ingredient_creation_ingredient_amount"
+        android:id="@+id/fragment_ingredient_creation_text_view_amount" />
+
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/fragment_ingredient_creation_edittext_amount"
+        android:layout_below="@+id/fragment_ingredient_creation_text_view_amount"
+        style="@style/InstalistTheme1.base_edit_text_numeric_style"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/fragment_ingredient_creation_ingredient_product"
+        android:id="@+id/fragment_ingredient_creation_text_view_ingredient"
+        android:layout_below="@+id/fragment_ingredient_creation_edittext_amount"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+
+    <Spinner
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/fragment_ingredient_creation_spinner_ingredient_product"
+        android:layout_below="@+id/fragment_ingredient_creation_text_view_ingredient"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/product_details_action_add"
+        android:id="@+id/fragment_ingredient_creation_button_add_ingredient"
+        android:layout_below="@+id/fragment_ingredient_creation_spinner_ingredient_product"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/recipe_details_cancel"
+        android:id="@+id/fragment_ingredient_creation_button_cancel"
+        android:layout_alignTop="@+id/fragment_ingredient_creation_button_add_ingredient"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+
+</RelativeLayout>
