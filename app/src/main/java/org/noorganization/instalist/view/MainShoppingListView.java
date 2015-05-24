@@ -169,17 +169,13 @@ public class MainShoppingListView extends ActionBarActivity {
         if (getFragmentManager().getBackStackEntryCount() > 1) {
             getFragmentManager().popBackStack();
         } else {
+            // create a leave message box to prevent accidentially exit the app.
             new AlertDialog.Builder(this)
                     .setTitle("Exit App?")
                     .setMessage("Are you sure you want to leave this georgeous app?")
                     .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int which) {
                             exitApp();
-                        }
-                    })
-                    .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int which) {
-                            // do nothing
                         }
                     })
                     .setIcon(android.R.drawable.ic_dialog_alert)

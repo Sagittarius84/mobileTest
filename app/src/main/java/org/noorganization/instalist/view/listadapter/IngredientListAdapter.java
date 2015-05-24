@@ -1,21 +1,16 @@
 package org.noorganization.instalist.view.listadapter;
 
 import android.app.Activity;
-import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.CheckBox;
 import android.widget.TextView;
 
 import org.noorganization.instalist.R;
 import org.noorganization.instalist.model.Ingredient;
-import org.noorganization.instalist.model.ListEntry;
-import org.noorganization.instalist.model.Product;
-import org.noorganization.instalist.model.Recipe;
-import org.noorganization.instalist.model.ShoppingList;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -24,15 +19,16 @@ import java.util.List;
 public class IngredientListAdapter extends ArrayAdapter<Ingredient> {
 
     private List<Ingredient> mIngredientList;
+    private List<Ingredient> mRemovedIngredients;
+
     private Activity mContext;
 
     public IngredientListAdapter(Activity _Context, List<Ingredient> _IngredientList){
-        super(_Context, R.layout.list_selectable_product  , _IngredientList);
+        super(_Context, R.layout.list_recipe_ingredient_entry  , _IngredientList);
         mIngredientList = _IngredientList;
+        mRemovedIngredients = new ArrayList<>();
         mContext = _Context;
     }
-
-
 
     @Override
     public View getView(int _Position, View _ConvertView, ViewGroup _Parent) {
@@ -41,22 +37,45 @@ public class IngredientListAdapter extends ArrayAdapter<Ingredient> {
 
         if(_ConvertView == null){
             LayoutInflater shoppingListNamesInflater = mContext.getLayoutInflater();
-            view = shoppingListNamesInflater.inflate(R.layout.list_selectable_product, null);
+            view = shoppingListNamesInflater.inflate(R.layout.list_recipe_ingredient_entry, null);
         }else{
             view = _ConvertView;
         }
 
-        TextView textView       = (TextView) view.findViewById(R.id.product_list_product_name);
-        CheckBox checkBox       = (CheckBox) view.findViewById(R.id.product_list_product_selected);
-        textView.setText(ingredientEntry.mProduct.mName);
+        TextView amountTextView     = (TextView) view.findViewById(R.id.list_recipe_ingredient_entry_amount);
+        TextView amountTypeTextView = (TextView) view.findViewById(R.id.list_recipe_ingredient_entry_amount_type);
+        TextView nameTextView       = (TextView) view.findViewById(R.id.list_recipe_ingredient_entry_name);
+
+        if(ingredientEntry.mProduct.mUnit != null) {
+            amountTypeTextView.setText(ingredientEntry.mProduct.mUnit.mName);
+        }
+        amountTextView.setText(String.valueOf(ingredientEntry.mAmount));
+        nameTextView.setText(ingredientEntry.mProduct.mName);
+
         return view;
     }
 
-    public void addIngredient() {
-        Product product = new Product("Testtestetests", null, 1.0f, 1.0f);
-        Recipe recipe = new Recipe("Schalom");
-        Ingredient ing = new Ingredient(product, recipe, 1.0f);
-        mIngredientList.add(ing);
+    public void addIngredient(Ingredient _Ingredient) {
+        mIngredientList.add(_Ingredient);
         notifyDataSetChanged();
+    }
+
+    public void removeIngredient(Ingredient _Ingredient){
+        int index = mIngredientList.indexOf(_Ingredient);
+        Ingredient ingredient = mIngredientList.get(index);
+        if(ingredient != null){
+            mRemovedIngredients.add(ingredient);
+        }
+
+        mIngredientList.remove(index);
+        notifyDataSetChanged();
+    }
+
+    public List<Ingredient> getIngredients(){
+        return mIngredientList;
+    }
+
+    public List<Ingredient> getRemovedIngredients(){
+        return mRemovedIngredients;
     }
 }

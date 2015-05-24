@@ -7,25 +7,25 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ListAdapter;
 import android.widget.ListView;
-import android.widget.SimpleAdapter;
+import android.widget.Toast;
 
 import org.noorganization.instalist.R;
+import org.noorganization.instalist.controller.implementation.ControllerFactory;
 import org.noorganization.instalist.model.Ingredient;
 import org.noorganization.instalist.model.Product;
 import org.noorganization.instalist.model.Recipe;
 import org.noorganization.instalist.model.ShoppingList;
-import org.noorganization.instalist.view.MainShoppingListView;
 import org.noorganization.instalist.view.listadapter.IngredientListAdapter;
 import org.noorganization.instalist.view.utils.ViewUtils;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
+ * Fragment that handles the creation of a recipe.
  * Created by TS on 28.04.2015.
  */
 public class RecipeCreationFragment extends BaseCustomFragment {
@@ -38,7 +38,115 @@ public class RecipeCreationFragment extends BaseCustomFragment {
     private ViewAcccessor mViewAccessor;
     private Recipe  mRecipe;
     private Button mAddIngredientButton;
+    private Button mAddRecipeButton;
+    private Button mCancelButton;
+
     private IngredientListAdapter mIngredientListAdapter;
+
+    private View.OnClickListener mOnAddRecipeClickListener = new View.OnClickListener() {
+
+        @Override
+        public void onClick(View v) {
+            if(!mViewAccessor.isFilled()){
+                return;
+            }
+            if(!mViewAccessor.isValid()){
+                return;
+            }
+
+            boolean success = false;
+
+            if(mRecipe == null){
+                success = saveRecipe();
+            }else
+            {
+                success = updateRecipe();
+            }
+
+            // if saving was no success so show some error message and do nothing more!
+            if(!success){
+                if(mRecipe == null){
+                    Toast.makeText(getActivity(), "Recipe update failed!", Toast.LENGTH_LONG).show();
+                }else{
+                    Toast.makeText(getActivity(), "Addition of recipe failed!", Toast.LENGTH_LONG).show();
+                }
+                return;
+            }
+
+            // success case begins
+            Fragment fragment;
+            if(mRecipe == null){
+                fragment = ShoppingListOverviewFragment.newInstance(mCurrentShoppingList.mName);
+            }else{
+                fragment = ProductListDialogFragment.newInstance(mCurrentShoppingList.mName);
+            }
+            changeFragment(fragment);
+        }
+
+        private boolean updateRecipe(){
+            String recipeName = mViewAccessor.getRecipeName();
+            List<Ingredient> ingredientList = mViewAccessor.getRecipeIngredients();
+            String[] tagArray               = mViewAccessor.getRecipeTags();
+            if(tagArray != null){
+                // save the tags!
+            }
+            Recipe recipe = mRecipe;
+            if(recipe == null){
+                return false;
+            }
+
+            List<Ingredient> existingIngredients = recipe.getIngredients();
+            List<Ingredient> removedIngredients = mViewAccessor.getRemovedIngredients();
+
+            for(Ingredient ingredient : ingredientList){
+                Ingredient ingredientCreated = ControllerFactory.getRecipeController().addOrChangeIngredient(recipe, ingredient.mProduct, ingredient.mAmount);
+                if(ingredientCreated == null){
+                    // amount is set wrong
+                    return false;
+                }
+            }
+
+
+            // remove all removed ingredients
+            for(Ingredient ingredient : removedIngredients){
+                ControllerFactory.getRecipeController().removeIngredient(ingredient);
+            }
+
+            // change the name of recipe
+            if(!mRecipe.mName.equals(recipeName)) {
+                Recipe recipe1 = ControllerFactory.getRecipeController().renameRecipe(recipe, recipeName);
+                if(!recipe1.mName.equals(recipeName)){
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        private boolean saveRecipe(){
+            String recipeName               = mViewAccessor.getRecipeName();
+            List<Ingredient> ingredientList = mViewAccessor.getRecipeIngredients();
+            String[] tagArray               = mViewAccessor.getRecipeTags();
+
+            if(tagArray != null){
+                // save the tags!
+            }
+            Recipe recipe = ControllerFactory.getRecipeController().createRecipe(recipeName);
+            if(recipe == null){
+                return false;
+            }
+
+            for(Ingredient ingredient : ingredientList){
+                Ingredient ingredientCreated = ControllerFactory.getRecipeController().addOrChangeIngredient(recipe, ingredient.mProduct, ingredient.mAmount);
+                if(ingredientCreated == null){
+                    // amount is set wrong
+                    return false;
+                }
+            }
+
+            return true;
+        }
+    };
 
     /**
      * Creates an instance of an ProductCreationFragment with the details of the product.
@@ -88,9 +196,11 @@ public class RecipeCreationFragment extends BaseCustomFragment {
         super.onCreateView(inflater, container, savedInstanceState);
 
         View view = inflater.inflate(R.layout.fragment_recipe_details, container, false);
-        mViewAccessor = new ViewAcccessor(view, getActivity(), null);
 
         mAddIngredientButton = (Button) view.findViewById(R.id.fragment_recipe_details_add_ingredient);
+        mAddRecipeButton     = (Button) view.findViewById(R.id.fragment_recipe_details_add_recipe);
+        mCancelButton        = (Button) view.findViewById(R.id.fragment_recipe_details_cancel_recipe);
+
         mAddIngredientButton.setOnClickListener(new View.OnClickListener(){
 
             @Override
@@ -98,12 +208,21 @@ public class RecipeCreationFragment extends BaseCustomFragment {
                 mViewAccessor.addIngredient();
             }
         });
-    /*    if(mRecipe == null) {
+
+        mAddRecipeButton.setOnClickListener(mOnAddRecipeClickListener);
+
+        mCancelButton.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v) {
+                onBackPressed();
+            }
+        });
+
+        if(mRecipe == null) {
             mViewAccessor = new ViewAcccessor(view, getActivity());
         } else{
             mViewAccessor = new ViewAcccessor(view, getActivity(), mRecipe);
         }
-      */
         return view;
     }
 
@@ -117,6 +236,7 @@ public class RecipeCreationFragment extends BaseCustomFragment {
         private Context     mContext;
 
         private IngredientListAdapter mIngredientListAdapter;
+        private Recipe      mRecipe;
 
         /**
          * Initializes all views and sets the view reference.
@@ -127,6 +247,8 @@ public class RecipeCreationFragment extends BaseCustomFragment {
             this.mView = _View;
             this.mContext = _Context;
             assignIds();
+            mIngredientListAdapter = new IngredientListAdapter((Activity) _Context, new ArrayList<Ingredient>());
+            this.mRecipe = null;
         }
 
         /**
@@ -140,30 +262,33 @@ public class RecipeCreationFragment extends BaseCustomFragment {
             this.mView = _View;
             this.mContext = _Context;
             assignIds();
+            this.mRecipe = _Recipe;
 
-            //mRecipeNameText.setText(_Recipe.mName);
-            //mRecipeTagText.setText();
-            mIngredientListAdapter = new IngredientListAdapter((Activity) _Context, new ArrayList<Ingredient>());
-
-            mIngredientListView.setAdapter( mIngredientListAdapter);
+            mRecipeNameText.setText(_Recipe.mName);
+            // mRecipeTagText.setText();
+            mIngredientListAdapter = new IngredientListAdapter((Activity) _Context, _Recipe.getIngredients());
+            mIngredientListView.setAdapter(mIngredientListAdapter);
         }
 
         public void addIngredient(){
-            mIngredientListAdapter.addIngredient();
+            Product prod = new Product("Mehl", null, 1.0f, 1.0f);
+            Recipe rec = new Recipe("Mehlkuchen");
+            Ingredient ingredient = new Ingredient(prod, rec, 100.0f);
+            mIngredientListAdapter.addIngredient(ingredient);
         }
+
         /**
          * Checks if all editable fields are filled. Recommended to check before accessing product amount.
          * Marks an unfilled entry as not filled.
          * @return true, if all elements are filled. false, if at least one element is not filled.
          */
         public boolean isFilled(){
-            boolean returnValue = false;
-            returnValue |= ViewUtils.checkTextViewIsFilled(mRecipeNameText);
-            returnValue |= ViewUtils.checkTextViewIsFilled(mRecipeTagText);
-            // TODO: CHECK Listview
-            return !returnValue;
+            boolean returnValue = true;
+            returnValue &= ViewUtils.checkTextViewIsFilled(mRecipeNameText);
+            // check if at least on ingredient is there
+            returnValue &= mIngredientListAdapter.getCount() > 0;
+            return returnValue;
         }
-
 
         /**
          * Assigns all related references to the single view components.
@@ -172,6 +297,36 @@ public class RecipeCreationFragment extends BaseCustomFragment {
             mRecipeNameText = (EditText) mView.findViewById(R.id.fragment_recipe_details_recipe_name);
             mRecipeTagText  = (EditText) mView.findViewById(R.id.fragment_recipe_details_recipe_tags);
             mIngredientListView = (ListView) mView.findViewById(R.id.fragment_recipe_details_ingredient_container);
+        }
+
+        public String getRecipeName(){
+            return mRecipeNameText.getText().toString();
+        }
+
+        /**
+         * Get the assigned tags from the recipe tags field
+         * @return if any tags are entered an array of tags in string form, else you will receive null.
+         */
+        public String[] getRecipeTags(){
+            if(mRecipeTagText.getText().length() > 0) {
+                return mRecipeTagText.getText().toString().split(",");
+            }
+            return null;
+        }
+
+        public List<Ingredient> getRecipeIngredients(){
+            return mIngredientListAdapter.getIngredients();
+        }
+
+        public List<Ingredient> getRemovedIngredients(){
+            return mIngredientListAdapter.getRemovedIngredients();
+        }
+        /**
+         * TODO: Add validation feature
+         * @return
+         */
+        public boolean isValid() {
+            return true;
         }
 
     }
