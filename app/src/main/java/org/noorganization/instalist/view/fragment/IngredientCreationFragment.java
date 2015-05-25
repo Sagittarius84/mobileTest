@@ -8,13 +8,12 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.SimpleAdapter;
 import android.widget.Spinner;
 
 import org.noorganization.instalist.R;
 import org.noorganization.instalist.model.Ingredient;
 import org.noorganization.instalist.model.Product;
-import org.noorganization.instalist.view.datahandler.IngredientDataHandler;
+import org.noorganization.instalist.view.datahandler.RecipeDataHolder;
 
 import java.util.List;
 
@@ -56,12 +55,12 @@ public class IngredientCreationFragment extends BaseCustomFragment {
         mAddIngredientButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                List<Ingredient> ingredients = IngredientDataHandler.getInstance().getIngredients();
+                List<Ingredient> ingredients = RecipeDataHolder.getInstance().getIngredients();
                 Ingredient ingredient = new Ingredient();
                 ingredient.mAmount = Float.valueOf(mAmountEditText.getText().toString());
                 ingredient.mProduct = (Product) mIngredientSpinner.getSelectedItem();
                 ingredients.add(ingredient);
-                IngredientDataHandler.getInstance().setIngredients(ingredients);
+                RecipeDataHolder.getInstance().setIngredients(ingredients);
                 changeFragment(RecipeCreationFragment.getInstance());
             }
         });

@@ -15,11 +15,16 @@ import org.noorganization.instalist.controller.IListController;
 import org.noorganization.instalist.controller.implementation.ControllerFactory;
 import org.noorganization.instalist.model.ListEntry;
 import org.noorganization.instalist.model.Product;
+import org.noorganization.instalist.model.Recipe;
 import org.noorganization.instalist.model.ShoppingList;
+import org.noorganization.instalist.model.view.BaseItemListEntry;
+import org.noorganization.instalist.model.view.ProductListEntry;
+import org.noorganization.instalist.model.view.RecipeListEntry;
 import org.noorganization.instalist.view.MainShoppingListView;
 import org.noorganization.instalist.view.datahandler.SelectedProductDataHandler;
 import org.noorganization.instalist.view.listadapter.SelectableProductListAdapter;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -31,7 +36,6 @@ public class ProductListDialogFragment extends BaseCustomFragment{
 
     private ShoppingList mCurrentShoppingList;
     private String       mCurrentListName;
-
 
     private Button mAddNewProductButton;
     private Button mCancelButton;
@@ -86,13 +90,23 @@ public class ProductListDialogFragment extends BaseCustomFragment{
         ListAdapter adapter;
         View view = inflater.inflate(R.layout.fragment_product_list_dialog, container, false);
 
+
         List<Product> productList = Product.listAll(Product.class);
+        List<Recipe> recipeList = Recipe.listAll(Recipe.class);
 
         List<ListEntry> listEntries = mCurrentShoppingList.getEntries();
         // remove all inserted list entries
         for(ListEntry listEntry : listEntries){
             productList.remove(listEntry.mProduct);
         }
+
+        /*List<BaseItemListEntry> listAbstractEntries = new ArrayList<>();
+        for(Product product: productList){
+            listAbstractEntries.add(new ProductListEntry(product));
+        }
+        for(Recipe recipe: recipeList){
+            listAbstractEntries.add(new RecipeListEntry(recipe));
+        }*/
 
         adapter = new SelectableProductListAdapter(getActivity(), productList, mCurrentShoppingList);
 

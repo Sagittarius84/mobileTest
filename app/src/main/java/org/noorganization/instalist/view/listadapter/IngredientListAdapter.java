@@ -78,4 +78,10 @@ public class IngredientListAdapter extends ArrayAdapter<Ingredient> {
     public List<Ingredient> getRemovedIngredients(){
         return mRemovedIngredients;
     }
+
+    public void setData(List<Ingredient> _Ingredients, List<Ingredient> _RemovedIngredients) {
+        this.mIngredientList = _Ingredients;
+        this.mRemovedIngredients = _RemovedIngredients;
+        notifyDataSetChanged();
+    }
 }

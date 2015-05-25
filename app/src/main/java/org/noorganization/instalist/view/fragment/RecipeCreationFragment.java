@@ -18,7 +18,7 @@ import org.noorganization.instalist.model.Ingredient;
 import org.noorganization.instalist.model.Product;
 import org.noorganization.instalist.model.Recipe;
 import org.noorganization.instalist.model.ShoppingList;
-import org.noorganization.instalist.view.datahandler.IngredientDataHandler;
+import org.noorganization.instalist.view.datahandler.RecipeDataHolder;
 import org.noorganization.instalist.view.listadapter.IngredientListAdapter;
 import org.noorganization.instalist.view.utils.ViewUtils;
 
@@ -82,6 +82,8 @@ public class RecipeCreationFragment extends BaseCustomFragment {
             }else{
                 fragment = ProductListDialogFragment.newInstance(mCurrentShoppingList.mName);
             }
+            // clear the data holder so that we not retrieve later the currently inserted data.
+            RecipeDataHolder.getInstance().clear();
             changeFragment(fragment);
         }
 
@@ -214,7 +216,7 @@ public class RecipeCreationFragment extends BaseCustomFragment {
             @Override
             public void onClick(View v) {
                // mViewAccessor.addIngredient();
-                mViewAccessor.saveIngredients();
+                mViewAccessor.saveRecipeToDataHolder();
                 changeFragment(IngredientCreationFragment.newInstance());
             }
         });
@@ -233,6 +235,11 @@ public class RecipeCreationFragment extends BaseCustomFragment {
         } else{
             mViewAccessor = new ViewAcccessor(view, getActivity(), mRecipe);
         }
+
+        if(RecipeDataHolder.getInstance().hasSetValues()){
+            mViewAccessor.loadRecipeFromDataHolder();
+        }
+
         return view;
     }
 
@@ -247,7 +254,7 @@ public class RecipeCreationFragment extends BaseCustomFragment {
 
         private IngredientListAdapter mIngredientListAdapter;
         private Recipe      mRecipe;
-        private IngredientDataHandler mIngredientDataHandler;
+        private RecipeDataHolder mRecipeDataHolder;
         /**
          * Initializes all views and sets the view reference.
          * @param _View the view that is currently used.
@@ -258,8 +265,9 @@ public class RecipeCreationFragment extends BaseCustomFragment {
             this.mContext = _Context;
             assignIds();
 
-            mIngredientDataHandler = IngredientDataHandler.getInstance();
-            List<Ingredient> ingredientList = mIngredientDataHandler.getIngredients();
+            mRecipeDataHolder = RecipeDataHolder.getInstance();
+            List<Ingredient> ingredientList = mRecipeDataHolder.getIngredients();
+
             if(ingredientList.size() > 0){
                 mIngredientListAdapter = new IngredientListAdapter((Activity) _Context, ingredientList);
             }
@@ -282,14 +290,14 @@ public class RecipeCreationFragment extends BaseCustomFragment {
             this.mContext = _Context;
             assignIds();
             this.mRecipe = _Recipe;
-            mIngredientDataHandler = IngredientDataHandler.getInstance();
+            mRecipeDataHolder = RecipeDataHolder.getInstance();
 
             mRecipeNameText.setText(_Recipe.mName);
             // mRecipeTagText.setText();
 
-            mIngredientDataHandler = IngredientDataHandler.getInstance();
-            if(mIngredientDataHandler.getIngredients() != null){
-                mIngredientListAdapter = new IngredientListAdapter((Activity) _Context, mIngredientDataHandler.getIngredients());
+            mRecipeDataHolder = RecipeDataHolder.getInstance();
+            if(mRecipeDataHolder.getIngredients() != null){
+                mIngredientListAdapter = new IngredientListAdapter((Activity) _Context, mRecipeDataHolder.getIngredients());
             }
             else{
                 mIngredientListAdapter = new IngredientListAdapter((Activity) _Context, _Recipe.getIngredients());
@@ -357,9 +365,32 @@ public class RecipeCreationFragment extends BaseCustomFragment {
             return true;
         }
 
-        public void saveIngredients(){
+
+        public void saveRecipeToDataHolder(){
+            long id = -1L;
+            boolean isNew = true;
+            String recipeName = "";
+            if(this.mRecipe != null){
+                id = this.mRecipe.getId();
+                isNew = false;
+            }
+
+            if(this.mRecipeNameText.getText().length() > 0){
+                recipeName = mRecipeNameText.getText().toString();
+            }
+
             List<Ingredient> ingredients = getRecipeIngredients();
-            mIngredientDataHandler.setIngredients(ingredients);
+            List<Ingredient> removedIngredients = mIngredientListAdapter.getRemovedIngredients();
+
+            mRecipeDataHolder.setValues(id, isNew, recipeName, ingredients, removedIngredients);
+        }
+
+        public void loadRecipeFromDataHolder(){
+            if(mRecipeDataHolder.isNew()){
+                this.mRecipe = Recipe.findById(Recipe.class, mRecipeDataHolder.getRecipeID());
+            }
+            this.mRecipeNameText.setText(mRecipeDataHolder.getRecipeName());
+            this.mIngredientListAdapter.setData(mRecipeDataHolder.getIngredients(), mRecipeDataHolder.getRemovedIngredients());
         }
 
     }
