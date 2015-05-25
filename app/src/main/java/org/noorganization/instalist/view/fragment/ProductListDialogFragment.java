@@ -15,7 +15,6 @@ import android.widget.TextView;
 import org.noorganization.instalist.R;
 import org.noorganization.instalist.controller.IListController;
 import org.noorganization.instalist.controller.implementation.ControllerFactory;
-import org.noorganization.instalist.controller.implementation.ListController;
 import org.noorganization.instalist.model.ListEntry;
 import org.noorganization.instalist.model.Product;
 import org.noorganization.instalist.model.ShoppingList;
@@ -90,7 +89,7 @@ public class ProductListDialogFragment extends Fragment{
         public void onClick(View v) {
             ((MainShoppingListView) getActivity()).addProductsToList();
             List<ListEntry> listEntries = SelectedProductDataHandler.getInstance().getListEntries();
-            ShoppingList list = ShoppingList.find(ShoppingList.class, ShoppingList.LIST_NAME_ATTR + "=?", mListName).get(0);
+            ShoppingList list = ShoppingList.find(ShoppingList.class, ShoppingList.ATTR_NAME + "=?", mListName).get(0);
             IListController mListController = ControllerFactory.getListController();
 
             for(ListEntry listEntry : listEntries){

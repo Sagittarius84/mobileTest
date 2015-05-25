@@ -8,6 +8,7 @@ import com.orm.query.Select;
 
 import org.noorganization.instalist.GlobalApplication;
 import org.noorganization.instalist.controller.IListController;
+import org.noorganization.instalist.model.Category;
 import org.noorganization.instalist.model.ListEntry;
 import org.noorganization.instalist.model.Product;
 import org.noorganization.instalist.model.ShoppingList;
@@ -36,9 +37,7 @@ public class ListController implements IListController {
         return mInstance;
     }
 
-
-    @Override
-    public ListEntry addOrChangeItem(ShoppingList _list, Product _product, float _amount) {
+    private ListEntry addOrChangeItem(ShoppingList _list, Product _product, float _amount, boolean _prioUsed, int _prio) {
         if (_list == null || _product == null) {
             return null;
         }
@@ -56,7 +55,7 @@ public class ListController implements IListController {
             if (_amount < 0.001f) {
                 return null;
             }
-            item = new ListEntry(savedList, savedProduct, _amount);
+            item = new ListEntry(savedList, savedProduct, _amount, false, (_prioUsed ? _prio : 0));
             item.save();
 
             IChangeHandler target = GlobalApplication.getChangeHandler();
@@ -68,6 +67,9 @@ public class ListController implements IListController {
                 return item;
             }
             item.mAmount = _amount;
+            if (_prioUsed) {
+                item.mPriority = _prio;
+            }
             item.save();
 
             IChangeHandler target = GlobalApplication.getChangeHandler();
@@ -77,6 +79,16 @@ public class ListController implements IListController {
         }
 
         return item;
+    }
+
+    @Override
+    public ListEntry addOrChangeItem(ShoppingList _list, Product _product, float _amount) {
+        return addOrChangeItem(_list, _product, _amount, false, 0);
+    }
+
+    @Override
+    public ListEntry addOrChangeItem(ShoppingList _list, Product _product, float _amount, int _prio) {
+        return addOrChangeItem(_list,_product, _amount, true, _prio);
     }
 
     @Override
@@ -231,12 +243,47 @@ public class ListController implements IListController {
     }
 
     @Override
+    public ListEntry setItemPriority(ListEntry _item, int _newPrio) {
+        if (_item == null) {
+            return null;
+        }
+
+        ListEntry toChange = SugarRecord.findById(ListEntry.class, _item.getId());
+        if (toChange == null) {
+            return null;
+        }
+
+        toChange.mPriority = _newPrio;
+        toChange.save();
+
+        IChangeHandler target = GlobalApplication.getChangeHandler();
+        if (target != null) {
+            Message.obtain(target, IChangeHandler.ITEM_UPDATED, toChange).sendToTarget();
+        }
+
+        return toChange;
+    }
+
+    @Override
     public ShoppingList addList(String _name) {
+        return addList(_name, null);
+    }
+
+    @Override
+    public ShoppingList addList(String _name, Category _category) {
         if (_name == null || _name.length() == 0 || existsListName(_name)) {
             return null;
         }
 
-        ShoppingList rtn = new ShoppingList(_name);
+        Category targetCategory = null;
+        if (_category != null) {
+            targetCategory = SugarRecord.findById(Category.class, _category.getId());
+            if (targetCategory == null) {
+                return null;
+            }
+        }
+
+        ShoppingList rtn = new ShoppingList(_name, targetCategory);
         rtn.save();
 
         IChangeHandler target = GlobalApplication.getChangeHandler();
@@ -288,6 +335,36 @@ public class ListController implements IListController {
         }
 
         return rtn;
+    }
+
+    @Override
+    public ShoppingList moveToCategory(ShoppingList _list, Category _category) {
+        if (_list == null) {
+            return null;
+        }
+
+        ShoppingList listToChange = SugarRecord.findById(ShoppingList.class, _list.getId());
+        if (listToChange == null) {
+            return null;
+        }
+
+        Category targetCategory = null;
+        if (_category != null) {
+            targetCategory = SugarRecord.findById(Category.class, _category.getId());
+            if (targetCategory == null) {
+                return listToChange;
+            }
+        }
+
+        listToChange.mCategory = targetCategory;
+        listToChange.save();
+
+        IChangeHandler target = GlobalApplication.getChangeHandler();
+        if (target != null) {
+            Message.obtain(target, IChangeHandler.LISTS_CHANGED).sendToTarget();
+        }
+
+        return listToChange;
     }
 
     private boolean existsListName(String _name) {

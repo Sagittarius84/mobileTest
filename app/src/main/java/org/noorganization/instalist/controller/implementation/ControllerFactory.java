@@ -1,5 +1,6 @@
 package org.noorganization.instalist.controller.implementation;
 
+import org.noorganization.instalist.controller.ICategoryController;
 import org.noorganization.instalist.controller.IListController;
 import org.noorganization.instalist.controller.IProductController;
 import org.noorganization.instalist.controller.IRecipeController;
@@ -32,5 +33,9 @@ public class ControllerFactory {
 
     public static ITagController getTagController() {
         return TagController.getInstance();
+    }
+
+    public static ICategoryController getCategoryController() {
+        return CategoryController.getInstance();
     }
 }

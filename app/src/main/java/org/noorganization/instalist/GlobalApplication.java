@@ -65,7 +65,7 @@ public class GlobalApplication extends SugarApp {
     }
 
     public List<ListEntry> getListEntries(String listName){
-        ShoppingList shoppingList = Select.from(ShoppingList.class).where(Condition.prop(ShoppingList.LIST_NAME_ATTR).eq(listName)).first();
+        ShoppingList shoppingList = Select.from(ShoppingList.class).where(Condition.prop(ShoppingList.ATTR_NAME).eq(listName)).first();
         List<ListEntry> entries = shoppingList.getEntries();
         Log.d(LOG_TAG, "Get list entries of list: " + shoppingList.mName + " number of elements: " + entries.size());
         return entries;
