@@ -14,6 +14,7 @@ import org.noorganization.instalist.R;
 import org.noorganization.instalist.model.Ingredient;
 import org.noorganization.instalist.model.Product;
 import org.noorganization.instalist.view.datahandler.RecipeDataHolder;
+import org.noorganization.instalist.view.spinneradapter.ProductSpinnerAdapter;
 
 import java.util.List;
 
@@ -50,7 +51,7 @@ public class IngredientCreationFragment extends BaseCustomFragment {
         mAddIngredientButton = (Button) view.findViewById(R.id.fragment_ingredient_creation_button_add_ingredient);
         mCancelButton = (Button) view.findViewById(R.id.fragment_ingredient_creation_button_cancel);
 
-        mIngredientSpinner.setAdapter(new ArrayAdapter<Product>(mActivity, android.R.layout.simple_list_item_1, mListOfProducts));
+        mIngredientSpinner.setAdapter(new ProductSpinnerAdapter(mActivity, mListOfProducts));
 
         mAddIngredientButton.setOnClickListener(new View.OnClickListener() {
             @Override
