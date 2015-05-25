@@ -27,4 +27,9 @@ public class RecipeListEntry extends BaseItemListEntry {
     public BaseItemReturnType getEntry() {
         return new BaseItemReturnType(mRecipe);
     }
+
+    @Override
+    public eItemType getType() {
+        return eItemType.RECIPE_LIST_ENTRY;
+    }
 }

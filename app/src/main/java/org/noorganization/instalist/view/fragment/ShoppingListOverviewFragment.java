@@ -26,7 +26,7 @@ import org.noorganization.instalist.model.ListEntry;
 import org.noorganization.instalist.model.ShoppingList;
 import org.noorganization.instalist.view.ChangeHandler;
 import org.noorganization.instalist.view.MainShoppingListView;
-import org.noorganization.instalist.view.datahandler.SelectedProductDataHandler;
+import org.noorganization.instalist.view.datahandler.SelectableBaseItemListEntryDataHolder;
 import org.noorganization.instalist.view.decoration.DividerItemListDecoration;
 import org.noorganization.instalist.view.listadapter.ShoppingListAdapter;
 
@@ -171,9 +171,8 @@ public class ShoppingListOverviewFragment extends BaseCustomFragment {
         mAddButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // reset selected product items ... (lazy resetting!)
-                SelectedProductDataHandler.getInstance().clearListEntries();
-
+                // reset selected items ... (lazy resetting!)
+                SelectableBaseItemListEntryDataHolder.getInstance().clear();
                 Fragment fragment = ProductListDialogFragment.newInstance(mCurrentListName);
                 changeFragment(fragment);
             }

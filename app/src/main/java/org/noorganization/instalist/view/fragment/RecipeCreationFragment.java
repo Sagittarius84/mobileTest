@@ -296,7 +296,7 @@ public class RecipeCreationFragment extends BaseCustomFragment {
             // mRecipeTagText.setText();
 
             mRecipeDataHolder = RecipeDataHolder.getInstance();
-            if(mRecipeDataHolder.getIngredients() != null){
+            if(mRecipeDataHolder.getIngredients() != null && mRecipeDataHolder.getIngredients().size() > 0){
                 mIngredientListAdapter = new IngredientListAdapter((Activity) _Context, mRecipeDataHolder.getIngredients());
             }
             else{

@@ -26,4 +26,9 @@ public class ProductListEntry extends BaseItemListEntry {
     public BaseItemReturnType getEntry() {
         return new BaseItemReturnType(mProduct);
     }
+
+    @Override
+    public eItemType getType() {
+        return eItemType.PRODUCT_LIST_ENTRY;
+    }
 }
