@@ -276,6 +276,7 @@ public class RecipeCreationFragment extends BaseCustomFragment {
             }
             this.mRecipe = null;
             mIngredientListView.setAdapter(mIngredientListAdapter);
+            mRecipeDataHolder.setIngredients(mIngredientListAdapter.getIngredients());
         }
 
         /**
@@ -303,14 +304,7 @@ public class RecipeCreationFragment extends BaseCustomFragment {
                 mIngredientListAdapter = new IngredientListAdapter((Activity) _Context, _Recipe.getIngredients());
             }
             mIngredientListView.setAdapter(mIngredientListAdapter);
-
-        }
-
-        public void addIngredient(){
-            Product prod = new Product("Mehl", null, 1.0f, 1.0f);
-            Recipe rec = new Recipe("Mehlkuchen");
-            Ingredient ingredient = new Ingredient(prod, rec, 100.0f);
-            mIngredientListAdapter.addIngredient(ingredient);
+            mRecipeDataHolder.setIngredients(mIngredientListAdapter.getIngredients());
         }
 
         /**

@@ -1,6 +1,7 @@
 package org.noorganization.instalist.view.listadapter;
 
 import android.app.Activity;
+import android.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,6 +10,9 @@ import android.widget.TextView;
 
 import org.noorganization.instalist.R;
 import org.noorganization.instalist.model.Ingredient;
+import org.noorganization.instalist.view.MainShoppingListView;
+import org.noorganization.instalist.view.fragment.IngredientCreationFragment;
+import org.noorganization.instalist.view.fragment.RecipeCreationFragment;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -52,6 +56,8 @@ public class IngredientListAdapter extends ArrayAdapter<Ingredient> {
         amountTextView.setText(String.valueOf(ingredientEntry.mAmount));
         nameTextView.setText(ingredientEntry.mProduct.mName);
 
+        view.setOnLongClickListener(new IngredientOnLongClickListener(ingredientEntry));
+
         return view;
     }
 
@@ -83,5 +89,26 @@ public class IngredientListAdapter extends ArrayAdapter<Ingredient> {
         this.mIngredientList = _Ingredients;
         this.mRemovedIngredients = _RemovedIngredients;
         notifyDataSetChanged();
+    }
+
+    private class IngredientOnLongClickListener implements View.OnLongClickListener
+    {
+        private Ingredient mIngredient;
+
+        public IngredientOnLongClickListener(Ingredient _Ingredient){
+            mIngredient = _Ingredient;
+        }
+
+        @Override
+        public boolean onLongClick(View v) {
+            Fragment fragment;
+            if(mIngredient.getId() != null) {
+                fragment = IngredientCreationFragment.newInstance(mIngredient.getId());
+            }else{
+                fragment = IngredientCreationFragment.newInstance();
+            }
+            ((MainShoppingListView) mContext).changeFragment(fragment);
+            return true;
+        }
     }
 }
