@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    style = "@style/style_fragment_general"
     >
 
     <TextView
@@ -12,8 +11,7 @@
     <EditText
         android:id="@+id/fragment_recipe_details_recipe_name"
         android:hint="@string/recipe_details_recipe_name_hint"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        style="@style/InstalistTheme1.base_edit_text_style"
         android:layout_below="@+id/fragment_recipe_details_recipe_name_textview"
         android:layout_alignRight="@+id/fragment_recipe_details_add_recipe"
         android:layout_alignEnd="@+id/fragment_recipe_details_add_recipe" />
@@ -52,8 +50,7 @@
     <EditText
         android:id="@+id/fragment_recipe_details_recipe_tags"
         android:hint="@string/product_details_tag_edittext_hint"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        style="@style/InstalistTheme1.base_edit_text_style"
         android:layout_below="@+id/fragment_recipe_details_tags_textview"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true" />

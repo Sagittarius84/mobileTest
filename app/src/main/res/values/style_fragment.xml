@@ -2,7 +2,7 @@
 <resources>
 
     <style name = "style_fragment_general">
-        <item name = "android:background">@color/primary_color_light</item>
+        <item name = "android:background">@color/black</item>
         <item name = "android:layout_width">match_parent</item>
         <item name = "android:layout_height">match_parent</item>
     </style>

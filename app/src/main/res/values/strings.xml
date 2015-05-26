@@ -33,4 +33,10 @@
     <string name="shopping_list_overview_fragment_no_list_available">No list created.</string>
     <string name="fragment_ingredient_creation_ingredient_product">Ingredient</string>
     <string name="fragment_ingredient_creation_ingredient_amount">Amount of ingredient</string>
+    <string name="fragment_ingredient_creation_no_product_assigned">There is no product assigned, first create a new product.</string>
+    <string name="fragment_ingredient_creation_update_ingredient">Update Ingredient</string>
+    <string name="fragment_ingredient_creation_add_ingredient">Add Ingredient</string>
+    <string name="fragment_ingredient_creation_update_ingredient_title">Update ingredient of</string>
+    <string name="fragment_ingredient_creation_add_ingredient_title">Add Ingredient to</string>
+    <string name="invalid_amount">The amount must be greater than 0.0</string>
 </resources>

@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * Holds the data of a recipe currently created.
+ * Important to note, this holder tries to not give any null values back.
  * Created by TS on 24.05.2015.
  */
 public class RecipeDataHolder {
@@ -67,7 +69,7 @@ public class RecipeDataHolder {
     }
 
     public String getRecipeName() {
-        return this.mRecipeName;
+        return this.mRecipeName != null ? this.mRecipeName : "";
     }
 
     public long getRecipeID() {

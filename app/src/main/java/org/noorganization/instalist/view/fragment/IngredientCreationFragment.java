@@ -4,19 +4,17 @@ import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ListView;
 import android.widget.Spinner;
+import android.widget.Toast;
 
 import org.noorganization.instalist.R;
 import org.noorganization.instalist.model.Ingredient;
 import org.noorganization.instalist.model.Product;
-import org.noorganization.instalist.model.Recipe;
 import org.noorganization.instalist.view.datahandler.RecipeDataHolder;
 import org.noorganization.instalist.view.spinneradapter.ProductSpinnerAdapter;
 import org.noorganization.instalist.view.utils.ViewUtils;
@@ -32,15 +30,38 @@ public class IngredientCreationFragment extends BaseCustomFragment {
     private static final String ARGS_INGREDIENT_ID = "ingredient_id";
     private static final String ARGS_INGREDIENT_LIST_INDEX = "ingredient_list_index";
 
-    private EditText mAmountEditText;
-    private Spinner mIngredientSpinner;
+    /**
+     * The instance of add ingredient button.
+     */
     private Button mAddIngredientButton;
+
+    /**
+     * The instance of cancel button.
+     */
     private Button mCancelButton;
 
+    /**
+     * The list of products that is shown within the spinner.
+     */
     private List<Product> mListOfProducts;
+
+    /**
+     * The ingredient that should be edited when not null, else it is a new ingredient.
+     * Used as flag to indicate if a ingredient is new(null) or not(ingredient is set).
+     */
     private Ingredient mIngredient = null;
+
+    /**
+     * The reference to the ViewAcccessor.
+     * @see org.noorganization.instalist.view.fragment.IngredientCreationFragment.ViewAcccessor
+     */
     private ViewAcccessor mViewAccessor;
 
+    /**
+     * Creates a IngredientCreationFragment with the information of an ingredient filled, that database id was given as parameter.
+     * @param _IngredientId the id of the database entry of this ingredient.
+     * @return an instance of the fragment with set values of the given data.
+     */
     public static IngredientCreationFragment newInstance(long _IngredientId){
         IngredientCreationFragment fragment = new IngredientCreationFragment();
         Bundle args = new Bundle();
@@ -53,7 +74,7 @@ public class IngredientCreationFragment extends BaseCustomFragment {
     /**
      * Creates a IngredientCreationFragment with the information of an ingredient filled, that index id was given as parameter.
      * @param _IngredientListIndex the list index for the ingredientlist hold in RecipeDataHolder.
-     * @return the new instance of this fragment.
+     * @return an instance of the fragment with set values of the given data.
      */
     public static IngredientCreationFragment newInstance(int _IngredientListIndex){
         IngredientCreationFragment fragment = new IngredientCreationFragment();
@@ -66,7 +87,7 @@ public class IngredientCreationFragment extends BaseCustomFragment {
     /**
      * Creates an instance of IngredientCreationFragment that enables the creation of a
      * new ingredient.
-     * @return an instance of IngredientCreationFragment.
+     * @return an instance of the fragment with set values of the given data.
      */
     public static IngredientCreationFragment newInstance(){
         IngredientCreationFragment fragment = new IngredientCreationFragment();
@@ -108,73 +129,151 @@ public class IngredientCreationFragment extends BaseCustomFragment {
 
     }
 
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
 
+        String titleString;
         View view = inflater.inflate(R.layout.fragment_ingredient_creation, container, false);
-        mAmountEditText = (EditText) view.findViewById(R.id.fragment_ingredient_creation_edittext_amount);
-        mIngredientSpinner = (Spinner) view.findViewById(R.id.fragment_ingredient_creation_spinner_ingredient_product);
+
         mAddIngredientButton = (Button) view.findViewById(R.id.fragment_ingredient_creation_button_add_ingredient);
         mCancelButton = (Button) view.findViewById(R.id.fragment_ingredient_creation_button_cancel);
 
-        //mIngredientSpinner.setAdapter(new ProductSpinnerAdapter(mActivity, mListOfProducts));
-
-
         if(mIngredient == null) {
             mViewAccessor = new ViewAcccessor(view, mActivity, mListOfProducts);
+            mAddIngredientButton.setText(mActivity.getText(R.string.fragment_ingredient_creation_add_ingredient));
+            titleString = mActivity.getText(R.string.fragment_ingredient_creation_add_ingredient_title).toString();
         }else{
             mViewAccessor = new ViewAcccessor(view, mActivity, mListOfProducts, mIngredient);
+            mAddIngredientButton.setText(mActivity.getText(R.string.fragment_ingredient_creation_update_ingredient));
+            titleString = mActivity.getText(R.string.fragment_ingredient_creation_update_ingredient_title).toString();
+
         }
 
+        titleString = titleString.concat(" " + RecipeDataHolder.getInstance().getRecipeName());
+
+        setToolbarTitle(titleString);
+
+        return view;
+    }
+
+    /**
+     * Add all clicklisteners.
+     */
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        // add or update an ingredient
         mAddIngredientButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
+                // check if data is filled in.
                 if(!mViewAccessor.isFilled()){
                     return;
                 }
 
+                if(!mViewAccessor.isValid()){
+                    return;
+                }
+
+                // get the ingredients that are currently assigned to the recipe.
                 List<Ingredient> ingredients = RecipeDataHolder.getInstance().getIngredients();
 
                 if(mIngredient != null){
-                    int index = ingredients.indexOf(mIngredient);
-                    Ingredient ingredient = ingredients.get(index);
-                    ingredient.mAmount = mViewAccessor.getIngredientAmount();
-                    ingredient.mProduct = mViewAccessor.getSelectedProduct();
-                    ingredients.set(index, ingredient);
+                    update(ingredients);
                 }else{
-                    Ingredient ingredient = new Ingredient();
-                    ingredient.mAmount = mViewAccessor.getIngredientAmount();
-                    ingredient.mProduct = mViewAccessor.getSelectedProduct();
-                    ingredients.add(ingredient);
+                    save(ingredients);
                 }
 
+                // push the changed data to the currently edited recipe.
                 RecipeDataHolder.getInstance().setIngredients(ingredients);
                 changeFragment(RecipeCreationFragment.getInstance());
             }
+
+            /**
+             * Adds the user generated ingredient to the list of ingredients of the current recipe.
+             * @param _Ingredients the list of ingredients of the current recipe. Commonly from RecipeDataHolder.
+             */
+            public void save(List<Ingredient> _Ingredients){
+                Ingredient ingredient = new Ingredient();
+                ingredient.mAmount = mViewAccessor.getIngredientAmount();
+                ingredient.mProduct = mViewAccessor.getSelectedProduct();
+                _Ingredients.add(ingredient);
+            }
+
+            /**
+             * Overrides an existing Ingredient in the list of ingredients of the current recipe.
+             * @param _Ingredients the list of ingredients of the current recipe. Commonly from RecipeDataHolder.
+             */
+            public void update(List<Ingredient> _Ingredients){
+                int index = _Ingredients.indexOf(mIngredient);
+                Ingredient ingredient = _Ingredients.get(index);
+                ingredient.mAmount = mViewAccessor.getIngredientAmount();
+                ingredient.mProduct = mViewAccessor.getSelectedProduct();
+                _Ingredients.set(index, ingredient);
+            }
         });
+
+        // only go back to calling fragment, wenn cancel was pressed.
         mCancelButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 onBackPressed();
             }
         });
-        return view;
     }
 
+    /**
+     * Remove all clicklisteners.
+     */
+    @Override
+    public void onPause() {
+        super.onPause();
+        mAddIngredientButton.setOnClickListener(null);
+        mCancelButton.setOnClickListener(null);
+    }
 
+    /**
+     * The ViewAcccessor class provides methods to set the data to the view
+     * and to get data from the view.
+     */
     private class ViewAcccessor
     {
 
+        /**
+         * The EditText reference to the amount of a product for a ingredient.
+         */
         private EditText mIngredientAmountEditText;
+
+        /**
+         * The Spinner of the chooseable product to add as ingredient.
+         */
         private Spinner  mProductSpinner;
 
+        /**
+         * The view that is currently shown.
+         */
         private View        mView;
+
+        /**
+         * The context of the application.
+         */
         private Context     mContext;
 
+        /**
+         * The ProductSpinnerAdapter that holds the elements for mProductSpinner.
+         * In short it holds all selectable products.
+         */
         private ProductSpinnerAdapter mProductSpinnerAdapter;
+
+        /**
+         * The Ingredient reference that is currently edited,
+         * null if there is no Ingredient to be edited.
+         */
         private Ingredient mIngredient;
 
         /**
@@ -184,13 +283,13 @@ public class IngredientCreationFragment extends BaseCustomFragment {
          * @param _ProductList the list of products that can be choosen, without the already existent products.
          */
         public ViewAcccessor(View _View, Context _Context, List<Product> _ProductList){
-            this.mView = _View;
-            this.mContext = _Context;
+            mView = _View;
+            mContext = _Context;
             assignIds();
 
             mIngredientAmountEditText.setText(String.valueOf(0.0f));
-            this.mProductSpinnerAdapter = new ProductSpinnerAdapter((Activity) _Context, _ProductList);
-            mProductSpinner.setAdapter(this.mProductSpinnerAdapter);
+            mProductSpinnerAdapter = new ProductSpinnerAdapter((Activity) _Context, _ProductList);
+            mProductSpinner.setAdapter(mProductSpinnerAdapter);
         }
 
         /**
@@ -201,18 +300,19 @@ public class IngredientCreationFragment extends BaseCustomFragment {
          * @param _Ingredient the ingredient that should be filled in.
          */
         public ViewAcccessor(View _View, Context _Context, List<Product> _ProductList, Ingredient _Ingredient){
-
-            this.mView = _View;
-            this.mContext = _Context;
+            mView = _View;
+            mContext = _Context;
             assignIds();
 
-            _ProductList.add(_Ingredient.mProduct);
+            mIngredient = _Ingredient;
+            mIngredientAmountEditText.setText(String.valueOf(mIngredient.mAmount));
 
-            this.mIngredient = _Ingredient;
-            this.mIngredientAmountEditText.setText(String.valueOf(_Ingredient.mAmount));
-            this.mProductSpinnerAdapter = new ProductSpinnerAdapter((Activity) _Context, _ProductList);
-            this.mProductSpinner.setAdapter(this.mProductSpinnerAdapter);
-            this.mProductSpinner.setSelection(mProductSpinnerAdapter.getPosition(_Ingredient.mProduct));
+            // add the product that is currently in edit process to the list of chooseable products
+            _ProductList.add(mIngredient.mProduct);
+            mProductSpinnerAdapter = new ProductSpinnerAdapter((Activity) _Context, _ProductList);
+            mProductSpinner.setAdapter(mProductSpinnerAdapter);
+            // set the selection on the product that is currently in edit process
+            mProductSpinner.setSelection(mProductSpinnerAdapter.getPosition(_Ingredient.mProduct));
         }
 
 
@@ -222,13 +322,31 @@ public class IngredientCreationFragment extends BaseCustomFragment {
          * @return true, if all elements are filled. false, if at least one element is not filled.
          */
         public boolean isFilled(){
-            boolean returnValue = true;
-            returnValue &= ViewUtils.checkTextViewIsFilled(mIngredientAmountEditText);
+            boolean returnValue;
+
+            returnValue = ViewUtils.checkTextViewIsFilled(mIngredientAmountEditText);
             // check if at least on ingredient is there
             returnValue &= !mProductSpinnerAdapter.isEmpty();
+            // show info that the user should assign a product at first
+            if(mProductSpinnerAdapter.isEmpty()){
+                Toast.makeText(mContext, mContext.getResources().getText(R.string.fragment_ingredient_creation_no_product_assigned), Toast.LENGTH_SHORT).show();
+            }
             return returnValue;
         }
 
+        /**
+         * Checks if the inserted data is valid and marks it.
+         * @return true if valid, false invalid.
+         */
+        public boolean isValid(){
+            // check if value is out of range
+            if(getIngredientAmount() <= 0.0f){
+                mIngredientAmountEditText.setError(mContext.getResources().getString(R.string.invalid_amount));
+                return false;
+            }
+
+            return true;
+        }
         /**
          * Assigns all related references to the single view components.
          */
