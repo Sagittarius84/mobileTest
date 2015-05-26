@@ -25,6 +25,7 @@ public class ProductSpinnerAdapter extends ArrayAdapter<Product> {
         this.mListOfProducts = _ListOfProducts;
     }
 
+
     @Override
     public View getView(int _Position, View _ConvertView, ViewGroup _Parent) {
         View view = null;

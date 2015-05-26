@@ -30,6 +30,7 @@ import java.util.List;
 public class IngredientCreationFragment extends BaseCustomFragment {
 
     private static final String ARGS_INGREDIENT_ID = "ingredient_id";
+    private static final String ARGS_INGREDIENT_LIST_INDEX = "ingredient_list_index";
 
     private EditText mAmountEditText;
     private Spinner mIngredientSpinner;
@@ -44,14 +45,34 @@ public class IngredientCreationFragment extends BaseCustomFragment {
         IngredientCreationFragment fragment = new IngredientCreationFragment();
         Bundle args = new Bundle();
         args.putLong(ARGS_INGREDIENT_ID, _IngredientId);
+        args.putInt(ARGS_INGREDIENT_LIST_INDEX, -1);
         fragment.setArguments(args);
         return fragment;
     }
 
+    /**
+     * Creates a IngredientCreationFragment with the information of an ingredient filled, that index id was given as parameter.
+     * @param _IngredientListIndex the list index for the ingredientlist hold in RecipeDataHolder.
+     * @return the new instance of this fragment.
+     */
+    public static IngredientCreationFragment newInstance(int _IngredientListIndex){
+        IngredientCreationFragment fragment = new IngredientCreationFragment();
+        Bundle args = new Bundle();
+        args.putLong(ARGS_INGREDIENT_ID, -1L);
+        args.putInt(ARGS_INGREDIENT_LIST_INDEX, _IngredientListIndex);
+        fragment.setArguments(args);
+        return fragment;
+    }
+    /**
+     * Creates an instance of IngredientCreationFragment that enables the creation of a
+     * new ingredient.
+     * @return an instance of IngredientCreationFragment.
+     */
     public static IngredientCreationFragment newInstance(){
         IngredientCreationFragment fragment = new IngredientCreationFragment();
         Bundle args = new Bundle();
         args.putLong(ARGS_INGREDIENT_ID, -1L);
+        args.putInt(ARGS_INGREDIENT_LIST_INDEX, -1);
         fragment.setArguments(args);
         return fragment;
     }
@@ -59,16 +80,30 @@ public class IngredientCreationFragment extends BaseCustomFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         mListOfProducts = Product.listAll(Product.class);
         List<Ingredient> ingredients = RecipeDataHolder.getInstance().getIngredients();
+
+        if(ingredients == null){
+            throw new NullPointerException("The list of ingredients in RecipeDataHolder is not set.");
+        }
+
         for(Ingredient ingredient : ingredients){
             mListOfProducts.remove(ingredient.mProduct);
         }
 
         // check if an product should be shown
-        if(getArguments().getInt(ARGS_INGREDIENT_ID) >= 0){
+        if(getArguments().getLong(ARGS_INGREDIENT_ID) >= 0){
             long ingredientId = getArguments().getLong(ARGS_INGREDIENT_ID);
             mIngredient = Ingredient.findById(Ingredient.class, ingredientId);
+        }else{
+            int listIndex = getArguments().getInt(ARGS_INGREDIENT_LIST_INDEX);
+            if( listIndex >= 0){
+                if(listIndex > ingredients.size()){
+                    throw new IndexOutOfBoundsException("The given listIndex is bigger than the ingredients size.");
+                }
+                mIngredient = ingredients.get(listIndex);
+            }
         }
 
     }
@@ -176,7 +211,8 @@ public class IngredientCreationFragment extends BaseCustomFragment {
             this.mIngredient = _Ingredient;
             this.mIngredientAmountEditText.setText(String.valueOf(_Ingredient.mAmount));
             this.mProductSpinnerAdapter = new ProductSpinnerAdapter((Activity) _Context, _ProductList);
-            mProductSpinner.setAdapter(this.mProductSpinnerAdapter);
+            this.mProductSpinner.setAdapter(this.mProductSpinnerAdapter);
+            this.mProductSpinner.setSelection(mProductSpinnerAdapter.getPosition(_Ingredient.mProduct));
         }
 
 

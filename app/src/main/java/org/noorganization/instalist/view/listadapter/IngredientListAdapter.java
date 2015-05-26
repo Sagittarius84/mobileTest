@@ -11,6 +11,7 @@ import android.widget.TextView;
 import org.noorganization.instalist.R;
 import org.noorganization.instalist.model.Ingredient;
 import org.noorganization.instalist.view.MainShoppingListView;
+import org.noorganization.instalist.view.datahandler.RecipeDataHolder;
 import org.noorganization.instalist.view.fragment.IngredientCreationFragment;
 import org.noorganization.instalist.view.fragment.RecipeCreationFragment;
 
@@ -105,7 +106,8 @@ public class IngredientListAdapter extends ArrayAdapter<Ingredient> {
             if(mIngredient.getId() != null) {
                 fragment = IngredientCreationFragment.newInstance(mIngredient.getId());
             }else{
-                fragment = IngredientCreationFragment.newInstance();
+                int index = RecipeDataHolder.getInstance().getIngredients().indexOf(mIngredient);
+                fragment = IngredientCreationFragment.newInstance(index);
             }
             ((MainShoppingListView) mContext).changeFragment(fragment);
             return true;
