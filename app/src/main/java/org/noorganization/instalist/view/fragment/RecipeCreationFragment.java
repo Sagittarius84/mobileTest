@@ -42,7 +42,6 @@ public class RecipeCreationFragment extends BaseCustomFragment {
     private Button mAddRecipeButton;
     private Button mCancelButton;
 
-    private IngredientListAdapter mIngredientListAdapter;
     private static RecipeCreationFragment mInstance;
 
     private View.OnClickListener mOnAddRecipeClickListener = new View.OnClickListener() {
@@ -204,45 +203,61 @@ public class RecipeCreationFragment extends BaseCustomFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
 
+        String titleString;
         View view = inflater.inflate(R.layout.fragment_recipe_details, container, false);
 
         mAddIngredientButton = (Button) view.findViewById(R.id.fragment_recipe_details_add_ingredient);
         mAddRecipeButton     = (Button) view.findViewById(R.id.fragment_recipe_details_add_recipe);
         mCancelButton        = (Button) view.findViewById(R.id.fragment_recipe_details_cancel_recipe);
 
-
-        mAddIngredientButton.setOnClickListener(new View.OnClickListener(){
-
-            @Override
-            public void onClick(View v) {
-               // mViewAccessor.addIngredient();
-                mViewAccessor.saveRecipeToDataHolder();
-                changeFragment(IngredientCreationFragment.newInstance());
-            }
-        });
-
-        mAddRecipeButton.setOnClickListener(mOnAddRecipeClickListener);
-
-        mCancelButton.setOnClickListener(new View.OnClickListener(){
-            @Override
-            public void onClick(View v) {
-                onBackPressed();
-            }
-        });
-
         if(mRecipe == null) {
             mViewAccessor = new ViewAcccessor(view, getActivity());
+            mAddRecipeButton.setText(mActivity.getText(R.string.fragment_recipe_creation_add_recipe));
+            titleString = mActivity.getText(R.string.fragment_recipe_creation_add_recipe_title).toString();
         } else{
             mViewAccessor = new ViewAcccessor(view, getActivity(), mRecipe);
+            mAddRecipeButton.setText(mActivity.getText(R.string.fragment_recipe_creation_update_recipe));
+            titleString = mActivity.getText(R.string.fragment_recipe_creation_update_recipe_title).toString();
+            titleString = titleString.concat(" " + mRecipe.mName);
         }
 
         if(RecipeDataHolder.getInstance().hasSetValues()){
             mViewAccessor.loadRecipeFromDataHolder();
         }
 
+        setToolbarTitle(titleString);
         return view;
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        mAddIngredientButton.setOnClickListener(new View.OnClickListener(){
+
+            @Override
+            public void onClick(View v) {
+                // mViewAccessor.addIngredient();
+                mViewAccessor.saveRecipeToDataHolder();
+                changeFragment(IngredientCreationFragment.newInstance());
+            }
+        });
+
+        mAddRecipeButton.setOnClickListener(mOnAddRecipeClickListener);
+        mCancelButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onBackPressed();
+            }
+        });
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        mAddIngredientButton.setOnClickListener(null);
+        mAddRecipeButton.setOnClickListener(null);
+        mCancelButton.setOnClickListener(null);
+    }
 
     private final static class ViewAcccessor{
 
@@ -255,6 +270,7 @@ public class RecipeCreationFragment extends BaseCustomFragment {
         private IngredientListAdapter mIngredientListAdapter;
         private Recipe      mRecipe;
         private RecipeDataHolder mRecipeDataHolder;
+
         /**
          * Initializes all views and sets the view reference.
          * @param _View the view that is currently used.
@@ -287,12 +303,12 @@ public class RecipeCreationFragment extends BaseCustomFragment {
          */
         public ViewAcccessor(View _View, Context _Context, Recipe _Recipe){
 
-            this.mView = _View;
-            this.mContext = _Context;
-            assignIds();
-            this.mRecipe = _Recipe;
-            mRecipeDataHolder = RecipeDataHolder.getInstance();
+           mView = _View;
+           mContext = _Context;
+           mRecipe = _Recipe;
 
+            assignIds();
+            mRecipeDataHolder = RecipeDataHolder.getInstance();
             mRecipeNameText.setText(_Recipe.mName);
             // mRecipeTagText.setText();
 
@@ -360,6 +376,9 @@ public class RecipeCreationFragment extends BaseCustomFragment {
         }
 
 
+        /**
+         * Saves the current recipe to the RecipeDataHolder.
+         */
         public void saveRecipeToDataHolder(){
             long id = -1L;
             boolean isNew = true;
@@ -379,6 +398,9 @@ public class RecipeCreationFragment extends BaseCustomFragment {
             mRecipeDataHolder.setValues(id, isNew, recipeName, ingredients, removedIngredients);
         }
 
+        /**
+         * Loads the recipe from the RecipeDataHolder.
+         */
         public void loadRecipeFromDataHolder(){
             if(mRecipeDataHolder.isNew()){
                 this.mRecipe = Recipe.findById(Recipe.class, mRecipeDataHolder.getRecipeID());

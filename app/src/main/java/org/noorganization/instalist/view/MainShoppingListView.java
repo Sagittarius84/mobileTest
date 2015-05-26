@@ -78,36 +78,8 @@ public class MainShoppingListView extends ActionBarActivity {
         mLeftSideListView.setAdapter(new ShoppingListOverviewAdapter(this, GlobalApplication.getInstance().getShoppingListNames()));
         mDrawerLayout.setFitsSystemWindows(true);
 
-        // navbar custom design of toolbar
-        mNavBarToggle = new ActionBarDrawerToggle(
-                this,
-                mDrawerLayout,
-                mToolbar,
-                R.string.nav_drawer_open,
-                R.string.nav_drawer_close
-        ) {
+        assignDrawer();
 
-            @Override
-            public void onDrawerClosed(View drawerView) {
-                super.onDrawerClosed(drawerView);
-                mToolbar.setTitle(mTitle);
-                // check if options menu has changed
-                invalidateOptionsMenu();
-            }
-
-            @Override
-            public void onDrawerOpened(View drawerView) {
-                super.onDrawerOpened(drawerView);
-                if (mToolbar.getTitle() != null) {
-                    mTitle = mToolbar.getTitle().toString();
-                    mToolbar.setTitle(R.string.choose_list);
-                }
-                // check if options menu has changed
-                invalidateOptionsMenu();
-            }
-        };
-
-        mDrawerLayout.setDrawerListener(mNavBarToggle);
 
         if (savedInstanceState == null) {
             selectList(GlobalApplication.getInstance().getShoppingListNames().get(0));
@@ -273,6 +245,45 @@ public class MainShoppingListView extends ActionBarActivity {
      */
     public void addProductsToList() {
 
+    }
+
+    /**
+     * Sets the drawer to toolbar.
+     */
+    public void assignDrawer(){
+        mToolbar.setNavigationIcon(R.mipmap.ic_menu_black_36dp);
+        // navbar custom design of toolbar
+        mNavBarToggle = new ActionBarDrawerToggle(
+                this,
+                mDrawerLayout,
+                mToolbar,
+                R.string.nav_drawer_open,
+                R.string.nav_drawer_close
+        ) {
+
+            @Override
+            public void onDrawerClosed(View drawerView) {
+                super.onDrawerClosed(drawerView);
+                mToolbar.setTitle(mTitle);
+                mToolbar.setNavigationIcon(R.mipmap.ic_menu_black_36dp);
+                // check if options menu has changed
+                invalidateOptionsMenu();
+            }
+
+            @Override
+            public void onDrawerOpened(View drawerView) {
+                super.onDrawerOpened(drawerView);
+                if (mToolbar.getTitle() != null) {
+                    mTitle = mToolbar.getTitle().toString();
+                    mToolbar.setTitle(R.string.choose_list);
+                    mToolbar.setNavigationIcon(R.mipmap.ic_arrow_back_black_18dp);
+                }
+                // check if options menu has changed
+                invalidateOptionsMenu();
+            }
+        };
+
+        mDrawerLayout.setDrawerListener(mNavBarToggle);
     }
 
 }

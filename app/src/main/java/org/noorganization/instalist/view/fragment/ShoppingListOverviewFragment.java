@@ -73,6 +73,8 @@ public class ShoppingListOverviewFragment extends BaseCustomFragment {
     }
 
 
+
+
     // --------------------------------------------------------------------------------------------
 
 
@@ -154,6 +156,8 @@ public class ShoppingListOverviewFragment extends BaseCustomFragment {
         shoppingListView.addItemDecoration(new DividerItemListDecoration(getResources().getDrawable(R.drawable.abc_list_divider_mtrl_alpha), false, false));
         shoppingListView.setAdapter(mShoppingListAdapter);
         shoppingListView.setItemAnimator(new DefaultItemAnimator());
+
+        ((MainShoppingListView)mActivity).assignDrawer();
 
     }
 

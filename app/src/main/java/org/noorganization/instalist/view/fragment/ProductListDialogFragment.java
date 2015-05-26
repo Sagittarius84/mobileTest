@@ -24,9 +24,7 @@ import org.noorganization.instalist.model.view.RecipeListEntry;
 import org.noorganization.instalist.model.view.SelectableBaseItemListEntry;
 import org.noorganization.instalist.view.MainShoppingListView;
 import org.noorganization.instalist.view.datahandler.SelectableBaseItemListEntryDataHolder;
-import org.noorganization.instalist.view.datahandler.SelectedProductDataHandler;
 import org.noorganization.instalist.view.listadapter.SelectableItemListAdapter;
-import org.noorganization.instalist.view.listadapter.SelectableProductListAdapter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,6 +42,11 @@ public class ProductListDialogFragment extends BaseCustomFragment{
     private Button mAddNewProductButton;
     private Button mCancelButton;
     private Button mAddProductsButton;
+    private Button mTempAddRecipeButton;
+
+    // create the abstract selectable list entries to show mixed entries
+    private List<SelectableBaseItemListEntry> mSelectableBaseItemListEntries = new ArrayList<>();
+
 
     /**
      * Creates an instance of an ProductListDialogFragment.
@@ -68,6 +71,23 @@ public class ProductListDialogFragment extends BaseCustomFragment{
         }
         mCurrentListName    = bundle.getString(MainShoppingListView.KEY_LISTNAME);
         mCurrentShoppingList = ShoppingList.find(ShoppingList.class, ShoppingList.LIST_NAME_ATTR + "=?", mCurrentListName).get(0);
+
+        List<Product> productList = Product.listAll(Product.class);
+        List<Recipe> recipeList = Recipe.listAll(Recipe.class);
+        List<ListEntry> listEntries = mCurrentShoppingList.getEntries();
+
+        // remove all inserted list entries
+        for(ListEntry listEntry : listEntries){
+            productList.remove(listEntry.mProduct);
+        }
+
+        for(Product product: productList){
+            mSelectableBaseItemListEntries.add(new SelectableBaseItemListEntry(new ProductListEntry(product)));
+        }
+
+        for(Recipe recipe: recipeList){
+            mSelectableBaseItemListEntries.add(new SelectableBaseItemListEntry(new RecipeListEntry(recipe)));
+        }
     }
 
     @Override
@@ -94,53 +114,19 @@ public class ProductListDialogFragment extends BaseCustomFragment{
         ListAdapter adapter;
         View view = inflater.inflate(R.layout.fragment_product_list_dialog, container, false);
 
+        adapter = new SelectableItemListAdapter(getActivity(), mSelectableBaseItemListEntries, mCurrentShoppingList);
 
-        List<Product> productList = Product.listAll(Product.class);
-        List<Recipe> recipeList = Recipe.listAll(Recipe.class);
+        mAddNewProductButton    = (Button) view.findViewById(R.id.fragment_product_list_dialog_add_new_product);
+        mCancelButton           = (Button) view.findViewById(R.id.fragment_product_list_dialog_cancel);
+        mAddProductsButton      = (Button) view.findViewById(R.id.fragment_product_list_dialog_add_products_to_list);
+        mTempAddRecipeButton    = (Button) view.findViewById(R.id.testRecipeButton);
 
-        List<ListEntry> listEntries = mCurrentShoppingList.getEntries();
-        // remove all inserted list entries
-        for(ListEntry listEntry : listEntries){
-            productList.remove(listEntry.mProduct);
-        }
-
-        List<BaseItemListEntry> listAbstractEntries = new ArrayList<>();
-        for(Product product: productList){
-            listAbstractEntries.add(new ProductListEntry(product));
-        }
-        for(Recipe recipe: recipeList){
-            listAbstractEntries.add(new RecipeListEntry(recipe));
-        }
-        List<SelectableBaseItemListEntry> selectableBaseItemListEntries = new ArrayList<>();
-
-        for(BaseItemListEntry entry : listAbstractEntries){
-            selectableBaseItemListEntries.add(new SelectableBaseItemListEntry(entry));
-        }
-
-        adapter = new SelectableItemListAdapter(getActivity(), selectableBaseItemListEntries, mCurrentShoppingList);
-
-        mAddNewProductButton = (Button) view.findViewById(R.id.fragment_product_list_dialog_add_new_product);
-        mCancelButton = (Button) view.findViewById(R.id.fragment_product_list_dialog_cancel);
-        mAddProductsButton = (Button) view.findViewById(R.id.fragment_product_list_dialog_add_products_to_list);
-
-        TextView headingText        = (TextView) view.findViewById(R.id.fragment_product_list_dialog_list_name);
         ListView listView           = (ListView) view.findViewById(R.id.fragment_product_list_dialog_product_list_view);
 
         listView.setAdapter(adapter);
 
         setToolbarTitle(mActivity.getResources().getString(R.string.product_list_dialog_title) + " " + mCurrentShoppingList.mName);
 
-        mAddNewProductButton.setOnClickListener(onAddNewProductClickListener);
-        mCancelButton.setOnClickListener(onCancelClickListener);
-        mAddProductsButton.setOnClickListener(onAddProductsClickListener);
-        Button testRecipeButton = (Button) view.findViewById(R.id.testRecipeButton);
-
-        testRecipeButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                changeFragment(RecipeCreationFragment.newInstance(mCurrentShoppingList.mName));
-            }
-        });
         return view;
     }
 
@@ -211,6 +197,20 @@ public class ProductListDialogFragment extends BaseCustomFragment{
             changeFragment(creationFragment);
         }
     };
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        mAddNewProductButton.setOnClickListener(onAddNewProductClickListener);
+        mCancelButton.setOnClickListener(onCancelClickListener);
+        mAddProductsButton.setOnClickListener(onAddProductsClickListener);
+        mTempAddRecipeButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                changeFragment(RecipeCreationFragment.newInstance(mCurrentShoppingList.mName));
+            }
+        });
+    }
 
     @Override
     public void onPause() {
