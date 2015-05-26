@@ -137,18 +137,20 @@ public class ProductListDialogFragment extends BaseCustomFragment{
 
         @Override
         public void onClick(View v) {
-           /// ((MainShoppingListView) getActivity()).addProductsToList();
-
             List<SelectableBaseItemListEntry> listEntries = SelectableBaseItemListEntryDataHolder.getInstance().getListEntries();
             IListController mListController = ControllerFactory.getListController();
 
             for(SelectableBaseItemListEntry listEntry : listEntries){
+                // 2 possible solutions for adding to current shoppinglist
+                // first would be like add all single items with the controller
+                // second would be add all to added products to a list and persist it then to the database --> less db writes when recipes hold same items.
                 if(listEntry.isChecked()){
                     BaseItemListEntry baseItemListEntry = listEntry.getItemListEntry();
 
                     switch (baseItemListEntry.getType()){
                         case PRODUCT_LIST_ENTRY:
-                            ListEntry listEntryIntern = mListController.addOrChangeItem(mCurrentShoppingList, (Product)(baseItemListEntry.getEntry().getObject()), 1.0f);
+                            Product product = (Product)(baseItemListEntry.getEntry().getObject());
+                            ListEntry listEntryIntern = mListController.addOrChangeItem(mCurrentShoppingList, product, 1.0f);
                             if(listEntryIntern == null){
                                 Log.e(ProductListDialogFragment.class.getName(), "Insertion failed.");
                             }
@@ -160,7 +162,8 @@ public class ProductListDialogFragment extends BaseCustomFragment{
                             }
                             List<Ingredient> ingredients = recipe.getIngredients();
                             for(Ingredient ingredient : ingredients){
-                                mListController.addOrChangeItem(mCurrentShoppingList, ingredient.mProduct, ingredient.mAmount);
+                                product = ingredient.mProduct;
+                                mListController.addOrChangeItem(mCurrentShoppingList, product, ingredient.mAmount);
                             }
                             break;
                         default:

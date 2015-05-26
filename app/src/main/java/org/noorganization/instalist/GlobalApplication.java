@@ -71,18 +71,6 @@ public class GlobalApplication extends SugarApp {
         return entries;
     }
 
-    public List<String> getShoppingListNames(){
-        List<ShoppingList> shoppingLists = Select.from(ShoppingList.class).list();
-        List<String> shoppingListNames = new ArrayList<>();
-
-        for (ShoppingList shoppingList : shoppingLists) {
-            // fill navbar with some sample data
-            shoppingListNames.add(shoppingList.mName);
-        }
-
-        return shoppingListNames;
-    }
-
     /**
      *
      * @return global instance of IListController implmentation.

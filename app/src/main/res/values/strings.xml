@@ -43,4 +43,8 @@
     <string name="fragment_recipe_creation_update_recipe">Update Recipe</string>
     <string name="fragment_recipe_creation_add_recipe_title">Create new Recipe</string>
     <string name="fragment_recipe_creation_update_recipe_title">Edit Recipe</string>
+    <string name="drawer_layout_custom_add_list_button">Add List</string>
+    <string name="drawer_layout_custom_new_listname_hint">new listname</string>
+    <string name="drawer_layout_custom_no_input">Please insert at least a sign</string>
+    <string name="drawer_layout_custom_exists">List already exists</string>
 </resources>

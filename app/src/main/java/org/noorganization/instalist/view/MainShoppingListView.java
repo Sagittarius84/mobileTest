@@ -11,15 +11,25 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ListAdapter;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
 
 import org.noorganization.instalist.GlobalApplication;
 import org.noorganization.instalist.R;
+import org.noorganization.instalist.controller.IProductController;
+import org.noorganization.instalist.controller.implementation.ControllerFactory;
+import org.noorganization.instalist.model.ShoppingList;
 import org.noorganization.instalist.view.fragment.ShoppingListOverviewFragment;
 import org.noorganization.instalist.view.listadapter.ShoppingListOverviewAdapter;
+
+import java.util.List;
 
 /**
  * MainShoppingListView handles the display of an selected shoppinglist, so that the corresponding
@@ -35,8 +45,12 @@ public class MainShoppingListView extends ActionBarActivity {
     public final static String KEY_LISTNAME = "list_name";
 
     private Toolbar mToolbar;
-    private ListView mLeftSideListView;
 
+    private ListView    mLeftSideListView;
+    private EditText    mNewListEditText;
+    private Button      mAddListButton;
+    private ShoppingListOverviewAdapter mShoppingListOverviewAdapter;
+    private RelativeLayout mLeftMenuDrawerRelativeLayout;
     /**
      * For creation an icon at the toolbar for toggling the navbar in and out.
      */
@@ -65,6 +79,7 @@ public class MainShoppingListView extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_shopping_list_view);
 
+        List<String> shoppingListNames = ShoppingList.getShoppingListNames();
         // init and setup toolbar
         mToolbar = (Toolbar) findViewById(R.id.toolbar);
 
@@ -72,17 +87,22 @@ public class MainShoppingListView extends ActionBarActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         mDrawerLayout = (DrawerLayout) findViewById(R.id.main_drawer_layout_container);
-        mLeftSideListView = (ListView) findViewById(R.id.list_view_left_side_navigation);
+        mLeftSideListView = (ListView) findViewById(R.id.drawer_layout_custom_list_name_view);
+        mNewListEditText = (EditText) findViewById(R.id.drawer_layout_custom_new_listname_edittext);
+        mAddListButton = (Button) findViewById(R.id.drawer_layout_custom_add_list_name_button);
+        mLeftMenuDrawerRelativeLayout = (RelativeLayout) findViewById(R.id.list_view_left_side_navigation);
 
+        mShoppingListOverviewAdapter = new ShoppingListOverviewAdapter(this, shoppingListNames);
         // fill the list with selectable lists
-        mLeftSideListView.setAdapter(new ShoppingListOverviewAdapter(this, GlobalApplication.getInstance().getShoppingListNames()));
+        mLeftSideListView.setAdapter(mShoppingListOverviewAdapter);
         mDrawerLayout.setFitsSystemWindows(true);
 
         assignDrawer();
 
-
         if (savedInstanceState == null) {
-            selectList(GlobalApplication.getInstance().getShoppingListNames().get(0));
+            if(shoppingListNames.size() > 0) {
+                selectList(shoppingListNames.get(0));
+            }
         }
     }
 
@@ -127,6 +147,50 @@ public class MainShoppingListView extends ActionBarActivity {
         super.onPostCreate(savedInstanceState);
         // Sync the toggle state after onRestoreInstanceState has occurred.
         mNavBarToggle.syncState();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        mAddListButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mNewListEditText.setError(null);
+
+                if (mNewListEditText.getText().length() < 0) {
+                    mNewListEditText.setError(getResources().getString(R.string.drawer_layout_custom_no_input));
+                    return;
+                }
+                String listName = mNewListEditText.getText().toString();
+
+                ShoppingList shoppingList = ControllerFactory.getListController().addList(listName);
+                if (shoppingList == null) {
+                    mNewListEditText.setError(getResources().getString(R.string.drawer_layout_custom_exists));
+                    return;
+                }
+
+                // clear the field
+                mNewListEditText.setText("");
+                mShoppingListOverviewAdapter.addList(shoppingList.mName);
+                changeFragment(ShoppingListOverviewFragment.newInstance(shoppingList.mName));
+            }
+        });
+
+        mNewListEditText.setOnKeyListener(new View.OnKeyListener() {
+
+            @Override
+            public boolean onKey(View v, int keyCode, KeyEvent event) {
+                ((EditText) v).setError(null);
+                return false;
+            }
+        });
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        mAddListButton.setOnClickListener(null);
+        mNewListEditText.setOnKeyListener(null);
     }
 
     @Override
@@ -176,7 +240,7 @@ public class MainShoppingListView extends ActionBarActivity {
     public void selectList(String listName) {
 
         // always close the drawer
-        mDrawerLayout.closeDrawer(mLeftSideListView);
+        mDrawerLayout.closeDrawer(mLeftMenuDrawerRelativeLayout);
 
         // list is the same as the current one
         // no need to do then something
@@ -227,7 +291,7 @@ public class MainShoppingListView extends ActionBarActivity {
         FragmentTransaction transaction = getFragmentManager().beginTransaction();
         transaction.replace(R.id.container, _Fragment);
         transaction.addToBackStack(null);
-        transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+        //transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
         transaction.commit();
     }
 

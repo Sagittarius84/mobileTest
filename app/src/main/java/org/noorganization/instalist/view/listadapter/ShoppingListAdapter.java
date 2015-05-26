@@ -16,6 +16,7 @@ import org.noorganization.instalist.controller.implementation.ControllerFactory;
 import org.noorganization.instalist.model.ListEntry;
 import org.noorganization.instalist.touchlistener.OnSimpleSwipeGestureListener;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -181,19 +182,36 @@ public class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingListAdapte
      */
     public void changeItem(ListEntry _Entry){
         // replace entry with changed entry
+        // TODO performance
 
-        for(ListEntry listEntry : mListOfEntries){
+        int positionToChange = -1;
+        synchronized (mListOfEntries) {
+            for (ListEntry listEntry : mListOfEntries) {
 
-            // somehow only this works for finding the equal ids
-            long id1 = _Entry.getId();
-            long id2 = listEntry.getId();
-            if( id1 == id2){
+                // somehow only this works for finding the equal ids
+                long id1 = _Entry.getId();
+                long id2 = listEntry.getId();
+                if (id1 == id2) {
+                    if(!_Entry.mStruck) {
+                        int index = mListOfEntries.indexOf(listEntry);
+                        positionToChange = index;
 
-                int index = mListOfEntries.indexOf(listEntry);
-                listEntry = _Entry;
-                mListOfEntries.set(index, listEntry);
-                notifyItemChanged(index);
+                        listEntry = _Entry;
+                        mListOfEntries.set(index, listEntry);
+
+                        notifyItemMoved(index, mListOfEntries.size() - 1);
+                        notifyItemChanged(mListOfEntries.size() - 1);
+                    }
+
+                    // unstroke than on the upper side of the list.
+                }
             }
+        }
+
+        if(positionToChange >= 0){
+            ListEntry entry = mListOfEntries.get(positionToChange);
+            mListOfEntries.remove(positionToChange);
+            mListOfEntries.add(entry);
         }
     }
 
