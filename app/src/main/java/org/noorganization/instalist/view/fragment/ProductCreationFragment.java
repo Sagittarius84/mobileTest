@@ -100,8 +100,7 @@ public class ProductCreationFragment extends BaseCustomFragment {
             return returnValue;
         }
 
-        /**
-         * checks if the input matches the conventions.
+        /**         * checks if the input matches the conventions.
          * @return true if  all is fine, false when some value is curious.
          */
         public boolean isValid(){
