@@ -103,6 +103,11 @@ public class IListControllerTest extends AndroidTestCase {
         assertEquals(2, allEntriesOfHomeList.size());
         assertTrue(allEntriesOfHomeList.contains(returnedEntry2));
         assertTrue(allEntriesOfHomeList.contains(returnedSecondEntry));
+
+        ListEntry returnedThirdEntry = mLML4Test.addOrChangeItem(mListHome, mProductBread, 1.0f, true);
+        assertNotNull(returnedThirdEntry);
+        assertEquals(2.0f, returnedThirdEntry.mAmount, 0.001f);
+        assertEquals(returnedThirdEntry, SugarRecord.findById(ListEntry.class, returnedSecondEntry.getId()));
     }
 
     public void testStrikeAllItems() throws Exception {

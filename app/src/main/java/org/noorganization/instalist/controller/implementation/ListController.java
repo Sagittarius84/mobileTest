@@ -37,7 +37,8 @@ public class ListController implements IListController {
         return mInstance;
     }
 
-    private ListEntry addOrChangeItem(ShoppingList _list, Product _product, float _amount, boolean _prioUsed, int _prio) {
+    private ListEntry addOrChangeItem(ShoppingList _list, Product _product, float _amount,
+                                      boolean _prioUsed, int _prio, boolean _addAmount) {
         if (_list == null || _product == null) {
             return null;
         }
@@ -66,7 +67,7 @@ public class ListController implements IListController {
             if (_amount < 0.001f) {
                 return item;
             }
-            item.mAmount = _amount;
+            item.mAmount = (_addAmount ? item.mAmount : 0.0f) + _amount;
             if (_prioUsed) {
                 item.mPriority = _prio;
             }
@@ -83,12 +84,23 @@ public class ListController implements IListController {
 
     @Override
     public ListEntry addOrChangeItem(ShoppingList _list, Product _product, float _amount) {
-        return addOrChangeItem(_list, _product, _amount, false, 0);
+        return addOrChangeItem(_list, _product, _amount, false, 0, false);
     }
 
     @Override
     public ListEntry addOrChangeItem(ShoppingList _list, Product _product, float _amount, int _prio) {
-        return addOrChangeItem(_list,_product, _amount, true, _prio);
+        return addOrChangeItem(_list,_product, _amount, true, _prio, false);
+    }
+
+    @Override
+    public ListEntry addOrChangeItem(ShoppingList _list, Product _product, float _amount, boolean _addAmount) {
+        return addOrChangeItem(_list, _product, _amount, false, 0, _addAmount);
+    }
+
+    @Override
+    public ListEntry addOrChangeItem(ShoppingList _list, Product _product, float _amount, int _prio,
+                                     boolean _addAmount) {
+        return addOrChangeItem(_list,_product, _amount, true, _prio, true);
     }
 
     @Override
