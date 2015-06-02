@@ -5,13 +5,14 @@
         <item name="android:layout_height">match_parent</item>
     </style>
     <style name="left_side_navigation_drawer">
-        <item name="android:layout_width">240dp</item>
+        <item name="android:layout_width">@dimen/navigation_drawer_width</item>
         <item name="android:layout_height">match_parent</item>
         <item name="android:layout_gravity">start</item>
         <item name="android:background">@color/primary_color_dark</item>
     </style>
     <style name="InstalistTheme1.base_text_style">
         <item name="android:textSize">@dimen/fragment_base_text_size</item>
+        <item name="android:textColor">@color/white</item>
     </style>
     <style name="InstalistTheme1.base_text_view_style" parent="InstalistTheme1.base_text_style">
         <item name="android:layout_width">match_parent</item>
@@ -33,4 +34,17 @@
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">@dimen/base_flatten_button_height</item>
     </style>
+    <style name="InstalistTheme1.base_list_entry" parent="InstalistTheme1.base_text_style">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">@dimen/base_list_entry_height</item>
+      <!--  <item name="android:paddingLeft">@dimen/base_list_entry_padding_left</item>
+        <item name="android:paddingRight">@dimen/base_list_entry_padding_right</item>
+        <item name="android:paddingTop">@dimen/base_list_entry_padding_top</item>-->
+    </style>
+
+    <dimen name="base_list_entry_padding_left">16dp</dimen>
+    <dimen name="base_list_entry_padding_right">16dp</dimen>
+    <dimen name="base_list_entry_padding_top">16dp</dimen>
+    <dimen name="base_list_entry_height">48dp</dimen>
+    <dimen name="navigation_drawer_width">240dp</dimen>
 </resources>

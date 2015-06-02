@@ -2,6 +2,7 @@ package org.noorganization.instalist.view.fragment;
 
 import android.app.Activity;
 import android.app.Fragment;
+import android.app.LauncherActivity;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.widget.DrawerLayout;
@@ -21,9 +22,11 @@ import org.noorganization.instalist.GlobalApplication;
 import org.noorganization.instalist.R;
 import org.noorganization.instalist.controller.IListController;
 import org.noorganization.instalist.controller.implementation.ControllerFactory;
+import org.noorganization.instalist.model.ListEntry;
 import org.noorganization.instalist.model.ShoppingList;
+import org.noorganization.instalist.view.ChangeHandler;
 import org.noorganization.instalist.view.MainShoppingListView;
-import org.noorganization.instalist.view.datahandler.SelectedProductDataHandler;
+import org.noorganization.instalist.view.datahandler.SelectableBaseItemListEntryDataHolder;
 import org.noorganization.instalist.view.decoration.DividerItemListDecoration;
 import org.noorganization.instalist.view.listadapter.ShoppingListAdapter;
 
@@ -70,6 +73,8 @@ public class ShoppingListOverviewFragment extends BaseCustomFragment {
     }
 
 
+
+
     // --------------------------------------------------------------------------------------------
 
 
@@ -107,6 +112,7 @@ public class ShoppingListOverviewFragment extends BaseCustomFragment {
     public void onPause() {
         super.onPause();
         mAddButton.setOnClickListener(null);
+        ((ChangeHandler)((GlobalApplication)getActivity().getApplication()).getChangeHandler()).setCurrentFragment(null);
     }
 
 
@@ -119,6 +125,7 @@ public class ShoppingListOverviewFragment extends BaseCustomFragment {
 
         mContext            = this.getActivity();
         mListController     = ControllerFactory.getListController();
+        ((ChangeHandler)((GlobalApplication)getActivity().getApplication()).getChangeHandler()).setCurrentFragment(this);
         unlockDrawerLayout();
 
         // decl
@@ -150,6 +157,8 @@ public class ShoppingListOverviewFragment extends BaseCustomFragment {
         shoppingListView.setAdapter(mShoppingListAdapter);
         shoppingListView.setItemAnimator(new DefaultItemAnimator());
 
+        ((MainShoppingListView)mActivity).assignDrawer();
+
     }
 
 
@@ -166,13 +175,28 @@ public class ShoppingListOverviewFragment extends BaseCustomFragment {
         mAddButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // reset selected product items ... (lazy resetting!)
-                SelectedProductDataHandler.getInstance().clearListEntries();
-
+                // reset selected items ... (lazy resetting!)
+                SelectableBaseItemListEntryDataHolder.getInstance().clear();
                 Fragment fragment = ProductListDialogFragment.newInstance(mCurrentListName);
                 changeFragment(fragment);
             }
         });
         return view;
+    }
+
+    /**
+     * Updates the adapter in the shoppinglistadapter with the given item.
+     * @param _Entry the item that should be deleted.
+     */
+    public void onListItemUpdated(ListEntry _Entry){
+        mShoppingListAdapter.changeItem(_Entry);
+    }
+
+    /**
+     * Removes the given item from the containing listarray in the shoppinglistadapter.
+     * @param _Entry the item that should be deleted.
+     */
+    public void onListItemDeleted(ListEntry _Entry){
+        mShoppingListAdapter.removeItem(_Entry);
     }
 }

@@ -11,8 +11,6 @@
             style="@style/match_parent_width_height"
             tools:context="org.noorganization.instalist.view.MainShoppingListView"
             tools:ignore="MergeRootFrame" />
-        <ListView
-            android:id="@+id/list_view_left_side_navigation"
-            style="@style/left_side_navigation_drawer"></ListView>
+        <include layout="@layout/drawer_layout_custom" />
     </android.support.v4.widget.DrawerLayout>
 </RelativeLayout>

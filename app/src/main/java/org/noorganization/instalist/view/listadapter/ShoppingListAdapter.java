@@ -16,6 +16,7 @@ import org.noorganization.instalist.controller.implementation.ControllerFactory;
 import org.noorganization.instalist.model.ListEntry;
 import org.noorganization.instalist.touchlistener.OnSimpleSwipeGestureListener;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -146,14 +147,26 @@ public class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingListAdapte
      */
     public void removeItem(ListEntry _Entry){
 
-        int position = mListOfEntries.indexOf(_Entry);
-        // check if element was removed, if yes so update the specific viewholder.
-        if(mListOfEntries.remove(_Entry)){
-            notifyItemRemoved(position);
+        int index = -1;
+        synchronized(mListOfEntries) {
+            for (ListEntry listEntry : mListOfEntries) {
+
+                // somehow only this works for finding the equal ids
+                long id1 = _Entry.getId();
+                long id2 = listEntry.getId();
+                if (id1 == id2) {
+
+                    index = mListOfEntries.indexOf(listEntry);
+                    notifyItemRemoved(index);
+                }
+            }
+        }
+        if(index >= 0) {
+            mListOfEntries.remove(index);
         }
     }
 
-    /**
+    /**--
      * Adds the given entry to the list and notifies the adapter to update the view for this element.
      * @param _Entry entry element that should be added.
      */
@@ -168,8 +181,37 @@ public class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingListAdapte
      */
     public void changeItem(ListEntry _Entry){
         // replace entry with changed entry
-        mListOfEntries.set(mListOfEntries.indexOf(_Entry), _Entry);
-        notifyItemChanged(mListOfEntries.indexOf(_Entry));
+        // TODO performance
+
+        int positionToChange = -1;
+        synchronized (mListOfEntries) {
+            for (ListEntry listEntry : mListOfEntries) {
+
+                // somehow only this works for finding the equal ids
+                long id1 = _Entry.getId();
+                long id2 = listEntry.getId();
+                if (id1 == id2) {
+                    if(!_Entry.mStruck) {
+                        int index = mListOfEntries.indexOf(listEntry);
+                        positionToChange = index;
+
+                        listEntry = _Entry;
+                        mListOfEntries.set(index, listEntry);
+
+                        notifyItemMoved(index, mListOfEntries.size() - 1);
+                        notifyItemChanged(mListOfEntries.size() - 1);
+                    }
+
+                    // unstroke than on the upper side of the list.
+                }
+            }
+        }
+
+        if(positionToChange >= 0){
+            ListEntry entry = mListOfEntries.get(positionToChange);
+            mListOfEntries.remove(positionToChange);
+            mListOfEntries.add(entry);
+        }
     }
 
 

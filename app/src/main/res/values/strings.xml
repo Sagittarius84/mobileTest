@@ -31,4 +31,20 @@
     <string name="recipe_details_cancel">Cancel</string>
     <string name="product_creation_fragment">Illegal amount type. Choose values greater than 0.</string>
     <string name="shopping_list_overview_fragment_no_list_available">No list created.</string>
+    <string name="fragment_ingredient_creation_ingredient_product">Ingredient</string>
+    <string name="fragment_ingredient_creation_ingredient_amount">Amount of ingredient</string>
+    <string name="fragment_ingredient_creation_no_product_assigned">There is no product assigned, first create a new product.</string>
+    <string name="fragment_ingredient_creation_update_ingredient">Update Ingredient</string>
+    <string name="fragment_ingredient_creation_add_ingredient">Add Ingredient</string>
+    <string name="fragment_ingredient_creation_update_ingredient_title">Update ingredient of</string>
+    <string name="fragment_ingredient_creation_add_ingredient_title">Add Ingredient to</string>
+    <string name="invalid_amount">The amount must be greater than 0.0</string>
+    <string name="fragment_recipe_creation_add_recipe">Add Recipe</string>
+    <string name="fragment_recipe_creation_update_recipe">Update Recipe</string>
+    <string name="fragment_recipe_creation_add_recipe_title">Create new Recipe</string>
+    <string name="fragment_recipe_creation_update_recipe_title">Edit Recipe</string>
+    <string name="drawer_layout_custom_add_list_button">Add List</string>
+    <string name="drawer_layout_custom_new_listname_hint">new listname</string>
+    <string name="drawer_layout_custom_no_input">Please insert at least a sign</string>
+    <string name="drawer_layout_custom_exists">List already exists</string>
 </resources>

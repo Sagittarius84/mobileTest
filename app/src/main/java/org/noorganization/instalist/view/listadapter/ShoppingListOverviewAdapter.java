@@ -49,6 +49,16 @@ public class ShoppingListOverviewAdapter extends ArrayAdapter<String> {
         return shoppingListNamesView;
     }
 
+    public void addList(String _ListName){
+        mListOfListNames.add(_ListName);
+        notifyDataSetChanged();
+    }
+
+    public void removeList(String _ListName){
+        mListOfListNames.remove(_ListName);
+        notifyDataSetChanged();
+    }
+
     /**
      * On click listener for managing the on click events on a shoppinglistname
      */

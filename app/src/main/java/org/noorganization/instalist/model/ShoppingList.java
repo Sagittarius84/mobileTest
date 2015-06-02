@@ -5,6 +5,7 @@ import com.orm.SugarRecord;
 import com.orm.query.Condition;
 import com.orm.query.Select;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -48,6 +49,21 @@ public class ShoppingList extends SugarRecord<ShoppingList> {
         }
 
         return Select.from(ShoppingList.class).where(Condition.prop("m_name").eq(_name)).first();
+    }
+
+    /**
+     * Adds all listnames to a list.
+     * @return a list with the current shoppingListNames.
+     */
+    public static List<String> getShoppingListNames(){
+        List<ShoppingList> shoppingLists = Select.from(ShoppingList.class).list();
+        List<String> shoppingListNames = new ArrayList<>();
+
+        for (ShoppingList shoppingList : shoppingLists) {
+            shoppingListNames.add(shoppingList.mName);
+        }
+
+        return shoppingListNames;
     }
 
     @Override
