@@ -191,17 +191,9 @@ public class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingListAdapte
                 long id1 = _Entry.getId();
                 long id2 = listEntry.getId();
                 if (id1 == id2) {
-                    if(!_Entry.mStruck) {
-                        int index = mListOfEntries.indexOf(listEntry);
-                        positionToChange = index;
-
-                        listEntry = _Entry;
-                        mListOfEntries.set(index, listEntry);
-
-                        notifyItemMoved(index, mListOfEntries.size() - 1);
-                        notifyItemChanged(mListOfEntries.size() - 1);
-                    }
-
+                    int index = mListOfEntries.indexOf(listEntry);
+                    positionToChange = index;
+                    mListOfEntries.set(index, _Entry);
                     // unstroke than on the upper side of the list.
                 }
             }
@@ -211,9 +203,8 @@ public class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingListAdapte
             ListEntry entry = mListOfEntries.get(positionToChange);
             mListOfEntries.remove(positionToChange);
             mListOfEntries.add(entry);
+            notifyItemMoved(positionToChange, mListOfEntries.size() - 1);
+            notifyItemChanged(mListOfEntries.size() - 1);
         }
     }
-
-
-
 }
