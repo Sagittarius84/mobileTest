@@ -327,7 +327,7 @@ public class ProductCreationFragment extends BaseCustomFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mCurrentShoppingList = ShoppingList.find(ShoppingList.class, ShoppingList.LIST_NAME_ATTR + "=?", getArguments().getString("listName")).get(0);
+        mCurrentShoppingList = ShoppingList.find(ShoppingList.class, ShoppingList.ATTR_NAME + "=?", getArguments().getString("listName")).get(0);
 
         // check if an product should be shown
         if(getArguments().getInt(ARGS_PRODUCT_ID) >= 0){

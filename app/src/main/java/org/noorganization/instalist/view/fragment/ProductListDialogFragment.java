@@ -70,7 +70,7 @@ public class ProductListDialogFragment extends BaseCustomFragment{
             return;
         }
         mCurrentListName    = bundle.getString(MainShoppingListView.KEY_LISTNAME);
-        mCurrentShoppingList = ShoppingList.find(ShoppingList.class, ShoppingList.LIST_NAME_ATTR + "=?", mCurrentListName).get(0);
+        mCurrentShoppingList = ShoppingList.find(ShoppingList.class, ShoppingList.ATTR_NAME + "=?", mCurrentListName).get(0);
 
         List<Product> productList = Product.listAll(Product.class);
         List<Recipe> recipeList = Recipe.listAll(Recipe.class);

@@ -104,7 +104,7 @@ public class MainShoppingListView extends ActionBarActivity {
         assignDrawer();
 
         if (savedInstanceState == null) {
-            selectList(GlobalApplication.getInstance().getShoppingListNames().get(0));
+            selectList(ShoppingList.getShoppingListNames().get(0));
         }
     }
 
@@ -226,6 +226,11 @@ public class MainShoppingListView extends ActionBarActivity {
                     .show();
         }
 
+
+    }
+
+    public void exitApp(){
+        super.onBackPressed();
     }
 
     // --------------------------------------------------------------------------------
