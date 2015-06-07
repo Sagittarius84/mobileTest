@@ -1,18 +1,18 @@
 package org.noorganization.instalist.view.fragment;
 
-import android.app.Activity;
 import android.app.Fragment;
-import android.app.LauncherActivity;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -29,8 +29,13 @@ import org.noorganization.instalist.view.MainShoppingListView;
 import org.noorganization.instalist.view.datahandler.SelectableBaseItemListEntryDataHolder;
 import org.noorganization.instalist.view.decoration.DividerItemListDecoration;
 import org.noorganization.instalist.view.listadapter.ShoppingListAdapter;
+import org.noorganization.instalist.view.sorting.AlphabeticalListEntryComparator;
+import org.noorganization.instalist.view.sorting.PriorityListEntryComparator;
 
+import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
+import java.util.WeakHashMap;
 
 /**
  * A ShoppingListOverviewFragment containing a list view.
@@ -50,6 +55,17 @@ public class ShoppingListOverviewFragment extends BaseCustomFragment {
     private ShoppingListAdapter mShoppingListAdapter;
 
     private IListController mListController;
+
+    private static String PREFERENCES_NAME = "SHOPPING_LIST_FRAGMENT";
+
+    private static String SORT_MODE = "SORT_MODE";
+    /**
+     * Contains the mapping from a Integer to comperators.
+     */
+    private Map<Integer, Comparator> mMapComperable;
+
+    private static Integer SORT_BY_NAME = 0;
+    private static Integer SORT_BY_PRIORITY = 1;
 
     // --------------------------------------------------------------------------------------------
 
@@ -81,17 +97,54 @@ public class ShoppingListOverviewFragment extends BaseCustomFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
         // get bundle args to get the listname that should be shown
         Bundle bundle = this.getArguments();
         if (bundle == null) {
             return;
         }
         mCurrentListName    = bundle.getString(MainShoppingListView.KEY_LISTNAME);
+        mMapComperable = new WeakHashMap<>();
+        mMapComperable.put(0, new AlphabeticalListEntryComparator());
+        mMapComperable.put(1, new PriorityListEntryComparator());
     }
 
 
     // --------------------------------------------------------------------------------------------
 
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.menu_main, menu);
+        super.onCreateOptionsMenu(menu, inflater);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        SharedPreferences sortDetails = mActivity.getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE);
+
+        // swtich which action item was pressed
+        switch (id) {
+            case R.id.list_items_sort_by_priority:
+                mShoppingListAdapter.sortByComparator(mMapComperable.get(SORT_BY_PRIORITY));
+
+                sortDetails.edit()
+                        .putInt(SORT_MODE, SORT_BY_PRIORITY)
+                        .commit();
+
+                break;
+            case R.id.list_items_sort_by_name:
+                mShoppingListAdapter.sortByComparator(mMapComperable.get(SORT_BY_NAME));
+                sortDetails.edit()
+                        .putInt(SORT_MODE, SORT_BY_NAME)
+                        .commit();
+                break;
+            default:
+                break;
+        }
+        return super.onOptionsItemSelected(item);
+    }
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
@@ -128,6 +181,8 @@ public class ShoppingListOverviewFragment extends BaseCustomFragment {
         ((ChangeHandler)((GlobalApplication)getActivity().getApplication()).getChangeHandler()).setCurrentFragment(this);
         unlockDrawerLayout();
 
+        SharedPreferences sortDetails = mContext.getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE);
+
         // decl
         final RecyclerView shoppingListView;
         // init
@@ -148,6 +203,8 @@ public class ShoppingListOverviewFragment extends BaseCustomFragment {
         }
 
         mShoppingListAdapter = new ShoppingListAdapter(getActivity(), GlobalApplication.getInstance().getListEntries(mCurrentListName));
+        mShoppingListAdapter.sortByComparator(mMapComperable.get(sortDetails.getInt(SORT_MODE, SORT_BY_PRIORITY)));
+
         // use a linear layout manager
         mLayoutManager = new LinearLayoutManager(this.getActivity());
         mLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);

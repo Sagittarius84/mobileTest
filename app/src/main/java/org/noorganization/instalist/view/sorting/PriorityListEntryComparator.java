@@ -13,6 +13,12 @@ public class PriorityListEntryComparator implements Comparator<ListEntry> {
 
     @Override
     public int compare(ListEntry _toCheck, ListEntry _baseEntry) {
+        if(_toCheck.mStruck && !_baseEntry.mStruck){
+            return 1;
+        }else if(!_toCheck.mStruck && _baseEntry.mStruck){
+            return -1;
+        }
+
         if (_toCheck.mPriority > _baseEntry.mPriority) {
             return -1;
         }

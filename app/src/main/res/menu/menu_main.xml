@@ -8,8 +8,8 @@
         android:orderInCategory="100"
         app:showAsAction="never" />
     <item
-        android:id="@+id/list_items_sort_by_amount"
-        android:title="@string/menu_sort_by_amount"
+        android:id="@+id/list_items_sort_by_priority"
+        android:title="@string/menu_sort_by_priority"
         android:orderInCategory="100"
         app:showAsAction="never" />
 </menu>
