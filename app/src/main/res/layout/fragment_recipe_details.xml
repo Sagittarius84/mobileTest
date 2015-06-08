@@ -41,7 +41,7 @@
         />-->
     <TextView
         android:id="@+id/fragment_recipe_details_tags_textview"
-        android:text="@string/product_details_tag_textview_text"
+        android:text="@string/product_details_tags_hint"
         style="@style/InstalistTheme1.base_text_view_style"
         android:layout_below="@+id/fragment_recipe_details_recipe_name"
         android:layout_alignParentLeft="true"
@@ -49,7 +49,7 @@
 
     <EditText
         android:id="@+id/fragment_recipe_details_recipe_tags"
-        android:hint="@string/product_details_tag_edittext_hint"
+        android:hint="@string/product_details_tags_hint"
         style="@style/InstalistTheme1.base_edit_text_style"
         android:layout_below="@+id/fragment_recipe_details_tags_textview"
         android:layout_alignParentLeft="true"
