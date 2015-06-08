@@ -9,6 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.Toast;
 
 import org.noorganization.instalist.R;
@@ -17,8 +18,11 @@ import org.noorganization.instalist.model.Product;
 import org.noorganization.instalist.model.ShoppingList;
 import org.noorganization.instalist.model.Tag;
 import org.noorganization.instalist.model.TaggedProduct;
+import org.noorganization.instalist.view.customview.AmountPicker;
 import org.noorganization.instalist.view.utils.ViewUtils;
 
+import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -36,11 +40,8 @@ public class ProductCreationFragment extends BaseCustomFragment {
     /**
      * used when product values should be rendered into view.
      */
-    private Product             mProduct;
-
-    private Button mAddButton;
-    private Button mDecAmountButton;
-    private Button mIncAmountButton;
+    private Product     mProduct;
+    private Button      mAddButton;
 
 
     /**
@@ -48,14 +49,14 @@ public class ProductCreationFragment extends BaseCustomFragment {
      * views.
      */
     private final static class InputParamsHolder{
-        private EditText mProductNameEditText;
-        private EditText mProductAmountEditText;
-        private EditText mProductTagsEditText;
-        private Context  mContext;
+        private EditText     mProductName;
+        private AmountPicker mProductAmount;
+        private EditText     mProductTags;
+        private Context      mContext;
 
         public InputParamsHolder(View _View, Context _Context){
             assignContextToEditViews(_View);
-            mProductAmountEditText.setText(String.valueOf(0.0f));
+            mProductAmount.setValue(0.0f);
             this.mContext = _Context;
         }
 
@@ -69,8 +70,8 @@ public class ProductCreationFragment extends BaseCustomFragment {
             assignContextToEditViews(_View);
             this.mContext = _Context;
 
-            this.mProductAmountEditText.setText(String.valueOf(_Product.mDefaultAmount));
-            this.mProductNameEditText.setText(String.valueOf(_Product.mName));
+            this.mProductAmount.setValue(_Product.mDefaultAmount);
+            this.mProductName.setText(_Product.mName);
 
             List<TaggedProduct> taggedProductList = TaggedProduct.findTaggedProductsByProduct(_Product);
             if(taggedProductList.isEmpty()){
@@ -84,7 +85,7 @@ public class ProductCreationFragment extends BaseCustomFragment {
             if(taggedProductList.size() > 1) {
                 tags = tags.substring(0, tags.length() - 2);
             }
-            this.mProductTagsEditText.setText(tags);
+            this.mProductTags.setText(tags);
         }
 
         /**
@@ -94,8 +95,8 @@ public class ProductCreationFragment extends BaseCustomFragment {
          */
         public boolean isFilled(){
             boolean returnValue = true;
-            returnValue &= ViewUtils.checkTextViewIsFilled(mProductNameEditText);
-            returnValue &= ViewUtils.checkTextViewIsFilled(mProductAmountEditText);
+            returnValue &= ViewUtils.checkTextViewIsFilled(mProductName);
+            returnValue &= mProductAmount.getValue() > 0.0f;
             // check if amount is greater than zero
             return returnValue;
         }
@@ -106,7 +107,7 @@ public class ProductCreationFragment extends BaseCustomFragment {
         public boolean isValid(){
             boolean returnValue = true;
 
-            float amount = Float.valueOf(mProductAmountEditText.getText().toString());
+            float amount = mProductAmount.getValue();
             if(amount <= 0.0f){
                 Toast.makeText(mContext, mContext.getResources().getText(R.string.product_creation_fragment), Toast.LENGTH_SHORT).show();
                 returnValue = false;
@@ -121,7 +122,7 @@ public class ProductCreationFragment extends BaseCustomFragment {
          * @return name of the product.
          */
         public String getProductName(){
-            return mProductNameEditText.getText().toString();
+            return mProductName.getText().toString();
         }
 
         /**
@@ -129,10 +130,7 @@ public class ProductCreationFragment extends BaseCustomFragment {
          * @return  a float value of the amount input. if edittext is set the value of this, else 0.0f.
          */
         public float getProductAmount(){
-            if(mProductAmountEditText.getText().length() > 0) {
-                return Float.valueOf(mProductAmountEditText.getText().toString());
-            }
-            return 0.0f;
+            return mProductAmount.getValue();
         }
 
         /**
@@ -140,46 +138,35 @@ public class ProductCreationFragment extends BaseCustomFragment {
          * @return a string array of extracted tags.
          */
         public String[] getTags(){
-            if(mProductTagsEditText.getText().length() > 0) {
-                    String tag = mProductTagsEditText.getText().toString();
-                    return tag.split(",");
+            String tagValue = mProductTags.getText().toString();
+            LinkedList<String> rtn = new LinkedList<>(Arrays.asList(tagValue.split("\\s*,\\s*")));
+            int last_size = rtn.size() + 1;
+            while (last_size > rtn.size()) {
+                last_size = rtn.size();
+                rtn.remove("");
             }
-            return new String[]{""};
-        }
-
-        /**
-         * Increaese the amount of a product by 1.0f.
-         */
-        public void incProductAmount(){
-            changeProductAmount(1.0f);
-        }
-
-        /**
-         * decreaes the amount of a product by 1.0f.
-         */
-        public void decProductAmount(){
-            changeProductAmount(-1.0f);
+            return rtn.toArray(new String[rtn.size()]);
         }
 
         /**
          * Adds the given value to the productAmount. Takes care when value is less than 0.0f(resets it to 0.0f).
-         * @param changeValue the value that should be added/substracted.
+         * @param _changeValue the value that should be added/substracted.
          */
-        private void changeProductAmount(float changeValue){
+        private void changeProductAmount(float _changeValue){
             float amount = getProductAmount();
-            amount += changeValue;
+            amount += _changeValue;
             if(amount < 0.0f){
                 amount = 0.0f;
             }
-            mProductAmountEditText.setText(String.valueOf(amount));
+            mProductAmount.setValue(amount);
         }
         /**
          * Assigns the context to the edit view elements in this class. (like EditText)
          */
         private void assignContextToEditViews(View view){
-            mProductNameEditText    = (EditText) view.findViewById(R.id.product_details_product_name_edittext);
-            mProductAmountEditText  = (EditText) view.findViewById(R.id.product_details_amount_edittext);
-            mProductTagsEditText    = (EditText) view.findViewById(R.id.product_details_tag_edittext);
+            mProductName    = (EditText) view.findViewById(R.id.product_details_product_name);
+            mProductAmount  = (AmountPicker) view.findViewById(R.id.product_details_amount);
+            mProductTags    = (EditText) view.findViewById(R.id.product_details_tag);
         }
     }
 
@@ -346,21 +333,6 @@ public class ProductCreationFragment extends BaseCustomFragment {
             mInputParams = new InputParamsHolder(view, getActivity(), mProduct);
         }
         mAddButton = (Button) view.findViewById(R.id.product_details_action_button_new_or_update);
-        mDecAmountButton = (Button) view.findViewById(R.id.product_details_dec_amount);
-        mIncAmountButton = (Button) view.findViewById(R.id.product_details_inc_amount);
-        mIncAmountButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mInputParams.incProductAmount();
-            }
-        });
-
-        mDecAmountButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mInputParams.decProductAmount();
-            }
-        });
         mAddButton.setOnClickListener(mOnCreateProductClickListener);
         return view;
     }
@@ -368,8 +340,5 @@ public class ProductCreationFragment extends BaseCustomFragment {
     @Override
     public void onPause() {
         super.onPause();
-        mDecAmountButton.setOnClickListener(null);
-        mIncAmountButton.setOnClickListener(null);
-        mIncAmountButton.setOnClickListener(null);
     }
 }
