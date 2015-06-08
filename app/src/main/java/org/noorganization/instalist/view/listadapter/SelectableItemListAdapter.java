@@ -7,7 +7,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
+import android.widget.Filter;
+import android.widget.Filterable;
 import android.widget.TextView;
+
+import com.orm.query.Select;
 
 import org.noorganization.instalist.R;
 import org.noorganization.instalist.model.ListEntry;
@@ -23,16 +27,18 @@ import org.noorganization.instalist.view.fragment.RecipeCreationFragment;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Created by TS on 25.05.2015.
  */
-public class SelectableItemListAdapter extends ArrayAdapter<SelectableBaseItemListEntry> {
+public class SelectableItemListAdapter extends ArrayAdapter<SelectableBaseItemListEntry> implements Filterable{
 
     final String LOG_TAG    = SelectableProductListAdapter.class.getName();
 
     private Activity mContext;
     private List<SelectableBaseItemListEntry> mSelectableItems;
+    private List<SelectableBaseItemListEntry> mResSelectableItems;
 
     private ShoppingList mCurrentShoppingList;
 
@@ -40,6 +46,8 @@ public class SelectableItemListAdapter extends ArrayAdapter<SelectableBaseItemLi
         super(_Context, R.layout.list_selectable_product  , _ProductList);
         mContext = _Context;
         mSelectableItems = _ProductList;
+        mResSelectableItems = new ArrayList<>(_ProductList);
+
         mCurrentShoppingList = _CurrentShoppingList;
         if(SelectableBaseItemListEntryDataHolder.getInstance().getListEntries().size() > 0) {
             mSelectableItems = SelectableBaseItemListEntryDataHolder.getInstance().getListEntries();
@@ -148,6 +156,65 @@ public class SelectableItemListAdapter extends ArrayAdapter<SelectableBaseItemLi
             transaction.commit();
             return true;
         }
+    }
+
+    @Override
+    public Filter getFilter() {
+        final Filter filter = new Filter() {
+
+            @Override
+            protected FilterResults performFiltering(CharSequence constraint) {
+                FilterResults result = new FilterResults();
+
+                // TODO: make it thread safe
+                List<SelectableBaseItemListEntry> listEntries = new ArrayList<>( mResSelectableItems);
+
+                if(constraint == null || constraint.length() == 0){
+                    result.values = listEntries;
+                    result.count = listEntries.size();
+                }else{
+                    BaseItemListEntry.eItemType filterType;
+                    ArrayList<SelectableBaseItemListEntry> filteredList = new ArrayList<SelectableBaseItemListEntry>();
+
+                    switch(Integer.parseInt(constraint.toString())){
+                        case 0:
+                            filterType = BaseItemListEntry.eItemType.PRODUCT_LIST_ENTRY;
+                            break;
+                        case 1:
+                            filterType = BaseItemListEntry.eItemType.RECIPE_LIST_ENTRY;
+                            break;
+                        case 2:
+                            filterType = BaseItemListEntry.eItemType.EMPTY;
+                            break;
+                        default:
+                            filterType = BaseItemListEntry.eItemType.EMPTY;
+                            break;
+                    }
+
+                    if(filterType != BaseItemListEntry.eItemType.EMPTY) {
+                        for (SelectableBaseItemListEntry entry : listEntries) {
+                            if (entry.getItemListEntry().getType() == filterType)
+                                filteredList.add(entry);
+                        }
+                    }
+                    else {
+                        filteredList = new ArrayList<>(mResSelectableItems);
+                    }
+                    result.values = filteredList;
+                    result.count = filteredList.size();
+                }
+
+                return result;
+            }
+
+            @SuppressWarnings("unchecked")
+            @Override
+            protected void publishResults(CharSequence constraint, FilterResults results) {
+                mSelectableItems = (ArrayList<SelectableBaseItemListEntry>) results.values;
+                notifyDataSetChanged();
+            }
+        };
+        return filter;
     }
 
 }

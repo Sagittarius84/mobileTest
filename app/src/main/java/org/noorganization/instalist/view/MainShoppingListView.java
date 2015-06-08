@@ -334,7 +334,7 @@ public class MainShoppingListView extends ActionBarActivity {
                 if (mToolbar.getTitle() != null) {
                     mTitle = mToolbar.getTitle().toString();
                     mToolbar.setTitle(R.string.choose_list);
-                    mToolbar.setNavigationIcon(R.mipmap.ic_arrow_back_black_18dp);
+                    mToolbar.setNavigationIcon(R.mipmap.ic_arrow_back_black_36dp);
                 }
                 // check if options menu has changed
                 invalidateOptionsMenu();

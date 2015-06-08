@@ -3,6 +3,9 @@ package org.noorganization.instalist.view.fragment;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -46,7 +49,7 @@ public class ProductListDialogFragment extends BaseCustomFragment{
 
     // create the abstract selectable list entries to show mixed entries
     private List<SelectableBaseItemListEntry> mSelectableBaseItemListEntries = new ArrayList<>();
-
+    private SelectableItemListAdapter mListAdapter;
 
     /**
      * Creates an instance of an ProductListDialogFragment.
@@ -69,6 +72,8 @@ public class ProductListDialogFragment extends BaseCustomFragment{
         if (bundle == null) {
             return;
         }
+
+        setHasOptionsMenu(true);
         mCurrentListName    = bundle.getString(MainShoppingListView.KEY_LISTNAME);
         mCurrentShoppingList = ShoppingList.find(ShoppingList.class, ShoppingList.ATTR_NAME + "=?", mCurrentListName).get(0);
 
@@ -97,7 +102,7 @@ public class ProductListDialogFragment extends BaseCustomFragment{
         setToolbarTitle(mActivity.getResources().getText(R.string.product_list_dialog_title).toString());
         lockDrawerLayoutClosed();
 
-        mToolbar.setNavigationIcon(R.mipmap.ic_arrow_back_black_18dp);
+        mToolbar.setNavigationIcon(R.mipmap.ic_arrow_back_black_36dp);
 
         mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
@@ -111,10 +116,9 @@ public class ProductListDialogFragment extends BaseCustomFragment{
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
 
-        ListAdapter adapter;
         View view = inflater.inflate(R.layout.fragment_product_list_dialog, container, false);
 
-        adapter = new SelectableItemListAdapter(getActivity(), mSelectableBaseItemListEntries, mCurrentShoppingList);
+        mListAdapter = new SelectableItemListAdapter(getActivity(), mSelectableBaseItemListEntries, mCurrentShoppingList);
 
         mAddNewProductButton    = (Button) view.findViewById(R.id.fragment_product_list_dialog_add_new_product);
         mCancelButton           = (Button) view.findViewById(R.id.fragment_product_list_dialog_cancel);
@@ -123,11 +127,37 @@ public class ProductListDialogFragment extends BaseCustomFragment{
 
         ListView listView           = (ListView) view.findViewById(R.id.fragment_product_list_dialog_product_list_view);
 
-        listView.setAdapter(adapter);
+        listView.setAdapter(mListAdapter);
 
         setToolbarTitle(mActivity.getResources().getString(R.string.product_list_dialog_title) + " " + mCurrentShoppingList.mName);
 
         return view;
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.menu_product_list_dialog, menu);
+        super.onCreateOptionsMenu(menu, inflater);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+        switch (item.getItemId()){
+            case R.id.menu_product_list_dialog_filter_by_product:
+                mListAdapter.getFilter().filter("0");
+                break;
+            case R.id.menu_product_list_dialog_filter_by_recipe:
+                mListAdapter.getFilter().filter("1");
+                break;
+            case R.id.menu_product_list_dialog_filter_by_all:
+                mListAdapter.getFilter().filter("2");
+                break;
+            case R.id.menu_product_list_dialog_sort_by_name:
+                break;
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 
     /**
