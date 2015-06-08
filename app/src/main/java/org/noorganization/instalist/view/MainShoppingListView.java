@@ -112,7 +112,7 @@ public class MainShoppingListView extends ActionBarActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         //getMenuInflater().inflate(R.menu.menu_main, menu);
-        mToolbar.inflateMenu(R.menu.menu_toolbar_main_listview);
+        //mToolbar.inflateMenu(R.menu.menu_toolbar_main_listview);
         return true;
     }
 
@@ -128,17 +128,6 @@ public class MainShoppingListView extends ActionBarActivity {
         // ActionBarDrawerToggle will take care of this.
         if (mNavBarToggle.onOptionsItemSelected(item)) {
             return true;
-        }
-
-        // swtich which action item was pressed
-        switch (id) {
-            case R.id.list_items_sort_by_amount:
-                // say controller there is a statechange
-                break;
-            case R.id.list_items_sort_by_name:
-                break;
-            default:
-                break;
         }
 
         return super.onOptionsItemSelected(item);

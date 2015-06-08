@@ -15,8 +15,12 @@ import org.noorganization.instalist.controller.IListController;
 import org.noorganization.instalist.controller.implementation.ControllerFactory;
 import org.noorganization.instalist.model.ListEntry;
 import org.noorganization.instalist.touchlistener.OnSimpleSwipeGestureListener;
+import org.noorganization.instalist.view.sorting.AlphabeticalListEntryComparator;
+import org.noorganization.instalist.view.sorting.PriorityListEntryComparator;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -172,7 +176,13 @@ public class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingListAdapte
      */
     public void addItem(ListEntry _Entry){
         mListOfEntries.add(_Entry);
-        notifyItemInserted(mListOfEntries.size()-1);
+        notifyItemInserted(mListOfEntries.size() - 1);
+    }
+
+    public void sortByComparator(Comparator _Comparator) {
+        // AlphabeticalListEntryComparator comparator = new AlphabeticalListEntryComparator();
+        Collections.sort(mListOfEntries, _Comparator);
+        notifyDataSetChanged();
     }
 
     /**
@@ -191,17 +201,9 @@ public class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingListAdapte
                 long id1 = _Entry.getId();
                 long id2 = listEntry.getId();
                 if (id1 == id2) {
-                    if(!_Entry.mStruck) {
-                        int index = mListOfEntries.indexOf(listEntry);
-                        positionToChange = index;
-
-                        listEntry = _Entry;
-                        mListOfEntries.set(index, listEntry);
-
-                        notifyItemMoved(index, mListOfEntries.size() - 1);
-                        notifyItemChanged(mListOfEntries.size() - 1);
-                    }
-
+                    int index = mListOfEntries.indexOf(listEntry);
+                    positionToChange = index;
+                    mListOfEntries.set(index, _Entry);
                     // unstroke than on the upper side of the list.
                 }
             }
@@ -211,9 +213,8 @@ public class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingListAdapte
             ListEntry entry = mListOfEntries.get(positionToChange);
             mListOfEntries.remove(positionToChange);
             mListOfEntries.add(entry);
+            notifyItemMoved(positionToChange, mListOfEntries.size() - 1);
+            notifyItemChanged(mListOfEntries.size() - 1);
         }
     }
-
-
-
 }
