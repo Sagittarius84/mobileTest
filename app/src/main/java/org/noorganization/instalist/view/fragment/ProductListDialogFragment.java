@@ -193,7 +193,7 @@ public class ProductListDialogFragment extends BaseCustomFragment{
                             List<Ingredient> ingredients = recipe.getIngredients();
                             for(Ingredient ingredient : ingredients){
                                 product = ingredient.mProduct;
-                                mListController.addOrChangeItem(mCurrentShoppingList, product, ingredient.mAmount);
+                                mListController.addOrChangeItem(mCurrentShoppingList, product, ingredient.mAmount, true);
                             }
                             break;
                         default:

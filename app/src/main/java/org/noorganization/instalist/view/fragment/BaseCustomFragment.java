@@ -22,6 +22,7 @@ public class BaseCustomFragment extends Fragment {
     protected Toolbar mToolbar;
     protected DrawerLayout mDrawerLayout;
     protected Activity mActivity;
+    protected String mTitle;
 
     @Nullable
     @Override
@@ -34,6 +35,20 @@ public class BaseCustomFragment extends Fragment {
             throw new IllegalStateException("The activity is not an instance of " +  MainShoppingListView.class.getName());
         }
         return super.onCreateView(inflater, container, savedInstanceState);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if(mTitle != null){
+            mToolbar.setTitle(mTitle);
+        }
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        mTitle = mToolbar.getTitle().toString();
     }
 
     /**

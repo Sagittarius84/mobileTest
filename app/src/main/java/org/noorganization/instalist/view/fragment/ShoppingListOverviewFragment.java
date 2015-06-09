@@ -210,7 +210,7 @@ public class ShoppingListOverviewFragment extends BaseCustomFragment {
         mLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
 
         shoppingListView.setLayoutManager(mLayoutManager);
-        shoppingListView.addItemDecoration(new DividerItemListDecoration(getResources().getDrawable(R.drawable.abc_list_divider_mtrl_alpha), false, false));
+        shoppingListView.addItemDecoration(new DividerItemListDecoration(getResources().getDrawable(R.drawable.list_divider), false, false));
         shoppingListView.setAdapter(mShoppingListAdapter);
         shoppingListView.setItemAnimator(new DefaultItemAnimator());
 

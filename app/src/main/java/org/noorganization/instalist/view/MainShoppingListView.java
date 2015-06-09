@@ -5,6 +5,7 @@ import android.app.DialogFragment;
 import android.app.Fragment;
 import android.app.FragmentTransaction;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.v4.widget.DrawerLayout;
@@ -66,6 +67,8 @@ public class MainShoppingListView extends ActionBarActivity {
      */
     private DrawerLayout mDrawerLayout;
 
+    private Button mSettingsButton;
+
     /**
      * Title of the toolbar.
      */
@@ -90,13 +93,16 @@ public class MainShoppingListView extends ActionBarActivity {
         setSupportActionBar(mToolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        mDrawerLayout = (DrawerLayout) findViewById(R.id.main_drawer_layout_container);
-        mLeftSideListView = (ListView) findViewById(R.id.drawer_layout_custom_list_name_view);
-        mNewListEditText = (EditText) findViewById(R.id.drawer_layout_custom_new_listname_edittext);
-        mAddListButton = (Button) findViewById(R.id.drawer_layout_custom_add_list_name_button);
-        mLeftMenuDrawerRelativeLayout = (RelativeLayout) findViewById(R.id.list_view_left_side_navigation);
+        mDrawerLayout       = (DrawerLayout) findViewById(R.id.main_drawer_layout_container);
+        mLeftSideListView   = (ListView) findViewById(R.id.drawer_layout_custom_list_name_view);
+        mNewListEditText    = (EditText) findViewById(R.id.drawer_layout_custom_new_listname_edittext);
+        mAddListButton      = (Button) findViewById(R.id.drawer_layout_custom_add_list_name_button);
 
-        mShoppingListOverviewAdapter = new ShoppingListOverviewAdapter(this, shoppingListNames);
+        mLeftMenuDrawerRelativeLayout   = (RelativeLayout) findViewById(R.id.list_view_left_side_navigation);
+        mShoppingListOverviewAdapter    = new ShoppingListOverviewAdapter(this, shoppingListNames);
+
+        mSettingsButton = (Button) findViewById(R.id.drawer_layout_custom_settings);
+
         // fill the list with selectable lists
         mLeftSideListView.setAdapter(mShoppingListOverviewAdapter);
         mDrawerLayout.setFitsSystemWindows(true);
@@ -143,6 +149,10 @@ public class MainShoppingListView extends ActionBarActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        // TODO: try to remove this
+        mShoppingListOverviewAdapter.notifyDataSetChanged();
+        // end todo
+
         mAddListButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -167,12 +177,27 @@ public class MainShoppingListView extends ActionBarActivity {
             }
         });
 
+        mNewListEditText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if(hasFocus){
+                    ((EditText) v).setError(null);
+                }
+            }
+        });
         mNewListEditText.setOnKeyListener(new View.OnKeyListener() {
 
             @Override
             public boolean onKey(View v, int keyCode, KeyEvent event) {
                 ((EditText) v).setError(null);
                 return false;
+            }
+        });
+
+        mSettingsButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent settingsIntent;
             }
         });
     }
@@ -182,6 +207,7 @@ public class MainShoppingListView extends ActionBarActivity {
         super.onPause();
         mAddListButton.setOnClickListener(null);
         mNewListEditText.setOnKeyListener(null);
+        mSettingsButton.setOnClickListener(null);
     }
 
     @Override
@@ -214,8 +240,6 @@ public class MainShoppingListView extends ActionBarActivity {
                     .setIcon(android.R.drawable.ic_dialog_alert)
                     .show();
         }
-
-
     }
 
     public void exitApp(){
@@ -299,17 +323,10 @@ public class MainShoppingListView extends ActionBarActivity {
     }
 
     /**
-     * Add the selected products to list? or say that we should update the view.
-     */
-    public void addProductsToList() {
-
-    }
-
-    /**
      * Sets the drawer to toolbar.
      */
     public void assignDrawer(){
-        mToolbar.setNavigationIcon(R.mipmap.ic_menu_black_36dp);
+        mToolbar.setNavigationIcon(R.mipmap.ic_menu_white_36dp);
         // navbar custom design of toolbar
         mNavBarToggle = new ActionBarDrawerToggle(
                 this,
@@ -323,7 +340,7 @@ public class MainShoppingListView extends ActionBarActivity {
             public void onDrawerClosed(View drawerView) {
                 super.onDrawerClosed(drawerView);
                 mToolbar.setTitle(mTitle);
-                mToolbar.setNavigationIcon(R.mipmap.ic_menu_black_36dp);
+                mToolbar.setNavigationIcon(R.mipmap.ic_menu_white_36dp);
                 // check if options menu has changed
                 invalidateOptionsMenu();
             }
@@ -334,7 +351,7 @@ public class MainShoppingListView extends ActionBarActivity {
                 if (mToolbar.getTitle() != null) {
                     mTitle = mToolbar.getTitle().toString();
                     mToolbar.setTitle(R.string.choose_list);
-                    mToolbar.setNavigationIcon(R.mipmap.ic_arrow_back_black_36dp);
+                    mToolbar.setNavigationIcon(R.mipmap.ic_arrow_back_white_36dp);
                 }
                 // check if options menu has changed
                 invalidateOptionsMenu();

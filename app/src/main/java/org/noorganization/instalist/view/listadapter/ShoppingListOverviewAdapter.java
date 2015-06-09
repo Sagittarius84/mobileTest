@@ -59,6 +59,9 @@ public class ShoppingListOverviewAdapter extends ArrayAdapter<String> {
         notifyDataSetChanged();
     }
 
+    public void notifyUpadateListeners(){
+        notifyDataSetChanged();
+    }
     /**
      * On click listener for managing the on click events on a shoppinglistname
      */

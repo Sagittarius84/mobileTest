@@ -153,9 +153,7 @@ public class IngredientCreationFragment extends BaseCustomFragment {
         }
 
         titleString = titleString.concat(" " + RecipeDataHolder.getInstance().getRecipeName());
-
         setToolbarTitle(titleString);
-
         return view;
     }
 

@@ -8,7 +8,7 @@
         <item name="android:layout_width">@dimen/navigation_drawer_width</item>
         <item name="android:layout_height">match_parent</item>
         <item name="android:layout_gravity">start</item>
-        <item name="android:background">@color/primary_color_dark</item>
+        <item name="android:background">@color/white</item>
     </style>
     <style name="InstalistTheme1.base_text_style">
         <item name="android:textSize">@dimen/fragment_base_text_size</item>

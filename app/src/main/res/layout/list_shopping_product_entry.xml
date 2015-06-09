@@ -2,7 +2,7 @@
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/list_product_shopping_view"
-    style="@style/single_line_product_list_view"
+    style="@style/single_line_list_view"
     >
     <TextView
         android:id = "@+id/list_product_shopping_product_amount"
