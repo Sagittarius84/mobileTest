@@ -4,16 +4,22 @@ import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.InputType;
+import android.text.method.DigitsKeyListener;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 
+import org.noorganization.instalist.GlobalApplication;
 import org.noorganization.instalist.R;
+import org.noorganization.instalist.view.utils.ViewUtils;
 
 import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.text.ParseException;
+import java.util.Locale;
 
 /**
  * A picker for amounts. This is a compound view made with a LinearLayout, an EditText and two
@@ -52,6 +58,7 @@ public class AmountPicker extends LinearLayout {
         mIncreaseButton.setOnClickListener(changeListener);
 
         mValueField.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
+        mValueField.setKeyListener(ViewUtils.getNumberListener());
         mValueField.setHint(R.string.product_details_amount_hint);
 
         if (getOrientation() == LinearLayout.HORIZONTAL) {
@@ -70,7 +77,7 @@ public class AmountPicker extends LinearLayout {
             addView(mDecreaseButton);
         }
 
-        mStep = 1.0f;
+        mStep = 0.5f;
     }
 
     /**
@@ -90,15 +97,7 @@ public class AmountPicker extends LinearLayout {
      * @return The value or 0.0f, if nothing set.
      */
     public float getValue() {
-        String value = "0" + mValueField.getText().toString();
-
-        float rtn;
-        try {
-            rtn = new DecimalFormat("#.###").parse(value).floatValue();
-        } catch (ParseException e) {
-            rtn = 0.0f;
-        }
-        return rtn;
+        return ViewUtils.parseFloatFromLocal(mValueField.getText().toString());
     }
 
     /**
@@ -111,6 +110,10 @@ public class AmountPicker extends LinearLayout {
         }
 
         mStep = _NewStep;
+    }
+
+    public float getStep() {
+        return mStep;
     }
 
     @Override

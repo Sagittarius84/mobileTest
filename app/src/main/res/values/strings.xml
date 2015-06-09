@@ -57,4 +57,5 @@
     <string name="menu_product_list_dialog_filter_by_product">Show products</string>
     <string name="menu_product_list_dialog_filter_by_recipe">Show recipes</string>
     <string name="menu_product_list_dialog_filter_by_all">Show all</string>
+    <string name="advanced">advanced</string>
 </resources>

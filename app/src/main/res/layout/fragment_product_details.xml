@@ -13,28 +13,38 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:id="@+id/product_details_amount"
-            android:layout_gravity="center_vertical" />
+            android:layout_gravity="center_vertical"
+            android:layout_weight="0" />
 
         <Spinner
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:id="@+id/product_details_unit"
-            android:layout_weight="1"
-            android:layout_gravity="center_vertical" />
+            android:layout_gravity="center_vertical"
+            android:layout_weight="0"/>
 
         <EditText
             android:id="@+id/product_details_product_name"
             android:hint="@string/product_details_product_name_hint"
             style="@style/InstalistTheme1.base_edit_text_style"
             android:layout_gravity="center_vertical"
-            android:layout_width="wrap_content" />
+            android:layout_width="wrap_content"
+            android:layout_weight="1" />
 
     </LinearLayout>
+
+    <CheckBox
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/advanced"
+        android:id="@+id/product_details_advanced"
+        android:button="@drawable/ic_expand_black_24dp" />
 
     <LinearLayout
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:id="@+id/product_details_advanced_contents">
 
         <EditText
             android:id="@+id/product_details_tag"

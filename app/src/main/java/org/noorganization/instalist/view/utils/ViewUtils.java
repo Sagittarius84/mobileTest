@@ -1,11 +1,26 @@
 package org.noorganization.instalist.view.utils;
 
+import android.text.method.DigitsKeyListener;
+import android.text.method.KeyListener;
 import android.widget.EditText;
+
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.text.NumberFormat;
 
 /**
  * Created by tinos_000 on 18.05.2015.
  */
 public class ViewUtils {
+
+    /**
+     * NUMBERS_AND_SEPARATOR is a workaround for a Bug in EditText's, existing since Android 1.5!
+     * Accept local decimal separator and dot as decimal separator - for usability and compatibility
+     * reasons.
+     * {@see https://code.google.com/p/android/issues/detail?id=2626}
+     */
+    private static final String NUMBERS_AND_SEPARATOR = "0123456789." +
+            DecimalFormatSymbols.getInstance().getDecimalSeparator();
 
     /**
      * Checks if the given textview is filled with some text. If it is not filled then there will be an message be shown
@@ -22,4 +37,20 @@ public class ViewUtils {
 
         _EditText.setError(null);
         return true;
-    }}
+    }
+
+    public static KeyListener getNumberListener() {
+        return DigitsKeyListener.getInstance(NUMBERS_AND_SEPARATOR);
+    }
+
+    public static float parseFloatFromLocal(String _toConvert) {
+        String toConvert = "0" + _toConvert.
+                replace('.', DecimalFormatSymbols.getInstance().getDecimalSeparator());
+        NumberFormat formatter = DecimalFormat.getInstance();
+        try {
+            return formatter.parse(toConvert).floatValue();
+        } catch (Exception _notUsed) {
+            return 0.0f;
+        }
+    }
+}

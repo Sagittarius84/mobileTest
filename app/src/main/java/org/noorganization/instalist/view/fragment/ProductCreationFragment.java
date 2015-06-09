@@ -1,15 +1,18 @@
 package org.noorganization.instalist.view.fragment;
 
 import android.app.Fragment;
-import android.app.FragmentTransaction;
 import android.content.Context;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.EditText;
-import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import org.noorganization.instalist.R;
@@ -52,11 +55,14 @@ public class ProductCreationFragment extends BaseCustomFragment {
         private EditText     mProductName;
         private AmountPicker mProductAmount;
         private EditText     mProductTags;
+        private EditText     mProductStep;
+        private CheckBox     mProductAdvancedSwitch;
+        private LinearLayout mProductAdvancedContents;
         private Context      mContext;
 
         public InputParamsHolder(View _View, Context _Context){
-            assignContextToEditViews(_View);
-            mProductAmount.setValue(0.0f);
+            initViews(_View);
+            mProductAmount.setValue(1.0f);
             this.mContext = _Context;
         }
 
@@ -67,7 +73,7 @@ public class ProductCreationFragment extends BaseCustomFragment {
          * @param _Product      the reference to the product that should be rendered into the view.
          */
         public InputParamsHolder(View _View, Context _Context, Product _Product){
-            assignContextToEditViews(_View);
+            initViews(_View);
             this.mContext = _Context;
 
             this.mProductAmount.setValue(_Product.mDefaultAmount);
@@ -80,7 +86,7 @@ public class ProductCreationFragment extends BaseCustomFragment {
 
             String tags = "";
             for(TaggedProduct taggedProduct : taggedProductList){
-                tags = tags.concat(taggedProduct.mTag.mName).concat(",");
+                tags = tags.concat(taggedProduct.mTag.mName).concat(", ");
             }
             if(taggedProductList.size() > 1) {
                 tags = tags.substring(0, tags.length() - 2);
@@ -134,6 +140,13 @@ public class ProductCreationFragment extends BaseCustomFragment {
         }
 
         /**
+         * @return The step size for the product.
+         */
+        public float getProductStep() {
+            return mProductAmount.getStep();
+        }
+
+        /**
          * Splits the tags in the given edittext. Separator is comma.
          * @return a string array of extracted tags.
          */
@@ -163,10 +176,43 @@ public class ProductCreationFragment extends BaseCustomFragment {
         /**
          * Assigns the context to the edit view elements in this class. (like EditText)
          */
-        private void assignContextToEditViews(View view){
-            mProductName    = (EditText) view.findViewById(R.id.product_details_product_name);
-            mProductAmount  = (AmountPicker) view.findViewById(R.id.product_details_amount);
-            mProductTags    = (EditText) view.findViewById(R.id.product_details_tag);
+        private void initViews(View _paremtView){
+            mProductName             = (EditText) _paremtView.findViewById(R.id.product_details_product_name);
+            mProductAmount           = (AmountPicker) _paremtView.findViewById(R.id.product_details_amount);
+            mProductTags             = (EditText) _paremtView.findViewById(R.id.product_details_tag);
+            mProductStep             = (EditText) _paremtView.findViewById(R.id.product_details_step);
+            mProductAdvancedSwitch   = (CheckBox) _paremtView.findViewById(R.id.product_details_advanced);
+            mProductAdvancedContents = (LinearLayout) _paremtView.
+                    findViewById(R.id.product_details_advanced_contents);
+            mProductAdvancedContents.
+                    setVisibility(mProductAdvancedSwitch.isChecked() ? View.VISIBLE : View.GONE);
+
+            mProductAdvancedSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                    mProductAdvancedContents.
+                            setVisibility(mProductAdvancedSwitch.isChecked() ? View.VISIBLE : View.GONE);
+                }
+            });
+
+            mProductStep.setKeyListener(ViewUtils.getNumberListener());
+            mProductStep.addTextChangedListener(new TextWatcher() {
+                @Override
+                public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                }
+
+                @Override
+                public void onTextChanged(CharSequence s, int start, int before, int count) {
+                }
+
+                @Override
+                public void afterTextChanged(Editable _newText) {
+                    float newStep = ViewUtils.parseFloatFromLocal(_newText.toString());
+                    if (newStep > 0.0f) {
+                        mProductAmount.setStep(newStep);
+                    }
+                }
+            });
         }
     }
 
@@ -228,7 +274,7 @@ public class ProductCreationFragment extends BaseCustomFragment {
                     mInputParams.getProductName(),
                     null,
                     mInputParams.getProductAmount(),
-                    0.1f
+                    mInputParams.getProductStep()
             );
 
             if(product == null) {
@@ -251,6 +297,7 @@ public class ProductCreationFragment extends BaseCustomFragment {
         private boolean updateProduct(){
             mProduct.mName          = mInputParams.getProductName();
             mProduct.mDefaultAmount = mInputParams.getProductAmount();
+            mProduct.mStepAmount    = mInputParams.getProductStep();
 
             Product product = ControllerFactory.getProductController().modifyProduct(mProduct);
             if(product == null){
@@ -321,6 +368,7 @@ public class ProductCreationFragment extends BaseCustomFragment {
             long productId = getArguments().getLong(ARGS_PRODUCT_ID);
             mProduct = Product.findById(Product.class, productId);
         }
+
     }
 
     @Override
