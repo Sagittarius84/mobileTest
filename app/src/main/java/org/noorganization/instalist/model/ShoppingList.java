@@ -1,9 +1,11 @@
 package org.noorganization.instalist.model;
 
+import com.orm.StringUtil;
 import com.orm.SugarRecord;
 import com.orm.query.Condition;
 import com.orm.query.Select;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -11,16 +13,25 @@ import java.util.List;
  * Created by michi on 14.04.15.
  */
 public class ShoppingList extends SugarRecord<ShoppingList> {
-    public final static String LIST_NAME_ATTR = "m_name";
+    public final static String ATTR_NAME = StringUtil.toSQLName("mName");
+    public final static String ATTR_CATEGORY = StringUtil.toSQLName("mCategory");
 
-    public String mName;
+    public String   mName;
+    public Category mCategory;
 
     public ShoppingList() {
-        mName = "";
+        mName     = "";
+        mCategory = null;
     }
 
     public ShoppingList(String _name) {
+        mName     = _name;
+        mCategory = null;
+    }
+
+    public ShoppingList(String _name, Category _category) {
         mName = _name;
+        mCategory = (_category != null ? SugarRecord.findById(Category.class, _category.getId()) : null);
     }
 
     public List<ListEntry> getEntries() {
@@ -40,6 +51,21 @@ public class ShoppingList extends SugarRecord<ShoppingList> {
         return Select.from(ShoppingList.class).where(Condition.prop("m_name").eq(_name)).first();
     }
 
+    /**
+     * Adds all listnames to a list.
+     * @return a list with the current shoppingListNames.
+     */
+    public static List<String> getShoppingListNames(){
+        List<ShoppingList> shoppingLists = Select.from(ShoppingList.class).list();
+        List<String> shoppingListNames = new ArrayList<>();
+
+        for (ShoppingList shoppingList : shoppingLists) {
+            shoppingListNames.add(shoppingList.mName);
+        }
+
+        return shoppingListNames;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o){
@@ -50,6 +76,11 @@ public class ShoppingList extends SugarRecord<ShoppingList> {
         }
 
         ShoppingList that = (ShoppingList) o;
+
+        if ((mCategory == null && that.mCategory != null) ||
+                (mCategory != null && !mCategory.equals(that.mCategory))) {
+            return false;
+        }
 
         return (getId().equals(that.getId()) && mName.equals(that.mName));
 

@@ -6,9 +6,7 @@ import com.orm.SugarRecord;
 import com.orm.query.Condition;
 import com.orm.query.Select;
 
-import junit.framework.TestCase;
-
-import org.noorganization.instalist.controller.implementation.RecipeController;
+import org.noorganization.instalist.controller.implementation.ControllerFactory;
 import org.noorganization.instalist.model.Ingredient;
 import org.noorganization.instalist.model.Product;
 import org.noorganization.instalist.model.Recipe;
@@ -45,7 +43,7 @@ public class IRecipeControllerTest extends AndroidTestCase {
         mCurdInCake = new Ingredient(mCurd, mCheeseCake, 0.5f);
         mCurdInCake.save();
 
-        mRecipeController = RecipeController.getInstance();
+        mRecipeController = ControllerFactory.getRecipeController();
     }
 
     public void tearDown() throws Exception {

@@ -26,10 +26,10 @@
             android:value="shopping.db" />
         <meta-data
             android:name="VERSION"
-            android:value="1" />
+            android:value="2" />
         <meta-data
             android:name="QUERY_LOG"
-            android:value="true" /> <!-- for dev = true -->
+            android:value="false" /> <!-- for debugging set this to true -->
         <meta-data
             android:name="DOMAIN_PACKAGE_NAME"
             android:value="org.noorganization.instalist.model" />

@@ -17,7 +17,7 @@ public class ProductController implements IProductController {
 
     private static ProductController mInstance;
 
-    public static ProductController getInstance() {
+    static ProductController getInstance() {
         if (mInstance == null) {
             mInstance = new ProductController();
         }

@@ -14,30 +14,40 @@ public class ListEntry extends SugarRecord<ListEntry> {
     public float        mAmount;
     /** Whether a product is struck through, i.e. because it's already bought. */
     public boolean      mStruck;
+    public int          mPriority;
 
     public ListEntry() {
-        mList    = null;
-        mProduct = null;
-        mAmount  = 1.0f;
-        mStruck  = false;
+        mList     = null;
+        mProduct  = null;
+        mAmount   = 1.0f;
+        mStruck   = false;
+        mPriority = 0;
     }
 
 
     public ListEntry(ShoppingList _list, Product _product, float _amount) {
-        mList    = _list;
-        mProduct = _product;
-        mAmount  = _amount;
-        mStruck  = false;
+        mList     = _list;
+        mProduct  = _product;
+        mAmount   = _amount;
+        mStruck   = false;
+        mPriority = 0;
     }
 
     public ListEntry(ShoppingList _list, Product _product, float _amount, boolean _struck) {
-        mList    = _list;
-        mProduct = _product;
-        mAmount  = _amount;
-        mStruck  = _struck;
+        mList     = _list;
+        mProduct  = _product;
+        mAmount   = _amount;
+        mStruck   = _struck;
+        mPriority = 0;
     }
 
-
+    public ListEntry(ShoppingList _list, Product _product, float _amount, boolean _struck, int _prio) {
+        mList     = _list;
+        mProduct  = _product;
+        mAmount   = _amount;
+        mStruck   = _struck;
+        mPriority = _prio;
+    }
 
     @Override
     public boolean equals(Object o) {
@@ -53,8 +63,9 @@ public class ListEntry extends SugarRecord<ListEntry> {
         if (!getId().equals(that.getId()) ||
                 Float.compare(that.mAmount, mAmount) != 0 ||
                 mStruck != that.mStruck ||
-                !mList.equals(that.mList) ||
-                !mProduct.equals(that.mProduct)) {
+                (mList == null && that.mList != null) || !mList.equals(that.mList) ||
+                !mProduct.equals(that.mProduct) ||
+                mPriority != that.mPriority) {
             return false;
         }
 
@@ -64,5 +75,12 @@ public class ListEntry extends SugarRecord<ListEntry> {
     @Override
     public int hashCode() {
         return getId().intValue();
+    }
+
+    @Override
+    public String toString() {
+        return "ListEntry { id = " + getId() + ", mList.id = " + (mList == null ? "none" : mList.getId()) +
+                ", mProduct.id = " + (mProduct == null ? "none" : mProduct.getId()) +
+                ", mStruck = " + mStruck + ", mAmount" + mAmount + " }";
     }
 }

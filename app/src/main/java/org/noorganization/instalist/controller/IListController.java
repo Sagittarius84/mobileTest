@@ -1,5 +1,6 @@
 package org.noorganization.instalist.controller;
 
+import org.noorganization.instalist.model.Category;
 import org.noorganization.instalist.model.ListEntry;
 import org.noorganization.instalist.model.Product;
 import org.noorganization.instalist.model.ShoppingList;
@@ -13,15 +14,42 @@ import org.noorganization.instalist.model.ShoppingList;
  * Created by michi on 20.04.2015.
  */
 public interface IListController {
+
     /**
-     * Adds or updates an item to an existing list.
+     * Shortcut for {@link #addOrChangeItem(ShoppingList, Product, float, int)} with priority set to
+     * 0 and replacing amount of an existing item.
+     */
+    ListEntry addOrChangeItem(ShoppingList _list, Product _product, float _amount);
+
+    /**
+     * Shortcut for {@link #addOrChangeItem(ShoppingList, Product, float, int, boolean)}, replacing
+     * amount of an existing item.
+     */
+    ListEntry addOrChangeItem(ShoppingList _list, Product _product, float _amount, int _prio);
+
+    /**
+     * Shortcut for {@link #addOrChangeItem(ShoppingList, Product, float, int, boolean)}, not
+     * updating any priority (if creating, then set to 0)
+     */
+    ListEntry addOrChangeItem(ShoppingList _list, Product _product, float _amount,
+                              boolean _addAmount);
+
+    /**
+     *
+     * Adds or updates an item to an existing list. The amount will be updated (not added) if the
+     * corresponding ListEntry already exists.
      * @param _list A valid ShoppingList, not null.
      * @param _product A valid Product, not null.
      * @param _amount The amount of the product. Not +infty, NaN or lesser than 0.001f.
+     * @param _prio  The priority of the ListEntry. 0 does mean neutral, higher values mean higher
+     *               priority.
+     * @param _addAmount Whether to add the amount if ListEntry exits (= true) or to replace it
+     *                   (= false).
      * @return The created or updated ListEntry. If not worked, null or the old item will be
      * returned.
      */
-    ListEntry addOrChangeItem(ShoppingList _list, Product _product, float _amount);
+    ListEntry addOrChangeItem(ShoppingList _list, Product _product, float _amount, int _prio,
+                              boolean _addAmount);
 
     /**
      * Strikes all items on a list.
@@ -69,11 +97,27 @@ public interface IListController {
     boolean removeItem(ListEntry _item);
 
     /**
+     * Set a new priority for an item.
+     * @param _item The item to priorize, not null, saved.
+     * @param _newPrio A new priority (0 = neutral, less = lower priority, more = higher priority).
+     * @return The changed ListEntry or null if not found.
+     */
+    ListEntry setItemPriority(ListEntry _item, int _newPrio);
+
+    /**
      * Creates a list and returns it.
      * @param _name The name of the new list. Not null, not empty.
      * @return The new list or null, if creation failed.
      */
     ShoppingList addList(String _name);
+
+    /**
+     * Creates a list in a specific category.
+     * @param _name The name of the category. Not null, not empty.
+     * @param _category The specific, already saved category. Null is possible if no category.
+     * @return The created list or null if creation failed.
+     */
+    ShoppingList addList(String _name, Category _category);
     boolean removeList(ShoppingList _list);
 
     /**
@@ -83,4 +127,13 @@ public interface IListController {
      * @return The modified list or the old list.
      */
     ShoppingList renameList(ShoppingList _list, String _newName);
+
+    /**
+     * Moves a list to a category.
+     * @param _list The list to move (saved, not null).
+     * @param _category The saved category or null, if no category. If category can't be found and
+     *                  is not null, moving fails.
+     * @return The changed ShoppingList or null if moving failed.
+     */
+    ShoppingList moveToCategory(ShoppingList _list, Category _category);
 }

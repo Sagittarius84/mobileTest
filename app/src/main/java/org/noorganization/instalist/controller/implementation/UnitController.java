@@ -11,7 +11,7 @@ import org.noorganization.instalist.model.Unit;
 public class UnitController implements IUnitController {
     private static UnitController mInstance;
 
-    public static UnitController getInstance() {
+    static UnitController getInstance() {
         if (mInstance == null) {
             mInstance = new UnitController();
         }

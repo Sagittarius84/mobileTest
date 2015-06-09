@@ -6,8 +6,7 @@ import com.orm.SugarRecord;
 import com.orm.query.Condition;
 import com.orm.query.Select;
 
-import org.noorganization.instalist.controller.implementation.ListController;
-import org.noorganization.instalist.controller.implementation.ProductController;
+import org.noorganization.instalist.controller.implementation.ControllerFactory;
 import org.noorganization.instalist.model.ListEntry;
 import org.noorganization.instalist.model.Product;
 import org.noorganization.instalist.model.ShoppingList;
@@ -41,11 +40,11 @@ public class IProductControllerTest extends AndroidTestCase {
         mList = new ShoppingList("_TEST_home");
         mList.save();
 
-        ListController.getInstance().addOrChangeItem(mList, mMilk, 1.0f);
+        ControllerFactory.getListController().addOrChangeItem(mList, mMilk, 1.0f);
 
         new TaggedProduct(mTag, mBroccoli).save();
 
-        mController2Test = ProductController.getInstance();
+        mController2Test = ControllerFactory.getProductController();
     }
 
     @Override

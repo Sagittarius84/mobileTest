@@ -6,10 +6,16 @@ import com.orm.query.Condition;
 import com.orm.query.Select;
 
 import org.noorganization.instalist.controller.IListController;
+import org.noorganization.instalist.controller.implementation.ControllerFactory;
 import org.noorganization.instalist.controller.implementation.ListController;
+import org.noorganization.instalist.controller.implementation.ProductController;
+import org.noorganization.instalist.model.Ingredient;
 import org.noorganization.instalist.model.ListEntry;
 import org.noorganization.instalist.model.Product;
+import org.noorganization.instalist.model.Recipe;
 import org.noorganization.instalist.model.ShoppingList;
+import org.noorganization.instalist.model.Tag;
+import org.noorganization.instalist.model.TaggedProduct;
 import org.noorganization.instalist.model.Unit;
 
 import java.util.ArrayList;
@@ -27,7 +33,7 @@ public class DatabaseSeeder {
     private static DatabaseSeeder mInstance;
 
     private final String    SAMPLE_TAG              = "SAMPLE";
-    private final int       PRODUCT_TEST_DATA_SIZE  = 100;
+    private final int       PRODUCT_TEST_DATA_SIZE  = 10;
     private final long      PRODUCT_LIST_SEED       = 324982340237840L;
 
     private IListController mListController;
@@ -45,34 +51,15 @@ public class DatabaseSeeder {
     // -----------------------------------------------------------------------
 
     private DatabaseSeeder(){
-        mListController = ListController.getInstance();
+        mListController = ControllerFactory.getListController();
     }
 
     /**
      * Fill the database with some sample data.
      */
     public void startUp(){
-
-        List<ShoppingList>  shoppingList  = ShoppingList.listAll(ShoppingList.class);
-
-        for(ShoppingList list : shoppingList)
-        {
-            List<ListEntry> listEntries = Select.from(ListEntry.class).where(
-                    Condition.prop("m_list").eq(list.getId())).list();
-            for(ListEntry listEntry : listEntries) {
-               if(mListController.removeItem(listEntry)){
-                   Log.d(LOG_TAG, "Deleted item.");
-               }else{
-                   Log.d(LOG_TAG, "Deletion of item failed.");
-               }
-            }
-
-            if(mListController.removeList(list)){
-                Log.d(LOG_TAG, "Delete list successful.");
-            } else{
-                Log.d(LOG_TAG, "Delete list failed.");
-            }
-        }
+        // just for safety to delete whole product set
+        tearDown();
 
         Random rand = new Random(PRODUCT_LIST_SEED);
         String[]        listNames           = new String[]{SAMPLE_TAG.concat("_Home"), SAMPLE_TAG.concat("_Work")};
@@ -98,9 +85,9 @@ public class DatabaseSeeder {
            // singleUnit      = new Unit(listUnitNames[rand.nextInt(listUnitNames.length)]);
            // singleUnit.save();
 
-            singleProduct   = new Product(productName, null, 1.0f, 1.0f);
+            singleProduct   = ControllerFactory.getProductController().createProduct(productName, null, 1.0f, 1.0f);// new Product(productName, null, 1.0f, 1.0f);
 
-            singleProduct.save();
+            //singleProduct.save();
             productList.add(singleProduct);
         }
 
@@ -110,8 +97,9 @@ public class DatabaseSeeder {
             //mListController.addOrChangeItem(shoppingLists[rand.nextInt(shoppingLists.length)], product, rand.nextFloat());
             ShoppingList list = shoppingLists.get(rand.nextInt(shoppingLists.size()));
             Log.d(LOG_TAG, "List name: " + list.mName);
-            ListEntry listEntry = new ListEntry(list, product, rand.nextFloat() * 100.0f);
-            listEntry.save();
+            ListEntry listEntry = ControllerFactory.getListController().addOrChangeItem(list, product, rand.nextFloat() * 100.0f);
+            listEntry.mStruck = false;
+            listEntry=null;
         }
     }
 
@@ -121,13 +109,15 @@ public class DatabaseSeeder {
     public void tearDown(){
         List<ShoppingList>  shoppingLists  = ShoppingList.listAll(ShoppingList.class);
         List<ListEntry>     listEntries    = ListEntry.listAll(ListEntry.class);
+        List<Product>       products        = Product.listAll(Product.class);
 
-        for(ListEntry listEntry : listEntries)
-            mListController.removeItem(listEntry);
-
-        for( ShoppingList shoppingList : shoppingLists)
-            mListController.removeList(shoppingList);
-
-
+        ListEntry.deleteAll(ListEntry.class);
+        ShoppingList.deleteAll(ShoppingList.class);
+        Product.deleteAll(Product.class);
+        Ingredient.deleteAll(Ingredient.class);
+        Recipe.deleteAll(Recipe.class);
+        Tag.deleteAll(Tag.class);
+        TaggedProduct.deleteAll(TaggedProduct.class);
+        Unit.deleteAll(Unit.class);
     }
 }

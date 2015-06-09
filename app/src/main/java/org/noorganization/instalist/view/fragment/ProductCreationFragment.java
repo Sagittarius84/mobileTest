@@ -1,153 +1,344 @@
 package org.noorganization.instalist.view.fragment;
 
 import android.app.Fragment;
+import android.app.FragmentTransaction;
+import android.content.Context;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.Spinner;
+import android.widget.ImageButton;
+import android.widget.Toast;
 
 import org.noorganization.instalist.R;
-import org.noorganization.instalist.controller.implementation.ProductController;
+import org.noorganization.instalist.controller.implementation.ControllerFactory;
 import org.noorganization.instalist.model.Product;
+import org.noorganization.instalist.model.ShoppingList;
 import org.noorganization.instalist.model.Tag;
+import org.noorganization.instalist.model.TaggedProduct;
+import org.noorganization.instalist.view.customview.AmountPicker;
+import org.noorganization.instalist.view.utils.ViewUtils;
+
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
+ * Fragment where the creation and the editing of an product is handled.
  * Created by TS on 28.04.2015.
  */
-public class ProductCreationFragment extends Fragment {
+public class ProductCreationFragment extends BaseCustomFragment {
 
-    private InputParamsHolder mInputParams;
+    public static final String ARGS_LIST_NAME = "listName";
+    public static final String ARGS_PRODUCT_ID = "productId";
+    private ShoppingList        mCurrentShoppingList;
+    private InputParamsHolder   mInputParams;
+    private Context             mContext;
+
+    /**
+     * used when product values should be rendered into view.
+     */
+    private Product     mProduct;
+    private Button      mAddButton;
+
 
     /**
      * Holds the input parameter views. Also delivers methods to retrieve the content of these
      * views.
      */
     private final static class InputParamsHolder{
-        private EditText mProductNameEditText;
-        private EditText mProductAmountEditText;
-        private EditText mProductTagsEditText;
-        private View     mView;
+        private EditText     mProductName;
+        private AmountPicker mProductAmount;
+        private EditText     mProductTags;
+        private Context      mContext;
 
-        public InputParamsHolder(View view){
-            assignContextToEditViews(view);
-            this.mView              = view;
+        public InputParamsHolder(View _View, Context _Context){
+            assignContextToEditViews(_View);
+            mProductAmount.setValue(0.0f);
+            this.mContext = _Context;
         }
 
         /**
-         *
-         * @param view          the view of the calling element.
-         * @param productName   the name of the product that should be displayed.
-         * @param productAmount the amount of products that should be displayed.
-         * @param tags          the tags separated by comma.
+         * Constructor of InputParamsHolder
+         * @param _View         the view of the calling element.
+         * @param _Context      the context of the fragment.
+         * @param _Product      the reference to the product that should be rendered into the view.
          */
-        public InputParamsHolder(View view, String productName, float productAmount, String tags){
-            assignContextToEditViews(view);
-            this.mView              = view;
+        public InputParamsHolder(View _View, Context _Context, Product _Product){
+            assignContextToEditViews(_View);
+            this.mContext = _Context;
+
+            this.mProductAmount.setValue(_Product.mDefaultAmount);
+            this.mProductName.setText(_Product.mName);
+
+            List<TaggedProduct> taggedProductList = TaggedProduct.findTaggedProductsByProduct(_Product);
+            if(taggedProductList.isEmpty()){
+                return;
+            }
+
+            String tags = "";
+            for(TaggedProduct taggedProduct : taggedProductList){
+                tags = tags.concat(taggedProduct.mTag.mName).concat(",");
+            }
+            if(taggedProductList.size() > 1) {
+                tags = tags.substring(0, tags.length() - 2);
+            }
+            this.mProductTags.setText(tags);
         }
 
         /**
          * Checks if all editable fields are filled. Recommended to check before accessing product amount.
+         * Marks an unfilled entry as not filled.
          * @return true, if all elements are filled. false, if at least one element is not filled.
          */
         public boolean isFilled(){
-            boolean returnValue = false;
-            returnValue |= getProductName().length() == 0;
-            returnValue |= mProductAmountEditText.getText().length() == 0;
-            returnValue |= mProductTagsEditText.getText().length() == 0;
+            boolean returnValue = true;
+            returnValue &= ViewUtils.checkTextViewIsFilled(mProductName);
+            returnValue &= mProductAmount.getValue() > 0.0f;
+            // check if amount is greater than zero
             return returnValue;
         }
 
-        /**
-         * call to show which elements aren't filled.
-         */
-        public void showUnFilledError(){
-
-        }
-
-        /**
-         * checks if the input is correct.
+        /**         * checks if the input matches the conventions.
          * @return true if  all is fine, false when some value is curious.
          */
         public boolean isValid(){
-            return true;
+            boolean returnValue = true;
+
+            float amount = mProductAmount.getValue();
+            if(amount <= 0.0f){
+                Toast.makeText(mContext, mContext.getResources().getText(R.string.product_creation_fragment), Toast.LENGTH_SHORT).show();
+                returnValue = false;
+            }
+
+            return returnValue;
         }
 
-        /**
-         * Show the elements that aren't valid.
-         */
-        public void showInvalid(){
-
-        }
 
         /**
          * Gets the product name.
          * @return name of the product.
          */
         public String getProductName(){
-            return mProductNameEditText.getText().toString();
+            return mProductName.getText().toString();
         }
 
+        /**
+         * Creates a float value of the amount input.
+         * @return  a float value of the amount input. if edittext is set the value of this, else 0.0f.
+         */
         public float getProductAmount(){
-            return Float.valueOf(mProductAmountEditText.getText().toString());
+            return mProductAmount.getValue();
         }
 
+        /**
+         * Splits the tags in the given edittext. Separator is comma.
+         * @return a string array of extracted tags.
+         */
         public String[] getTags(){
-            String tag = mProductTagsEditText.getText().toString();
-            return tag.split(",");
+            String tagValue = mProductTags.getText().toString();
+            LinkedList<String> rtn = new LinkedList<>(Arrays.asList(tagValue.split("\\s*,\\s*")));
+            int last_size = rtn.size() + 1;
+            while (last_size > rtn.size()) {
+                last_size = rtn.size();
+                rtn.remove("");
+            }
+            return rtn.toArray(new String[rtn.size()]);
         }
 
+        /**
+         * Adds the given value to the productAmount. Takes care when value is less than 0.0f(resets it to 0.0f).
+         * @param _changeValue the value that should be added/substracted.
+         */
+        private void changeProductAmount(float _changeValue){
+            float amount = getProductAmount();
+            amount += _changeValue;
+            if(amount < 0.0f){
+                amount = 0.0f;
+            }
+            mProductAmount.setValue(amount);
+        }
         /**
          * Assigns the context to the edit view elements in this class. (like EditText)
          */
         private void assignContextToEditViews(View view){
-            mProductNameEditText    = (EditText) view.findViewById(R.id.product_details_product_name_edittext);
-            mProductAmountEditText  = (EditText) view.findViewById(R.id.product_details_amount_edittext);
-            mProductTagsEditText    = (EditText) view.findViewById(R.id.product_details_tag_edittext);
+            mProductName    = (EditText) view.findViewById(R.id.product_details_product_name);
+            mProductAmount  = (AmountPicker) view.findViewById(R.id.product_details_amount);
+            mProductTags    = (EditText) view.findViewById(R.id.product_details_tag);
         }
     }
 
 
-    private View.OnClickListener mClickListener = new View.OnClickListener() {
+    private View.OnClickListener mOnCreateProductClickListener = new View.OnClickListener() {
+
         @Override
         public void onClick(View v) {
 
-            if(! mInputParams.isFilled()) {
-                mInputParams.showUnFilledError();
-                return;
-            }
-            if(!mInputParams.isValid()){
-                mInputParams.showInvalid();
+            if(!mInputParams.isFilled()){
                 return;
             }
 
-            Product product = ProductController.getInstance().createProduct(
+            if(!mInputParams.isValid()){
+                return;
+            }
+
+            boolean success = false;
+            // no information previously introduced
+            if(mProduct == null){
+                // new product to insert
+                success = saveProduct();
+            }else{
+                // update old product
+                success = updateProduct();
+            }
+
+            if(success){
+
+                Fragment newFragment;
+                if(mProduct == null){
+                    Toast.makeText(getActivity(),"Addition of product succeeded!", Toast.LENGTH_LONG).show();
+                    newFragment = ShoppingListOverviewFragment.newInstance(mCurrentShoppingList.mName);
+
+                }else{
+                    Toast.makeText(getActivity(),"Update of product succeeded!", Toast.LENGTH_LONG).show();
+                    newFragment = ProductListDialogFragment.newInstance(mCurrentShoppingList.mName);
+                }
+
+                changeFragment(newFragment);
+
+            }else {
+                if(mProduct == null){
+                    Toast.makeText(getActivity(), "Product update failed!", Toast.LENGTH_LONG).show();
+                }else{
+                    Toast.makeText(getActivity(), "Addition of product failed!", Toast.LENGTH_LONG).show();
+                }
+
+            }
+
+        }
+
+        /**
+         * saves the new product.
+         * @return true by success false by fail.
+         */
+        private boolean saveProduct(){
+            Product product = ControllerFactory.getProductController().createProduct(
                     mInputParams.getProductName(),
                     null,
                     mInputParams.getProductAmount(),
                     0.1f
             );
-            String[] tagArray = mInputParams.getTags();
-            for(int Index = 0; Index < tagArray.length; ++ Index){
-                Tag tag = new Tag(tagArray[Index]);
-                ProductController.getInstance().addTagToProduct(product, tag);
+
+            if(product == null) {
+                return false;
             }
+
+            if(saveTags(product)) {
+                // add entry to list overview
+                ControllerFactory.getListController().addOrChangeItem(mCurrentShoppingList, product, product.mDefaultAmount);
+                return true;
+            }
+
+            return false;
+        }
+
+        /**
+         * Updates the product given to the fragment.
+         * @return true if updating was successful else false, if an error happened.
+         */
+        private boolean updateProduct(){
+            mProduct.mName          = mInputParams.getProductName();
+            mProduct.mDefaultAmount = mInputParams.getProductAmount();
+
+            Product product = ControllerFactory.getProductController().modifyProduct(mProduct);
+            if(product == null){
+                return false;
+            }
+
+            return saveTags(product);
+        }
+
+        /**
+         * Saves all the given tags.
+         * @param _Product the product where they should be associated.
+         * @return true if all goes well, false if something is wrong.
+         */
+        private boolean saveTags(Product _Product){
+            String[] tagArray = mInputParams.getTags();
+            for (int Index = 0; Index < tagArray.length; ++Index) {
+                Tag tag = ControllerFactory.getTagController().createTag(tagArray[Index]);
+                if(tag == null){
+                    tag = Tag.find(Tag.class,"m_name = ?", tagArray[Index]).get(0);
+                }
+                if(!ControllerFactory.getProductController().addTagToProduct(_Product, tag)){
+                    return false;
+                }
+            }
+            return true;
         }
     };
+
+
+
+    /**
+     * Creates an instance of an ProductCreationFragment with the details of the product.
+     * @param _ListName the name of the list where the product should be added.
+     * @return the new instance of this fragment.
+     */
+    public static ProductCreationFragment newInstance(String _ListName){
+        ProductCreationFragment fragment = new ProductCreationFragment();
+        Bundle args = new Bundle();
+        args.putString(ARGS_LIST_NAME, _ListName);
+        args.putLong(ARGS_PRODUCT_ID, -1L);
+        fragment.setArguments(args);
+        return fragment;
+    }
+
+    /**
+     * Creates an instance of an ProductCreationFragment.
+     * @param _ProductId the id in the database of the product that should be edited.
+     * @param _ListName the name of the list where the calling productlistselector should save the products.
+     * @return the new instance of this fragment.
+     */
+    public static ProductCreationFragment newInstance(String _ListName, long _ProductId){
+        ProductCreationFragment fragment = new ProductCreationFragment();
+        Bundle args = new Bundle();
+        args.putString(ARGS_LIST_NAME, _ListName);
+        args.putLong(ARGS_PRODUCT_ID, _ProductId);
+        fragment.setArguments(args);
+        return fragment;
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        mCurrentShoppingList = ShoppingList.find(ShoppingList.class, ShoppingList.ATTR_NAME + "=?", getArguments().getString("listName")).get(0);
+
+        // check if an product should be shown
+        if(getArguments().getInt(ARGS_PRODUCT_ID) >= 0){
+            long productId = getArguments().getLong(ARGS_PRODUCT_ID);
+            mProduct = Product.findById(Product.class, productId);
+        }
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        super.onCreateView(inflater, container, savedInstanceState);
         View view = inflater.inflate(R.layout.fragment_product_details, container, false);
-        mInputParams = new InputParamsHolder(view);
-        Button addButton = (Button) view.findViewById(R.id.product_details_action_button_new_or_update);
-        addButton.setOnClickListener(mClickListener);
+        if(mProduct == null) {
+            mInputParams = new InputParamsHolder(view, getActivity());
+        } else{
+            mInputParams = new InputParamsHolder(view, getActivity(), mProduct);
+        }
+        mAddButton = (Button) view.findViewById(R.id.product_details_action_button_new_or_update);
+        mAddButton.setOnClickListener(mOnCreateProductClickListener);
         return view;
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
     }
 }

@@ -2,6 +2,8 @@ package org.noorganization.instalist.model;
 
 import android.test.AndroidTestCase;
 
+import com.orm.SugarConfig;
+import com.orm.SugarRecord;
 import com.orm.query.Condition;
 import com.orm.query.Select;
 
@@ -60,5 +62,9 @@ public class SugarORMTest extends AndroidTestCase {
                 first();
         assertEquals("kg", testProduct.mUnit.mName);
         assertEquals(justAUnit.getId(), testProduct.mUnit.getId());
+    }
+
+    public void testNameConversion() throws Exception {
+        assertEquals("SHOPPING_LIST", SugarRecord.getTableName(ShoppingList.class));
     }
 }
