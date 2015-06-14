@@ -17,7 +17,7 @@
             android:layout_weight="0" />
 
         <Spinner
-            android:layout_width="0dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/product_details_unit"
             android:layout_gravity="center_vertical"

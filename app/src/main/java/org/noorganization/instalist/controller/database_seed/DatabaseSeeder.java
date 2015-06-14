@@ -6,9 +6,11 @@ import com.orm.query.Condition;
 import com.orm.query.Select;
 
 import org.noorganization.instalist.controller.IListController;
+import org.noorganization.instalist.controller.IUnitController;
 import org.noorganization.instalist.controller.implementation.ControllerFactory;
 import org.noorganization.instalist.controller.implementation.ListController;
 import org.noorganization.instalist.controller.implementation.ProductController;
+import org.noorganization.instalist.controller.implementation.UnitController;
 import org.noorganization.instalist.model.Ingredient;
 import org.noorganization.instalist.model.ListEntry;
 import org.noorganization.instalist.model.Product;
@@ -75,6 +77,12 @@ public class DatabaseSeeder {
             //shoppingLists[counter].save();
         }
 
+        IUnitController unitController = ControllerFactory.getUnitController();
+        for (String unitName : listUnitNames) {
+            Unit createdUnit = unitController.createUnit(unitName);
+            Log.d(LOG_TAG, "Added unit: " + (createdUnit == null ? "FAILED! " : "") + unitName);
+        }
+
 
         for(int Index = 0; Index < PRODUCT_TEST_DATA_SIZE; ++ Index){
             String  productName;
@@ -91,7 +99,7 @@ public class DatabaseSeeder {
             productList.add(singleProduct);
         }
 
-        for(Product product : productList){
+        for(Product product : productList) {
             Log.d(LOG_TAG, "Add Product: " + product.mName);
 
             //mListController.addOrChangeItem(shoppingLists[rand.nextInt(shoppingLists.length)], product, rand.nextFloat());
@@ -99,7 +107,7 @@ public class DatabaseSeeder {
             Log.d(LOG_TAG, "List name: " + list.mName);
             ListEntry listEntry = ControllerFactory.getListController().addOrChangeItem(list, product, rand.nextFloat() * 100.0f);
             listEntry.mStruck = false;
-            listEntry=null;
+            listEntry = null;
         }
     }
 
