@@ -10,6 +10,8 @@ import com.orm.SugarRecord;
  */
 public class Unit extends SugarRecord<Unit> {
 
+    public static String ATTR_NAME = "m_name";
+
     public String mName;
 
     public Unit() {
