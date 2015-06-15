@@ -58,4 +58,7 @@
     <string name="menu_product_list_dialog_filter_by_recipe">Show recipes</string>
     <string name="menu_product_list_dialog_filter_by_all">Show all</string>
     <string name="advanced">advanced</string>
+    <string name="no_unit" translatable="false">-</string>
+    <string name="product_saved_okay">product was saved.</string>
+    <string name="product_saved_fail">product saving failed!</string>
 </resources>

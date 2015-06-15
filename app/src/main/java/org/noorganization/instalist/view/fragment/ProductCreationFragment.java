@@ -1,9 +1,8 @@
 package org.noorganization.instalist.view.fragment;
 
-import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.Dialog;
 import android.app.DialogFragment;
-import android.app.Fragment;
-import android.app.FragmentManager;
 import android.content.Context;
 import android.os.Bundle;
 import android.text.Editable;
@@ -11,6 +10,7 @@ import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -20,7 +20,6 @@ import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.Toast;
 
-import com.orm.SugarRecord;
 import com.orm.query.Select;
 
 import org.noorganization.instalist.R;
@@ -34,7 +33,6 @@ import org.noorganization.instalist.view.customview.AmountPicker;
 import org.noorganization.instalist.view.interfaces.IBaseActivity;
 import org.noorganization.instalist.view.utils.ViewUtils;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -175,6 +173,14 @@ public class ProductCreationFragment extends DialogFragment {
             return rtn.toArray(new String[rtn.size()]);
         }
 
+        public Unit getProductDefaultUnit() {
+            int selectedPos = mUnits.getSelectedItemPosition();
+            if (selectedPos == AdapterView.INVALID_POSITION) {
+                selectedPos = 0;
+            }
+            return mUnitList.get(selectedPos);
+        }
+
         /**
          * Adds the given value to the productAmount. Takes care when value is less than 0.0f(resets it to 0.0f).
          * @param _changeValue the value that should be added/substracted.
@@ -231,64 +237,16 @@ public class ProductCreationFragment extends DialogFragment {
             });
 
             mUnitList = Select.from(Unit.class).orderBy(Unit.ATTR_NAME).list();
+            mUnitList.add(0, null);
             String[] displayUnitStrings = new String[mUnitList.size()];
-            for (int currentUnitIndex = 0; currentUnitIndex < mUnitList.size(); currentUnitIndex++) {
+            displayUnitStrings[0] = mContext.getString(R.string.no_unit);
+            for (int currentUnitIndex = 1; currentUnitIndex < mUnitList.size(); currentUnitIndex++) {
                 displayUnitStrings[currentUnitIndex] = mUnitList.get(currentUnitIndex).mName;
             }
             mUnits.setAdapter(new ArrayAdapter<>(mContext, android.R.layout.simple_dropdown_item_1line,
                     displayUnitStrings));
         }
     }
-
-
-    private View.OnClickListener mOnCreateProductClickListener = new View.OnClickListener() {
-
-        @Override
-        public void onClick(View v) {
-
-            if(!mInputParams.isFilled()){
-                return;
-            }
-
-            if(!mInputParams.isValid()){
-                return;
-            }
-
-            boolean success = false;
-            // no information previously introduced
-            if(mProduct == null){
-                // new product to insert
-                success = saveProduct();
-            }else{
-                // update old product
-                success = updateProduct();
-            }
-
-            if(success){
-
-                //Fragment newFragment;
-                if(mProduct == null){
-                    Toast.makeText(getActivity(),"Addition of product succeeded!", Toast.LENGTH_LONG).show();
-                    //   newFragment = ShoppingListOverviewFragment.newInstance(mCurrentShoppingList.mName);
-
-                }else{
-                    Toast.makeText(getActivity(),"Update of product succeeded!", Toast.LENGTH_LONG).show();
-                //    newFragment = ProductListDialogFragment.newInstance(mCurrentShoppingList.mName);
-                }
-
-                //changeFragment(newFragment);
-
-
-            }else {
-                if(mProduct == null){
-                    Toast.makeText(getActivity(), "Product update failed!", Toast.LENGTH_LONG).show();
-                }else{
-                    Toast.makeText(getActivity(), "Addition of product failed!", Toast.LENGTH_LONG).show();
-                }
-
-            }
-
-        }
 
         /**
          * saves the new product.
@@ -297,7 +255,7 @@ public class ProductCreationFragment extends DialogFragment {
         private boolean saveProduct(){
             Product product = ControllerFactory.getProductController().createProduct(
                     mInputParams.getProductName(),
-                    null,
+                    mInputParams.getProductDefaultUnit(),
                     mInputParams.getProductAmount(),
                     mInputParams.getProductStep()
             );
@@ -323,6 +281,7 @@ public class ProductCreationFragment extends DialogFragment {
             mProduct.mName          = mInputParams.getProductName();
             mProduct.mDefaultAmount = mInputParams.getProductAmount();
             mProduct.mStepAmount    = mInputParams.getProductStep();
+            mProduct.mUnit          = mInputParams.getProductDefaultUnit();
 
             Product product = ControllerFactory.getProductController().modifyProduct(mProduct);
             if(product == null){
@@ -350,9 +309,6 @@ public class ProductCreationFragment extends DialogFragment {
             }
             return true;
         }
-    };
-
-
 
     /**
      * Creates an instance of an ProductCreationFragment with the details of the product.
@@ -409,6 +365,11 @@ public class ProductCreationFragment extends DialogFragment {
     }
 
     @Override
+    public Dialog onCreateDialog(Bundle savedInstanceState) {
+        return new AlertDialog.Builder(getActivity()).create();
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
         View view = inflater.inflate(R.layout.fragment_product_details, container, false);
@@ -418,7 +379,26 @@ public class ProductCreationFragment extends DialogFragment {
             mInputParams = new InputParamsHolder(view, getActivity(), mProduct);
         }
         mAddButton = (Button) view.findViewById(R.id.product_details_action_button_new_or_update);
-        mAddButton.setOnClickListener(mOnCreateProductClickListener);
+        mAddButton.setOnClickListener(new View.OnClickListener() {
+
+@Override
+public void onClick(View v) {
+
+        if(!mInputParams.isFilled()){
+        return;
+        }
+
+        if(!mInputParams.isValid()){
+        return;
+        }
+
+        if(saveProduct()){
+        Toast.makeText(getActivity(), R.string.product_saved_okay, Toast.LENGTH_LONG).show();
+        ViewUtils.removeFragment(getActivity(), ProductCreationFragment.this);
+        }else {
+        Toast.makeText(getActivity(), R.string.product_saved_fail, Toast.LENGTH_LONG).show();
+        }
+        }});
         return view;
     }
 
