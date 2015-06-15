@@ -35,6 +35,7 @@ import org.noorganization.instalist.controller.implementation.ControllerFactory;
 import org.noorganization.instalist.model.ShoppingList;
 import org.noorganization.instalist.view.fragment.ShoppingListOverviewFragment;
 import org.noorganization.instalist.view.listadapter.ShoppingListOverviewAdapter;
+import org.noorganization.instalist.view.utils.ViewUtils;
 
 import java.util.List;
 
@@ -308,12 +309,7 @@ public class MainShoppingListView extends ActionBarActivity implements BaseCusto
      * @param _Fragment the fragment that should be created.
      */
     public void changeFragment(Fragment _Fragment) {
-        // create transaction to new fragment
-        FragmentTransaction transaction = getFragmentManager().beginTransaction();
-        transaction.add(R.id.container, _Fragment);
-        //transaction.addToBackStack(null);
-        //transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
-        transaction.commit();
+        ViewUtils.addFragment(this, _Fragment);
     }
 
     /**

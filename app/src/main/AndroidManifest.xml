@@ -34,10 +34,6 @@
             android:name="DOMAIN_PACKAGE_NAME"
             android:value="org.noorganization.instalist.model" />
 
-        <activity
-            android:name=".view.MainActivity"
-            android:label="MainActivity" >
-        </activity>
     </application>
 
 </manifest>
