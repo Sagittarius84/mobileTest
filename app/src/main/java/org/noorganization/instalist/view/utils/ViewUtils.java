@@ -1,6 +1,7 @@
 package org.noorganization.instalist.view.utils;
 
 import android.app.Activity;
+import android.app.DialogFragment;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
@@ -65,12 +66,16 @@ public class ViewUtils {
         String canonicalName = _newFragment.getClass().getCanonicalName();
         FragmentTransaction transaction = fragmentManager.beginTransaction();
         Fragment oldFragment = fragmentManager.findFragmentByTag(canonicalName);
-        if (oldFragment != null){
+        if (oldFragment != null) {
             transaction.remove(oldFragment);
         }
-        transaction.add(R.id.container, _newFragment, canonicalName);
-        transaction.addToBackStack(null);
-        transaction.commit();
+        if (_newFragment instanceof DialogFragment) {
+            ((DialogFragment) _newFragment).show(transaction, canonicalName);
+        } else {
+            transaction.addToBackStack(null);
+            transaction.add(R.id.container, _newFragment, canonicalName);
+            transaction.commit();
+        }
     }
 
     public static void removeFragment(Activity _activity, Fragment _oldFragment) {

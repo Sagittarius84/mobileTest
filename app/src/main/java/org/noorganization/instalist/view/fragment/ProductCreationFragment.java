@@ -1,16 +1,16 @@
 package org.noorganization.instalist.view.fragment;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -48,7 +48,6 @@ public class ProductCreationFragment extends DialogFragment {
     public static final String ARGS_PRODUCT_ID = "productId";
     private ShoppingList        mCurrentShoppingList;
     private InputParamsHolder   mInputParams;
-    private Context             mContext;
     private IBaseActivity       mBaseActivityInterface;
     /**
      * used when product values should be rendered into view.
@@ -72,22 +71,21 @@ public class ProductCreationFragment extends DialogFragment {
         private Context      mContext;
         private List<Unit>   mUnitList;
 
-        public InputParamsHolder(View _View, Context _Context){
-            this.mContext = _Context;
-            initViews(_View);
+        public InputParamsHolder(Dialog _dialog, View _parentView){
+            this.mContext = _dialog.getContext();
+            initViews(_parentView);
 
             mProductAmount.setValue(1.0f);
         }
 
         /**
          * Constructor of InputParamsHolder
-         * @param _View         the view of the calling element.
-         * @param _Context      the context of the fragment.
+         * @param _dialog     the context of the fragment.
          * @param _Product      the reference to the product that should be rendered into the view.
          */
-        public InputParamsHolder(View _View, Context _Context, Product _Product) {
-            this.mContext = _Context;
-            initViews(_View);
+        public InputParamsHolder(Dialog _dialog, View _parentView, Product _Product) {
+            this.mContext = _dialog.getContext();
+            initViews(_parentView);
 
             this.mProductAmount.setValue(_Product.mDefaultAmount);
             this.mProductName.setText(_Product.mName);
@@ -128,7 +126,7 @@ public class ProductCreationFragment extends DialogFragment {
 
             float amount = mProductAmount.getValue();
             if(amount <= 0.0f){
-                Toast.makeText(mContext, mContext.getResources().getText(R.string.product_creation_fragment), Toast.LENGTH_SHORT).show();
+                Toast.makeText(mContext, R.string.product_creation_fragment, Toast.LENGTH_SHORT).show();
                 returnValue = false;
             }
 
@@ -198,6 +196,7 @@ public class ProductCreationFragment extends DialogFragment {
          * Assigns the context to the edit view elements in this class. (like EditText)
          */
         private void initViews(View _parentView){
+
             mProductName             = (EditText) _parentView.findViewById(R.id.product_details_product_name);
             mProductAmount           = (AmountPicker) _parentView.findViewById(R.id.product_details_amount);
             mProductTags             = (EditText) _parentView.findViewById(R.id.product_details_tag);
@@ -244,7 +243,8 @@ public class ProductCreationFragment extends DialogFragment {
             for (int currentUnitIndex = 1; currentUnitIndex < mUnitList.size(); currentUnitIndex++) {
                 displayUnitStrings[currentUnitIndex] = mUnitList.get(currentUnitIndex).mName;
             }
-            mUnits.setAdapter(new ArrayAdapter<>(mContext, android.R.layout.simple_dropdown_item_1line,
+            mUnits.setAdapter(new ArrayAdapter<>(mContext,
+                    android.R.layout.simple_dropdown_item_1line,
                     displayUnitStrings));
         }
     }
@@ -340,6 +340,7 @@ public class ProductCreationFragment extends DialogFragment {
         return fragment;
     }
 
+    /*
     @Override
     public void onAttach(Activity _Activity) {
         super.onAttach(_Activity);
@@ -350,9 +351,9 @@ public class ProductCreationFragment extends DialogFragment {
             throw new ClassCastException(_Activity.toString()
                     + " has no IBaseActivity interface attached.");
         }
-    }
+    }*/
 
-    @Override
+    /*@Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mCurrentShoppingList = ShoppingList.find(ShoppingList.class, ShoppingList.ATTR_NAME + "=?", getArguments().getString("listName")).get(0);
@@ -363,48 +364,41 @@ public class ProductCreationFragment extends DialogFragment {
             mProduct = Product.findById(Product.class, productId);
         }
 
-    }
+    }*/
 
     @Override
-    public Dialog onCreateDialog(Bundle savedInstanceState) {
-        return new AlertDialog.Builder(getActivity()).create();
-    }
+    public Dialog onCreateDialog(Bundle _savedInstanceState) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        builder.setPositiveButton(R.string.product_details_action_add, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                if (!mInputParams.isFilled()) {
+                    return;
+                }
 
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        super.onCreateView(inflater, container, savedInstanceState);
-        View view = inflater.inflate(R.layout.fragment_product_details, container, false);
+                if (!mInputParams.isValid()) {
+                    return;
+                }
+
+                if (saveProduct()) {
+                    Toast.makeText(getActivity(), R.string.product_saved_okay, Toast.LENGTH_LONG).show();
+                    ViewUtils.removeFragment(getActivity(), ProductCreationFragment.this);
+                } else {
+                    Toast.makeText(getActivity(), R.string.product_saved_fail, Toast.LENGTH_LONG).show();
+                }
+            }
+        });
+
+        LayoutInflater inflater = getActivity().getLayoutInflater();
+        View inflatedDialogContents = inflater.inflate(R.layout.fragment_product_details, null);
+        builder.setView(inflatedDialogContents);
+
+        AlertDialog createdDialog = builder.create();
         if(mProduct == null) {
-            mInputParams = new InputParamsHolder(view, getActivity());
+            mInputParams = new InputParamsHolder(createdDialog, inflatedDialogContents);
         } else{
-            mInputParams = new InputParamsHolder(view, getActivity(), mProduct);
+            mInputParams = new InputParamsHolder(createdDialog, inflatedDialogContents, mProduct);
         }
-        mAddButton = (Button) view.findViewById(R.id.product_details_action_button_new_or_update);
-        mAddButton.setOnClickListener(new View.OnClickListener() {
-
-@Override
-public void onClick(View v) {
-
-        if(!mInputParams.isFilled()){
-        return;
-        }
-
-        if(!mInputParams.isValid()){
-        return;
-        }
-
-        if(saveProduct()){
-        Toast.makeText(getActivity(), R.string.product_saved_okay, Toast.LENGTH_LONG).show();
-        ViewUtils.removeFragment(getActivity(), ProductCreationFragment.this);
-        }else {
-        Toast.makeText(getActivity(), R.string.product_saved_fail, Toast.LENGTH_LONG).show();
-        }
-        }});
-        return view;
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
+        return createdDialog;
     }
 }
