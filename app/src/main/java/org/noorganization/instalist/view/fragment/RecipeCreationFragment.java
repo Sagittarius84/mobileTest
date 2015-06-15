@@ -15,10 +15,10 @@ import android.widget.Toast;
 import org.noorganization.instalist.R;
 import org.noorganization.instalist.controller.implementation.ControllerFactory;
 import org.noorganization.instalist.model.Ingredient;
-import org.noorganization.instalist.model.Product;
 import org.noorganization.instalist.model.Recipe;
 import org.noorganization.instalist.model.ShoppingList;
 import org.noorganization.instalist.view.datahandler.RecipeDataHolder;
+import org.noorganization.instalist.view.interfaces.IBaseActivity;
 import org.noorganization.instalist.view.listadapter.IngredientListAdapter;
 import org.noorganization.instalist.view.utils.ViewUtils;
 
@@ -29,7 +29,7 @@ import java.util.List;
  * Fragment that handles the creation of a recipe.
  * Created by TS on 28.04.2015.
  */
-public class RecipeCreationFragment extends BaseCustomFragment {
+public class RecipeCreationFragment extends Fragment {
 
     private static final String ARGS_LIST_NAME = "list_name";
     private static final String ARGS_RECIPE_ID = "recipe_id";
@@ -41,6 +41,9 @@ public class RecipeCreationFragment extends BaseCustomFragment {
     private Button mAddIngredientButton;
     private Button mAddRecipeButton;
     private Button mCancelButton;
+
+    private IBaseActivity mBaseActivityInterface;
+    private Context mContext;
 
     private static RecipeCreationFragment mInstance;
 
@@ -83,7 +86,7 @@ public class RecipeCreationFragment extends BaseCustomFragment {
             }
             // clear the data holder so that we not retrieve later the currently inserted data.
             RecipeDataHolder.getInstance().clear();
-            changeFragment(fragment);
+            mBaseActivityInterface.changeFragment(fragment);
         }
 
         private boolean updateRecipe(){
@@ -188,6 +191,17 @@ public class RecipeCreationFragment extends BaseCustomFragment {
     }
 
     @Override
+    public void onAttach(Activity _Activity) {
+        super.onAttach(_Activity);
+        try {
+            mBaseActivityInterface = (IBaseActivity) _Activity;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(_Activity.toString()
+                    + " has no IBaseActivity interface attached.");
+        }
+    }
+
+    @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mCurrentShoppingList = ShoppingList.find(ShoppingList.class, ShoppingList.ATTR_NAME + "=?", getArguments().getString(ARGS_LIST_NAME)).get(0);
@@ -212,12 +226,12 @@ public class RecipeCreationFragment extends BaseCustomFragment {
 
         if(mRecipe == null) {
             mViewAccessor = new ViewAcccessor(view, getActivity());
-            mAddRecipeButton.setText(mActivity.getText(R.string.fragment_recipe_creation_add_recipe));
-            titleString = mActivity.getText(R.string.fragment_recipe_creation_add_recipe_title).toString();
+            mAddRecipeButton.setText(mContext.getResources().getString(R.string.fragment_recipe_creation_add_recipe));
+            titleString = mContext.getResources().getString(R.string.fragment_recipe_creation_add_recipe_title);
         } else{
             mViewAccessor = new ViewAcccessor(view, getActivity(), mRecipe);
-            mAddRecipeButton.setText(mActivity.getText(R.string.fragment_recipe_creation_update_recipe));
-            titleString = mActivity.getText(R.string.fragment_recipe_creation_update_recipe_title).toString();
+            mAddRecipeButton.setText(mContext.getResources().getString(R.string.fragment_recipe_creation_update_recipe));
+            titleString = mContext.getResources().getString(R.string.fragment_recipe_creation_update_recipe_title);
             titleString = titleString.concat(" " + mRecipe.mName);
         }
 
@@ -225,7 +239,7 @@ public class RecipeCreationFragment extends BaseCustomFragment {
             mViewAccessor.loadRecipeFromDataHolder();
         }
 
-        setToolbarTitle(titleString);
+        mBaseActivityInterface.setToolbarTitle(titleString);
         return view;
     }
 
@@ -238,7 +252,7 @@ public class RecipeCreationFragment extends BaseCustomFragment {
             public void onClick(View v) {
                 // mViewAccessor.addIngredient();
                 mViewAccessor.saveRecipeToDataHolder();
-                changeFragment(IngredientCreationFragment.newInstance());
+                mBaseActivityInterface.changeFragment(IngredientCreationFragment.newInstance());
             }
         });
 
@@ -246,7 +260,7 @@ public class RecipeCreationFragment extends BaseCustomFragment {
         mCancelButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                onBackPressed();
+                mBaseActivityInterface.onBackPressed();
             }
         });
     }
@@ -288,7 +302,7 @@ public class RecipeCreationFragment extends BaseCustomFragment {
                 mIngredientListAdapter = new IngredientListAdapter((Activity) _Context, ingredientList);
             }
             else{
-                mIngredientListAdapter = new IngredientListAdapter((Activity) _Context, new ArrayList<>());
+                mIngredientListAdapter = new IngredientListAdapter((Activity) _Context, new ArrayList<Ingredient>());
             }
             this.mRecipe = null;
             mIngredientListView.setAdapter(mIngredientListAdapter);

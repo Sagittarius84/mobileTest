@@ -1,5 +1,6 @@
 package org.noorganization.instalist.view.fragment;
 
+import android.app.Activity;
 import android.app.DialogFragment;
 import android.app.Fragment;
 import android.app.FragmentManager;
@@ -30,6 +31,7 @@ import org.noorganization.instalist.model.Tag;
 import org.noorganization.instalist.model.TaggedProduct;
 import org.noorganization.instalist.model.Unit;
 import org.noorganization.instalist.view.customview.AmountPicker;
+import org.noorganization.instalist.view.interfaces.IBaseActivity;
 import org.noorganization.instalist.view.utils.ViewUtils;
 
 import java.util.ArrayList;
@@ -41,14 +43,14 @@ import java.util.List;
  * Fragment where the creation and the editing of an product is handled.
  * Created by TS on 28.04.2015.
  */
-public class ProductCreationFragment extends DialogFragment { //BaseCustomFragment {
+public class ProductCreationFragment extends DialogFragment {
 
     public static final String ARGS_LIST_NAME = "listName";
     public static final String ARGS_PRODUCT_ID = "productId";
     private ShoppingList        mCurrentShoppingList;
     private InputParamsHolder   mInputParams;
     private Context             mContext;
-
+    private IBaseActivity       mBaseActivityInterface;
     /**
      * used when product values should be rendered into view.
      */
@@ -379,6 +381,18 @@ public class ProductCreationFragment extends DialogFragment { //BaseCustomFragme
         args.putLong(ARGS_PRODUCT_ID, _ProductId);
         fragment.setArguments(args);
         return fragment;
+    }
+
+    @Override
+    public void onAttach(Activity _Activity) {
+        super.onAttach(_Activity);
+        mContext = _Activity;
+        try {
+            mBaseActivityInterface = (IBaseActivity) _Activity;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(_Activity.toString()
+                    + " has no IBaseActivity interface attached.");
+        }
     }
 
     @Override

@@ -1,6 +1,7 @@
 package org.noorganization.instalist.view.fragment;
 
 import android.app.Activity;
+import android.app.Fragment;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -16,6 +17,7 @@ import org.noorganization.instalist.R;
 import org.noorganization.instalist.model.Ingredient;
 import org.noorganization.instalist.model.Product;
 import org.noorganization.instalist.view.datahandler.RecipeDataHolder;
+import org.noorganization.instalist.view.interfaces.IBaseActivity;
 import org.noorganization.instalist.view.spinneradapter.ProductSpinnerAdapter;
 import org.noorganization.instalist.view.utils.ViewUtils;
 
@@ -25,7 +27,7 @@ import java.util.List;
  * The IngredientCreationFragment handles the creation and editing of an ingredient.
  * Created by TS on 24.05.2015.
  */
-public class IngredientCreationFragment extends BaseCustomFragment {
+public class IngredientCreationFragment extends Fragment {
 
     private static final String ARGS_INGREDIENT_ID = "ingredient_id";
     private static final String ARGS_INGREDIENT_LIST_INDEX = "ingredient_list_index";
@@ -57,6 +59,8 @@ public class IngredientCreationFragment extends BaseCustomFragment {
      */
     private ViewAcccessor mViewAccessor;
 
+    private IBaseActivity mBaseActivityInterface;
+    private Context mContext;
     /**
      * Creates a IngredientCreationFragment with the information of an ingredient filled, that database id was given as parameter.
      * @param _IngredientId the id of the database entry of this ingredient.
@@ -96,6 +100,18 @@ public class IngredientCreationFragment extends BaseCustomFragment {
         args.putInt(ARGS_INGREDIENT_LIST_INDEX, -1);
         fragment.setArguments(args);
         return fragment;
+    }
+
+    @Override
+    public void onAttach(Activity _Activity) {
+        super.onAttach(_Activity);
+        mContext = _Activity;
+        try {
+            mBaseActivityInterface = (IBaseActivity) _Activity;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(_Activity.toString()
+                    + " has no IBaseActivity interface attached.");
+        }
     }
 
     @Override
@@ -142,18 +158,18 @@ public class IngredientCreationFragment extends BaseCustomFragment {
         mCancelButton = (Button) view.findViewById(R.id.fragment_ingredient_creation_button_cancel);
 
         if(mIngredient == null) {
-            mViewAccessor = new ViewAcccessor(view, mActivity, mListOfProducts);
-            mAddIngredientButton.setText(mActivity.getText(R.string.fragment_ingredient_creation_add_ingredient));
-            titleString = mActivity.getText(R.string.fragment_ingredient_creation_add_ingredient_title).toString();
+            mViewAccessor = new ViewAcccessor(view, mContext, mListOfProducts);
+            mAddIngredientButton.setText(mContext.getText(R.string.fragment_ingredient_creation_add_ingredient));
+            titleString = mContext.getText(R.string.fragment_ingredient_creation_add_ingredient_title).toString();
         }else{
-            mViewAccessor = new ViewAcccessor(view, mActivity, mListOfProducts, mIngredient);
-            mAddIngredientButton.setText(mActivity.getText(R.string.fragment_ingredient_creation_update_ingredient));
-            titleString = mActivity.getText(R.string.fragment_ingredient_creation_update_ingredient_title).toString();
+            mViewAccessor = new ViewAcccessor(view, mContext, mListOfProducts, mIngredient);
+            mAddIngredientButton.setText(mContext.getText(R.string.fragment_ingredient_creation_update_ingredient));
+            titleString = mContext.getText(R.string.fragment_ingredient_creation_update_ingredient_title).toString();
 
         }
 
         titleString = titleString.concat(" " + RecipeDataHolder.getInstance().getRecipeName());
-        setToolbarTitle(titleString);
+        mBaseActivityInterface.setToolbarTitle(titleString);
         return view;
     }
 
@@ -189,7 +205,7 @@ public class IngredientCreationFragment extends BaseCustomFragment {
 
                 // push the changed data to the currently edited recipe.
                 RecipeDataHolder.getInstance().setIngredients(ingredients);
-                changeFragment(RecipeCreationFragment.getInstance());
+                mBaseActivityInterface.changeFragment(RecipeCreationFragment.getInstance());
             }
 
             /**
@@ -220,7 +236,7 @@ public class IngredientCreationFragment extends BaseCustomFragment {
         mCancelButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                onBackPressed();
+                mBaseActivityInterface.onBackPressed();
             }
         });
     }

@@ -4,7 +4,7 @@ import android.os.Handler;
 import android.os.Message;
 
 /**
- * Asynchronous interface for Controller when Model gets updated. Since this has to happen via a
+ * Asynchronous interfaces for Controller when Model gets updated. Since this has to happen via a
  * {@link android.os.Handler}, this class uses int's for representation of different actions and
  * is modeled as fully abstract class.
  * Created by daMihe on 20.05.2015.
