@@ -310,8 +310,8 @@ public class MainShoppingListView extends ActionBarActivity implements BaseCusto
     public void changeFragment(Fragment _Fragment) {
         // create transaction to new fragment
         FragmentTransaction transaction = getFragmentManager().beginTransaction();
-        transaction.replace(R.id.container, _Fragment);
-        transaction.addToBackStack(null);
+        transaction.add(R.id.container, _Fragment);
+        //transaction.addToBackStack(null);
         //transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
         transaction.commit();
     }

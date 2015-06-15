@@ -288,7 +288,7 @@ public class RecipeCreationFragment extends BaseCustomFragment {
                 mIngredientListAdapter = new IngredientListAdapter((Activity) _Context, ingredientList);
             }
             else{
-                mIngredientListAdapter = new IngredientListAdapter((Activity) _Context, new ArrayList<>());
+                mIngredientListAdapter = new IngredientListAdapter((Activity) _Context, new ArrayList<Ingredient>());
             }
             this.mRecipe = null;
             mIngredientListView.setAdapter(mIngredientListAdapter);
