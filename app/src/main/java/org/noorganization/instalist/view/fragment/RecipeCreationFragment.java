@@ -193,6 +193,7 @@ public class RecipeCreationFragment extends Fragment {
     @Override
     public void onAttach(Activity _Activity) {
         super.onAttach(_Activity);
+        mContext = _Activity;
         try {
             mBaseActivityInterface = (IBaseActivity) _Activity;
         } catch (ClassCastException e) {

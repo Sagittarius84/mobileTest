@@ -62,8 +62,13 @@ public class ViewUtils {
 
     public static void addFragment(Activity _activity, Fragment _newFragment) {
         FragmentManager fragmentManager = _activity.getFragmentManager();
+        String canonicalName = _newFragment.getClass().getCanonicalName();
         FragmentTransaction transaction = fragmentManager.beginTransaction();
-        transaction.add(R.id.container, _newFragment);
+        Fragment oldFragment = fragmentManager.findFragmentByTag(canonicalName);
+        if (oldFragment != null){
+            transaction.remove(oldFragment);
+        }
+        transaction.add(R.id.container, _newFragment, canonicalName);
         transaction.addToBackStack(null);
         transaction.commit();
     }

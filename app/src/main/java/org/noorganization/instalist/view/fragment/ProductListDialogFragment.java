@@ -162,6 +162,7 @@ public class ProductListDialogFragment extends Fragment{
         return view;
     }
 
+
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.menu_product_list_dialog, menu);
