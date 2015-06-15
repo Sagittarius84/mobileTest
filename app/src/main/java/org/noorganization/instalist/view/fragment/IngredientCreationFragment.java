@@ -132,11 +132,11 @@ public class IngredientCreationFragment extends BaseCustomFragment {
 
     @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        super.onCreateView(inflater, container, savedInstanceState);
+    public View onCreateView(LayoutInflater _Inflater, ViewGroup _Container, Bundle _SavedInstanceState) {
+        super.onCreateView(_Inflater, _Container, _SavedInstanceState);
 
         String titleString;
-        View view = inflater.inflate(R.layout.fragment_ingredient_creation, container, false);
+        View view = _Inflater.inflate(R.layout.fragment_ingredient_creation, _Container, false);
 
         mAddIngredientButton = (Button) view.findViewById(R.id.fragment_ingredient_creation_button_add_ingredient);
         mCancelButton = (Button) view.findViewById(R.id.fragment_ingredient_creation_button_cancel);

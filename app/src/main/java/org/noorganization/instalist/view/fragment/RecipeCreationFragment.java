@@ -55,7 +55,7 @@ public class RecipeCreationFragment extends BaseCustomFragment {
                 return;
             }
 
-            boolean success = false;
+            boolean success;
 
             if(mRecipe == null){
                 success = saveRecipe();
@@ -200,11 +200,11 @@ public class RecipeCreationFragment extends BaseCustomFragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        super.onCreateView(inflater, container, savedInstanceState);
+    public View onCreateView(LayoutInflater _Inflater, ViewGroup _Container, Bundle _SavedInstanceState) {
+        super.onCreateView(_Inflater, _Container, _SavedInstanceState);
 
         String titleString;
-        View view = inflater.inflate(R.layout.fragment_recipe_details, container, false);
+        View view = _Inflater.inflate(R.layout.fragment_recipe_details, _Container, false);
 
         mAddIngredientButton = (Button) view.findViewById(R.id.fragment_recipe_details_add_ingredient);
         mAddRecipeButton     = (Button) view.findViewById(R.id.fragment_recipe_details_add_recipe);
@@ -288,7 +288,7 @@ public class RecipeCreationFragment extends BaseCustomFragment {
                 mIngredientListAdapter = new IngredientListAdapter((Activity) _Context, ingredientList);
             }
             else{
-                mIngredientListAdapter = new IngredientListAdapter((Activity) _Context, new ArrayList<Ingredient>());
+                mIngredientListAdapter = new IngredientListAdapter((Activity) _Context, new ArrayList<>());
             }
             this.mRecipe = null;
             mIngredientListView.setAdapter(mIngredientListAdapter);
@@ -329,8 +329,7 @@ public class RecipeCreationFragment extends BaseCustomFragment {
          * @return true, if all elements are filled. false, if at least one element is not filled.
          */
         public boolean isFilled(){
-            boolean returnValue = true;
-            returnValue &= ViewUtils.checkTextViewIsFilled(mRecipeNameText);
+            boolean returnValue = ViewUtils.checkTextViewIsFilled(mRecipeNameText);
             // check if at least on ingredient is there
             returnValue &= mIngredientListAdapter.getCount() > 0;
             return returnValue;
@@ -369,7 +368,7 @@ public class RecipeCreationFragment extends BaseCustomFragment {
         }
         /**
          * TODO: Add validation feature
-         * @return
+         * @return true if input is valid, false if at least one input is invalid.
          */
         public boolean isValid() {
             return true;

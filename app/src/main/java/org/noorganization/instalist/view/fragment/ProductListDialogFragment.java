@@ -39,6 +39,9 @@ import java.util.List;
  */
 public class ProductListDialogFragment extends BaseCustomFragment{
 
+    public static final String FILTER_BY_PRODUCT = "0";
+    public static final String FILTER_BY_RECIPE = "1";
+    public static final String FILTER_SHOW_ALL = "2";
     private ShoppingList mCurrentShoppingList;
     private String       mCurrentListName;
 
@@ -75,7 +78,12 @@ public class ProductListDialogFragment extends BaseCustomFragment{
 
         setHasOptionsMenu(true);
         mCurrentListName    = bundle.getString(MainShoppingListView.KEY_LISTNAME);
-        mCurrentShoppingList = ShoppingList.find(ShoppingList.class, ShoppingList.ATTR_NAME + "=?", mCurrentListName).get(0);
+        mCurrentShoppingList = ShoppingList.findByName(mCurrentListName);
+
+        if(mCurrentShoppingList == null){
+            throw new IllegalStateException(ProductListDialogFragment.class.toString() +
+                    ": Cannot find corresponding ShoppingList with name: " + mCurrentListName);
+        }
 
         List<Product> productList = Product.listAll(Product.class);
         List<Recipe> recipeList = Recipe.listAll(Recipe.class);
@@ -102,9 +110,8 @@ public class ProductListDialogFragment extends BaseCustomFragment{
         setToolbarTitle(mActivity.getResources().getText(R.string.product_list_dialog_title).toString());
         lockDrawerLayoutClosed();
 
-        mToolbar.setNavigationIcon(R.mipmap.ic_arrow_back_black_36dp);
-
-        mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
+        mMainActivityListener.getToolbar().setNavigationIcon(R.mipmap.ic_arrow_back_white_36dp);
+        mMainActivityListener.getToolbar().setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 onBackPressed();
@@ -113,10 +120,10 @@ public class ProductListDialogFragment extends BaseCustomFragment{
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        super.onCreateView(inflater, container, savedInstanceState);
+    public View onCreateView(LayoutInflater _Inflater, ViewGroup _Container, Bundle _SavedInstanceState) {
+        super.onCreateView(_Inflater, _Container, _SavedInstanceState);
 
-        View view = inflater.inflate(R.layout.fragment_product_list_dialog, container, false);
+        View view = _Inflater.inflate(R.layout.fragment_product_list_dialog, _Container, false);
 
         mListAdapter = new SelectableItemListAdapter(getActivity(), mSelectableBaseItemListEntries, mCurrentShoppingList);
 
@@ -145,13 +152,13 @@ public class ProductListDialogFragment extends BaseCustomFragment{
 
         switch (item.getItemId()){
             case R.id.menu_product_list_dialog_filter_by_product:
-                mListAdapter.getFilter().filter("0");
+                mListAdapter.getFilter().filter(FILTER_BY_PRODUCT);
                 break;
             case R.id.menu_product_list_dialog_filter_by_recipe:
-                mListAdapter.getFilter().filter("1");
+                mListAdapter.getFilter().filter(FILTER_BY_RECIPE);
                 break;
             case R.id.menu_product_list_dialog_filter_by_all:
-                mListAdapter.getFilter().filter("2");
+                mListAdapter.getFilter().filter(FILTER_SHOW_ALL);
                 break;
             case R.id.menu_product_list_dialog_sort_by_name:
                 break;
@@ -189,6 +196,8 @@ public class ProductListDialogFragment extends BaseCustomFragment{
                             Recipe recipe = (Recipe) (baseItemListEntry.getEntry().getObject());
                             if(recipe == null){
                                 Log.e(ProductListDialogFragment.class.getName(), "recipe is null.");
+                                throw new NullPointerException(ProductListDialogFragment.class.getName()
+                                        + ": Recipe cannot be found.");
                             }
                             List<Ingredient> ingredients = recipe.getIngredients();
                             for(Ingredient ingredient : ingredients){
@@ -197,7 +206,8 @@ public class ProductListDialogFragment extends BaseCustomFragment{
                             }
                             break;
                         default:
-                            throw new IllegalStateException("There is a item type that is not handled.");
+                            throw new IllegalStateException(ProductListDialogFragment.class.toString()
+                                    + ". There is a item type that is not handled.");
                     }
                 }
             }
@@ -212,7 +222,6 @@ public class ProductListDialogFragment extends BaseCustomFragment{
      * Assign to go back to the last fragment.
      */
     private View.OnClickListener onCancelClickListener = new View.OnClickListener(){
-
         @Override
         public void onClick(View v) {
             onBackPressed();

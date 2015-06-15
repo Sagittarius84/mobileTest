@@ -43,7 +43,7 @@ public class ShoppingList extends SugarRecord<ShoppingList> {
      * @param _name The name of the list. Any String but not null.
      * @return Either the found list or null if no list is matching.
      */
-    public ShoppingList findByName(String _name) {
+    public static ShoppingList findByName(String _name) {
         if (_name == null) {
             return null;
         }

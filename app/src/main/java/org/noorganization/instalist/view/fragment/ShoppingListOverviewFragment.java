@@ -223,10 +223,10 @@ public class ShoppingListOverviewFragment extends BaseCustomFragment {
 
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        super.onCreateView(inflater, container, savedInstanceState);
+    public View onCreateView(LayoutInflater _Inflater, ViewGroup _Container, Bundle _SavedInstanceState) {
+        super.onCreateView(_Inflater, _Container, _SavedInstanceState);
 
-        View view = inflater.inflate(R.layout.fragment_main_shopping_list_view, container, false);
+        View view = _Inflater.inflate(R.layout.fragment_main_shopping_list_view, _Container, false);
         mAddButton = (ActionButton) view.findViewById(R.id.add_item_main_list_view);
 
         mAddButton.setOnClickListener(new View.OnClickListener() {

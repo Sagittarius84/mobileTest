@@ -28,6 +28,7 @@ import android.widget.RelativeLayout;
 
 import org.noorganization.instalist.GlobalApplication;
 import org.noorganization.instalist.R;
+import org.noorganization.instalist.view.fragment.BaseCustomFragment;
 import org.noorganization.instalist.view.fragment.ShoppingListOverviewFragment;
 import org.noorganization.instalist.controller.IProductController;
 import org.noorganization.instalist.controller.implementation.ControllerFactory;
@@ -45,7 +46,7 @@ import java.util.List;
  *
  * @author TS
  */
-public class MainShoppingListView extends ActionBarActivity {
+public class MainShoppingListView extends ActionBarActivity implements BaseCustomFragment.OnMainActivityCallback {
 
     private final static String LOG_TAG = MainShoppingListView.class.getName();
     public final static String KEY_LISTNAME = "list_name";
@@ -57,6 +58,7 @@ public class MainShoppingListView extends ActionBarActivity {
     private Button      mAddListButton;
     private ShoppingListOverviewAdapter mShoppingListOverviewAdapter;
     private RelativeLayout mLeftMenuDrawerRelativeLayout;
+
     /**
      * For creation an icon at the toolbar for toggling the navbar in and out.
      */
@@ -78,6 +80,7 @@ public class MainShoppingListView extends ActionBarActivity {
      * Name of the current list
      */
     private String mCurrentListName;
+
 
 
     @Override

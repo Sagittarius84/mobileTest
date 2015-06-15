@@ -19,50 +19,73 @@ import org.noorganization.instalist.view.MainShoppingListView;
  */
 public class BaseCustomFragment extends Fragment {
 
-    protected Toolbar mToolbar;
-    protected DrawerLayout mDrawerLayout;
+    public interface OnMainActivityCallback{
+        void            changeFragment(Fragment _NewFragment);
+        Toolbar         getToolbar();
+        DrawerLayout    getDrawerLayout();
+    }
+
+
     protected Activity mActivity;
     protected String mTitle;
 
+    protected OnMainActivityCallback mMainActivityListener;
+
+    @Override
+    public void onAttach(Activity _Activity) {
+        super.onAttach(_Activity);
+        try {
+            mMainActivityListener   = (OnMainActivityCallback) _Activity;
+            mActivity               = _Activity;
+
+/*
+            if(mActivity instanceof MainShoppingListView) {
+                MainShoppingListView mReferenceActivity = (MainShoppingListView) mActivity;
+                mToolbar        =   mReferenceActivity.getToolbar();
+                mDrawerLayout   =   mReferenceActivity.getDrawerLayout();
+            }else{
+                throw new IllegalStateException("The activity is not an instance of " +  MainShoppingListView.class.getName());
+            }
+             */
+
+        } catch (ClassCastException e){
+            throw new ClassCastException( _Activity.toString()
+                    + " must implement OnMainActivityListener.");
+        }
+    }
+
     @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        mActivity = getActivity();
-        if(mActivity instanceof MainShoppingListView) {
-            mToolbar = ((MainShoppingListView) mActivity).getToolbar();
-            mDrawerLayout = ((MainShoppingListView) mActivity).getDrawerLayout();
-        }else{
-            throw new IllegalStateException("The activity is not an instance of " +  MainShoppingListView.class.getName());
-        }
-        return super.onCreateView(inflater, container, savedInstanceState);
+    public View onCreateView(LayoutInflater _Inflater, ViewGroup _Container, Bundle _SavedInstanceState) {
+        return super.onCreateView(_Inflater, _Container, _SavedInstanceState);
     }
 
     @Override
     public void onResume() {
         super.onResume();
         if(mTitle != null){
-            mToolbar.setTitle(mTitle);
+            mMainActivityListener.getToolbar().setTitle(mTitle);
         }
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        mTitle = mToolbar.getTitle().toString();
+        mTitle = mMainActivityListener.getToolbar().getTitle().toString();
     }
 
     /**
      * Locks the DrawerLayout as closed.
      */
     protected void lockDrawerLayoutClosed(){
-        mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
+        mMainActivityListener.getDrawerLayout().setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
     }
 
     /**
      * Unlocks the DrawerLayout, so that open of the DrawerLayout is possible.
      */
     protected void unlockDrawerLayout(){
-        mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
+        mMainActivityListener.getDrawerLayout().setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
     }
 
     /**
@@ -70,18 +93,21 @@ public class BaseCustomFragment extends Fragment {
      * @param _Title the title that should be shown.
      */
     protected void setToolbarTitle(String _Title){
-        mToolbar.setTitle(_Title);
+        mMainActivityListener.getToolbar().setTitle(_Title);
     }
 
     /**
      * Changes the current Fragment to the give fragment.
-     * @param fragment
+     * @param fragment The fragment to change to.
      */
     protected void changeFragment(Fragment fragment){
-        ((MainShoppingListView) mActivity).changeFragment(fragment);
+        mMainActivityListener.changeFragment(fragment);
     }
 
+    /**
+     * Calls the onBackPressed in parent activity.
+     */
     protected void onBackPressed(){
-        ((MainShoppingListView) mActivity).onBackPressed();
+        mActivity.onBackPressed();
     }
 }
