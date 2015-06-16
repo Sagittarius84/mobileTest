@@ -11,6 +11,7 @@ import org.noorganization.instalist.controller.implementation.ControllerFactory;
 import org.noorganization.instalist.controller.implementation.ListController;
 import org.noorganization.instalist.controller.implementation.ProductController;
 import org.noorganization.instalist.controller.implementation.UnitController;
+import org.noorganization.instalist.model.Category;
 import org.noorganization.instalist.model.Ingredient;
 import org.noorganization.instalist.model.ListEntry;
 import org.noorganization.instalist.model.Product;
@@ -64,15 +65,21 @@ public class DatabaseSeeder {
         tearDown();
 
         Random rand = new Random(PRODUCT_LIST_SEED);
+        String[]        categoryNames       = new String[]{SAMPLE_TAG.concat("_ShoppingMall"), SAMPLE_TAG.concat("_ToolMarket")};
         String[]        listNames           = new String[]{SAMPLE_TAG.concat("_Home"), SAMPLE_TAG.concat("_Work")};
         String[]        listProductNames    = new String[]{"Sugar", "Beer", "Cheese", "Ham", "Nails", "Grenade Apple Juice"};
         String[]        listUnitNames       = new String[]{"g", "kg", "ml", "l", "hl", "pfund"};
         List<Product>       productList     = new ArrayList<>();
         List<ShoppingList>  shoppingLists   = new ArrayList<>();
+        List<Category>      categoryList      = new ArrayList<>();
+
+        for(String categoryName : categoryNames){
+            categoryList.add(ControllerFactory.getCategoryController().createCategory(categoryName));
+        }
 
         // add new lists
         for(String listName : listNames) {
-            shoppingLists.add(mListController.addList(listName));
+            shoppingLists.add(mListController.addList(listName,categoryList.get(0)));
             Log.d(LOG_TAG, "List name: " + listName);
             //shoppingLists[counter].save();
         }
@@ -119,6 +126,7 @@ public class DatabaseSeeder {
         List<ListEntry>     listEntries    = ListEntry.listAll(ListEntry.class);
         List<Product>       products        = Product.listAll(Product.class);
 
+        Category.deleteAll(Category.class);
         ListEntry.deleteAll(ListEntry.class);
         ShoppingList.deleteAll(ShoppingList.class);
         Product.deleteAll(Product.class);

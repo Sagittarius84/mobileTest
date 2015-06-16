@@ -196,7 +196,7 @@ public class ShoppingListOverviewFragment extends Fragment{
 
         mListController     = ControllerFactory.getListController();
         ((ChangeHandler)((GlobalApplication)getActivity().getApplication()).getChangeHandler()).setCurrentFragment(this);
-        mBaseActivityInterface.setDrawerLayoutMode(DrawerLayout.LOCK_MODE_UNLOCKED);
+        mBaseActivityInterface.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
 
         SharedPreferences sortDetails = mContext.getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE);
 

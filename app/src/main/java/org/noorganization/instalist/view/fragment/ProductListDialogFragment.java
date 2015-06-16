@@ -13,9 +13,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.ListAdapter;
 import android.widget.ListView;
-import android.widget.TextView;
 
 import org.noorganization.instalist.R;
 import org.noorganization.instalist.controller.IListController;
@@ -128,7 +126,7 @@ public class ProductListDialogFragment extends Fragment{
         super.onActivityCreated(_SavedIndstance);
 
         mBaseActivityInterface.setToolbarTitle(mContext.getResources().getString(R.string.product_list_dialog_title));
-        mBaseActivityInterface.setDrawerLayoutMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
+        mBaseActivityInterface.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
 
         mBaseActivityInterface.setNavigationIcon(R.mipmap.ic_arrow_back_white_36dp);
 

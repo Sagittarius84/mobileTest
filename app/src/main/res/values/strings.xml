@@ -43,9 +43,9 @@
     <string name="fragment_recipe_creation_add_recipe_title">Create new Recipe</string>
     <string name="fragment_recipe_creation_update_recipe_title">Edit Recipe</string>
     <string name="drawer_layout_custom_add_list_button">Add List</string>
-    <string name="drawer_layout_custom_new_listname_hint">new listname</string>
+    <string name="drawer_layout_custom_new_addition_hint">New name</string>
     <string name="drawer_layout_custom_no_input">Please insert at least a sign</string>
-    <string name="drawer_layout_custom_exists">List already exists</string>
+    <string name="list_exists">List already exists</string>
     <string name="menu_sort_by_priority">Priority</string>
     <string name="menu_sort_text">Sort</string>
     <string name="menu_product_list_dialog_search">Search</string>
@@ -64,4 +64,8 @@
 
 <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="create_options">Create</string>
+    <string name="create_list">Create Shopping List</string>
+    <string name="create_category">Create Category</string>
+    <string name="category_exists">Category already exists</string>
 </resources>

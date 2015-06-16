@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/menu_toolbar_drawer_create_options"
+        android:title="@string/create_options"
+        app:showAsAction="ifRoom"
+        android:icon="@mipmap/ic_add_white_36dp">
+        <menu>
+            <item
+                android:id="@+id/menu_toolbar_drawer_create_list"
+                android:title="@string/create_list"
+                android:orderInCategory="100"
+                app:showAsAction="never" />
+            <item
+                android:id="@+id/menu_toolbar_drawer_create_category"
+                android:title="@string/create_category"
+                android:orderInCategory="100"
+                app:showAsAction="never" />
+        </menu>
+    </item>
+</menu>

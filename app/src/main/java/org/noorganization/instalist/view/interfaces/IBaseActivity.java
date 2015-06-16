@@ -25,7 +25,7 @@ public interface IBaseActivity{
      * Set the DrawerLayout mode. (Closed, Open,..)
      * @param _DrawerLayoutMode the DrawerLayout mode.
      */
-    void    setDrawerLayoutMode(int _DrawerLayoutMode);
+    void setDrawerLockMode(int _DrawerLayoutMode);
 
     /**
      * Called when Back was pressed.

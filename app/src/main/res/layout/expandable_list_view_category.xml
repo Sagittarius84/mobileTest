@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/expandable_list_view_category_item"
+    style="@style/InstalistTheme1.weighted_linear_list_layout_parent"
+    >
+    <TextView
+        android:id="@+id/expandable_list_view_category_name"
+        style="@style/InstalistTheme1.weighted_text_style_left"
+        />
+    <TextView
+        android:id="@+id/expandable_list_view_category_entries"
+        style="@style/InstalistTheme1.weighted_text_style_right"
+        />
+</LinearLayout>
