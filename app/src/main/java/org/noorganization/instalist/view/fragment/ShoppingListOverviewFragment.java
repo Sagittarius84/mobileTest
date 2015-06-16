@@ -149,14 +149,14 @@ public class ShoppingListOverviewFragment extends Fragment{
 
                 sortDetails.edit()
                         .putInt(SORT_MODE, SORT_BY_PRIORITY)
-                        .commit();
+                        .apply();
 
                 break;
             case R.id.list_items_sort_by_name:
                 mShoppingListAdapter.sortByComparator(mMapComperable.get(SORT_BY_NAME));
                 sortDetails.edit()
                         .putInt(SORT_MODE, SORT_BY_NAME)
-                        .commit();
+                        .apply();
                 break;
             default:
                 break;
