@@ -1,6 +1,10 @@
 package org.noorganization.instalist.view.fragment;
 
+import android.app.Activity;
+import android.app.Fragment;
+import android.content.Context;
 import android.os.Bundle;
+import android.support.v4.widget.DrawerLayout;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -27,6 +31,7 @@ import org.noorganization.instalist.model.view.RecipeListEntry;
 import org.noorganization.instalist.model.view.SelectableBaseItemListEntry;
 import org.noorganization.instalist.view.MainShoppingListView;
 import org.noorganization.instalist.view.datahandler.SelectableBaseItemListEntryDataHolder;
+import org.noorganization.instalist.view.interfaces.IBaseActivity;
 import org.noorganization.instalist.view.listadapter.SelectableItemListAdapter;
 
 import java.util.ArrayList;
@@ -37,8 +42,11 @@ import java.util.List;
  * Responsible to show a dialog with a list of selectable products to add them to an existing shopping
  * list.
  */
-public class ProductListDialogFragment extends BaseCustomFragment{
+public class ProductListDialogFragment extends Fragment{
 
+    public static final String FILTER_BY_PRODUCT = "0";
+    public static final String FILTER_BY_RECIPE = "1";
+    public static final String FILTER_SHOW_ALL = "2";
     private ShoppingList mCurrentShoppingList;
     private String       mCurrentListName;
 
@@ -50,6 +58,9 @@ public class ProductListDialogFragment extends BaseCustomFragment{
     // create the abstract selectable list entries to show mixed entries
     private List<SelectableBaseItemListEntry> mSelectableBaseItemListEntries = new ArrayList<>();
     private SelectableItemListAdapter mListAdapter;
+
+    private IBaseActivity mBaseActivityInterface;
+    private Context mContext;
 
     /**
      * Creates an instance of an ProductListDialogFragment.
@@ -65,6 +76,18 @@ public class ProductListDialogFragment extends BaseCustomFragment{
     }
 
     @Override
+    public void onAttach(Activity _Activity) {
+        super.onAttach(_Activity);
+        mContext = _Activity;
+        try {
+            mBaseActivityInterface = (IBaseActivity) _Activity;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(_Activity.toString()
+                    + " has no IBaseActivity interface attached.");
+        }
+    }
+
+    @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         // get bundle args to get the listname that should be shown
@@ -75,7 +98,12 @@ public class ProductListDialogFragment extends BaseCustomFragment{
 
         setHasOptionsMenu(true);
         mCurrentListName    = bundle.getString(MainShoppingListView.KEY_LISTNAME);
-        mCurrentShoppingList = ShoppingList.find(ShoppingList.class, ShoppingList.ATTR_NAME + "=?", mCurrentListName).get(0);
+        mCurrentShoppingList = ShoppingList.findByName(mCurrentListName);
+
+        if(mCurrentShoppingList == null){
+            throw new IllegalStateException(ProductListDialogFragment.class.toString() +
+                    ": Cannot find corresponding ShoppingList with name: " + mCurrentListName);
+        }
 
         List<Product> productList = Product.listAll(Product.class);
         List<Recipe> recipeList = Recipe.listAll(Recipe.class);
@@ -99,24 +127,24 @@ public class ProductListDialogFragment extends BaseCustomFragment{
     public void onActivityCreated(Bundle _SavedIndstance) {
         super.onActivityCreated(_SavedIndstance);
 
-        setToolbarTitle(mActivity.getResources().getText(R.string.product_list_dialog_title).toString());
-        lockDrawerLayoutClosed();
+        mBaseActivityInterface.setToolbarTitle(mContext.getResources().getString(R.string.product_list_dialog_title));
+        mBaseActivityInterface.setDrawerLayoutMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
 
-        mToolbar.setNavigationIcon(R.mipmap.ic_arrow_back_black_36dp);
+        mBaseActivityInterface.setNavigationIcon(R.mipmap.ic_arrow_back_white_36dp);
 
-        mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
+        mBaseActivityInterface.setNavigationClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                onBackPressed();
+                mBaseActivityInterface.onBackPressed();
             }
         });
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        super.onCreateView(inflater, container, savedInstanceState);
+    public View onCreateView(LayoutInflater _Inflater, ViewGroup _Container, Bundle _SavedInstanceState) {
+        super.onCreateView(_Inflater, _Container, _SavedInstanceState);
 
-        View view = inflater.inflate(R.layout.fragment_product_list_dialog, container, false);
+        View view = _Inflater.inflate(R.layout.fragment_product_list_dialog, _Container, false);
 
         mListAdapter = new SelectableItemListAdapter(getActivity(), mSelectableBaseItemListEntries, mCurrentShoppingList);
 
@@ -129,10 +157,11 @@ public class ProductListDialogFragment extends BaseCustomFragment{
 
         listView.setAdapter(mListAdapter);
 
-        setToolbarTitle(mActivity.getResources().getString(R.string.product_list_dialog_title) + " " + mCurrentShoppingList.mName);
+        mBaseActivityInterface.setToolbarTitle(mContext.getResources().getString(R.string.product_list_dialog_title) + " " + mCurrentShoppingList.mName);
 
         return view;
     }
+
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
@@ -145,13 +174,13 @@ public class ProductListDialogFragment extends BaseCustomFragment{
 
         switch (item.getItemId()){
             case R.id.menu_product_list_dialog_filter_by_product:
-                mListAdapter.getFilter().filter("0");
+                mListAdapter.getFilter().filter(FILTER_BY_PRODUCT);
                 break;
             case R.id.menu_product_list_dialog_filter_by_recipe:
-                mListAdapter.getFilter().filter("1");
+                mListAdapter.getFilter().filter(FILTER_BY_RECIPE);
                 break;
             case R.id.menu_product_list_dialog_filter_by_all:
-                mListAdapter.getFilter().filter("2");
+                mListAdapter.getFilter().filter(FILTER_SHOW_ALL);
                 break;
             case R.id.menu_product_list_dialog_sort_by_name:
                 break;
@@ -189,6 +218,8 @@ public class ProductListDialogFragment extends BaseCustomFragment{
                             Recipe recipe = (Recipe) (baseItemListEntry.getEntry().getObject());
                             if(recipe == null){
                                 Log.e(ProductListDialogFragment.class.getName(), "recipe is null.");
+                                throw new NullPointerException(ProductListDialogFragment.class.getName()
+                                        + ": Recipe cannot be found.");
                             }
                             List<Ingredient> ingredients = recipe.getIngredients();
                             for(Ingredient ingredient : ingredients){
@@ -197,14 +228,15 @@ public class ProductListDialogFragment extends BaseCustomFragment{
                             }
                             break;
                         default:
-                            throw new IllegalStateException("There is a item type that is not handled.");
+                            throw new IllegalStateException(ProductListDialogFragment.class.toString()
+                                    + ". There is a item type that is not handled.");
                     }
                 }
             }
 
             SelectableBaseItemListEntryDataHolder.getInstance().clear();
             // go back to old fragment
-            changeFragment(ShoppingListOverviewFragment.newInstance(mCurrentListName));
+            mBaseActivityInterface.changeFragment(ShoppingListOverviewFragment.newInstance(mCurrentListName));
         }
     };
 
@@ -212,10 +244,9 @@ public class ProductListDialogFragment extends BaseCustomFragment{
      * Assign to go back to the last fragment.
      */
     private View.OnClickListener onCancelClickListener = new View.OnClickListener(){
-
         @Override
         public void onClick(View v) {
-            onBackPressed();
+            mBaseActivityInterface.onBackPressed();
         }
     };
 
@@ -227,7 +258,7 @@ public class ProductListDialogFragment extends BaseCustomFragment{
         @Override
         public void onClick(View v) {
             ProductCreationFragment creationFragment = ProductCreationFragment.newInstance(mCurrentShoppingList.mName);
-            changeFragment(creationFragment);
+            mBaseActivityInterface.changeFragment(creationFragment);
         }
     };
 
@@ -240,7 +271,7 @@ public class ProductListDialogFragment extends BaseCustomFragment{
         mTempAddRecipeButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                changeFragment(RecipeCreationFragment.newInstance(mCurrentShoppingList.mName));
+                mBaseActivityInterface.changeFragment(RecipeCreationFragment.newInstance(mCurrentShoppingList.mName));
             }
         });
     }

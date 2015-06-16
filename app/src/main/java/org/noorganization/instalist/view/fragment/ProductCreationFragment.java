@@ -1,15 +1,17 @@
 package org.noorganization.instalist.view.fragment;
 
+import android.app.AlertDialog;
+import android.app.Dialog;
 import android.app.DialogFragment;
-import android.app.Fragment;
-import android.app.FragmentManager;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -19,7 +21,6 @@ import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.Toast;
 
-import com.orm.SugarRecord;
 import com.orm.query.Select;
 
 import org.noorganization.instalist.R;
@@ -30,9 +31,9 @@ import org.noorganization.instalist.model.Tag;
 import org.noorganization.instalist.model.TaggedProduct;
 import org.noorganization.instalist.model.Unit;
 import org.noorganization.instalist.view.customview.AmountPicker;
+import org.noorganization.instalist.view.interfaces.IBaseActivity;
 import org.noorganization.instalist.view.utils.ViewUtils;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -41,14 +42,13 @@ import java.util.List;
  * Fragment where the creation and the editing of an product is handled.
  * Created by TS on 28.04.2015.
  */
-public class ProductCreationFragment extends DialogFragment { //BaseCustomFragment {
+public class ProductCreationFragment extends DialogFragment {
 
     public static final String ARGS_LIST_NAME = "listName";
     public static final String ARGS_PRODUCT_ID = "productId";
     private ShoppingList        mCurrentShoppingList;
     private InputParamsHolder   mInputParams;
-    private Context             mContext;
-
+    private IBaseActivity       mBaseActivityInterface;
     /**
      * used when product values should be rendered into view.
      */
@@ -71,22 +71,21 @@ public class ProductCreationFragment extends DialogFragment { //BaseCustomFragme
         private Context      mContext;
         private List<Unit>   mUnitList;
 
-        public InputParamsHolder(View _View, Context _Context){
-            this.mContext = _Context;
-            initViews(_View);
+        public InputParamsHolder(Dialog _dialog, View _parentView){
+            this.mContext = _dialog.getContext();
+            initViews(_parentView);
 
             mProductAmount.setValue(1.0f);
         }
 
         /**
          * Constructor of InputParamsHolder
-         * @param _View         the view of the calling element.
-         * @param _Context      the context of the fragment.
+         * @param _dialog     the context of the fragment.
          * @param _Product      the reference to the product that should be rendered into the view.
          */
-        public InputParamsHolder(View _View, Context _Context, Product _Product) {
-            this.mContext = _Context;
-            initViews(_View);
+        public InputParamsHolder(Dialog _dialog, View _parentView, Product _Product) {
+            this.mContext = _dialog.getContext();
+            initViews(_parentView);
 
             this.mProductAmount.setValue(_Product.mDefaultAmount);
             this.mProductName.setText(_Product.mName);
@@ -127,7 +126,7 @@ public class ProductCreationFragment extends DialogFragment { //BaseCustomFragme
 
             float amount = mProductAmount.getValue();
             if(amount <= 0.0f){
-                Toast.makeText(mContext, mContext.getResources().getText(R.string.product_creation_fragment), Toast.LENGTH_SHORT).show();
+                Toast.makeText(mContext, R.string.product_creation_fragment, Toast.LENGTH_SHORT).show();
                 returnValue = false;
             }
 
@@ -173,6 +172,14 @@ public class ProductCreationFragment extends DialogFragment { //BaseCustomFragme
             return rtn.toArray(new String[rtn.size()]);
         }
 
+        public Unit getProductDefaultUnit() {
+            int selectedPos = mUnits.getSelectedItemPosition();
+            if (selectedPos == AdapterView.INVALID_POSITION) {
+                selectedPos = 0;
+            }
+            return mUnitList.get(selectedPos);
+        }
+
         /**
          * Adds the given value to the productAmount. Takes care when value is less than 0.0f(resets it to 0.0f).
          * @param _changeValue the value that should be added/substracted.
@@ -189,6 +196,7 @@ public class ProductCreationFragment extends DialogFragment { //BaseCustomFragme
          * Assigns the context to the edit view elements in this class. (like EditText)
          */
         private void initViews(View _parentView){
+
             mProductName             = (EditText) _parentView.findViewById(R.id.product_details_product_name);
             mProductAmount           = (AmountPicker) _parentView.findViewById(R.id.product_details_amount);
             mProductTags             = (EditText) _parentView.findViewById(R.id.product_details_tag);
@@ -229,64 +237,17 @@ public class ProductCreationFragment extends DialogFragment { //BaseCustomFragme
             });
 
             mUnitList = Select.from(Unit.class).orderBy(Unit.ATTR_NAME).list();
+            mUnitList.add(0, null);
             String[] displayUnitStrings = new String[mUnitList.size()];
-            for (int currentUnitIndex = 0; currentUnitIndex < mUnitList.size(); currentUnitIndex++) {
+            displayUnitStrings[0] = mContext.getString(R.string.no_unit);
+            for (int currentUnitIndex = 1; currentUnitIndex < mUnitList.size(); currentUnitIndex++) {
                 displayUnitStrings[currentUnitIndex] = mUnitList.get(currentUnitIndex).mName;
             }
-            mUnits.setAdapter(new ArrayAdapter<>(mContext, android.R.layout.simple_dropdown_item_1line,
+            mUnits.setAdapter(new ArrayAdapter<>(mContext,
+                    android.R.layout.simple_dropdown_item_1line,
                     displayUnitStrings));
         }
     }
-
-
-    private View.OnClickListener mOnCreateProductClickListener = new View.OnClickListener() {
-
-        @Override
-        public void onClick(View v) {
-
-            if(!mInputParams.isFilled()){
-                return;
-            }
-
-            if(!mInputParams.isValid()){
-                return;
-            }
-
-            boolean success = false;
-            // no information previously introduced
-            if(mProduct == null){
-                // new product to insert
-                success = saveProduct();
-            }else{
-                // update old product
-                success = updateProduct();
-            }
-
-            if(success){
-
-                //Fragment newFragment;
-                if(mProduct == null){
-                    Toast.makeText(getActivity(),"Addition of product succeeded!", Toast.LENGTH_LONG).show();
-                    //   newFragment = ShoppingListOverviewFragment.newInstance(mCurrentShoppingList.mName);
-
-                }else{
-                    Toast.makeText(getActivity(),"Update of product succeeded!", Toast.LENGTH_LONG).show();
-                //    newFragment = ProductListDialogFragment.newInstance(mCurrentShoppingList.mName);
-                }
-
-                //changeFragment(newFragment);
-
-
-            }else {
-                if(mProduct == null){
-                    Toast.makeText(getActivity(), "Product update failed!", Toast.LENGTH_LONG).show();
-                }else{
-                    Toast.makeText(getActivity(), "Addition of product failed!", Toast.LENGTH_LONG).show();
-                }
-
-            }
-
-        }
 
         /**
          * saves the new product.
@@ -295,7 +256,7 @@ public class ProductCreationFragment extends DialogFragment { //BaseCustomFragme
         private boolean saveProduct(){
             Product product = ControllerFactory.getProductController().createProduct(
                     mInputParams.getProductName(),
-                    null,
+                    mInputParams.getProductDefaultUnit(),
                     mInputParams.getProductAmount(),
                     mInputParams.getProductStep()
             );
@@ -321,6 +282,7 @@ public class ProductCreationFragment extends DialogFragment { //BaseCustomFragme
             mProduct.mName          = mInputParams.getProductName();
             mProduct.mDefaultAmount = mInputParams.getProductAmount();
             mProduct.mStepAmount    = mInputParams.getProductStep();
+            mProduct.mUnit          = mInputParams.getProductDefaultUnit();
 
             Product product = ControllerFactory.getProductController().modifyProduct(mProduct);
             if(product == null){
@@ -348,9 +310,6 @@ public class ProductCreationFragment extends DialogFragment { //BaseCustomFragme
             }
             return true;
         }
-    };
-
-
 
     /**
      * Creates an instance of an ProductCreationFragment with the details of the product.
@@ -381,7 +340,20 @@ public class ProductCreationFragment extends DialogFragment { //BaseCustomFragme
         return fragment;
     }
 
+    /*
     @Override
+    public void onAttach(Activity _Activity) {
+        super.onAttach(_Activity);
+        mContext = _Activity;
+        try {
+            mBaseActivityInterface = (IBaseActivity) _Activity;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(_Activity.toString()
+                    + " has no IBaseActivity interface attached.");
+        }
+    }*/
+
+    /*@Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mCurrentShoppingList = ShoppingList.find(ShoppingList.class, ShoppingList.ATTR_NAME + "=?", getArguments().getString("listName")).get(0);
@@ -392,24 +364,41 @@ public class ProductCreationFragment extends DialogFragment { //BaseCustomFragme
             mProduct = Product.findById(Product.class, productId);
         }
 
-    }
+    }*/
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        super.onCreateView(inflater, container, savedInstanceState);
-        View view = inflater.inflate(R.layout.fragment_product_details, container, false);
+    public Dialog onCreateDialog(Bundle _savedInstanceState) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        builder.setPositiveButton(R.string.product_details_action_add, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                if (!mInputParams.isFilled()) {
+                    return;
+                }
+
+                if (!mInputParams.isValid()) {
+                    return;
+                }
+
+                if (saveProduct()) {
+                    Toast.makeText(getActivity(), R.string.product_saved_okay, Toast.LENGTH_LONG).show();
+                    ViewUtils.removeFragment(getActivity(), ProductCreationFragment.this);
+                } else {
+                    Toast.makeText(getActivity(), R.string.product_saved_fail, Toast.LENGTH_LONG).show();
+                }
+            }
+        });
+
+        LayoutInflater inflater = getActivity().getLayoutInflater();
+        View inflatedDialogContents = inflater.inflate(R.layout.fragment_product_details, null);
+        builder.setView(inflatedDialogContents);
+
+        AlertDialog createdDialog = builder.create();
         if(mProduct == null) {
-            mInputParams = new InputParamsHolder(view, getActivity());
+            mInputParams = new InputParamsHolder(createdDialog, inflatedDialogContents);
         } else{
-            mInputParams = new InputParamsHolder(view, getActivity(), mProduct);
+            mInputParams = new InputParamsHolder(createdDialog, inflatedDialogContents, mProduct);
         }
-        mAddButton = (Button) view.findViewById(R.id.product_details_action_button_new_or_update);
-        mAddButton.setOnClickListener(mOnCreateProductClickListener);
-        return view;
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
+        return createdDialog;
     }
 }

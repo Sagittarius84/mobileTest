@@ -1,9 +1,11 @@
 package org.noorganization.instalist.view.fragment;
 
+import android.app.Activity;
 import android.app.Fragment;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.DefaultItemAnimator;
@@ -28,6 +30,7 @@ import org.noorganization.instalist.view.ChangeHandler;
 import org.noorganization.instalist.view.MainShoppingListView;
 import org.noorganization.instalist.view.datahandler.SelectableBaseItemListEntryDataHolder;
 import org.noorganization.instalist.view.decoration.DividerItemListDecoration;
+import org.noorganization.instalist.view.interfaces.IBaseActivity;
 import org.noorganization.instalist.view.listadapter.ShoppingListAdapter;
 import org.noorganization.instalist.view.sorting.AlphabeticalListEntryComparator;
 import org.noorganization.instalist.view.sorting.PriorityListEntryComparator;
@@ -40,7 +43,7 @@ import java.util.WeakHashMap;
 /**
  * A ShoppingListOverviewFragment containing a list view.
  */
-public class ShoppingListOverviewFragment extends BaseCustomFragment {
+public class ShoppingListOverviewFragment extends Fragment{
 
     private String mCurrentListName;
     private ShoppingList mCurrentShoppingList;
@@ -55,6 +58,8 @@ public class ShoppingListOverviewFragment extends BaseCustomFragment {
     private ShoppingListAdapter mShoppingListAdapter;
 
     private IListController mListController;
+
+    private IBaseActivity mBaseActivityInterface;
 
     private static String PREFERENCES_NAME = "SHOPPING_LIST_FRAGMENT";
 
@@ -95,6 +100,19 @@ public class ShoppingListOverviewFragment extends BaseCustomFragment {
 
 
     @Override
+    public void onAttach(Activity _Activity) {
+        super.onAttach(_Activity);
+        mContext            = _Activity;
+
+        try {
+            mBaseActivityInterface = (IBaseActivity) _Activity;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(_Activity.toString()
+                    + " has no IBaseActivity interface attached.");
+        }
+    }
+
+    @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
@@ -122,7 +140,7 @@ public class ShoppingListOverviewFragment extends BaseCustomFragment {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
-        SharedPreferences sortDetails = mActivity.getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE);
+        SharedPreferences sortDetails = mContext.getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE);
 
         // swtich which action item was pressed
         switch (id) {
@@ -131,14 +149,14 @@ public class ShoppingListOverviewFragment extends BaseCustomFragment {
 
                 sortDetails.edit()
                         .putInt(SORT_MODE, SORT_BY_PRIORITY)
-                        .commit();
+                        .apply();
 
                 break;
             case R.id.list_items_sort_by_name:
                 mShoppingListAdapter.sortByComparator(mMapComperable.get(SORT_BY_NAME));
                 sortDetails.edit()
                         .putInt(SORT_MODE, SORT_BY_NAME)
-                        .commit();
+                        .apply();
                 break;
             default:
                 break;
@@ -176,10 +194,9 @@ public class ShoppingListOverviewFragment extends BaseCustomFragment {
     public void onResume() {
         super.onResume();
 
-        mContext            = this.getActivity();
         mListController     = ControllerFactory.getListController();
         ((ChangeHandler)((GlobalApplication)getActivity().getApplication()).getChangeHandler()).setCurrentFragment(this);
-        unlockDrawerLayout();
+        mBaseActivityInterface.setDrawerLayoutMode(DrawerLayout.LOCK_MODE_UNLOCKED);
 
         SharedPreferences sortDetails = mContext.getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE);
 
@@ -194,9 +211,9 @@ public class ShoppingListOverviewFragment extends BaseCustomFragment {
             if (mShoppingLists.size() > 0) {
                 mCurrentShoppingList = mShoppingLists.get(0);
                 mCurrentListName = mCurrentShoppingList.mName;
-                setToolbarTitle(mCurrentShoppingList.mName);
+                mBaseActivityInterface.setToolbarTitle(mCurrentShoppingList.mName);
             } else {
-                setToolbarTitle(mActivity.getResources().getString(R.string.shopping_list_overview_fragment_no_list_available));
+                mBaseActivityInterface.setToolbarTitle(mContext.getResources().getString(R.string.shopping_list_overview_fragment_no_list_available));
                 // do something to show that there are no shoppinglists!
                 return;
             }
@@ -214,8 +231,7 @@ public class ShoppingListOverviewFragment extends BaseCustomFragment {
         shoppingListView.setAdapter(mShoppingListAdapter);
         shoppingListView.setItemAnimator(new DefaultItemAnimator());
 
-        ((MainShoppingListView)mActivity).assignDrawer();
-
+        mBaseActivityInterface.updateDrawerLayout();
     }
 
 
@@ -223,10 +239,10 @@ public class ShoppingListOverviewFragment extends BaseCustomFragment {
 
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        super.onCreateView(inflater, container, savedInstanceState);
+    public View onCreateView(LayoutInflater _Inflater, ViewGroup _Container, Bundle _SavedInstanceState) {
+        super.onCreateView(_Inflater, _Container, _SavedInstanceState);
 
-        View view = inflater.inflate(R.layout.fragment_main_shopping_list_view, container, false);
+        View view = _Inflater.inflate(R.layout.fragment_main_shopping_list_view, _Container, false);
         mAddButton = (ActionButton) view.findViewById(R.id.add_item_main_list_view);
 
         mAddButton.setOnClickListener(new View.OnClickListener() {
@@ -235,7 +251,7 @@ public class ShoppingListOverviewFragment extends BaseCustomFragment {
                 // reset selected items ... (lazy resetting!)
                 SelectableBaseItemListEntryDataHolder.getInstance().clear();
                 Fragment fragment = ProductListDialogFragment.newInstance(mCurrentListName);
-                changeFragment(fragment);
+                mBaseActivityInterface.changeFragment(fragment);
             }
         });
         return view;

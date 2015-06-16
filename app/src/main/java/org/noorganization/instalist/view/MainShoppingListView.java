@@ -1,7 +1,6 @@
 package org.noorganization.instalist.view;
 
 import android.app.AlertDialog;
-import android.app.DialogFragment;
 import android.app.Fragment;
 import android.app.FragmentTransaction;
 import android.content.DialogInterface;
@@ -9,12 +8,8 @@ import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.widget.DefaultItemAnimator;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -22,18 +17,16 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 
-import org.noorganization.instalist.GlobalApplication;
 import org.noorganization.instalist.R;
-import org.noorganization.instalist.view.fragment.ShoppingListOverviewFragment;
-import org.noorganization.instalist.controller.IProductController;
 import org.noorganization.instalist.controller.implementation.ControllerFactory;
 import org.noorganization.instalist.model.ShoppingList;
 import org.noorganization.instalist.view.fragment.ShoppingListOverviewFragment;
+import org.noorganization.instalist.view.interfaces.IBaseActivity;
 import org.noorganization.instalist.view.listadapter.ShoppingListOverviewAdapter;
+import org.noorganization.instalist.view.utils.ViewUtils;
 
 import java.util.List;
 
@@ -45,7 +38,7 @@ import java.util.List;
  *
  * @author TS
  */
-public class MainShoppingListView extends ActionBarActivity {
+public class MainShoppingListView extends ActionBarActivity implements IBaseActivity {
 
     private final static String LOG_TAG = MainShoppingListView.class.getName();
     public final static String KEY_LISTNAME = "list_name";
@@ -57,6 +50,7 @@ public class MainShoppingListView extends ActionBarActivity {
     private Button      mAddListButton;
     private ShoppingListOverviewAdapter mShoppingListOverviewAdapter;
     private RelativeLayout mLeftMenuDrawerRelativeLayout;
+
     /**
      * For creation an icon at the toolbar for toggling the navbar in and out.
      */
@@ -78,6 +72,7 @@ public class MainShoppingListView extends ActionBarActivity {
      * Name of the current list
      */
     private String mCurrentListName;
+
 
 
     @Override
@@ -282,20 +277,9 @@ public class MainShoppingListView extends ActionBarActivity {
         changeFragment(fragment);
     }
 
-    /**
-     * Get the assigned toolbar reference.
-     * @return the reference of the toolbar.
-     */
-    public Toolbar getToolbar(){
-        return mToolbar;
-    }
-
-    /**
-     * Get the assigned DrawerLayout, use it for locking it on fragments.
-     * @return the reference to the DrawerLayout.
-     */
-    public DrawerLayout getDrawerLayout(){
-        return mDrawerLayout;
+    @Override
+    public void setDrawerLayoutMode(int _DrawerLayoutMode) {
+        mDrawerLayout.setDrawerLockMode(_DrawerLayoutMode);
     }
 
     /**
@@ -304,13 +288,24 @@ public class MainShoppingListView extends ActionBarActivity {
      *
      * @param _Fragment the fragment that should be created.
      */
+    @Override
     public void changeFragment(Fragment _Fragment) {
-        // create transaction to new fragment
-        FragmentTransaction transaction = getFragmentManager().beginTransaction();
-        transaction.replace(R.id.container, _Fragment);
-        transaction.addToBackStack(null);
-        //transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
-        transaction.commit();
+        ViewUtils.addFragment(this, _Fragment);
+    }
+
+    @Override
+    public void setNavigationIcon(int _ResId) {
+        mToolbar.setNavigationIcon(_ResId);
+    }
+
+    @Override
+    public void setNavigationClickListener(View.OnClickListener _ClickListener) {
+        mToolbar.setNavigationOnClickListener(_ClickListener);
+    }
+
+    @Override
+    public void updateDrawerLayout() {
+        assignDrawer();
     }
 
     /**
@@ -318,6 +313,7 @@ public class MainShoppingListView extends ActionBarActivity {
      *
      * @param _Title, the title of the toolbar
      */
+    @Override
     public void setToolbarTitle(String _Title) {
         mTitle = _Title;
     }

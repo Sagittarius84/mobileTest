@@ -1,8 +1,15 @@
 package org.noorganization.instalist.view.utils;
 
+import android.app.Activity;
+import android.app.DialogFragment;
+import android.app.Fragment;
+import android.app.FragmentManager;
+import android.app.FragmentTransaction;
 import android.text.method.DigitsKeyListener;
 import android.text.method.KeyListener;
 import android.widget.EditText;
+
+import org.noorganization.instalist.R;
 
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
@@ -52,5 +59,29 @@ public class ViewUtils {
         } catch (Exception _notUsed) {
             return 0.0f;
         }
+    }
+
+    public static void addFragment(Activity _activity, Fragment _newFragment) {
+        FragmentManager fragmentManager = _activity.getFragmentManager();
+        String canonicalName = _newFragment.getClass().getCanonicalName();
+        FragmentTransaction transaction = fragmentManager.beginTransaction();
+        Fragment oldFragment = fragmentManager.findFragmentByTag(canonicalName);
+        if (oldFragment != null) {
+            transaction.remove(oldFragment);
+        }
+        if (_newFragment instanceof DialogFragment) {
+            ((DialogFragment) _newFragment).show(transaction, canonicalName);
+        } else {
+            transaction.addToBackStack(null);
+            transaction.add(R.id.container, _newFragment, canonicalName);
+            transaction.commit();
+        }
+    }
+
+    public static void removeFragment(Activity _activity, Fragment _oldFragment) {
+        FragmentManager fragmentManager = _activity.getFragmentManager();
+        FragmentTransaction transaction = fragmentManager.beginTransaction();
+        transaction.remove(_oldFragment);
+        transaction.commit();
     }
 }

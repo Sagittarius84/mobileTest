@@ -15,10 +15,10 @@ import android.widget.Toast;
 import org.noorganization.instalist.R;
 import org.noorganization.instalist.controller.implementation.ControllerFactory;
 import org.noorganization.instalist.model.Ingredient;
-import org.noorganization.instalist.model.Product;
 import org.noorganization.instalist.model.Recipe;
 import org.noorganization.instalist.model.ShoppingList;
 import org.noorganization.instalist.view.datahandler.RecipeDataHolder;
+import org.noorganization.instalist.view.interfaces.IBaseActivity;
 import org.noorganization.instalist.view.listadapter.IngredientListAdapter;
 import org.noorganization.instalist.view.utils.ViewUtils;
 
@@ -29,7 +29,7 @@ import java.util.List;
  * Fragment that handles the creation of a recipe.
  * Created by TS on 28.04.2015.
  */
-public class RecipeCreationFragment extends BaseCustomFragment {
+public class RecipeCreationFragment extends Fragment {
 
     private static final String ARGS_LIST_NAME = "list_name";
     private static final String ARGS_RECIPE_ID = "recipe_id";
@@ -41,6 +41,9 @@ public class RecipeCreationFragment extends BaseCustomFragment {
     private Button mAddIngredientButton;
     private Button mAddRecipeButton;
     private Button mCancelButton;
+
+    private IBaseActivity mBaseActivityInterface;
+    private Context mContext;
 
     private static RecipeCreationFragment mInstance;
 
@@ -55,7 +58,7 @@ public class RecipeCreationFragment extends BaseCustomFragment {
                 return;
             }
 
-            boolean success = false;
+            boolean success;
 
             if(mRecipe == null){
                 success = saveRecipe();
@@ -83,7 +86,7 @@ public class RecipeCreationFragment extends BaseCustomFragment {
             }
             // clear the data holder so that we not retrieve later the currently inserted data.
             RecipeDataHolder.getInstance().clear();
-            changeFragment(fragment);
+            mBaseActivityInterface.changeFragment(fragment);
         }
 
         private boolean updateRecipe(){
@@ -188,6 +191,18 @@ public class RecipeCreationFragment extends BaseCustomFragment {
     }
 
     @Override
+    public void onAttach(Activity _Activity) {
+        super.onAttach(_Activity);
+        mContext = _Activity;
+        try {
+            mBaseActivityInterface = (IBaseActivity) _Activity;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(_Activity.toString()
+                    + " has no IBaseActivity interface attached.");
+        }
+    }
+
+    @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mCurrentShoppingList = ShoppingList.find(ShoppingList.class, ShoppingList.ATTR_NAME + "=?", getArguments().getString(ARGS_LIST_NAME)).get(0);
@@ -200,11 +215,11 @@ public class RecipeCreationFragment extends BaseCustomFragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        super.onCreateView(inflater, container, savedInstanceState);
+    public View onCreateView(LayoutInflater _Inflater, ViewGroup _Container, Bundle _SavedInstanceState) {
+        super.onCreateView(_Inflater, _Container, _SavedInstanceState);
 
         String titleString;
-        View view = inflater.inflate(R.layout.fragment_recipe_details, container, false);
+        View view = _Inflater.inflate(R.layout.fragment_recipe_details, _Container, false);
 
         mAddIngredientButton = (Button) view.findViewById(R.id.fragment_recipe_details_add_ingredient);
         mAddRecipeButton     = (Button) view.findViewById(R.id.fragment_recipe_details_add_recipe);
@@ -212,12 +227,12 @@ public class RecipeCreationFragment extends BaseCustomFragment {
 
         if(mRecipe == null) {
             mViewAccessor = new ViewAcccessor(view, getActivity());
-            mAddRecipeButton.setText(mActivity.getText(R.string.fragment_recipe_creation_add_recipe));
-            titleString = mActivity.getText(R.string.fragment_recipe_creation_add_recipe_title).toString();
+            mAddRecipeButton.setText(mContext.getResources().getString(R.string.fragment_recipe_creation_add_recipe));
+            titleString = mContext.getResources().getString(R.string.fragment_recipe_creation_add_recipe_title);
         } else{
             mViewAccessor = new ViewAcccessor(view, getActivity(), mRecipe);
-            mAddRecipeButton.setText(mActivity.getText(R.string.fragment_recipe_creation_update_recipe));
-            titleString = mActivity.getText(R.string.fragment_recipe_creation_update_recipe_title).toString();
+            mAddRecipeButton.setText(mContext.getResources().getString(R.string.fragment_recipe_creation_update_recipe));
+            titleString = mContext.getResources().getString(R.string.fragment_recipe_creation_update_recipe_title);
             titleString = titleString.concat(" " + mRecipe.mName);
         }
 
@@ -225,7 +240,7 @@ public class RecipeCreationFragment extends BaseCustomFragment {
             mViewAccessor.loadRecipeFromDataHolder();
         }
 
-        setToolbarTitle(titleString);
+        mBaseActivityInterface.setToolbarTitle(titleString);
         return view;
     }
 
@@ -238,7 +253,7 @@ public class RecipeCreationFragment extends BaseCustomFragment {
             public void onClick(View v) {
                 // mViewAccessor.addIngredient();
                 mViewAccessor.saveRecipeToDataHolder();
-                changeFragment(IngredientCreationFragment.newInstance());
+                mBaseActivityInterface.changeFragment(IngredientCreationFragment.newInstance());
             }
         });
 
@@ -246,7 +261,7 @@ public class RecipeCreationFragment extends BaseCustomFragment {
         mCancelButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                onBackPressed();
+                mBaseActivityInterface.onBackPressed();
             }
         });
     }
@@ -329,8 +344,7 @@ public class RecipeCreationFragment extends BaseCustomFragment {
          * @return true, if all elements are filled. false, if at least one element is not filled.
          */
         public boolean isFilled(){
-            boolean returnValue = true;
-            returnValue &= ViewUtils.checkTextViewIsFilled(mRecipeNameText);
+            boolean returnValue = ViewUtils.checkTextViewIsFilled(mRecipeNameText);
             // check if at least on ingredient is there
             returnValue &= mIngredientListAdapter.getCount() > 0;
             return returnValue;
@@ -369,7 +383,7 @@ public class RecipeCreationFragment extends BaseCustomFragment {
         }
         /**
          * TODO: Add validation feature
-         * @return
+         * @return true if input is valid, false if at least one input is invalid.
          */
         public boolean isValid() {
             return true;
