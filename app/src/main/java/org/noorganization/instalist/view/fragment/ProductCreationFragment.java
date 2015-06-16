@@ -24,6 +24,8 @@ import android.widget.Toast;
 import com.orm.query.Select;
 
 import org.noorganization.instalist.R;
+import org.noorganization.instalist.controller.IListController;
+import org.noorganization.instalist.controller.IProductController;
 import org.noorganization.instalist.controller.implementation.ControllerFactory;
 import org.noorganization.instalist.model.Product;
 import org.noorganization.instalist.model.ShoppingList;
@@ -35,6 +37,7 @@ import org.noorganization.instalist.view.interfaces.IBaseActivity;
 import org.noorganization.instalist.view.utils.ViewUtils;
 
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -53,14 +56,13 @@ public class ProductCreationFragment extends DialogFragment {
      * used when product values should be rendered into view.
      */
     private Product     mProduct;
-    private Button      mAddButton;
 
 
     /**
      * Holds the input parameter views. Also delivers methods to retrieve the content of these
      * views.
      */
-    private final static class InputParamsHolder{
+    private class InputParamsHolder{
         private EditText     mProductName;
         private AmountPicker mProductAmount;
         private EditText     mProductTags;
@@ -79,43 +81,12 @@ public class ProductCreationFragment extends DialogFragment {
         }
 
         /**
-         * Constructor of InputParamsHolder
-         * @param _dialog     the context of the fragment.
-         * @param _Product      the reference to the product that should be rendered into the view.
-         */
-        public InputParamsHolder(Dialog _dialog, View _parentView, Product _Product) {
-            this.mContext = _dialog.getContext();
-            initViews(_parentView);
-
-            this.mProductAmount.setValue(_Product.mDefaultAmount);
-            this.mProductName.setText(_Product.mName);
-
-            List<TaggedProduct> taggedProductList = TaggedProduct.findTaggedProductsByProduct(_Product);
-            if(taggedProductList.isEmpty()){
-                return;
-            }
-
-            String tags = "";
-            for(TaggedProduct taggedProduct : taggedProductList){
-                tags = tags.concat(taggedProduct.mTag.mName).concat(", ");
-            }
-            if(taggedProductList.size() > 1) {
-                tags = tags.substring(0, tags.length() - 2);
-            }
-            this.mProductTags.setText(tags);
-        }
-
-        /**
-         * Checks if all editable fields are filled. Recommended to check before accessing product amount.
+         * Checks if all needed editable fields are filled.
          * Marks an unfilled entry as not filled.
          * @return true, if all elements are filled. false, if at least one element is not filled.
          */
         public boolean isFilled(){
-            boolean returnValue = true;
-            returnValue &= ViewUtils.checkTextViewIsFilled(mProductName);
-            returnValue &= mProductAmount.getValue() > 0.0f;
-            // check if amount is greater than zero
-            return returnValue;
+            return ViewUtils.checkTextViewIsFilled(mProductName);
         }
 
         /**         * checks if the input matches the conventions.
@@ -181,18 +152,6 @@ public class ProductCreationFragment extends DialogFragment {
         }
 
         /**
-         * Adds the given value to the productAmount. Takes care when value is less than 0.0f(resets it to 0.0f).
-         * @param _changeValue the value that should be added/substracted.
-         */
-        private void changeProductAmount(float _changeValue){
-            float amount = getProductAmount();
-            amount += _changeValue;
-            if(amount < 0.0f){
-                amount = 0.0f;
-            }
-            mProductAmount.setValue(amount);
-        }
-        /**
          * Assigns the context to the edit view elements in this class. (like EditText)
          */
         private void initViews(View _parentView){
@@ -246,6 +205,33 @@ public class ProductCreationFragment extends DialogFragment {
             mUnits.setAdapter(new ArrayAdapter<>(mContext,
                     android.R.layout.simple_dropdown_item_1line,
                     displayUnitStrings));
+
+            fillViews();
+        }
+
+        private void fillViews() {
+            Product currentProduct = ProductCreationFragment.this.mProduct;
+            if (ProductCreationFragment.this.mProduct != null) {
+                mProductName.setText(currentProduct.mName);
+                mProductAmount.setValue(currentProduct.mDefaultAmount);
+
+                List<TaggedProduct> taggedProductList = TaggedProduct.findTaggedProductsByProduct(currentProduct);
+                StringBuilder tagBuffer = new StringBuilder();
+                if(!taggedProductList.isEmpty()){
+                    Iterator<TaggedProduct> taggedProductIterator = taggedProductList.iterator();
+                    while (taggedProductIterator.hasNext()) {
+                        tagBuffer.append(taggedProductIterator.next());
+                        if (taggedProductIterator.hasNext()) {
+                            tagBuffer.append(", ");
+                        }
+                    }
+                }
+                mProductTags.setText(tagBuffer);
+
+                mProductStep.setText(ViewUtils.formatFloat(currentProduct.mStepAmount));
+                mProductAmount.setStep(currentProduct.mStepAmount);
+                mUnits.setSelection(mUnitList.indexOf(mProduct.mUnit) + 1);
+            }
         }
     }
 
@@ -254,42 +240,34 @@ public class ProductCreationFragment extends DialogFragment {
          * @return true by success false by fail.
          */
         private boolean saveProduct(){
-            Product product = ControllerFactory.getProductController().createProduct(
-                    mInputParams.getProductName(),
-                    mInputParams.getProductDefaultUnit(),
-                    mInputParams.getProductAmount(),
-                    mInputParams.getProductStep()
-            );
+            IProductController productController = ControllerFactory.getProductController();
+            IListController    listController    = ControllerFactory.getListController();
 
-            if(product == null) {
-                return false;
+            if (mProduct == null) {
+                mProduct = productController.createProduct(
+                        mInputParams.getProductName(),
+                        mInputParams.getProductDefaultUnit(),
+                        mInputParams.getProductAmount(),
+                        mInputParams.getProductStep()
+                );
+
+                if (mProduct == null) {
+                    return false;
+                }
+                listController.addOrChangeItem(mCurrentShoppingList, mProduct, mProduct.mDefaultAmount);
+            } else {
+                mProduct.mName          = mInputParams.getProductName();
+                mProduct.mDefaultAmount = mInputParams.getProductAmount();
+                mProduct.mStepAmount    = mInputParams.getProductStep();
+                mProduct.mUnit          = mInputParams.getProductDefaultUnit();
+
+                Product savedProduct = productController.modifyProduct(mProduct);
+                if (!mProduct.equals(savedProduct)) {
+                    return false;
+                }
             }
 
-            if(saveTags(product)) {
-                // add entry to list overview
-                ControllerFactory.getListController().addOrChangeItem(mCurrentShoppingList, product, product.mDefaultAmount);
-                return true;
-            }
-
-            return false;
-        }
-
-        /**
-         * Updates the product given to the fragment.
-         * @return true if updating was successful else false, if an error happened.
-         */
-        private boolean updateProduct(){
-            mProduct.mName          = mInputParams.getProductName();
-            mProduct.mDefaultAmount = mInputParams.getProductAmount();
-            mProduct.mStepAmount    = mInputParams.getProductStep();
-            mProduct.mUnit          = mInputParams.getProductDefaultUnit();
-
-            Product product = ControllerFactory.getProductController().modifyProduct(mProduct);
-            if(product == null){
-                return false;
-            }
-
-            return saveTags(product);
+            return saveTags(mProduct);
         }
 
         /**
@@ -353,18 +331,14 @@ public class ProductCreationFragment extends DialogFragment {
         }
     }*/
 
-    /*@Override
+    @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mCurrentShoppingList = ShoppingList.find(ShoppingList.class, ShoppingList.ATTR_NAME + "=?", getArguments().getString("listName")).get(0);
 
         // check if an product should be shown
-        if(getArguments().getLong(ARGS_PRODUCT_ID) >= 0){
-            long productId = getArguments().getLong(ARGS_PRODUCT_ID);
-            mProduct = Product.findById(Product.class, productId);
-        }
-
-    }*/
+        mProduct = Product.findById(Product.class, getArguments().getLong(ARGS_PRODUCT_ID));
+    }
 
     @Override
     public Dialog onCreateDialog(Bundle _savedInstanceState) {
@@ -394,11 +368,7 @@ public class ProductCreationFragment extends DialogFragment {
         builder.setView(inflatedDialogContents);
 
         AlertDialog createdDialog = builder.create();
-        if(mProduct == null) {
-            mInputParams = new InputParamsHolder(createdDialog, inflatedDialogContents);
-        } else{
-            mInputParams = new InputParamsHolder(createdDialog, inflatedDialogContents, mProduct);
-        }
+        mInputParams = new InputParamsHolder(createdDialog, inflatedDialogContents);
         return createdDialog;
     }
 }
