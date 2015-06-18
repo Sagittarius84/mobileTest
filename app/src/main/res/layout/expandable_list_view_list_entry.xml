@@ -2,14 +2,30 @@
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/expandable_list_view_list_item"
-    style="@style/InstalistTheme1.weighted_linear_list_layout_child"
+    style="@style/InstalistTheme1.base_linear_layout_list"
    >
-    <TextView
-        android:id="@+id/expandable_list_view_list_name"
-        style="@style/InstalistTheme1.weighted_text_style_left"
-        />
+    <ViewSwitcher
+        android:id="@+id/expandable_list_view_view_switcher"
+        style="@style/InstalistTheme1.expandable_list_single_view_switcher"
+        >
+
+        <TextView
+            android:id="@+id/expandable_list_view_list_name"
+            style="@style/InstalistTheme1.list_text_style_left"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp" />
+
+        <EditText
+        android:id="@+id/expandable_list_view_list_edit_name"
+            style="@style/InstalistTheme1.list_text_style_left"
+            android:inputType="text"
+            />
+
+    </ViewSwitcher>
     <TextView
         android:id="@+id/expandable_list_view_list_entries"
         style="@style/InstalistTheme1.weighted_text_style_right"
-        />
+        android:layout_height="match_parent" />
 </LinearLayout>

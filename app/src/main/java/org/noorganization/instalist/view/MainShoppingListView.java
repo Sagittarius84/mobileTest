@@ -9,15 +9,21 @@ import android.os.Bundle;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.internal.widget.TintEditText;
 import android.support.v7.widget.Toolbar;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewParent;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ExpandableListView;
+import android.widget.ImageView;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
+import android.widget.ViewSwitcher;
 
 import org.noorganization.instalist.R;
 import org.noorganization.instalist.controller.implementation.ControllerFactory;
@@ -190,18 +196,18 @@ public class MainShoppingListView extends ActionBarActivity implements IBaseActi
             }
         });
 
-        mAddCategoryButton.setOnClickListener(new View.OnClickListener(){
+        mAddCategoryButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 String categoryName = validateAndGetNewName();
-                if(categoryName == null){
+                if (categoryName == null) {
                     return;
                 }
 
                 // create new category if insert of category failed, there will be shown an
                 // error hint to the user.
                 Category category = ControllerFactory.getCategoryController().createCategory(categoryName);
-                if(category == null){
+                if (category == null) {
                     mNewNameEditText.setError(getResources().getString(R.string.category_exists));
                     return;
                 }
@@ -232,6 +238,88 @@ public class MainShoppingListView extends ActionBarActivity implements IBaseActi
                 Intent settingsIntent;
             }
         });
+
+        mExpandableListView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, View _View, int position, long id) {
+                long packedPosition = mExpandableListView.getExpandableListPosition(position);
+                if(_View == null) return false;
+                switch(ExpandableListView.getPackedPositionType(packedPosition)){
+                    case ExpandableListView.PACKED_POSITION_TYPE_CHILD:
+
+                        int groupPosition = ExpandableListView.getPackedPositionGroup(packedPosition);
+                        int childPosition = ExpandableListView.getPackedPositionChild(packedPosition);
+
+                        ShoppingList shoppingList = (ShoppingList) mCategoryItemListAdapter.getChild(groupPosition, childPosition);
+
+                        ViewSwitcher viewSwitcher = (ViewSwitcher) _View.findViewById(R.id.expandable_list_view_view_switcher);
+                        EditText editText = (EditText) _View.findViewById(R.id.expandable_list_view_list_edit_name);
+
+                        ImageView cancelView = (ImageView) _View.findViewById(R.id.expandable_list_view_edit_cancel);
+                        ImageView submitView = (ImageView) _View.findViewById(R.id.expandable_list_view_edit_submit);
+
+                        cancelView.setOnClickListener(new OnCancelClickListenerWithData(viewSwitcher));
+                        submitView.setOnClickListener(new OnSubmitClickListenerWithData(viewSwitcher, editText, childPosition, groupPosition));
+                        editText.setText(shoppingList.mName);
+                        viewSwitcher.showNext();
+
+                        return true;
+
+                    case ExpandableListView.PACKED_POSITION_TYPE_GROUP:
+
+                        groupPosition = ExpandableListView.getPackedPositionGroup(packedPosition);
+
+                        Category category   = (Category) mCategoryItemListAdapter.getGroup(groupPosition);
+                        viewSwitcher        = (ViewSwitcher) _View.findViewById(R.id.expandable_list_view_view_switcher);
+                        editText            = (EditText) _View.findViewById(R.id.expandable_list_view_category_name_edit);
+                         cancelView = (ImageView) _View.findViewById(R.id.expandable_list_view_edit_cancel);
+                         submitView = (ImageView) _View.findViewById(R.id.expandable_list_view_edit_submit);
+
+                        cancelView.setOnClickListener(new OnCancelClickListenerWithData(viewSwitcher));
+                        submitView.setOnClickListener(new OnSubmitClickListenerWithData(viewSwitcher, editText, 0, groupPosition));
+                        editText.setText(category.mName);
+                        viewSwitcher.showNext();
+                        return true;
+                    default:
+                        return false;
+                }
+            }
+        });
+    }
+    private class OnCancelClickListenerWithData implements View.OnClickListener{
+
+        private ViewSwitcher mViewSwitcher;
+
+        public OnCancelClickListenerWithData(ViewSwitcher _ViewSwitcher){
+            mViewSwitcher = _ViewSwitcher;
+        }
+
+        @Override
+        public void onClick(View v) {
+            mViewSwitcher.showNext();
+        }
+    }
+    private class OnSubmitClickListenerWithData implements View.OnClickListener{
+
+        private ViewSwitcher mViewSwitcher;
+        private EditText mNameEditText;
+        private int mChildIndex;
+        private int mParentIndex;
+
+        public OnSubmitClickListenerWithData(ViewSwitcher _ViewSwitcher, EditText _NameEditText, int _ChildIndex, int _ParentIndex){
+            mViewSwitcher = _ViewSwitcher;
+            mChildIndex = _ChildIndex;
+            mParentIndex = _ParentIndex;
+            mNameEditText = _NameEditText;
+        }
+
+        @Override
+        public void onClick(View v) {
+            String insertedText = mNameEditText.getText().toString();
+            Category category   = (Category) mCategoryItemListAdapter.getGroup(mParentIndex);
+            ControllerFactory.getCategoryController().renameCategory(category, insertedText);
+            mViewSwitcher.showNext();
+        }
     }
 
     /**

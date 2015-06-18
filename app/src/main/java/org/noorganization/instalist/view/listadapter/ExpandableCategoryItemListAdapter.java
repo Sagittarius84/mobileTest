@@ -5,7 +5,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseExpandableListAdapter;
+import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.ViewSwitcher;
 
 import org.noorganization.instalist.R;
 import org.noorganization.instalist.model.Category;
@@ -96,6 +98,8 @@ public class ExpandableCategoryItemListAdapter extends BaseExpandableListAdapter
         return view;
     }
 
+
+
     @Override
     public View getChildView(int groupPosition, int childPosition, boolean isLastChild, View convertView, ViewGroup parent) {
         ViewGroup view;
@@ -114,7 +118,7 @@ public class ExpandableCategoryItemListAdapter extends BaseExpandableListAdapter
         tvListName.setText(shoppingList.mName);
         tvListItemCount.setText(String.valueOf(shoppingList.getEntries().size()));
 
-        view.setOnClickListener(new OnListNameClickListener(shoppingList));
+        OnListNameClickListener clickListener = new OnListNameClickListener(shoppingList);
 
         return view;
     }
@@ -137,18 +141,49 @@ public class ExpandableCategoryItemListAdapter extends BaseExpandableListAdapter
     }
 
     /**
-     * On click listener for managing the on click events on a shoppinglistname
+     * On click listener for managing the onClick and onLongClick events on a shoppinglistname
      */
-    private class OnListNameClickListener implements View.OnClickListener{
+    private class OnCategoryLongClickListener implements View.OnLongClickListener {
+
+        private Category mCategory;
+
+        public OnCategoryLongClickListener(Category _Category){
+            mCategory = _Category;
+        }
+
+        @Override
+        public boolean onLongClick(View _View) {
+            ViewSwitcher viewSwitcher = (ViewSwitcher) _View.findViewById(R.id.expandable_list_view_view_switcher);
+            EditText editText = (EditText) _View.findViewById(R.id.expandable_list_view_category_name_edit);
+            //editText.setText(mCategory.mName);
+            viewSwitcher.showNext();
+            return false;
+        }
+    }
+
+    /**
+     * On click listener for managing the onClick and onLongClick events on a shoppinglistname
+     */
+    private class OnListNameClickListener implements View.OnClickListener, View.OnLongClickListener {
 
         private ShoppingList mShoppingList;
 
         public OnListNameClickListener(ShoppingList _ShoppingList){
             mShoppingList = _ShoppingList;
         }
+
         @Override
         public void onClick(View view) {
             mIBaseActivityListEvent.selectList(mShoppingList);
+        }
+
+        @Override
+        public boolean onLongClick(View _View) {
+            ViewSwitcher viewSwitcher = (ViewSwitcher) _View.findViewById(R.id.expandable_list_view_view_switcher);
+            EditText editText = (EditText) _View.findViewById(R.id.expandable_list_view_list_edit_name);
+            editText.setText(mShoppingList.mName);
+            viewSwitcher.showNext();
+            return true;
         }
     }
 }

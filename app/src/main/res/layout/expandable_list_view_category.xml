@@ -1,14 +1,51 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/expandable_list_view_category_item"
-    style="@style/InstalistTheme1.weighted_linear_list_layout_parent"
-    >
-    <TextView
-        android:id="@+id/expandable_list_view_category_name"
-        style="@style/InstalistTheme1.weighted_text_style_left"
-        />
-    <TextView
-        android:id="@+id/expandable_list_view_category_entries"
-        style="@style/InstalistTheme1.weighted_text_style_right"
-        />
+    style="@style/InstalistTheme1.base_linear_layout_list">
+
+    <ViewSwitcher
+        android:id="@+id/expandable_list_view_view_switcher"
+        style="@style/InstalistTheme1.expandable_list_single_view_switcher">
+
+        <LinearLayout
+            android:id="@+id/expandable_list_view_text_view_layout"
+            style="@style/InstalistTheme1.expandable_list_first_linear_layout_container">
+
+            <TextView
+                android:id="@+id/expandable_list_view_category_name"
+                style="@style/InstalistTheme1.list_text_style_left" />
+
+            <TextView
+                android:id="@+id/expandable_list_view_category_entries"
+                style="@style/InstalistTheme1.weighted_text_style_right" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/expandable_list_view_text_edit_layout"
+            style="@style/InstalistTheme1.expandable_list_second_linear_layout_container"
+            android:gravity="center_vertical"
+            >
+
+            <EditText
+                android:id="@+id/expandable_list_view_category_name_edit"
+                style="@style/InstalistTheme1.list_text_style_left" />
+            <ImageView
+                android:id="@+id/expandable_list_view_edit_cancel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:maxHeight="18dp"
+                android:maxWidth="18dp"
+                android:src="@mipmap/ic_close_black_36dp"
+                />
+            <ImageView
+                android:id="@+id/expandable_list_view_edit_submit"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:maxHeight="18dp"
+                android:maxWidth="18dp"
+                android:src="@mipmap/ic_check_black_36dp"
+                />
+        </LinearLayout>
+    </ViewSwitcher>
+
 </LinearLayout>

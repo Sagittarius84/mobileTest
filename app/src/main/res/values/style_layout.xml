@@ -1,20 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="InstalistTheme1.base_linear_list_layout">
+    <style name="InstalistTheme1.base_linear_layout_list">
         <item name = "android:background"   >@color/white</item>
         <item name = "android:orientation"  >horizontal</item>
         <item name = "android:layout_width" >match_parent</item>
         <item name = "android:layout_height">@dimen/base_list_entry_height</item>
+        <item name = "android:paddingLeft"  >@dimen/base_list_entry_padding_left</item>
+        <item name = "android:paddingRight" >@dimen/base_list_entry_padding_right</item>
     </style>
 
-    <style name="InstalistTheme1.weighted_linear_list_layout_base" parent="InstalistTheme1.base_linear_list_layout">
-        <!--<item name="android:weightSum">5</item>-->
+    <!-- Probably for later tewaks-->
+    <style name="InstalistTheme1.expandable_list_first_linear_layout_container" parent="match_parent_width_height">
     </style>
-    <style name="InstalistTheme1.weighted_linear_list_layout_parent" parent="InstalistTheme1.weighted_linear_list_layout_base">
-        <item name="android:paddingLeft">@dimen/base_list_entry_padding_left</item>
-        <!--<item name="android:paddingStart">@dimen/base_list_entry_padding_left</item>-->
+    <style name="InstalistTheme1.expandable_list_second_linear_layout_container" parent="match_parent_width_height">
     </style>
-    <style name="InstalistTheme1.weighted_linear_list_layout_child" parent="InstalistTheme1.weighted_linear_list_layout_base">
-        <item name="android:paddingLeft">40dp</item>
-    </style>
+    <!-- -->
 </resources>
