@@ -50,6 +50,11 @@ public class ViewUtils {
         return DigitsKeyListener.getInstance(NUMBERS_AND_SEPARATOR);
     }
 
+    public static String formatFloat(float _toConvert) {
+        NumberFormat formatter = new DecimalFormat("#.###");
+        return formatter.format(_toConvert);
+    }
+
     public static float parseFloatFromLocal(String _toConvert) {
         String toConvert = "0" + _toConvert.
                 replace('.', DecimalFormatSymbols.getInstance().getDecimalSeparator());

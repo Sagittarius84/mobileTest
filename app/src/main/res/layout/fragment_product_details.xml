@@ -58,12 +58,5 @@
 
     </LinearLayout>
 
-    <Button
-        android:id="@+id/product_details_action_button_new_or_update"
-        android:text="@string/product_details_action_add"
-        android:layout_gravity="end"
-        style="@style/InstalistTheme1.base_flatten_button" />
-
-
 
 </LinearLayout>
