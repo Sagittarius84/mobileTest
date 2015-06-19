@@ -272,4 +272,8 @@ public class ShoppingListOverviewFragment extends Fragment{
     public void onListItemDeleted(ListEntry _Entry){
         mShoppingListAdapter.removeItem(_Entry);
     }
+
+    public void onShoppingListItemChanged(ShoppingList _ShoppingList){
+        mBaseActivityInterface.updateChangedShoppingList(_ShoppingList);
+    }
 }

@@ -244,6 +244,10 @@ public class MainShoppingListView extends ActionBarActivity implements IBaseActi
             public boolean onItemLongClick(AdapterView<?> parent, View _View, int position, long id) {
                 long packedPosition = mExpandableListView.getExpandableListPosition(position);
                 if(_View == null) return false;
+
+                ImageView cancelView = (ImageView) _View.findViewById(R.id.expandable_list_view_edit_cancel);
+                ImageView submitView = (ImageView) _View.findViewById(R.id.expandable_list_view_edit_submit);
+
                 switch(ExpandableListView.getPackedPositionType(packedPosition)){
                     case ExpandableListView.PACKED_POSITION_TYPE_CHILD:
 
@@ -255,11 +259,9 @@ public class MainShoppingListView extends ActionBarActivity implements IBaseActi
                         ViewSwitcher viewSwitcher = (ViewSwitcher) _View.findViewById(R.id.expandable_list_view_view_switcher);
                         EditText editText = (EditText) _View.findViewById(R.id.expandable_list_view_list_edit_name);
 
-                        ImageView cancelView = (ImageView) _View.findViewById(R.id.expandable_list_view_edit_cancel);
-                        ImageView submitView = (ImageView) _View.findViewById(R.id.expandable_list_view_edit_submit);
-
                         cancelView.setOnClickListener(new OnCancelClickListenerWithData(viewSwitcher));
-                        submitView.setOnClickListener(new OnSubmitClickListenerWithData(viewSwitcher, editText, childPosition, groupPosition));
+                        submitView.setOnClickListener(new OnSubmitClickListenerWithChildData(viewSwitcher, editText, childPosition, groupPosition));
+
                         editText.setText(shoppingList.mName);
                         viewSwitcher.showNext();
 
@@ -272,11 +274,9 @@ public class MainShoppingListView extends ActionBarActivity implements IBaseActi
                         Category category   = (Category) mCategoryItemListAdapter.getGroup(groupPosition);
                         viewSwitcher        = (ViewSwitcher) _View.findViewById(R.id.expandable_list_view_view_switcher);
                         editText            = (EditText) _View.findViewById(R.id.expandable_list_view_category_name_edit);
-                         cancelView = (ImageView) _View.findViewById(R.id.expandable_list_view_edit_cancel);
-                         submitView = (ImageView) _View.findViewById(R.id.expandable_list_view_edit_submit);
 
                         cancelView.setOnClickListener(new OnCancelClickListenerWithData(viewSwitcher));
-                        submitView.setOnClickListener(new OnSubmitClickListenerWithData(viewSwitcher, editText, 0, groupPosition));
+                        submitView.setOnClickListener(new OnSubmitClickListenerWithParentData(viewSwitcher, editText, groupPosition));
                         editText.setText(category.mName);
                         viewSwitcher.showNext();
                         return true;
@@ -299,16 +299,14 @@ public class MainShoppingListView extends ActionBarActivity implements IBaseActi
             mViewSwitcher.showNext();
         }
     }
-    private class OnSubmitClickListenerWithData implements View.OnClickListener{
+    private class OnSubmitClickListenerWithParentData implements View.OnClickListener{
 
         private ViewSwitcher mViewSwitcher;
         private EditText mNameEditText;
-        private int mChildIndex;
         private int mParentIndex;
 
-        public OnSubmitClickListenerWithData(ViewSwitcher _ViewSwitcher, EditText _NameEditText, int _ChildIndex, int _ParentIndex){
+        public OnSubmitClickListenerWithParentData(ViewSwitcher _ViewSwitcher, EditText _NameEditText, int _ParentIndex){
             mViewSwitcher = _ViewSwitcher;
-            mChildIndex = _ChildIndex;
             mParentIndex = _ParentIndex;
             mNameEditText = _NameEditText;
         }
@@ -316,8 +314,35 @@ public class MainShoppingListView extends ActionBarActivity implements IBaseActi
         @Override
         public void onClick(View v) {
             String insertedText = mNameEditText.getText().toString();
+
             Category category   = (Category) mCategoryItemListAdapter.getGroup(mParentIndex);
             ControllerFactory.getCategoryController().renameCategory(category, insertedText);
+            mViewSwitcher.showNext();
+            // TODO: remove this with a callback.
+            updateChangedCategory(category);
+        }
+    }
+
+    private class OnSubmitClickListenerWithChildData implements View.OnClickListener{
+
+        private ViewSwitcher mViewSwitcher;
+        private EditText mNameEditText;
+        private int mChildIndex;
+        private int mParentIndex;
+
+        public OnSubmitClickListenerWithChildData(ViewSwitcher _ViewSwitcher, EditText _NameEditText, int _ChildIndex, int _ParentIndex){
+            mViewSwitcher = _ViewSwitcher;
+            mParentIndex = _ParentIndex;
+            mChildIndex = _ChildIndex;
+            mNameEditText = _NameEditText;
+        }
+
+        @Override
+        public void onClick(View v) {
+            String insertedText = mNameEditText.getText().toString();
+
+            ShoppingList shoppingList   = (ShoppingList) mCategoryItemListAdapter.getChild(mParentIndex, mChildIndex);
+            ControllerFactory.getListController().renameList(shoppingList, insertedText);
             mViewSwitcher.showNext();
         }
     }
@@ -446,6 +471,16 @@ public class MainShoppingListView extends ActionBarActivity implements IBaseActi
     @Override
     public void setToolbarTitle(String _Title) {
         mTitle = _Title;
+    }
+
+    @Override
+    public void updateChangedShoppingList(ShoppingList _ShoppingList) {
+        mCategoryItemListAdapter.notifyDataSetChanged();
+    }
+
+    @Override
+    public void updateChangedCategory(Category _Category) {
+        mCategoryItemListAdapter.notifyDataSetChanged();
     }
 
     /**

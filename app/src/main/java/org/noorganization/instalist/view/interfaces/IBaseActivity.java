@@ -4,6 +4,8 @@ import android.app.Fragment;
 import android.view.View;
 
 import org.noorganization.instalist.R;
+import org.noorganization.instalist.model.Category;
+import org.noorganization.instalist.model.ShoppingList;
 
 /**
  * Provides standard functions to manipulate activity specific fields from a fragment.
@@ -48,4 +50,16 @@ public interface IBaseActivity{
      * Updates the DrawerLayout. Needed to provide that is working.
      */
     void updateDrawerLayout();
+
+    /**
+     * Updates the view of shoppinglists.
+     * @param _ShoppingList The _ShoppingList that was changed.
+     */
+    void updateChangedShoppingList(ShoppingList _ShoppingList);
+
+    /**
+     * Updates the view of categories.
+     * @param _Category The _Category that was changed.
+     */
+    void updateChangedCategory(Category _Category);
 }

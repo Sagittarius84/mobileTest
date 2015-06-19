@@ -8,24 +8,35 @@
         android:id="@+id/expandable_list_view_view_switcher"
         style="@style/InstalistTheme1.expandable_list_single_view_switcher"
         >
+        <LinearLayout
+            android:id="@+id/expandable_list_view_text_view_layout"
+            style="@style/InstalistTheme1.expandable_list_first_linear_layout_container">
 
-        <TextView
-            android:id="@+id/expandable_list_view_list_name"
-            style="@style/InstalistTheme1.list_text_style_left"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:paddingTop="8dp"
-            android:paddingBottom="8dp" />
+            <TextView
+                android:id="@+id/expandable_list_view_list_name"
+                style="@style/InstalistTheme1.list_text_style_left" />
 
-        <EditText
-        android:id="@+id/expandable_list_view_list_edit_name"
-            style="@style/InstalistTheme1.list_text_style_left"
-            android:inputType="text"
-            />
+            <TextView
+                android:id="@+id/expandable_list_view_list_entries"
+                style="@style/InstalistTheme1.weighted_text_style_right" />
+        </LinearLayout>
 
+        <LinearLayout
+            android:id="@+id/expandable_list_view_text_edit_layout"
+            style="@style/InstalistTheme1.expandable_list_second_linear_layout_container"
+            android:gravity="center_vertical"
+            >
+            <EditText
+                android:id="@+id/expandable_list_view_list_edit_name"
+                style="@style/InstalistTheme1.list_text_style_left" />
+            <ImageView
+                android:id="@+id/expandable_list_view_edit_cancel"
+                style="@style/InstalistTheme1.edit_cancel_image"
+                />
+            <ImageView
+                android:id="@+id/expandable_list_view_edit_submit"
+                style="@style/InstalistTheme1.edit_check_image"
+                />
+        </LinearLayout>
     </ViewSwitcher>
-    <TextView
-        android:id="@+id/expandable_list_view_list_entries"
-        style="@style/InstalistTheme1.weighted_text_style_right"
-        android:layout_height="match_parent" />
 </LinearLayout>

@@ -68,5 +68,20 @@
         <item name="android:layout_height">fill_parent</item>
     </style>
 
+    <style name="InstalistTheme1.base_edit_image">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:maxHeight">@dimen/base_edit_image_max_height</item>
+        <item name="android:maxWidth">@dimen/base_edit_image_max_width</item>
+    </style>
+    <style name="InstalistTheme1.edit_cancel_image" parent="InstalistTheme1.base_edit_image">
+        <item name="android:src">@mipmap/ic_close_black_36dp</item>
+    </style>
+
+    <style name="InstalistTheme1.edit_check_image" parent="InstalistTheme1.base_edit_image">
+        <item name="android:src">@mipmap/ic_check_black_36dp</item>
+    </style>
+
+
 
 </resources>
