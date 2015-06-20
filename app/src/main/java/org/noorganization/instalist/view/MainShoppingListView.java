@@ -9,26 +9,27 @@ import android.os.Bundle;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.internal.widget.TintEditText;
 import android.support.v7.widget.Toolbar;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewParent;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ExpandableListView;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
-import android.widget.TextView;
 import android.widget.ViewSwitcher;
 
 import org.noorganization.instalist.R;
 import org.noorganization.instalist.controller.implementation.ControllerFactory;
 import org.noorganization.instalist.model.Category;
 import org.noorganization.instalist.model.ShoppingList;
+import org.noorganization.instalist.touchlistener.IOnShoppingListClickListenerEvents;
+import org.noorganization.instalist.touchlistener.sidebar.OnCancelClickListenerWithData;
+import org.noorganization.instalist.touchlistener.sidebar.OnCategoryLongClickListener;
+import org.noorganization.instalist.touchlistener.sidebar.OnSubmitClickListenerWithParentData;
 import org.noorganization.instalist.view.fragment.ShoppingListOverviewFragment;
 import org.noorganization.instalist.view.interfaces.IBaseActivity;
 import org.noorganization.instalist.view.interfaces.IBaseActivityListEvent;
@@ -45,21 +46,21 @@ import java.util.List;
  *
  * @author TS
  */
-public class MainShoppingListView extends ActionBarActivity implements IBaseActivity, IBaseActivityListEvent {
+public class MainShoppingListView extends ActionBarActivity implements IBaseActivity, IBaseActivityListEvent, IOnShoppingListClickListenerEvents {
 
-    private final static String LOG_TAG = MainShoppingListView.class.getName();
-    public final static String KEY_LISTNAME = "list_name";
+    private final static String LOG_TAG      = MainShoppingListView.class.getName();
+    public final static  String KEY_LISTNAME = "list_name";
 
     private Toolbar mToolbar;
 
     private ExpandableListView mExpandableListView;
-    private EditText    mNewNameEditText;
+    private EditText           mNewNameEditText;
 
-    private Button      mAddListButton;
-    private Button      mAddCategoryButton;
+    private Button mAddListButton;
+    private Button mAddCategoryButton;
 
     private ExpandableCategoryItemListAdapter mCategoryItemListAdapter;
-    private RelativeLayout mLeftMenuDrawerRelativeLayout;
+    private RelativeLayout                    mLeftMenuDrawerRelativeLayout;
 
     /**
      * For creation an icon at the toolbar for toggling the navbar in and out.
@@ -84,7 +85,6 @@ public class MainShoppingListView extends ActionBarActivity implements IBaseActi
     private String mCurrentListName;
 
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
@@ -98,16 +98,16 @@ public class MainShoppingListView extends ActionBarActivity implements IBaseActi
         setSupportActionBar(mToolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        mDrawerLayout       = (DrawerLayout) findViewById(R.id.main_drawer_layout_container);
+        mDrawerLayout = (DrawerLayout) findViewById(R.id.main_drawer_layout_container);
         mExpandableListView = (ExpandableListView) findViewById(R.id.drawer_layout_custom_list_name_view);
-        mNewNameEditText    = (EditText) findViewById(R.id.drawer_layout_custom_new_name);
+        mNewNameEditText = (EditText) findViewById(R.id.drawer_layout_custom_new_name);
 
-        mAddListButton      = (Button) findViewById(R.id.drawer_layout_custom_create_list);
-        mAddCategoryButton  = (Button) findViewById(R.id.drawer_layout_custom_create_category);
+        mAddListButton = (Button) findViewById(R.id.drawer_layout_custom_create_list);
+        mAddCategoryButton = (Button) findViewById(R.id.drawer_layout_custom_create_category);
 
-        mLeftMenuDrawerRelativeLayout   = (RelativeLayout) findViewById(R.id.list_view_left_side_navigation);
-        mCategoryItemListAdapter        = new ExpandableCategoryItemListAdapter(this, Category.listAll(Category.class));
-        mSettingsButton                 = (Button) findViewById(R.id.drawer_layout_custom_settings);
+        mLeftMenuDrawerRelativeLayout = (RelativeLayout) findViewById(R.id.list_view_left_side_navigation);
+        mCategoryItemListAdapter = new ExpandableCategoryItemListAdapter(this, Category.listAll(Category.class));
+        mSettingsButton = (Button) findViewById(R.id.drawer_layout_custom_settings);
 
         // fill the list with selectable lists
         mExpandableListView.setAdapter(mCategoryItemListAdapter);
@@ -134,7 +134,7 @@ public class MainShoppingListView extends ActionBarActivity implements IBaseActi
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
         boolean drawerOpen = mDrawerLayout.isDrawerOpen(mLeftMenuDrawerRelativeLayout);
-        if(drawerOpen){
+        if (drawerOpen) {
             menu.clear();
         }
 
@@ -178,7 +178,7 @@ public class MainShoppingListView extends ActionBarActivity implements IBaseActi
             public void onClick(View v) {
 
                 String listName = validateAndGetNewName();
-                if(listName == null){
+                if (listName == null) {
                     return;
                 }
 
@@ -241,121 +241,62 @@ public class MainShoppingListView extends ActionBarActivity implements IBaseActi
 
         mExpandableListView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
-            public boolean onItemLongClick(AdapterView<?> parent, View _View, int position, long id) {
-                long packedPosition = mExpandableListView.getExpandableListPosition(position);
-                if(_View == null) return false;
+            public boolean onItemLongClick(AdapterView<?> _Parent, View _View, int _Position, long _Id) {
+                long packedPosition = mExpandableListView.getExpandableListPosition(_Position);
 
-                ImageView cancelView = (ImageView) _View.findViewById(R.id.expandable_list_view_edit_cancel);
-                ImageView submitView = (ImageView) _View.findViewById(R.id.expandable_list_view_edit_submit);
-
-                switch(ExpandableListView.getPackedPositionType(packedPosition)){
-                    case ExpandableListView.PACKED_POSITION_TYPE_CHILD:
-
-                        int groupPosition = ExpandableListView.getPackedPositionGroup(packedPosition);
-                        int childPosition = ExpandableListView.getPackedPositionChild(packedPosition);
-
-                        ShoppingList shoppingList = (ShoppingList) mCategoryItemListAdapter.getChild(groupPosition, childPosition);
-
-                        ViewSwitcher viewSwitcher = (ViewSwitcher) _View.findViewById(R.id.expandable_list_view_view_switcher);
-                        EditText editText = (EditText) _View.findViewById(R.id.expandable_list_view_list_edit_name);
-
-                        cancelView.setOnClickListener(new OnCancelClickListenerWithData(viewSwitcher));
-                        submitView.setOnClickListener(new OnSubmitClickListenerWithChildData(viewSwitcher, editText, childPosition, groupPosition));
-
-                        editText.setText(shoppingList.mName);
-                        viewSwitcher.showNext();
-
-                        return true;
-
+                switch (ExpandableListView.getPackedPositionType(packedPosition)) {
                     case ExpandableListView.PACKED_POSITION_TYPE_GROUP:
 
-                        groupPosition = ExpandableListView.getPackedPositionGroup(packedPosition);
+                        int groupPosition = ExpandableListView.getPackedPositionGroup(packedPosition);
+                        Category category = (Category) mCategoryItemListAdapter.getGroup(groupPosition);
+                        // view.setOnLongClickListener(new OnCategoryLongClickListener(category.getId(), mCategoryItemListAdapter));
 
-                        Category category   = (Category) mCategoryItemListAdapter.getGroup(groupPosition);
-                        viewSwitcher        = (ViewSwitcher) _View.findViewById(R.id.expandable_list_view_view_switcher);
-                        editText            = (EditText) _View.findViewById(R.id.expandable_list_view_category_name_edit);
+                        final EditText editText;
+                        ImageView cancelView, submitView;
+                        ViewSwitcher viewSwitcher;
+
+                        cancelView = (ImageView) _View.findViewById(R.id.expandable_list_view_edit_cancel);
+                        submitView = (ImageView) _View.findViewById(R.id.expandable_list_view_edit_submit);
+
+                        viewSwitcher = (ViewSwitcher) _View.findViewById(R.id.expandable_list_view_view_switcher);
+                        editText = (EditText) _View.findViewById(R.id.expandable_list_view_category_name_edit);
 
                         cancelView.setOnClickListener(new OnCancelClickListenerWithData(viewSwitcher));
-                        submitView.setOnClickListener(new OnSubmitClickListenerWithParentData(viewSwitcher, editText, groupPosition));
+                        submitView.setOnClickListener(new OnSubmitClickListenerWithParentData(viewSwitcher, editText, category.getId(), mCategoryItemListAdapter));
+
                         editText.setText(category.mName);
+                        // consume the longClickEvents and also mark whole edittext text
+                        editText.setOnLongClickListener(new View.OnLongClickListener() {
+                            @Override
+                            public boolean onLongClick(View v) {
+                                EditText newName = (EditText) v.findViewById(R.id.expandable_list_view_category_name_edit);
+                                newName.selectAll();
+                                return true;
+                            }
+                        });
                         viewSwitcher.showNext();
-                        return true;
-                    default:
-                        return false;
+
+                        break;
                 }
+
+                return false;
             }
         });
     }
-    private class OnCancelClickListenerWithData implements View.OnClickListener{
 
-        private ViewSwitcher mViewSwitcher;
 
-        public OnCancelClickListenerWithData(ViewSwitcher _ViewSwitcher){
-            mViewSwitcher = _ViewSwitcher;
-        }
 
-        @Override
-        public void onClick(View v) {
-            mViewSwitcher.showNext();
-        }
-    }
-    private class OnSubmitClickListenerWithParentData implements View.OnClickListener{
 
-        private ViewSwitcher mViewSwitcher;
-        private EditText mNameEditText;
-        private int mParentIndex;
-
-        public OnSubmitClickListenerWithParentData(ViewSwitcher _ViewSwitcher, EditText _NameEditText, int _ParentIndex){
-            mViewSwitcher = _ViewSwitcher;
-            mParentIndex = _ParentIndex;
-            mNameEditText = _NameEditText;
-        }
-
-        @Override
-        public void onClick(View v) {
-            String insertedText = mNameEditText.getText().toString();
-
-            Category category   = (Category) mCategoryItemListAdapter.getGroup(mParentIndex);
-            ControllerFactory.getCategoryController().renameCategory(category, insertedText);
-            mViewSwitcher.showNext();
-            // TODO: remove this with a callback.
-            updateChangedCategory(category);
-        }
-    }
-
-    private class OnSubmitClickListenerWithChildData implements View.OnClickListener{
-
-        private ViewSwitcher mViewSwitcher;
-        private EditText mNameEditText;
-        private int mChildIndex;
-        private int mParentIndex;
-
-        public OnSubmitClickListenerWithChildData(ViewSwitcher _ViewSwitcher, EditText _NameEditText, int _ChildIndex, int _ParentIndex){
-            mViewSwitcher = _ViewSwitcher;
-            mParentIndex = _ParentIndex;
-            mChildIndex = _ChildIndex;
-            mNameEditText = _NameEditText;
-        }
-
-        @Override
-        public void onClick(View v) {
-            String insertedText = mNameEditText.getText().toString();
-
-            ShoppingList shoppingList   = (ShoppingList) mCategoryItemListAdapter.getChild(mParentIndex, mChildIndex);
-            ControllerFactory.getListController().renameList(shoppingList, insertedText);
-            mViewSwitcher.showNext();
-        }
-    }
 
     /**
      * Evaluates the EditText field for the new name {listname or category name} and returns the inserted text.
+     *
      * @return the text that was inserted, else null.
      */
-    private String validateAndGetNewName(){
+    private String validateAndGetNewName() {
         mNewNameEditText.setError(null);
-
-        if (mNewNameEditText.getText().length() < 0) {
-            mNewNameEditText.setError(getResources().getString(R.string.drawer_layout_custom_no_input));
+        if (! ViewUtils.checkEditTextIsFilled(mNewNameEditText)) {
+            mNewNameEditText.setError(getString(R.string.drawer_layout_custom_no_input));
             return null;
         }
         return mNewNameEditText.getText().toString();
@@ -391,7 +332,7 @@ public class MainShoppingListView extends ActionBarActivity implements IBaseActi
                             exitApp();
                         }
                     })
-                    .setNegativeButton(android.R.string.no,new DialogInterface.OnClickListener() {
+                    .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int which) {
                             // do nothing
                         }
@@ -401,7 +342,7 @@ public class MainShoppingListView extends ActionBarActivity implements IBaseActi
         }
     }
 
-    public void exitApp(){
+    public void exitApp() {
         super.onBackPressed();
     }
 
@@ -423,7 +364,7 @@ public class MainShoppingListView extends ActionBarActivity implements IBaseActi
         }
 
         // decl
-        Bundle args;
+        Bundle   args;
         Fragment fragment;
 
         // init
@@ -480,13 +421,18 @@ public class MainShoppingListView extends ActionBarActivity implements IBaseActi
 
     @Override
     public void updateChangedCategory(Category _Category) {
-        mCategoryItemListAdapter.notifyDataSetChanged();
+        mCategoryItemListAdapter.updateCategory(_Category);
+    }
+
+    @Override
+    public void onShoppingListClicked(ShoppingList _ShoppingList) {
+        selectList(_ShoppingList);
     }
 
     /**
      * Sets the drawer to toolbar.
      */
-    public void assignDrawer(){
+    public void assignDrawer() {
         mToolbar.setNavigationIcon(R.mipmap.ic_menu_white_36dp);
         // navbar custom design of toolbar
         mNavBarToggle = new ActionBarDrawerToggle(
@@ -511,8 +457,8 @@ public class MainShoppingListView extends ActionBarActivity implements IBaseActi
                 super.onDrawerOpened(drawerView);
                 mToolbar.setNavigationIcon(R.mipmap.ic_arrow_back_white_36dp);
                 if (mToolbar.getTitle() != null) {
-                    mTitle = R.string.choose_list + mToolbar.getTitle().toString();
-                    mToolbar.setTitle(mTitle);
+                    String tmpTitle = getString(R.string.choose_list) + " " + mTitle;
+                    mToolbar.setTitle(tmpTitle);
                 }
                 // check if options menu has changed
                 invalidateOptionsMenu();

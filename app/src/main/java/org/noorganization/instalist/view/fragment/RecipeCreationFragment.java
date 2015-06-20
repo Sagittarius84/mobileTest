@@ -344,7 +344,7 @@ public class RecipeCreationFragment extends Fragment {
          * @return true, if all elements are filled. false, if at least one element is not filled.
          */
         public boolean isFilled(){
-            boolean returnValue = ViewUtils.checkTextViewIsFilled(mRecipeNameText);
+            boolean returnValue = ViewUtils.checkEditTextIsFilled(mRecipeNameText);
             // check if at least on ingredient is there
             returnValue &= mIngredientListAdapter.getCount() > 0;
             return returnValue;

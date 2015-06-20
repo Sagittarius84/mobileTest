@@ -204,7 +204,7 @@ public class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingListAdapte
      */
     public void changeItem(ListEntry _Entry){
         // replace entry with changed entry
-        // TODO performance
+        // TODO performance, usage of some comperator or so...
 
         int positionToChange = -1;
         synchronized (mListOfEntries) {

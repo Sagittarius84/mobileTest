@@ -71,22 +71,6 @@ public class GlobalApplication extends SugarApp {
         return entries;
     }
 
-    /**
-     *
-     * @return global instance of IListController implmentation.
-     */
-    public IListController getListController(){
-        return mListController;
-    }
-
-    /**
-     *
-     * @return an instance of a productController.
-     */
-    public IProductController getProductController(){
-        return mProductController;
-    }
-
     public static IChangeHandler getChangeHandler() {
         return mChangeHandler;
     }

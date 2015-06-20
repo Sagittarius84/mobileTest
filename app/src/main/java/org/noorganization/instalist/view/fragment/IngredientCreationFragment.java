@@ -338,7 +338,7 @@ public class IngredientCreationFragment extends Fragment {
         public boolean isFilled(){
             boolean returnValue;
 
-            returnValue = ViewUtils.checkTextViewIsFilled(mIngredientAmountEditText);
+            returnValue = ViewUtils.checkEditTextIsFilled(mIngredientAmountEditText);
             // check if at least on ingredient is there
             returnValue &= !mProductSpinnerAdapter.isEmpty();
             // show info that the user should assign a product at first

@@ -30,11 +30,12 @@ public class ViewUtils {
             DecimalFormatSymbols.getInstance().getDecimalSeparator();
 
     /**
-     * Checks if the given textview is filled with some text. If it is not filled then there will be an message be shown
-     * @param _EditText the textview that should be tested.
-     * @return
+     * Checks if the given EditText is filled with some text. If it is not filled then there
+     * will be set a error message.
+     * @param _EditText the EditText that should be tested.
+     * @return true, if filled, false if not.
      */
-    public static boolean checkTextViewIsFilled(EditText _EditText){
+    public static boolean checkEditTextIsFilled(EditText _EditText){
         if(_EditText.length() == 0
                 || (_EditText.getText().toString().replaceAll("(\\s)*","").length() == 0) ){
 

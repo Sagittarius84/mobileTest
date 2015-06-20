@@ -2,6 +2,7 @@ package org.noorganization.instalist.model;
 
 import com.orm.StringUtil;
 import com.orm.SugarRecord;
+import com.orm.dsl.Ignore;
 import com.orm.query.Condition;
 import com.orm.query.Select;
 
@@ -16,6 +17,9 @@ public class Category extends SugarRecord<Category> {
     public static final String ATTR_NAME = StringUtil.toSQLName("mName");
 
     public String mName;
+
+    @Ignore
+    public boolean mIsExpanded = false;
 
     public Category() {
     }
