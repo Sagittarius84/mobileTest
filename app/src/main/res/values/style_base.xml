@@ -90,7 +90,10 @@
     <style name="InstalistTheme1.edit_check_image" parent="InstalistTheme1.base_edit_image">
         <item name="android:src">@mipmap/ic_check_black_36dp</item>
     </style>
-
+<style name="InstalistTheme1.delete_image" parent="InstalistTheme1.base_edit_image">
+    <item name="android:src">@mipmap/ic_close_black_36dp</item>
+    <item name="android:tint">@color/fab_material_red_500</item>
+</style>
 
 
 </resources>

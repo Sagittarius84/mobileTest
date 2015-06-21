@@ -70,4 +70,6 @@
     <string name="category_exists">Category already exists</string>
     <string name="category_not_found">Category not found. (Internal Failure)</string>
     <string name="shopping_list_not_found">Shopping list not found. (Internal Failure)</string>
+    <string name="deletion_failed">Deletion failed.</string>
+    <string name="change_of_category_of_list_failed">Move of Shopping List failed...</string>
 </resources>

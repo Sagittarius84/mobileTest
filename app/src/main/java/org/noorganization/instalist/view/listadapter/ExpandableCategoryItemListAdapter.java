@@ -98,7 +98,9 @@ public class ExpandableCategoryItemListAdapter extends BaseExpandableListAdapter
 
         TextView tvCategoryName      = (TextView) view.findViewById(R.id.expandable_list_view_category_name);
         TextView tvCategoryItemCount = (TextView) view.findViewById(R.id.expandable_list_view_category_entries);
+        //ImageView deleteImage        = (ImageView) view.findViewById(R.id.expandable_list_view_edit_delete);
 
+        //deleteImage.setOnClickListener(new OnDeleteCategoryClickListener(category.getId()));
         tvCategoryName.setText(category.mName);
         tvCategoryItemCount.setText(String.valueOf(category.getLists().size()));
 
@@ -118,14 +120,18 @@ public class ExpandableCategoryItemListAdapter extends BaseExpandableListAdapter
             view = (ViewGroup) mInflater.inflate(R.layout.expandable_list_view_list_entry, parent, false);
         }
 
+        view.setLongClickable(true);
+
         TextView tvListName      = (TextView) view.findViewById(R.id.expandable_list_view_list_name);
         TextView tvListItemCount = (TextView) view.findViewById(R.id.expandable_list_view_list_entries);
+        //ImageView deleteImage        = (ImageView) view.findViewById(R.id.expandable_list_view_edit_delete);
 
         tvListName.setText(shoppingList.mName);
         tvListItemCount.setText(String.valueOf(shoppingList.getEntries().size()));
 
+        // deleteImage.setOnClickListener(new OnDeleteShoppingListClickListener(shoppingList.getId()));
         view.setOnClickListener(new OnShoppingListClickListener(mIOnShoppingListClickEvents, shoppingList));
-        view.setOnLongClickListener(new OnShoppingListLongClickListener(shoppingList.getId()));
+        // view.setOnLongClickListener(new OnShoppingListLongClickListener(shoppingList.getId()));
         return view;
     }
 
@@ -143,7 +149,12 @@ public class ExpandableCategoryItemListAdapter extends BaseExpandableListAdapter
 
     @Override
     public void removeCategory(Category _Category) {
-        mListOfCategories.remove(_Category);
+        int index = indexOfCategory(_Category);
+        if (index < 0) {
+            return;
+        }
+        mListOfCategories.remove(index);
+        notifyDataSetChanged();
     }
 
     public void updateCategory(Category _Category) {
@@ -153,6 +164,10 @@ public class ExpandableCategoryItemListAdapter extends BaseExpandableListAdapter
             return;
         }
         mListOfCategories.set(indexToUpdate, _Category);
+        notifyDataSetChanged();
+    }
+
+    public void notifyShoppingListChanged() {
         notifyDataSetChanged();
     }
 
@@ -190,5 +205,40 @@ public class ExpandableCategoryItemListAdapter extends BaseExpandableListAdapter
             }
         }
         return retCategory;
+    }
+
+    private class OnDeleteCategoryClickListener implements View.OnClickListener {
+        private long mCategoryId;
+
+        public OnDeleteCategoryClickListener(long _CategoryId) {
+            mCategoryId = _CategoryId;
+        }
+
+        @Override
+        public void onClick(View v) {
+            Category category = findCategoryById(mCategoryId);
+            ControllerFactory.getCategoryController().removeCategory(category);
+            removeCategory(category);
+        }
+    }
+
+    private class OnDeleteShoppingListClickListener implements View.OnClickListener {
+        private long mShoppingListId;
+
+        public OnDeleteShoppingListClickListener(long _ShoppingListId) {
+            mShoppingListId = _ShoppingListId;
+        }
+
+        @Override
+        public void onClick(View v) {
+            ShoppingList shoppingList = ShoppingList.findById(ShoppingList.class, mShoppingListId);
+            boolean      deleted      = ControllerFactory.getListController().removeList(shoppingList);
+            if (! deleted) {
+                Toast.makeText(v.getContext(), v.getContext().getString(R.string.deletion_failed)
+                        , Toast.LENGTH_SHORT).show();
+                return;
+            }
+            notifyDataSetChanged();
+        }
     }
 }
