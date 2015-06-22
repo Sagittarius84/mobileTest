@@ -31,6 +31,7 @@ import org.noorganization.instalist.view.MainShoppingListView;
 import org.noorganization.instalist.view.datahandler.SelectableBaseItemListEntryDataHolder;
 import org.noorganization.instalist.view.interfaces.IBaseActivity;
 import org.noorganization.instalist.view.listadapter.SelectableItemListAdapter;
+import org.noorganization.instalist.view.utils.ViewUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -234,7 +235,7 @@ public class ProductListDialogFragment extends Fragment{
 
             SelectableBaseItemListEntryDataHolder.getInstance().clear();
             // go back to old fragment
-            mBaseActivityInterface.changeFragment(ShoppingListOverviewFragment.newInstance(mCurrentListName));
+            ViewUtils.removeFragment(getActivity(), ProductListDialogFragment.this);
         }
     };
 
@@ -244,7 +245,7 @@ public class ProductListDialogFragment extends Fragment{
     private View.OnClickListener onCancelClickListener = new View.OnClickListener(){
         @Override
         public void onClick(View v) {
-            mBaseActivityInterface.onBackPressed();
+            ViewUtils.removeFragment(getActivity(), ProductListDialogFragment.this);
         }
     };
 
@@ -256,7 +257,8 @@ public class ProductListDialogFragment extends Fragment{
         @Override
         public void onClick(View v) {
             ProductCreationFragment creationFragment = ProductCreationFragment.newInstance(mCurrentShoppingList.mName);
-            mBaseActivityInterface.changeFragment(creationFragment);
+            ViewUtils.addFragment(getActivity(), creationFragment);
+            ViewUtils.removeFragment(getActivity(), ProductListDialogFragment.this);
         }
     };
 
@@ -269,7 +271,9 @@ public class ProductListDialogFragment extends Fragment{
         mTempAddRecipeButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mBaseActivityInterface.changeFragment(RecipeCreationFragment.newInstance(mCurrentShoppingList.mName));
+                ViewUtils.addFragment(getActivity(),
+                        RecipeCreationFragment.newInstance(mCurrentShoppingList.mName));
+                ViewUtils.removeFragment(getActivity(), ProductListDialogFragment.this);
             }
         });
     }
