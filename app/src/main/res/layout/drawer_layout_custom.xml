@@ -4,17 +4,21 @@
     android:id="@+id/list_view_left_side_navigation"
     style="@style/left_side_navigation_drawer"
     >
-
+<LinearLayout
+    android:id="@+id/container_edittext_new_name"
+    style="@style/InstalistTheme1.linearlayout_card_style"
+    >
     <EditText
         android:id="@+id/drawer_layout_custom_new_name"
         style="@style/InstalistTheme1.base_edit_text_style"
         android:hint="@string/drawer_layout_custom_new_addition_hint"
         android:layout_alignParentTop="true"
         />
+</LinearLayout>
     <LinearLayout
         android:id="@+id/drawer_layout_custom_create_container"
-        android:layout_below="@+id/drawer_layout_custom_new_name"
-    style="@style/InstalistTheme1.base_linear_layout_list"
+        android:layout_below="@+id/container_edittext_new_name"
+    style="@style/InstalistTheme1.linearlayout_card_style"
     >
     <Button
         android:id="@+id/drawer_layout_custom_create_list"
@@ -38,11 +42,9 @@
 
 </LinearLayout>
 
-
     <ExpandableListView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
         android:id="@+id/drawer_layout_custom_list_name_view"
+        style="@style/InstalistTheme1.linearlayout_card_style"
         android:layout_below="@+id/drawer_layout_custom_create_container"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
