@@ -13,7 +13,7 @@
     <color name="secondary_color_light">#F8BBD0</color>
     <color name="secondary_color_dark">#C2185B</color>
 
-    <color name="back_background_color">@color/grey_light</color>
+    <color name="back_background_color">@color/white</color>
     <color name="for_background_color">@color/white</color>
     <color name="shadow_color">@color/black</color>
 </resources>
