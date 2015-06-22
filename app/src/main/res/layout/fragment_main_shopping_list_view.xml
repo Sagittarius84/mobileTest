@@ -4,17 +4,21 @@
     xmlns:fab="http://schemas.android.com/apk/res-auto"
     tools:context="org.noorganization.instalist.view.MainShoppingListView$PlaceholderFragment">
     <android.support.v7.widget.RecyclerView
+        android:id="@+id/fragment_shopping_list"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:scrollbars ="vertical"
-        android:id="@+id/fragment_shopping_list"/>
+        android:background="@color/for_background_color"
+        />
     <com.software.shell.fab.ActionButton
         android:id="@+id/add_item_main_list_view"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
         android:layout_marginRight="@dimen/fab_margin"
+        android:layout_marginEnd="@dimen/base_list_entry_padding_right"
         android:layout_marginBottom="@dimen/fab_margin"
         fab:button_color="@color/secondary_color"
         fab:button_colorPressed="@color/secondary_color_dark"

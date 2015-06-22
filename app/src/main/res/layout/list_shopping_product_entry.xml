@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/list_product_shopping_view"
     style="@style/single_line_list_view"
@@ -9,14 +9,21 @@
         style="@style/single_line_product_text_view"
         android:layout_marginStart="16dp"
         android:layout_marginLeft="16dp"
+        android:layout_weight="0.2"
         android:minWidth="32dp"
     />
+    <TextView
+        android:id = "@+id/list_product_shopping_product_amount_type"
+        style="@style/single_line_product_text_view"
+        android:layout_marginStart="16dp"
+        android:layout_marginLeft="16dp"
+        android:layout_weight="0.1"
+        />
     <TextView
         android:id = "@+id/list_product_shopping_product_name"
         style="@style/single_line_product_text_view"
         android:layout_marginStart="16dp"
         android:layout_marginLeft="16dp"
-        android:layout_toEndOf="@id/list_product_shopping_product_amount"
-        android:layout_toRightOf="@id/list_product_shopping_product_amount"
+        android:layout_weight="0.7"
     />
-</RelativeLayout>
+</LinearLayout>

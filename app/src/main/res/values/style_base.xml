@@ -36,9 +36,12 @@
         <item name="android:paddingLeft">@dimen/list_text_padding_left</item>
         <item name="android:paddingTop">@dimen/list_text_padding_top</item>
         <item name="android:paddingBottom">@dimen/list_text_padding_bottom</item>
+        <!--<item name="android:paddingEnd">@dimen/base_list_entry_padding_right</item>-->
+    </style>
+    <style name="InstalistTheme1.weighted_text_style_right_entry_count" parent="InstalistTheme1.weighted_text_style_right">
+        <item name="android:layout_margin">@dimen/base_margin</item>
         <item name="android:background">@color/fab_material_blue_500</item>
         <item name="android:gravity">center</item>
-        <!--<item name="android:paddingEnd">@dimen/base_list_entry_padding_right</item>-->
     </style>
     <style name="InstalistTheme1.base_edit_text_style">
         <item name="android:layout_width">match_parent</item>

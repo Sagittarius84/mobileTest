@@ -17,7 +17,7 @@
 
             <TextView
                 android:id="@+id/expandable_list_view_category_entries"
-                style="@style/InstalistTheme1.weighted_text_style_right"/>
+                style="@style/InstalistTheme1.weighted_text_style_right_entry_count"/>
         </LinearLayout>
 
         <LinearLayout
