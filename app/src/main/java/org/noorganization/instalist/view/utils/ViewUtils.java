@@ -73,12 +73,13 @@ public class ViewUtils {
         FragmentTransaction transaction = fragmentManager.beginTransaction();
         Fragment oldFragment = fragmentManager.findFragmentByTag(canonicalName);
         if (oldFragment != null) {
+            fragmentManager.popBackStack(canonicalName, FragmentManager.POP_BACK_STACK_INCLUSIVE);
             transaction.remove(oldFragment);
         }
         if (_newFragment instanceof DialogFragment) {
             ((DialogFragment) _newFragment).show(transaction, canonicalName);
         } else {
-            transaction.addToBackStack(null);
+            transaction.addToBackStack(canonicalName);
             transaction.add(R.id.container, _newFragment, canonicalName);
             transaction.commit();
         }
@@ -87,6 +88,8 @@ public class ViewUtils {
     public static void removeFragment(Activity _activity, Fragment _oldFragment) {
         FragmentManager fragmentManager = _activity.getFragmentManager();
         FragmentTransaction transaction = fragmentManager.beginTransaction();
+        fragmentManager.popBackStack(_oldFragment.getClass().getCanonicalName(),
+                FragmentManager.POP_BACK_STACK_INCLUSIVE);
         transaction.remove(_oldFragment);
         transaction.commit();
     }
