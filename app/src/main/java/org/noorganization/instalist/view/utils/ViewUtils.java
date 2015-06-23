@@ -78,8 +78,9 @@ public class ViewUtils {
         }
         if (_newFragment instanceof DialogFragment) {
             ((DialogFragment) _newFragment).show(transaction, canonicalName);
-        } else {
+        } else{
             transaction.addToBackStack(canonicalName);
+            // use of replace, because the other fragments would run in background
             transaction.add(R.id.container, _newFragment, canonicalName);
             transaction.commit();
         }

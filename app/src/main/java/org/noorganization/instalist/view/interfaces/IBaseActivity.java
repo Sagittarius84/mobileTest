@@ -47,9 +47,10 @@ public interface IBaseActivity{
     void setNavigationClickListener(View.OnClickListener _ClickListener);
 
     /**
-     * Updates the DrawerLayout. Needed to provide that is working.
+     * Updates the DrawerLayout. Needed to provide that it is working. Also updates the option menu.
+     * Best place to call it, before a fragment is removed and the user should be led to the ShoppingList overview.
      */
-    void updateDrawerLayout();
+    void bindDrawerLayout();
 
     /**
      * Updates the view of shoppinglists.

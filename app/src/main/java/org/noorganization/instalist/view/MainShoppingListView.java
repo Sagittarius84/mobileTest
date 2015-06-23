@@ -388,7 +388,6 @@ public class MainShoppingListView extends ActionBarActivity implements IBaseActi
     @Override
     protected void onResume() {
         super.onResume();
-        assignDrawer();
 
         // TODO: try to remove this
         mCategoryItemListAdapter.notifyDataSetChanged();
@@ -580,7 +579,7 @@ public class MainShoppingListView extends ActionBarActivity implements IBaseActi
     }
 
     @Override
-    public void updateDrawerLayout() {
+    public void bindDrawerLayout() {
         assignDrawer();
     }
 

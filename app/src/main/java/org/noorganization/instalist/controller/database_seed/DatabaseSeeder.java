@@ -36,7 +36,7 @@ public class DatabaseSeeder {
     private static DatabaseSeeder mInstance;
 
     private final String    SAMPLE_TAG              = "SAMPLE";
-    private final int       PRODUCT_TEST_DATA_SIZE  = 10;
+    private final int       PRODUCT_TEST_DATA_SIZE  = 25;
     private final long      PRODUCT_LIST_SEED       = 324982340237840L;
 
     private IListController mListController;

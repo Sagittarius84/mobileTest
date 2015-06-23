@@ -7,7 +7,6 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
-import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -122,14 +121,17 @@ public class ShoppingListOverviewFragment extends Fragment{
         setHasOptionsMenu(true);
         // get bundle args to get the listname that should be shown
         Bundle bundle = this.getArguments();
+
+        mMapComperable = new WeakHashMap<>();
+        mMapComperable.put(0, new AlphabeticalListEntryComparator());
+        mMapComperable.put(1, new PriorityListEntryComparator());
+
         if (bundle == null) {
             return;
         }
         mCurrentListName     = bundle.getString(MainShoppingListView.KEY_LISTNAME);
         mCurrentShoppingList = ShoppingList.findByName(mCurrentListName);
-        mMapComperable = new WeakHashMap<>();
-        mMapComperable.put(0, new AlphabeticalListEntryComparator());
-        mMapComperable.put(1, new PriorityListEntryComparator());
+
     }
 
 
@@ -138,6 +140,7 @@ public class ShoppingListOverviewFragment extends Fragment{
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        menu.clear();
         inflater.inflate(R.menu.menu_main, menu);
         super.onCreateOptionsMenu(menu, inflater);
     }
@@ -247,7 +250,7 @@ public class ShoppingListOverviewFragment extends Fragment{
             }
         });
 
-        mBaseActivityInterface.updateDrawerLayout();
+        mBaseActivityInterface.bindDrawerLayout();
     }
 
 

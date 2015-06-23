@@ -29,7 +29,6 @@ import org.noorganization.instalist.model.view.BaseItemListEntry;
 import org.noorganization.instalist.model.view.ProductListEntry;
 import org.noorganization.instalist.model.view.RecipeListEntry;
 import org.noorganization.instalist.model.view.SelectableBaseItemListEntry;
-import org.noorganization.instalist.view.MainShoppingListView;
 import org.noorganization.instalist.view.datahandler.SelectableBaseItemListEntryDataHolder;
 import org.noorganization.instalist.view.interfaces.IBaseActivity;
 import org.noorganization.instalist.view.listadapter.SelectableItemListAdapter;
@@ -136,17 +135,6 @@ public class ProductListDialogFragment extends Fragment{
     public void onActivityCreated(Bundle _SavedIndstance) {
         super.onActivityCreated(_SavedIndstance);
 
-        mBaseActivityInterface.setToolbarTitle(mContext.getResources().getString(R.string.product_list_dialog_title));
-        mBaseActivityInterface.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
-
-        mBaseActivityInterface.setNavigationIcon(R.mipmap.ic_arrow_back_white_36dp);
-
-        mBaseActivityInterface.setNavigationClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mBaseActivityInterface.onBackPressed();
-            }
-        });
     }
 
     @Override
@@ -174,6 +162,7 @@ public class ProductListDialogFragment extends Fragment{
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        menu.clear();
         inflater.inflate(R.menu.menu_product_list_dialog, menu);
         super.onCreateOptionsMenu(menu, inflater);
     }
@@ -201,6 +190,17 @@ public class ProductListDialogFragment extends Fragment{
     @Override
     public void onResume() {
         super.onResume();
+
+        mBaseActivityInterface.setToolbarTitle(mContext.getResources().getString(R.string.product_list_dialog_title));
+        mBaseActivityInterface.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
+
+        mBaseActivityInterface.setNavigationIcon(R.mipmap.ic_arrow_back_white_36dp);
+        mBaseActivityInterface.setNavigationClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mBaseActivityInterface.onBackPressed();
+            }
+        });
         mAddNewProductButton.setOnClickListener(mCreateProductListener);
         mCancelButton.setOnClickListener(mCancelListener);
         mAddProductsButton.setOnClickListener(mAddProductsListener);
