@@ -47,7 +47,6 @@ public class ProductListDialogFragment extends Fragment{
     public static final String FILTER_BY_RECIPE = "1";
     public static final String FILTER_SHOW_ALL = "2";
     private ShoppingList mCurrentShoppingList;
-    private String       mCurrentListName;
 
     private Button mAddNewProductButton;
     private Button mCancelButton;
@@ -96,12 +95,12 @@ public class ProductListDialogFragment extends Fragment{
         }
 
         setHasOptionsMenu(true);
-        mCurrentListName    = bundle.getString(MainShoppingListView.KEY_LISTNAME);
-        mCurrentShoppingList = ShoppingList.findByName(mCurrentListName);
+        String currentListName = bundle.getString(MainShoppingListView.KEY_LISTNAME);
+        mCurrentShoppingList = ShoppingList.findByName(currentListName);
 
         if(mCurrentShoppingList == null){
             throw new IllegalStateException(ProductListDialogFragment.class.toString() +
-                    ": Cannot find corresponding ShoppingList with name: " + mCurrentListName);
+                    ": Cannot find corresponding ShoppingList with name: " + currentListName);
         }
 
         List<Product> productList = Product.listAll(Product.class);
@@ -120,6 +119,10 @@ public class ProductListDialogFragment extends Fragment{
         for(Recipe recipe: recipeList){
             mSelectableBaseItemListEntries.add(new SelectableBaseItemListEntry(new RecipeListEntry(recipe)));
         }
+
+        mAddProductsListener   = new OnAddProductsListener();
+        mCancelListener        = new OnCancelListener();
+        mCreateProductListener = new OnCreateProductListener();
     }
 
     @Override
@@ -188,10 +191,46 @@ public class ProductListDialogFragment extends Fragment{
         return super.onOptionsItemSelected(item);
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        mAddNewProductButton.setOnClickListener(mCreateProductListener);
+        mCancelButton.setOnClickListener(mCancelListener);
+        mAddProductsButton.setOnClickListener(mAddProductsListener);
+        mTempAddRecipeButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ViewUtils.addFragment(getActivity(),
+                        RecipeCreationFragment.newInstance(mCurrentShoppingList.mName));
+                ViewUtils.removeFragment(getActivity(), ProductListDialogFragment.this);
+            }
+        });
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        mAddNewProductButton.setOnClickListener(null);
+        mCancelButton.setOnClickListener(null);
+        mAddProductsButton.setOnClickListener(null);
+    }
+
     /**
      * Assign to add all selected list items to the current list.
      */
-    private View.OnClickListener onAddProductsClickListener = new View.OnClickListener(){
+    private View.OnClickListener mAddProductsListener;
+
+    /**
+     * Assign to go back to the last fragment.
+     */
+    private View.OnClickListener mCancelListener;
+
+    /**
+     * Assign to call add new product overview.
+     */
+    private View.OnClickListener mCreateProductListener;
+
+    private class OnAddProductsListener implements View.OnClickListener {
 
         @Override
         public void onClick(View v) {
@@ -237,52 +276,21 @@ public class ProductListDialogFragment extends Fragment{
             // go back to old fragment
             ViewUtils.removeFragment(getActivity(), ProductListDialogFragment.this);
         }
-    };
+    }
 
-    /**
-     * Assign to go back to the last fragment.
-     */
-    private View.OnClickListener onCancelClickListener = new View.OnClickListener(){
+    private class OnCancelListener implements View.OnClickListener {
         @Override
         public void onClick(View v) {
             ViewUtils.removeFragment(getActivity(), ProductListDialogFragment.this);
         }
-    };
+    }
 
-    /**
-     * Assign to call add new product overview.
-     */
-    private View.OnClickListener onAddNewProductClickListener = new View.OnClickListener(){
-
+    private class OnCreateProductListener implements View.OnClickListener {
         @Override
         public void onClick(View v) {
             ProductChangeFragment creationFragment = ProductChangeFragment.newInstance(mCurrentShoppingList.mName);
             ViewUtils.addFragment(getActivity(), creationFragment);
             ViewUtils.removeFragment(getActivity(), ProductListDialogFragment.this);
         }
-    };
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        mAddNewProductButton.setOnClickListener(onAddNewProductClickListener);
-        mCancelButton.setOnClickListener(onCancelClickListener);
-        mAddProductsButton.setOnClickListener(onAddProductsClickListener);
-        mTempAddRecipeButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                ViewUtils.addFragment(getActivity(),
-                        RecipeCreationFragment.newInstance(mCurrentShoppingList.mName));
-                ViewUtils.removeFragment(getActivity(), ProductListDialogFragment.this);
-            }
-        });
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        mAddNewProductButton.setOnClickListener(null);
-        mCancelButton.setOnClickListener(null);
-        mAddProductsButton.setOnClickListener(null);
     }
 }
