@@ -19,4 +19,5 @@
     <dimen name="navigation_drawer_width">280dp</dimen>
     <dimen name="base_edit_image_max_height">18dp</dimen>
     <dimen name="base_edit_image_max_width">18dp</dimen>
+    <dimen name="border_radius">2dp</dimen>
 </resources>
