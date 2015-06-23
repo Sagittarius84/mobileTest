@@ -72,4 +72,12 @@
     <string name="shopping_list_not_found">Shopping list not found. (Internal Failure)</string>
     <string name="deletion_failed">Deletion failed.</string>
     <string name="change_of_category_of_list_failed">Move of Shopping List failed...</string>
+    <string name="category_action">Actions on Group</string>
+    <string name="add_list">Add List</string>
+    <string name="remove_category">Remove Category</string>
+    <string name="edit_category_name">Edit Category Name</string>
+    <string name="shopping_list_action">Actions on Shopping List</string>
+    <string name="edit_shopping_list">Edit List</string>
+    <string name="remove_shopping_list">Remove Shopping List</string>
+    <string name="move_category">Move to Category</string>
 </resources>
