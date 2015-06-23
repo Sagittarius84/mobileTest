@@ -14,9 +14,8 @@ import org.noorganization.instalist.model.ListEntry;
 import org.noorganization.instalist.model.Product;
 import org.noorganization.instalist.model.ShoppingList;
 import org.noorganization.instalist.view.datahandler.SelectedProductDataHandler;
-import org.noorganization.instalist.view.fragment.ProductCreationFragment;
+import org.noorganization.instalist.view.fragment.ProductChangeFragment;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -111,7 +110,7 @@ public class SelectableProductListAdapter extends ArrayAdapter<Product> {
         public boolean onLongClick(View v) {
             FragmentTransaction transaction = mContext.getFragmentManager().beginTransaction();
             transaction.addToBackStack(null);
-            transaction.replace(R.id.container, ProductCreationFragment
+            transaction.replace(R.id.container, ProductChangeFragment
                     .newInstance(mCurrentShoppingList.mName, mListEntry.mProduct.getId()));
             transaction.commit();
             return true;

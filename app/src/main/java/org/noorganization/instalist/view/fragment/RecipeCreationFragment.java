@@ -155,7 +155,7 @@ public class RecipeCreationFragment extends Fragment {
     };
 
     /**
-     * Creates an instance of an ProductCreationFragment with the details of the product.
+     * Creates an instance of an ProductChangeFragment with the details of the product.
      * @param _ListName the name of the list where the product should be added.
      * @return the new instance of this fragment.
      */
@@ -171,7 +171,7 @@ public class RecipeCreationFragment extends Fragment {
 
 
     /**
-     * Creates an instance of an ProductCreationFragment.
+     * Creates an instance of an ProductChangeFragment.
      * @param _RecipeId the id in the database of the product that should be edited.
      * @param _ListName the name of the list where the calling productlistselector should save the products.
      * @return the new instance of this fragment.
