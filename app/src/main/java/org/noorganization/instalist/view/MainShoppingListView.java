@@ -16,7 +16,6 @@ import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ExpandableListView;
@@ -24,7 +23,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
-import android.widget.SimpleAdapter;
 import android.widget.Spinner;
 import android.widget.SpinnerAdapter;
 import android.widget.Toast;
@@ -45,9 +43,9 @@ import org.noorganization.instalist.view.interfaces.IBaseActivity;
 import org.noorganization.instalist.view.interfaces.IBaseActivityListEvent;
 import org.noorganization.instalist.view.listadapter.CategoryListAdapter;
 import org.noorganization.instalist.view.listadapter.ExpandableCategoryItemListAdapter;
+import org.noorganization.instalist.view.listadapter.PlainShoppingListOverviewAdapter;
 import org.noorganization.instalist.view.utils.ViewUtils;
 
-import java.security.InvalidParameterException;
 import java.util.List;
 
 /**
@@ -74,18 +72,19 @@ public class MainShoppingListView extends ActionBarActivity implements IBaseActi
     private Toolbar mToolbar;
 
     private ExpandableListView mExpandableListView;
-    private ListView           mListView;
-    private RelativeLayout     mLeftMenuDrawerRelativeLayout;
-    private EditText           mNewNameEditText;
+    private ListView           mPlainListView;
+
+    private RelativeLayout mLeftMenuDrawerRelativeLayout;
+    private EditText       mNewNameEditText;
 
     private Button mAddListButton;
     private Button mAddCategoryButton;
 
     private ExpandableCategoryItemListAdapter mCategoryItemListAdapter;
-
+    private PlainShoppingListOverviewAdapter  mPlainShoppingListAdapter;
 
     /**
-     * For creation an icon at the toolbar for toggling the navbar in and out.
+     * For creation of an icon at the toolbar to toggle the navbar.
      */
     private ActionBarDrawerToggle mNavBarToggle;
 
@@ -113,7 +112,6 @@ public class MainShoppingListView extends ActionBarActivity implements IBaseActi
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_shopping_list_view);
 
-        List<String> shoppingListNames = ShoppingList.getShoppingListNames();
         // init and setup toolbar
         mToolbar = (Toolbar) findViewById(R.id.toolbar);
 
@@ -122,14 +120,21 @@ public class MainShoppingListView extends ActionBarActivity implements IBaseActi
 
         mDrawerLayout = (DrawerLayout) findViewById(R.id.main_drawer_layout_container);
         mExpandableListView = (ExpandableListView) findViewById(R.id.drawer_layout_custom_list_name_view);
+
         mNewNameEditText = (EditText) findViewById(R.id.drawer_layout_custom_new_name);
 
         mAddListButton = (Button) findViewById(R.id.drawer_layout_custom_create_list);
         mAddCategoryButton = (Button) findViewById(R.id.drawer_layout_custom_create_category);
 
         mLeftMenuDrawerRelativeLayout = (RelativeLayout) findViewById(R.id.list_view_left_side_navigation);
-        mCategoryItemListAdapter = new ExpandableCategoryItemListAdapter(this, Category.listAll(Category.class));
         mSettingsButton = (Button) findViewById(R.id.drawer_layout_custom_settings);
+
+        long categoryCount = Category.count(Category.class, null, new String[]{});
+        if (categoryCount > 0) {
+            mCategoryItemListAdapter = new ExpandableCategoryItemListAdapter(this, Category.listAll(Category.class));
+        } else {
+            mPlainShoppingListAdapter = new PlainShoppingListOverviewAdapter(this, ShoppingList.find(ShoppingList.class, null, null));
+        }
 
         // fill the list with selectable lists
         mExpandableListView.setAdapter(mCategoryItemListAdapter);
@@ -359,6 +364,7 @@ public class MainShoppingListView extends ActionBarActivity implements IBaseActi
     @Override
     protected void onResume() {
         super.onResume();
+
         // TODO: try to remove this
         mCategoryItemListAdapter.notifyDataSetChanged();
         // end todo

@@ -184,6 +184,11 @@ public class ShoppingListOverviewFragment extends Fragment{
     public void onPause() {
         super.onPause();
         mAddButton.setOnClickListener(null);
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
         ((ChangeHandler) ((GlobalApplication) getActivity().getApplication()).getChangeHandler()).setCurrentFragment(null);
     }
 
@@ -273,6 +278,15 @@ public class ShoppingListOverviewFragment extends Fragment{
         mShoppingListAdapter.removeItem(_Entry);
     }
 
+    /**
+     * Adds the given listentry to the listentry adapter.
+     * @param _Entry The entry that should be added to the list.
+     */
+    public void onListItemAdded(ListEntry _Entry){
+        if(_Entry.mList.getId().equals(mCurrentShoppingList.getId())) {
+            mShoppingListAdapter.addItem(_Entry);
+        }
+    }
     public void onShoppingListItemChanged(ShoppingList _ShoppingList){
         mBaseActivityInterface.updateChangedShoppingList(_ShoppingList);
     }
