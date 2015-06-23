@@ -22,6 +22,7 @@ import android.widget.EditText;
 import android.widget.ExpandableListView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.SimpleAdapter;
 import android.widget.Spinner;
@@ -51,33 +52,36 @@ import java.util.List;
 /**
  * MainShoppingListView handles the display of an selected shoppinglist, so that the corresponding
  * items of this list are shown to the user.
- * <p>
+ * <p/>
  * Is dependant on the selected list.
  *
  * @author TS
  */
 public class MainShoppingListView extends ActionBarActivity implements IBaseActivity, IBaseActivityListEvent, IOnShoppingListClickListenerEvents {
 
-    private final static String LOG_TAG                            = MainShoppingListView.class.getName();
-    public final static  String KEY_LISTNAME                       = "list_name";
-    public static final  int    GROUP_MENU                         = 2;
-    public static final  int    GROUP_MENU_ADD_LIST_ACTION         = 0;
-    public static final  int    GROUP_MENU_REMOVE_CATEGORY_ACTION  = 1;
-    private static final int    GROUP_MENU_EDIT_CATEGORY_ACTION    = 2;
-    private static final int    CHILD_MENU                         = 3;
-    private static final int    CHILD_MENU_EDIT_LIST_NAME_ACTION   = 0;
-    private static final int    CHILD_MENU_REMOVE_LIST_ACTION      = 1;
-    private static final int    CHILD_MENU_MOVE_TO_CATEGORY_ACTION = 2;
+    private final static String LOG_TAG      = MainShoppingListView.class.getName();
+    public final static  String KEY_LISTNAME = "list_name";
+
+    private static final int GROUP_MENU                         = 2;
+    private static final int GROUP_MENU_ADD_LIST_ACTION         = 0;
+    private static final int GROUP_MENU_REMOVE_CATEGORY_ACTION  = 1;
+    private static final int GROUP_MENU_EDIT_CATEGORY_ACTION    = 2;
+    private static final int CHILD_MENU                         = 3;
+    private static final int CHILD_MENU_EDIT_LIST_NAME_ACTION   = 0;
+    private static final int CHILD_MENU_REMOVE_LIST_ACTION      = 1;
+    private static final int CHILD_MENU_MOVE_TO_CATEGORY_ACTION = 2;
     private Toolbar mToolbar;
 
     private ExpandableListView mExpandableListView;
+    private ListView           mListView;
+    private RelativeLayout     mLeftMenuDrawerRelativeLayout;
     private EditText           mNewNameEditText;
 
     private Button mAddListButton;
     private Button mAddCategoryButton;
 
     private ExpandableCategoryItemListAdapter mCategoryItemListAdapter;
-    private RelativeLayout                    mLeftMenuDrawerRelativeLayout;
+
 
     /**
      * For creation an icon at the toolbar for toggling the navbar in and out.
@@ -135,7 +139,9 @@ public class MainShoppingListView extends ActionBarActivity implements IBaseActi
         assignDrawer();
 
         if (savedInstanceState == null) {
-            selectList(ShoppingList.listAll(ShoppingList.class).get(0));
+            if (ShoppingList.count(ShoppingList.class, null, new String[]{}) > 0) {
+                selectList(ShoppingList.listAll(ShoppingList.class).get(0));
+            }
         }
     }
 
@@ -184,7 +190,7 @@ public class MainShoppingListView extends ActionBarActivity implements IBaseActi
 
         View view;
 
-        int flatPosition = mExpandableListView.getFlatListPosition(contextMenuInfo.packedPosition);
+        int flatPosition         = mExpandableListView.getFlatListPosition(contextMenuInfo.packedPosition);
         int firstVisiblePosition = mExpandableListView.getFirstVisiblePosition();
 
         view = mExpandableListView.getChildAt(flatPosition - firstVisiblePosition);
@@ -216,8 +222,8 @@ public class MainShoppingListView extends ActionBarActivity implements IBaseActi
                         cancelView = (ImageView) view.findViewById(R.id.expandable_list_view_edit_cancel);
                         submitView = (ImageView) view.findViewById(R.id.expandable_list_view_edit_submit);
 
-                        viewSwitcher = (ViewSwitcher)   view.findViewById(R.id.expandable_list_view_view_switcher);
-                        editText     = (EditText)       view.findViewById(R.id.expandable_list_view_category_name_edit);
+                        viewSwitcher = (ViewSwitcher) view.findViewById(R.id.expandable_list_view_view_switcher);
+                        editText = (EditText) view.findViewById(R.id.expandable_list_view_category_name_edit);
 
                         cancelView.setOnClickListener(new OnCancelClickListenerWithData(viewSwitcher));
                         submitView.setOnClickListener(new OnSubmitClickListenerWithParentData(viewSwitcher, editText, category.getId(), mCategoryItemListAdapter));
@@ -246,14 +252,14 @@ public class MainShoppingListView extends ActionBarActivity implements IBaseActi
                 ShoppingList shoppingList = (ShoppingList) mCategoryItemListAdapter.getChild(groupPosition, childPosition);
                 Category categoryForShoppingList = (Category) mCategoryItemListAdapter.getGroup(groupPosition);
 
-                EditText     editText;
+                EditText editText;
                 ViewSwitcher viewSwitcher;
-                ImageView    cancelView, submitView;
+                ImageView cancelView, submitView;
 
                 viewSwitcher = (ViewSwitcher) view.findViewById(R.id.expandable_list_view_view_switcher);
                 // get the shoppinglist from database
                 shoppingList = ShoppingList.findById(ShoppingList.class, shoppingList.getId());
-                switch (itemId){
+                switch (itemId) {
                     case CHILD_MENU_EDIT_LIST_NAME_ACTION:
 
                         cancelView = (ImageView) view.findViewById(R.id.expandable_list_view_edit_cancel);
@@ -269,7 +275,7 @@ public class MainShoppingListView extends ActionBarActivity implements IBaseActi
                         break;
                     case CHILD_MENU_REMOVE_LIST_ACTION:
                         boolean deleted = ControllerFactory.getListController().removeList(shoppingList);
-                        if(!deleted){
+                        if (! deleted) {
                             Toast.makeText(this, getString(R.string.deletion_failed), Toast.LENGTH_SHORT).show();
                         }
                         break;
@@ -281,7 +287,7 @@ public class MainShoppingListView extends ActionBarActivity implements IBaseActi
 
                         cancelView = (ImageView) view.findViewById(R.id.expandable_list_view_move_cancel);
                         submitView = (ImageView) view.findViewById(R.id.expandable_list_view_move_submit);
-                        spinner    = (Spinner)   view.findViewById(R.id.expandable_list_view_list_move_spinner);
+                        spinner = (Spinner) view.findViewById(R.id.expandable_list_view_list_move_spinner);
 
                         List<Category> categories = Category.listAll(Category.class);
                         categories.remove(categoryForShoppingList);
@@ -347,7 +353,6 @@ public class MainShoppingListView extends ActionBarActivity implements IBaseActi
         // Sync the toggle state after onRestoreInstanceState has occurred.
         mNavBarToggle.syncState();
     }
-
 
 
     @Override
@@ -562,7 +567,7 @@ public class MainShoppingListView extends ActionBarActivity implements IBaseActi
         mCategoryItemListAdapter.updateCategory(_Category);
     }
 
-    public void removeCategory(Category _Category){
+    public void removeCategory(Category _Category) {
         mCategoryItemListAdapter.removeCategory(_Category);
     }
 
@@ -598,10 +603,8 @@ public class MainShoppingListView extends ActionBarActivity implements IBaseActi
             public void onDrawerOpened(View drawerView) {
                 super.onDrawerOpened(drawerView);
                 mToolbar.setNavigationIcon(R.mipmap.ic_arrow_back_white_36dp);
-                if (mToolbar.getTitle() != null) {
-                    String tmpTitle = getString(R.string.choose_list) + " " + mTitle;
-                    mToolbar.setTitle(tmpTitle);
-                }
+                String tmpTitle = getString(R.string.choose_list);
+                mToolbar.setTitle(tmpTitle);
                 // check if options menu has changed
                 invalidateOptionsMenu();
             }
