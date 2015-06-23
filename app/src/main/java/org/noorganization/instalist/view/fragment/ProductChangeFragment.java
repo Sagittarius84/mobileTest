@@ -8,7 +8,6 @@ import android.content.DialogInterface;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
@@ -33,7 +32,6 @@ import org.noorganization.instalist.model.Tag;
 import org.noorganization.instalist.model.TaggedProduct;
 import org.noorganization.instalist.model.Unit;
 import org.noorganization.instalist.view.customview.AmountPicker;
-import org.noorganization.instalist.view.interfaces.IBaseActivity;
 import org.noorganization.instalist.view.utils.ViewUtils;
 
 import java.util.Arrays;
@@ -52,7 +50,6 @@ public class ProductChangeFragment extends DialogFragment {
     private static final String BUNDLE_KEY_PRODUCT_USED = "ProductUsed";
     private ShoppingList        mCurrentShoppingList;
     private InputParamsHolder   mInputParams;
-    private IBaseActivity       mBaseActivityInterface;
     /**
      * used when product values should be rendered into view.
      */
@@ -278,12 +275,12 @@ public class ProductChangeFragment extends DialogFragment {
          */
         private boolean saveTags(Product _Product){
             String[] tagArray = mInputParams.getTags();
-            for (int Index = 0; Index < tagArray.length; ++Index) {
-                Tag tag = ControllerFactory.getTagController().createTag(tagArray[Index]);
-                if(tag == null){
-                    tag = Tag.find(Tag.class,"m_name = ?", tagArray[Index]).get(0);
+            for (String currentTag : tagArray) {
+                Tag tag = ControllerFactory.getTagController().createTag(currentTag);
+                if (tag == null) {
+                    tag = Tag.find(Tag.class, "m_name = ?", currentTag).get(0);
                 }
-                if(!ControllerFactory.getProductController().addTagToProduct(_Product, tag)){
+                if (!ControllerFactory.getProductController().addTagToProduct(_Product, tag)) {
                     return false;
                 }
             }
@@ -347,26 +344,11 @@ public class ProductChangeFragment extends DialogFragment {
 
     @Override
     public Dialog onCreateDialog(Bundle _savedInstanceState) {
-
-        Log.d("TEST", "Dialog gets created");
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setPositiveButton(R.string.product_details_action_add, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                if (!mInputParams.isFilled()) {
-                    return;
-                }
-
-                if (!mInputParams.isValid()) {
-                    return;
-                }
-
-                if (saveProduct()) {
-                    Toast.makeText(getActivity(), R.string.product_saved_okay, Toast.LENGTH_LONG).show();
-                    ViewUtils.removeFragment(getActivity(), ProductChangeFragment.this);
-                } else {
-                    Toast.makeText(getActivity(), R.string.product_saved_fail, Toast.LENGTH_LONG).show();
-                }
+                // stub. will be replaced when showing dialog.
             }
         });
 
@@ -376,6 +358,52 @@ public class ProductChangeFragment extends DialogFragment {
 
         AlertDialog createdDialog = builder.create();
         mInputParams = new InputParamsHolder(createdDialog, inflatedDialogContents);
+        createdDialog.setOnShowListener(new ClickListenerAssignee(createdDialog));
         return createdDialog;
+    }
+
+    private class OnAddListener implements View.OnClickListener {
+
+        private AlertDialog mDialog;
+
+        public OnAddListener(AlertDialog _dialog) {
+            mDialog = _dialog;
+        }
+
+        @Override
+        public void onClick(View _clicked) {
+            if (!mInputParams.isFilled()) {
+                return;
+            }
+
+            if (!mInputParams.isValid()) {
+                return;
+            }
+
+            if (saveProduct()) {
+                Toast.makeText(getActivity(), R.string.product_saved_okay, Toast.LENGTH_LONG).show();
+                ViewUtils.removeFragment(getActivity(), ProductChangeFragment.this);
+            } else {
+                Toast.makeText(getActivity(), R.string.product_saved_fail, Toast.LENGTH_LONG).show();
+            }
+
+            mDialog.dismiss();
+        }
+    }
+
+
+    private class ClickListenerAssignee implements DialogInterface.OnShowListener {
+
+        private AlertDialog mDialog;
+
+        public ClickListenerAssignee(AlertDialog _dialog) {
+            mDialog = _dialog;
+        }
+
+        @Override
+        public void onShow(DialogInterface dialog) {
+            mDialog.getButton(DialogInterface.BUTTON_POSITIVE).
+                    setOnClickListener(new OnAddListener(mDialog));
+        }
     }
 }
