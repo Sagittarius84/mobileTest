@@ -141,6 +141,7 @@ public class MainShoppingListView extends ActionBarActivity implements IBaseActi
         registerForContextMenu(mExpandableListView);
 
         mDrawerLayout.setFitsSystemWindows(true);
+        assignDrawer();
 
 
         if (savedInstanceState == null) {
