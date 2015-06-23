@@ -2,6 +2,7 @@ package org.noorganization.instalist.view.utils;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.renderscript.RSInvalidStateException;
 
 /**
  * General Preference Manager for all preferences. Singleton, first call
@@ -53,6 +54,10 @@ public class PreferencesManager {
      * @return the instace of PreferencesManager.
      */
     public static PreferencesManager getInstance() {
+        if (mInstance == null) {
+            throw new IllegalStateException("Instance of PreferencesManager Singleton" + "" +
+                    "was not initializedl. First call initializeInstance.");
+        }
         return mInstance;
     }
 
