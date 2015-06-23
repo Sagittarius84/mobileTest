@@ -44,8 +44,10 @@ public class TagAdapter extends ArrayAdapter<Tag> {
 
         TextView tagText = (TextView) view.findViewById(R.id.list_tag_entry_tag_text);
         Button tagDeleteButton = (Button) view.findViewById(R.id.list_tag_entry_delete_button);
-        Tag tag = mTags.get(_Position);
 
+        Tag tag = mTags.get(_Position);
+        tagText.setText(tag.mName);
+        
         tagDeleteButton.setOnClickListener(new TagClickListener(tag));
         return view;
     }

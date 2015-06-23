@@ -26,21 +26,24 @@ public class CategoryListAdapter extends ArrayAdapter<Category> {
     }
 
     @Override
+    public Category getItem(int _Position) {
+        return mCategoryList.get(_Position);
+    }
+
+
+    @Override
     public View getView(int _Position, View _ConvertView, ViewGroup _Parent) {
-        View     view            = null;
-        Category ingredientEntry = mCategoryList.get(_Position);
+        View     view     = null;
+        Category category = mCategoryList.get(_Position);
 
         if (_ConvertView == null) {
-            LayoutInflater shoppingListNamesInflater = mContext.getLayoutInflater();
-            view = shoppingListNamesInflater.inflate(android.R.layout.simple_spinner_dropdown_item, null);
+            LayoutInflater categoryNamesInflater = mContext.getLayoutInflater();
+            view = categoryNamesInflater.inflate(android.R.layout.simple_spinner_dropdown_item, null);
         } else {
             view = _ConvertView;
         }
 
         TextView categoryName = (TextView) view.findViewById(android.R.id.text1);
-
-        Category category = mCategoryList.get(_Position);
-
         categoryName.setText(category.mName);
         return view;
     }

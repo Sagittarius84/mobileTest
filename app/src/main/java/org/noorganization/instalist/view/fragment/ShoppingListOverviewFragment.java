@@ -110,6 +110,11 @@ public class ShoppingListOverviewFragment extends Fragment{
             throw new ClassCastException(_Activity.toString()
                     + " has no IBaseActivity interface attached.");
         }
+
+        mListController     = ControllerFactory.getListController();
+        ((ChangeHandler)((GlobalApplication)getActivity().getApplication()).getChangeHandler()).setCurrentFragment(this);
+        mBaseActivityInterface.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
+
     }
 
     @Override
@@ -136,6 +141,8 @@ public class ShoppingListOverviewFragment extends Fragment{
         inflater.inflate(R.menu.menu_main, menu);
         super.onCreateOptionsMenu(menu, inflater);
     }
+
+
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -167,12 +174,8 @@ public class ShoppingListOverviewFragment extends Fragment{
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        // get in here the actionbar
-        mActionBar = ((ActionBarActivity) getActivity()).getSupportActionBar();
-        // not needed to check for null, because we have a actionbar always assigned
-        mActionBar.setTitle(mCurrentListName);
         // set the title in "main" activity so that the current list name is shown on the actionbar
-        ((MainShoppingListView) getActivity()).setToolbarTitle(mCurrentListName);
+        mBaseActivityInterface.setToolbarTitle(mCurrentListName);
     }
 
 
@@ -183,7 +186,7 @@ public class ShoppingListOverviewFragment extends Fragment{
     public void onPause() {
         super.onPause();
         mAddButton.setOnClickListener(null);
-        ((ChangeHandler)((GlobalApplication)getActivity().getApplication()).getChangeHandler()).setCurrentFragment(null);
+        ((ChangeHandler) ((GlobalApplication) getActivity().getApplication()).getChangeHandler()).setCurrentFragment(null);
     }
 
 
@@ -194,16 +197,13 @@ public class ShoppingListOverviewFragment extends Fragment{
     public void onResume() {
         super.onResume();
 
-        mListController     = ControllerFactory.getListController();
-        ((ChangeHandler)((GlobalApplication)getActivity().getApplication()).getChangeHandler()).setCurrentFragment(this);
-        mBaseActivityInterface.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
-
         SharedPreferences sortDetails = mContext.getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE);
 
         // decl
         final RecyclerView shoppingListView;
         // init
         shoppingListView = (RecyclerView) getActivity().findViewById(R.id.fragment_shopping_list);
+
         // assign other listname if none is assigned
         if (mCurrentListName == null) {
 
@@ -231,6 +231,16 @@ public class ShoppingListOverviewFragment extends Fragment{
         shoppingListView.setAdapter(mShoppingListAdapter);
         shoppingListView.setItemAnimator(new DefaultItemAnimator());
 
+        mAddButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // reset selected items ... (lazy resetting!)
+                SelectableBaseItemListEntryDataHolder.getInstance().clear();
+                Fragment fragment = ProductListDialogFragment.newInstance(mCurrentListName);
+                mBaseActivityInterface.changeFragment(fragment);
+            }
+        });
+
         mBaseActivityInterface.updateDrawerLayout();
     }
 
@@ -245,15 +255,6 @@ public class ShoppingListOverviewFragment extends Fragment{
         View view = _Inflater.inflate(R.layout.fragment_main_shopping_list_view, _Container, false);
         mAddButton = (ActionButton) view.findViewById(R.id.add_item_main_list_view);
 
-        mAddButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // reset selected items ... (lazy resetting!)
-                SelectableBaseItemListEntryDataHolder.getInstance().clear();
-                Fragment fragment = ProductListDialogFragment.newInstance(mCurrentListName);
-                mBaseActivityInterface.changeFragment(fragment);
-            }
-        });
         return view;
     }
 

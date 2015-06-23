@@ -348,6 +348,8 @@ public class MainShoppingListView extends ActionBarActivity implements IBaseActi
         mNavBarToggle.syncState();
     }
 
+
+
     @Override
     protected void onResume() {
         super.onResume();
@@ -570,7 +572,7 @@ public class MainShoppingListView extends ActionBarActivity implements IBaseActi
     }
 
     /**
-     * Sets the drawer to toolbar.
+     * Set a drawer to a fragmentlayout.
      */
     public void assignDrawer() {
         mToolbar.setNavigationIcon(R.mipmap.ic_menu_white_36dp);
