@@ -44,6 +44,7 @@ import org.noorganization.instalist.view.interfaces.IBaseActivityListEvent;
 import org.noorganization.instalist.view.listadapter.CategoryListAdapter;
 import org.noorganization.instalist.view.listadapter.ExpandableCategoryItemListAdapter;
 import org.noorganization.instalist.view.listadapter.PlainShoppingListOverviewAdapter;
+import org.noorganization.instalist.view.utils.PreferencesManager;
 import org.noorganization.instalist.view.utils.ViewUtils;
 
 import java.util.List;
@@ -59,6 +60,8 @@ import java.util.List;
 public class MainShoppingListView extends ActionBarActivity implements IBaseActivity, IBaseActivityListEvent, IOnShoppingListClickListenerEvents {
 
     private final static String LOG_TAG      = MainShoppingListView.class.getName();
+    private final static String DEFAULT_CATEGORY_NAME = "(default)";
+
     public final static  String KEY_LISTNAME = "list_name";
 
     private static final int GROUP_MENU                         = 2;
@@ -69,6 +72,7 @@ public class MainShoppingListView extends ActionBarActivity implements IBaseActi
     private static final int CHILD_MENU_EDIT_LIST_NAME_ACTION   = 0;
     private static final int CHILD_MENU_REMOVE_LIST_ACTION      = 1;
     private static final int CHILD_MENU_MOVE_TO_CATEGORY_ACTION = 2;
+
     private Toolbar mToolbar;
 
     private ExpandableListView mExpandableListView;
@@ -105,12 +109,21 @@ public class MainShoppingListView extends ActionBarActivity implements IBaseActi
      */
     private String mCurrentListName;
 
+    private long mDefaultCategoryId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_shopping_list_view);
+
+        // init PreferencesManager
+        PreferencesManager.initializeInstance(this);
+        mDefaultCategoryId = PreferencesManager.getInstance().getLongValue(PreferencesManager.KEY_DEFAULT_CATEGORY_ID);
+        if(mDefaultCategoryId == -1L){
+            // if not set
+            mDefaultCategoryId = ControllerFactory.getCategoryController().createCategory(DEFAULT_CATEGORY_NAME).getId();
+        }
 
         // init and setup toolbar
         mToolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -120,7 +133,7 @@ public class MainShoppingListView extends ActionBarActivity implements IBaseActi
 
         mDrawerLayout = (DrawerLayout) findViewById(R.id.main_drawer_layout_container);
         mExpandableListView = (ExpandableListView) findViewById(R.id.drawer_layout_custom_list_name_view);
-
+        mPlainListView = (ListView) findViewById(R.id.drawer_layout_custom_plain_shopping_list_overview);
         mNewNameEditText = (EditText) findViewById(R.id.drawer_layout_custom_new_name);
 
         mAddListButton = (Button) findViewById(R.id.drawer_layout_custom_create_list);
@@ -130,14 +143,18 @@ public class MainShoppingListView extends ActionBarActivity implements IBaseActi
         mSettingsButton = (Button) findViewById(R.id.drawer_layout_custom_settings);
 
         long categoryCount = Category.count(Category.class, null, new String[]{});
-        if (categoryCount > 0) {
+        // check if there are categories
+        if (categoryCount > 1) {
+            // more then 1 category, then display shoppinglists in expandable view
             mCategoryItemListAdapter = new ExpandableCategoryItemListAdapter(this, Category.listAll(Category.class));
+            // fill the list with selectable lists
+            mExpandableListView.setAdapter(mCategoryItemListAdapter);
         } else {
+            // display the shoppinglists in plain style
             mPlainShoppingListAdapter = new PlainShoppingListOverviewAdapter(this, ShoppingList.listAll(ShoppingList.class));
+            mPlainListView.setAdapter(mPlainShoppingListAdapter);
         }
 
-        // fill the list with selectable lists
-        mExpandableListView.setAdapter(mCategoryItemListAdapter);
         registerForContextMenu(mExpandableListView);
 
         mDrawerLayout.setFitsSystemWindows(true);
@@ -224,7 +241,7 @@ public class MainShoppingListView extends ActionBarActivity implements IBaseActi
                     case GROUP_MENU_REMOVE_CATEGORY_ACTION:
                         Toast.makeText(this, "Remove group: " + ((Category) mCategoryItemListAdapter.getGroup(groupPosition)).mName, Toast.LENGTH_SHORT).show();
                         ControllerFactory.getCategoryController().removeCategory(category);
-                        removeCategory(category);
+                        onCategoryRemoved(category);
                         break;
                     case GROUP_MENU_EDIT_CATEGORY_ACTION:
                         //region Edit Category name
@@ -402,7 +419,9 @@ public class MainShoppingListView extends ActionBarActivity implements IBaseActi
                     return;
                 }
 
+
                 ShoppingList shoppingList = ControllerFactory.getListController().addList(listName);
+                //ControllerFactory.getListController().moveToCategory(shoppingList, Category.find);
                 if (shoppingList == null) {
                     mNewNameEditText.setError(getResources().getString(R.string.list_exists));
                     return;
@@ -605,12 +624,42 @@ public class MainShoppingListView extends ActionBarActivity implements IBaseActi
 
 
     /**
-     * Reach created category to the underlying adapter.
+     * Pass created category to the underlying adapter.
+     * And also checks if it needs to switch layouts from plain to expandablelistview.
      * @param _Category The created Category.
      */
     public void onCategoryCreated(Category _Category){
-        long categoryCount = Category.count(Category.class, null, new String[]{});
-        if(mPlainShoppingListAdapter != null){
+        long categoryCount = 0L;
+
+        if(categoryCount == 1L || mCategoryItemListAdapter == null){
+           // if it is equal to 1 or the adapter is zero(not assigned) then we need to switch from plain list to ExpandableList with categories
+           // and also push the shoppinglist without categories into a separate category
+           assignExpandableList();
+        }else{
+            mCategoryItemListAdapter.addCategory(_Category);
+        }
+
+    }
+
+    /**
+     * Set the PlainListView as current listview to display the shoppinglists.
+     */
+    private void assignPlainList(){
+        mPlainShoppingListAdapter = new PlainShoppingListOverviewAdapter(this, ShoppingList.listAll(ShoppingList.class));
+        mCategoryItemListAdapter = null;
+
+        mExpandableListView.setAdapter(mPlainShoppingListAdapter);
+        mPlainListView.setAdapter(mPlainShoppingListAdapter);
+
+        mExpandableListView.setVisibility(View.GONE);
+        mPlainListView.setVisibility(View.VISIBLE);
+    }
+
+    /**
+     * Set the ExpandableListView to display categories and shoppinglists.
+     */
+    private void assignExpandableList() {
+
             mPlainShoppingListAdapter = null;
             mCategoryItemListAdapter = new ExpandableCategoryItemListAdapter(this, Category.listAll(Category.class));
 
@@ -619,25 +668,21 @@ public class MainShoppingListView extends ActionBarActivity implements IBaseActi
 
             mPlainListView.setVisibility(View.GONE);
             mExpandableListView.setVisibility(View.VISIBLE);
-            // register click listener
-        } else {
-            mPlainShoppingListAdapter = new PlainShoppingListOverviewAdapter(this, ShoppingList.listAll(ShoppingList.class));
-            mCategoryItemListAdapter = null;
 
-            mExpandableListView.setAdapter(mPlainShoppingListAdapter);
-            mPlainListView.setAdapter(mPlainShoppingListAdapter);
-
-            mExpandableListView.setVisibility(View.GONE);
-            mPlainListView.setVisibility(View.VISIBLE);
-        }
     }
 
     /**
-     * Reach the category which has been removed.
+     * Pass the category which has been removed.
      * @param _RemovedCategory the category that has been removed.
      */
-    public void removeCategory(Category _RemovedCategory) {
-        mCategoryItemListAdapter.removeCategory(_RemovedCategory);
+    public void onCategoryRemoved(Category _RemovedCategory) {
+        long categoryCount = 0L;
+        if(categoryCount == 1L){
+            assignPlainList();
+        } else{
+            mCategoryItemListAdapter.removeCategory(_RemovedCategory);
+        }
+
     }
 
     @Override

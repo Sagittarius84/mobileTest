@@ -81,7 +81,7 @@ public class ViewUtils {
         } else{
             transaction.addToBackStack(canonicalName);
             // use of replace, because the other fragments would run in background
-            transaction.add(R.id.container, _newFragment, canonicalName);
+            transaction.replace(R.id.container, _newFragment, canonicalName);
             transaction.commit();
         }
     }

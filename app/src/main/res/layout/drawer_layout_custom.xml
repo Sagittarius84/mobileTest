@@ -43,6 +43,13 @@
         style="@style/InstalistTheme1.linearlayout_card_style"
         android:layout_below="@+id/container_edittext_new_name"
         android:layout_above="@+id/drawer_layout_custom_settings" />
+    <ListView
+        android:id="@+id/drawer_layout_custom_plain_shopping_list_overview"
+        style="@style/InstalistTheme1.linearlayout_card_style"
+        android:layout_below="@+id/container_edittext_new_name"
+        android:layout_above="@+id/drawer_layout_custom_settings"
+        android:visibility="gone"
+    />
     <Button
         android:id="@+id/drawer_layout_custom_settings"
         style="@style/InstalistTheme1.base_button"
