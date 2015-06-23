@@ -139,8 +139,7 @@ public class SelectableItemListAdapter extends ArrayAdapter<SelectableBaseItemLi
 
             switch (mListEntry.getType()){
                 case PRODUCT_LIST_ENTRY:
-                    nextFragment = ProductChangeFragment.newInstance(
-                            mCurrentShoppingList.getId(), currentEntry.getId());
+                    nextFragment = ProductChangeFragment.newChangeInstance(currentEntry.getId());
                     break;
                 case RECIPE_LIST_ENTRY:
                     nextFragment = RecipeCreationFragment.newInstance(
