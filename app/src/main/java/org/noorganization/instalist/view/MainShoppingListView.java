@@ -47,6 +47,7 @@ import org.noorganization.instalist.view.listadapter.CategoryListAdapter;
 import org.noorganization.instalist.view.listadapter.ExpandableCategoryItemListAdapter;
 import org.noorganization.instalist.view.utils.ViewUtils;
 
+import java.security.InvalidParameterException;
 import java.util.List;
 
 /**
@@ -496,6 +497,10 @@ public class MainShoppingListView extends ActionBarActivity implements IBaseActi
 
     @Override
     public void selectList(ShoppingList _ShoppingList) {
+        if(_ShoppingList.mName == null){
+            throw new NullPointerException("Name of ShoppingList must be set.");
+        }
+
 
         // always close the drawer
         mDrawerLayout.closeDrawer(mLeftMenuDrawerRelativeLayout);

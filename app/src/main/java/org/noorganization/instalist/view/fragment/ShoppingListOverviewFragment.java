@@ -113,8 +113,6 @@ public class ShoppingListOverviewFragment extends Fragment{
 
         mListController     = ControllerFactory.getListController();
         ((ChangeHandler)((GlobalApplication)getActivity().getApplication()).getChangeHandler()).setCurrentFragment(this);
-        mBaseActivityInterface.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
-
     }
 
     @Override
@@ -218,6 +216,7 @@ public class ShoppingListOverviewFragment extends Fragment{
                 return;
             }
         }
+        mBaseActivityInterface.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
 
         mShoppingListAdapter = new ShoppingListAdapter(getActivity(), GlobalApplication.getInstance().getListEntries(mCurrentListName));
         mShoppingListAdapter.sortByComparator(mMapComperable.get(sortDetails.getInt(SORT_MODE, SORT_BY_PRIORITY)));
