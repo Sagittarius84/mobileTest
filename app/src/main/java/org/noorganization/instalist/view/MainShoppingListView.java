@@ -548,7 +548,7 @@ public class MainShoppingListView extends ActionBarActivity implements IBaseActi
         // init
         mCurrentListName = _ShoppingList.mName;
         fragment = ShoppingListOverviewFragment.newInstance(_ShoppingList.mName);
-        changeFragment(fragment);
+        ViewUtils.addFragment(this, fragment);
     }
 
     @Override
