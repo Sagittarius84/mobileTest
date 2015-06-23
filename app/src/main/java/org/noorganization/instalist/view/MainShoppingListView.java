@@ -145,17 +145,19 @@ public class MainShoppingListView extends ActionBarActivity implements IBaseActi
         long categoryCount = Category.count(Category.class, null, new String[]{});
         // check if there are categories
         if (categoryCount > 1) {
+            assignExpandableList();
+            /*
             // more then 1 category, then display shoppinglists in expandable view
             mCategoryItemListAdapter = new ExpandableCategoryItemListAdapter(this, Category.listAll(Category.class));
             // fill the list with selectable lists
-            mExpandableListView.setAdapter(mCategoryItemListAdapter);
+            mExpandableListView.setAdapter(mCategoryItemListAdapter);*/
         } else {
-            // display the shoppinglists in plain style
+            assignExpandableList();
+            /*// display the shoppinglists in plain style
             mPlainShoppingListAdapter = new PlainShoppingListOverviewAdapter(this, ShoppingList.listAll(ShoppingList.class));
-            mPlainListView.setAdapter(mPlainShoppingListAdapter);
+            mPlainListView.setAdapter(mPlainShoppingListAdapter);*/
         }
 
-        registerForContextMenu(mExpandableListView);
 
         mDrawerLayout.setFitsSystemWindows(true);
         assignDrawer();
@@ -659,15 +661,16 @@ public class MainShoppingListView extends ActionBarActivity implements IBaseActi
      * Set the ExpandableListView to display categories and shoppinglists.
      */
     private void assignExpandableList() {
+        registerForContextMenu(mExpandableListView);
 
-            mPlainShoppingListAdapter = null;
-            mCategoryItemListAdapter = new ExpandableCategoryItemListAdapter(this, Category.listAll(Category.class));
+        mPlainShoppingListAdapter = null;
+        mCategoryItemListAdapter = new ExpandableCategoryItemListAdapter(this, Category.listAll(Category.class));
 
-            mPlainListView.setAdapter(mPlainShoppingListAdapter);
-            mExpandableListView.setAdapter(mCategoryItemListAdapter);
+        mPlainListView.setAdapter(mPlainShoppingListAdapter);
+        mExpandableListView.setAdapter(mCategoryItemListAdapter);
 
-            mPlainListView.setVisibility(View.GONE);
-            mExpandableListView.setVisibility(View.VISIBLE);
+        mPlainListView.setVisibility(View.GONE);
+        mExpandableListView.setVisibility(View.VISIBLE);
 
     }
 
