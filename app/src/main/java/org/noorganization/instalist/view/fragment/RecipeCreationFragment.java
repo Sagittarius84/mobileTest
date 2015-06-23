@@ -82,7 +82,7 @@ public class RecipeCreationFragment extends Fragment {
             if(mRecipe == null){
                 fragment = ShoppingListOverviewFragment.newInstance(mCurrentShoppingList.mName);
             }else{
-                fragment = ProductListDialogFragment.newInstance(mCurrentShoppingList.mName);
+                fragment = ProductListDialogFragment.newInstance(mCurrentShoppingList.getId());
             }
             // clear the data holder so that we not retrieve later the currently inserted data.
             RecipeDataHolder.getInstance().clear();

@@ -34,6 +34,7 @@ import org.noorganization.instalist.view.interfaces.IBaseActivity;
 import org.noorganization.instalist.view.listadapter.ShoppingListAdapter;
 import org.noorganization.instalist.view.sorting.AlphabeticalListEntryComparator;
 import org.noorganization.instalist.view.sorting.PriorityListEntryComparator;
+import org.noorganization.instalist.view.utils.ViewUtils;
 
 import java.util.Comparator;
 import java.util.List;
@@ -126,7 +127,8 @@ public class ShoppingListOverviewFragment extends Fragment{
         if (bundle == null) {
             return;
         }
-        mCurrentListName    = bundle.getString(MainShoppingListView.KEY_LISTNAME);
+        mCurrentListName     = bundle.getString(MainShoppingListView.KEY_LISTNAME);
+        mCurrentShoppingList = ShoppingList.findByName(mCurrentListName);
         mMapComperable = new WeakHashMap<>();
         mMapComperable.put(0, new AlphabeticalListEntryComparator());
         mMapComperable.put(1, new PriorityListEntryComparator());
@@ -236,8 +238,8 @@ public class ShoppingListOverviewFragment extends Fragment{
             public void onClick(View v) {
                 // reset selected items ... (lazy resetting!)
                 SelectableBaseItemListEntryDataHolder.getInstance().clear();
-                Fragment fragment = ProductListDialogFragment.newInstance(mCurrentListName);
-                mBaseActivityInterface.changeFragment(fragment);
+                ViewUtils.addFragment(getActivity(),
+                        ProductListDialogFragment.newInstance(mCurrentShoppingList.getId()));
             }
         });
 
