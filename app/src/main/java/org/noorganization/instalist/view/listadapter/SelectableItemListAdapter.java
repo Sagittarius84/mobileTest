@@ -1,7 +1,7 @@
 package org.noorganization.instalist.view.listadapter;
 
 import android.app.Activity;
-import android.app.FragmentTransaction;
+import android.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,15 +11,16 @@ import android.widget.Filter;
 import android.widget.Filterable;
 import android.widget.TextView;
 
+import com.orm.SugarRecord;
+
 import org.noorganization.instalist.R;
-import org.noorganization.instalist.model.Product;
-import org.noorganization.instalist.model.Recipe;
 import org.noorganization.instalist.model.ShoppingList;
 import org.noorganization.instalist.model.view.BaseItemListEntry;
 import org.noorganization.instalist.model.view.SelectableBaseItemListEntry;
 import org.noorganization.instalist.view.datahandler.SelectableBaseItemListEntryDataHolder;
 import org.noorganization.instalist.view.fragment.ProductChangeFragment;
 import org.noorganization.instalist.view.fragment.RecipeCreationFragment;
+import org.noorganization.instalist.view.utils.ViewUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,15 +32,15 @@ public class SelectableItemListAdapter extends ArrayAdapter<SelectableBaseItemLi
 
     final String LOG_TAG    = SelectableProductListAdapter.class.getName();
 
-    private Activity mContext;
+    private Activity mActivity;
     private List<SelectableBaseItemListEntry> mSelectableItems;
     private List<SelectableBaseItemListEntry> mResSelectableItems;
 
     private ShoppingList mCurrentShoppingList;
 
-    public SelectableItemListAdapter(Activity _Context, List<SelectableBaseItemListEntry> _ProductList, ShoppingList _CurrentShoppingList){
-        super(_Context, R.layout.list_selectable_product  , _ProductList);
-        mContext = _Context;
+    public SelectableItemListAdapter(Activity _activity, List<SelectableBaseItemListEntry> _ProductList, ShoppingList _CurrentShoppingList){
+        super(_activity, R.layout.list_selectable_product  , _ProductList);
+        mActivity = _activity;
         mSelectableItems = _ProductList;
         mResSelectableItems = new ArrayList<>(_ProductList);
 
@@ -64,7 +65,7 @@ public class SelectableItemListAdapter extends ArrayAdapter<SelectableBaseItemLi
         SelectableBaseItemListEntry listEntry      = mSelectableItems.get(_Position);
 
         if(_ConvertView == null){
-            LayoutInflater shoppingListNamesInflater = mContext.getLayoutInflater();
+            LayoutInflater shoppingListNamesInflater = mActivity.getLayoutInflater();
             view = shoppingListNamesInflater.inflate(R.layout.list_selectable_product, null);
         }else{
             view = _ConvertView;
@@ -133,22 +134,24 @@ public class SelectableItemListAdapter extends ArrayAdapter<SelectableBaseItemLi
 
         @Override
         public boolean onLongClick(View v) {
-            FragmentTransaction transaction = mContext.getFragmentManager().beginTransaction();
-            transaction.addToBackStack(null);
+            Fragment nextFragment;
+            SugarRecord currentEntry = (SugarRecord) (mListEntry.getEntry().getObject());
 
             switch (mListEntry.getType()){
                 case PRODUCT_LIST_ENTRY:
-                    transaction.replace(R.id.container, ProductChangeFragment
-                            .newInstance(mCurrentShoppingList.mName, ((Product) (mListEntry.getEntry().getObject())).getId()));
+                    nextFragment = ProductChangeFragment.newInstance(
+                            mCurrentShoppingList.getId(), currentEntry.getId());
                     break;
                 case RECIPE_LIST_ENTRY:
-                    transaction.replace(R.id.container, RecipeCreationFragment
-                            .newInstance(mCurrentShoppingList.mName, ((Recipe) (mListEntry.getEntry().getObject())).getId()));
+                    nextFragment = RecipeCreationFragment.newInstance(
+                            mCurrentShoppingList.mName, currentEntry.getId());
                     break;
                 default:
                     throw new IllegalStateException("There is no entry type defined.");
             }
-            transaction.commit();
+
+            ViewUtils.addFragment(mActivity, nextFragment);
+
             return true;
         }
     }

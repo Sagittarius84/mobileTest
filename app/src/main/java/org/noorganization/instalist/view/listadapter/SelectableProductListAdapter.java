@@ -111,7 +111,7 @@ public class SelectableProductListAdapter extends ArrayAdapter<Product> {
             FragmentTransaction transaction = mContext.getFragmentManager().beginTransaction();
             transaction.addToBackStack(null);
             transaction.replace(R.id.container, ProductChangeFragment
-                    .newInstance(mCurrentShoppingList.mName, mListEntry.mProduct.getId()));
+                    .newInstance(mCurrentShoppingList.getId(), mListEntry.mProduct.getId()));
             transaction.commit();
             return true;
         }

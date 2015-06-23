@@ -513,7 +513,7 @@ public class MainShoppingListView extends ActionBarActivity implements IBaseActi
 
         // list is the same as the current one
         // no need to do then something
-        if (_ShoppingList.mName == mCurrentListName) {
+        if (_ShoppingList.mName.equals(mCurrentListName)) {
             return;
         }
 
@@ -540,6 +540,7 @@ public class MainShoppingListView extends ActionBarActivity implements IBaseActi
      */
     @Override
     public void changeFragment(Fragment _Fragment) {
+        Log.w("NoOrg Deprecated", "MainShoppingListView's changeFragment.");
         ViewUtils.addFragment(this, _Fragment);
     }
 

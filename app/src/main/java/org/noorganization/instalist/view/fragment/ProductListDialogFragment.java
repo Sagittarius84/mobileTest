@@ -15,6 +15,8 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ListView;
 
+import com.orm.SugarRecord;
+
 import org.noorganization.instalist.R;
 import org.noorganization.instalist.controller.IListController;
 import org.noorganization.instalist.controller.implementation.ControllerFactory;
@@ -46,12 +48,15 @@ public class ProductListDialogFragment extends Fragment{
     public static final String FILTER_BY_PRODUCT = "0";
     public static final String FILTER_BY_RECIPE = "1";
     public static final String FILTER_SHOW_ALL = "2";
+
     private ShoppingList mCurrentShoppingList;
 
     private Button mAddNewProductButton;
     private Button mCancelButton;
     private Button mAddProductsButton;
     private Button mTempAddRecipeButton;
+
+    private static final String BUNDLE_KEY_LIST_ID = "ListId";
 
     // create the abstract selectable list entries to show mixed entries
     private List<SelectableBaseItemListEntry> mSelectableBaseItemListEntries = new ArrayList<>();
@@ -62,13 +67,13 @@ public class ProductListDialogFragment extends Fragment{
 
     /**
      * Creates an instance of an ProductListDialogFragment.
-     * @param _ListName the name of the list where the products should be added.
+     * @param _ListId the id of the list where the products should be added.
      * @return the new instance of this fragment.
      */
-    public static ProductListDialogFragment newInstance(String _ListName){
+    public static ProductListDialogFragment newInstance(long _ListId){
         ProductListDialogFragment fragment = new ProductListDialogFragment();
         Bundle args = new Bundle();
-        args.putString(MainShoppingListView.KEY_LISTNAME, _ListName);
+        args.putLong(BUNDLE_KEY_LIST_ID, _ListId);
         fragment.setArguments(args);
         return fragment;
     }
@@ -86,8 +91,8 @@ public class ProductListDialogFragment extends Fragment{
     }
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    public void onCreate(Bundle _savedInstanceState) {
+        super.onCreate(_savedInstanceState);
         // get bundle args to get the listname that should be shown
         Bundle bundle = this.getArguments();
         if (bundle == null) {
@@ -95,12 +100,14 @@ public class ProductListDialogFragment extends Fragment{
         }
 
         setHasOptionsMenu(true);
-        String currentListName = bundle.getString(MainShoppingListView.KEY_LISTNAME);
-        mCurrentShoppingList = ShoppingList.findByName(currentListName);
+        long currentListId = bundle.getLong(BUNDLE_KEY_LIST_ID);
+        mCurrentShoppingList = SugarRecord.findById(ShoppingList.class, currentListId);
+        //String currentListName = bundle.getString(MainShoppingListView.KEY_LISTNAME);
+        //mCurrentShoppingList = ShoppingList.findByName(currentListName);
 
         if(mCurrentShoppingList == null){
             throw new IllegalStateException(ProductListDialogFragment.class.toString() +
-                    ": Cannot find corresponding ShoppingList with name: " + currentListName);
+                    ": Cannot find corresponding ShoppingList for id: " + currentListId);
         }
 
         List<Product> productList = Product.listAll(Product.class);
@@ -288,7 +295,8 @@ public class ProductListDialogFragment extends Fragment{
     private class OnCreateProductListener implements View.OnClickListener {
         @Override
         public void onClick(View v) {
-            ProductChangeFragment creationFragment = ProductChangeFragment.newInstance(mCurrentShoppingList.mName);
+            ProductChangeFragment creationFragment =
+                    ProductChangeFragment.newInstance(mCurrentShoppingList.getId());
             ViewUtils.addFragment(getActivity(), creationFragment);
             ViewUtils.removeFragment(getActivity(), ProductListDialogFragment.this);
         }
