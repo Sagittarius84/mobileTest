@@ -8,6 +8,7 @@ import android.content.DialogInterface;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
@@ -19,6 +20,7 @@ import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import com.orm.SugarRecord;
 import com.orm.query.Select;
 
 import org.noorganization.instalist.R;
@@ -45,8 +47,9 @@ import java.util.List;
  */
 public class ProductChangeFragment extends DialogFragment {
 
-    public static final String ARGS_LIST_NAME = "listName";
-    public static final String ARGS_PRODUCT_ID = "productId";
+    private static final String BUNDLE_KEY_LIST_ID      = "ListId";
+    private static final String BUNDLE_KEY_PRODUCT_ID   = "ProductId";
+    private static final String BUNDLE_KEY_PRODUCT_USED = "ProductUsed";
     private ShoppingList        mCurrentShoppingList;
     private InputParamsHolder   mInputParams;
     private IBaseActivity       mBaseActivityInterface;
@@ -289,29 +292,30 @@ public class ProductChangeFragment extends DialogFragment {
 
     /**
      * Creates an instance of an ProductChangeFragment with the details of the product.
-     * @param _ListName the name of the list where the product should be added.
+     * @param _listId The id of the list where the product should be added.
      * @return the new instance of this fragment.
      */
-    public static ProductChangeFragment newInstance(String _ListName){
+    public static ProductChangeFragment newInstance(long _listId){
         ProductChangeFragment fragment = new ProductChangeFragment();
         Bundle args = new Bundle();
-        args.putString(ARGS_LIST_NAME, _ListName);
-        args.putLong(ARGS_PRODUCT_ID, -1L);
+        args.putLong(BUNDLE_KEY_LIST_ID, _listId);
+        args.putBoolean(BUNDLE_KEY_PRODUCT_USED, false);
         fragment.setArguments(args);
         return fragment;
     }
 
     /**
      * Creates an instance of an ProductChangeFragment.
-     * @param _ProductId the id in the database of the product that should be edited.
-     * @param _ListName the name of the list where the calling productlistselector should save the products.
+     * @param _productId the id in the database of the product that should be edited.
+     * @param _listId the id of the list where the calling productlistselector should save the products.
      * @return the new instance of this fragment.
      */
-    public static ProductChangeFragment newInstance(String _ListName, long _ProductId){
+    public static ProductChangeFragment newInstance(long _listId, long _productId){
         ProductChangeFragment fragment = new ProductChangeFragment();
         Bundle args = new Bundle();
-        args.putString(ARGS_LIST_NAME, _ListName);
-        args.putLong(ARGS_PRODUCT_ID, _ProductId);
+        args.putLong(BUNDLE_KEY_LIST_ID, _listId);
+        args.putBoolean(BUNDLE_KEY_PRODUCT_USED, true);
+        args.putLong(BUNDLE_KEY_PRODUCT_ID, _productId);
         fragment.setArguments(args);
         return fragment;
     }
@@ -332,14 +336,19 @@ public class ProductChangeFragment extends DialogFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mCurrentShoppingList = ShoppingList.find(ShoppingList.class, ShoppingList.ATTR_NAME + "=?", getArguments().getString("listName")).get(0);
+        mCurrentShoppingList = SugarRecord.findById(ShoppingList.class,
+                getArguments().getLong(BUNDLE_KEY_LIST_ID));
 
         // check if an product should be shown
-        mProduct = Product.findById(Product.class, getArguments().getLong(ARGS_PRODUCT_ID));
+        if (getArguments().getBoolean(BUNDLE_KEY_PRODUCT_USED)) {
+            mProduct = Product.findById(Product.class, getArguments().getLong(BUNDLE_KEY_PRODUCT_ID));
+        }
     }
 
     @Override
     public Dialog onCreateDialog(Bundle _savedInstanceState) {
+
+        Log.d("TEST", "Dialog gets created");
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setPositiveButton(R.string.product_details_action_add, new DialogInterface.OnClickListener() {
             @Override
