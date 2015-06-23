@@ -11,23 +11,18 @@ import android.widget.Filter;
 import android.widget.Filterable;
 import android.widget.TextView;
 
-import com.orm.query.Select;
-
 import org.noorganization.instalist.R;
-import org.noorganization.instalist.model.ListEntry;
 import org.noorganization.instalist.model.Product;
 import org.noorganization.instalist.model.Recipe;
 import org.noorganization.instalist.model.ShoppingList;
 import org.noorganization.instalist.model.view.BaseItemListEntry;
 import org.noorganization.instalist.model.view.SelectableBaseItemListEntry;
 import org.noorganization.instalist.view.datahandler.SelectableBaseItemListEntryDataHolder;
-import org.noorganization.instalist.view.datahandler.SelectedProductDataHandler;
-import org.noorganization.instalist.view.fragment.ProductCreationFragment;
+import org.noorganization.instalist.view.fragment.ProductChangeFragment;
 import org.noorganization.instalist.view.fragment.RecipeCreationFragment;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Created by TS on 25.05.2015.
@@ -143,7 +138,7 @@ public class SelectableItemListAdapter extends ArrayAdapter<SelectableBaseItemLi
 
             switch (mListEntry.getType()){
                 case PRODUCT_LIST_ENTRY:
-                    transaction.replace(R.id.container, ProductCreationFragment
+                    transaction.replace(R.id.container, ProductChangeFragment
                             .newInstance(mCurrentShoppingList.mName, ((Product) (mListEntry.getEntry().getObject())).getId()));
                     break;
                 case RECIPE_LIST_ENTRY:

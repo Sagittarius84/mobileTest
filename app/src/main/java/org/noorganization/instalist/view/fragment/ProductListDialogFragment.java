@@ -256,7 +256,7 @@ public class ProductListDialogFragment extends Fragment{
 
         @Override
         public void onClick(View v) {
-            ProductCreationFragment creationFragment = ProductCreationFragment.newInstance(mCurrentShoppingList.mName);
+            ProductChangeFragment creationFragment = ProductChangeFragment.newInstance(mCurrentShoppingList.mName);
             ViewUtils.addFragment(getActivity(), creationFragment);
             ViewUtils.removeFragment(getActivity(), ProductListDialogFragment.this);
         }

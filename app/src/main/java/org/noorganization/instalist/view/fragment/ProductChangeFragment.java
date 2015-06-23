@@ -43,7 +43,7 @@ import java.util.List;
  * Fragment where the creation and the editing of an product is handled.
  * Created by TS on 28.04.2015.
  */
-public class ProductCreationFragment extends DialogFragment {
+public class ProductChangeFragment extends DialogFragment {
 
     public static final String ARGS_LIST_NAME = "listName";
     public static final String ARGS_PRODUCT_ID = "productId";
@@ -208,8 +208,8 @@ public class ProductCreationFragment extends DialogFragment {
         }
 
         private void fillViews() {
-            Product currentProduct = ProductCreationFragment.this.mProduct;
-            if (ProductCreationFragment.this.mProduct != null) {
+            Product currentProduct = ProductChangeFragment.this.mProduct;
+            if (ProductChangeFragment.this.mProduct != null) {
                 mProductName.setText(currentProduct.mName);
                 mProductAmount.setValue(currentProduct.mDefaultAmount);
 
@@ -288,12 +288,12 @@ public class ProductCreationFragment extends DialogFragment {
         }
 
     /**
-     * Creates an instance of an ProductCreationFragment with the details of the product.
+     * Creates an instance of an ProductChangeFragment with the details of the product.
      * @param _ListName the name of the list where the product should be added.
      * @return the new instance of this fragment.
      */
-    public static ProductCreationFragment newInstance(String _ListName){
-        ProductCreationFragment fragment = new ProductCreationFragment();
+    public static ProductChangeFragment newInstance(String _ListName){
+        ProductChangeFragment fragment = new ProductChangeFragment();
         Bundle args = new Bundle();
         args.putString(ARGS_LIST_NAME, _ListName);
         args.putLong(ARGS_PRODUCT_ID, -1L);
@@ -302,13 +302,13 @@ public class ProductCreationFragment extends DialogFragment {
     }
 
     /**
-     * Creates an instance of an ProductCreationFragment.
+     * Creates an instance of an ProductChangeFragment.
      * @param _ProductId the id in the database of the product that should be edited.
      * @param _ListName the name of the list where the calling productlistselector should save the products.
      * @return the new instance of this fragment.
      */
-    public static ProductCreationFragment newInstance(String _ListName, long _ProductId){
-        ProductCreationFragment fragment = new ProductCreationFragment();
+    public static ProductChangeFragment newInstance(String _ListName, long _ProductId){
+        ProductChangeFragment fragment = new ProductChangeFragment();
         Bundle args = new Bundle();
         args.putString(ARGS_LIST_NAME, _ListName);
         args.putLong(ARGS_PRODUCT_ID, _ProductId);
@@ -354,7 +354,7 @@ public class ProductCreationFragment extends DialogFragment {
 
                 if (saveProduct()) {
                     Toast.makeText(getActivity(), R.string.product_saved_okay, Toast.LENGTH_LONG).show();
-                    ViewUtils.removeFragment(getActivity(), ProductCreationFragment.this);
+                    ViewUtils.removeFragment(getActivity(), ProductChangeFragment.this);
                 } else {
                     Toast.makeText(getActivity(), R.string.product_saved_fail, Toast.LENGTH_LONG).show();
                 }
