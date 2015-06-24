@@ -110,8 +110,8 @@ public class SelectableProductListAdapter extends ArrayAdapter<Product> {
         public boolean onLongClick(View v) {
             FragmentTransaction transaction = mContext.getFragmentManager().beginTransaction();
             transaction.addToBackStack(null);
-            transaction.replace(R.id.container, ProductChangeFragment
-                    .newInstance(mCurrentShoppingList.getId(), mListEntry.mProduct.getId()));
+            transaction.replace(R.id.container, ProductChangeFragment.
+                    newChangeInstance(mListEntry.mProduct.getId()));
             transaction.commit();
             return true;
         }

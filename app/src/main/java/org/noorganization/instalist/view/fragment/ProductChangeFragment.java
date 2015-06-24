@@ -8,7 +8,6 @@ import android.content.DialogInterface;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
@@ -33,7 +32,6 @@ import org.noorganization.instalist.model.Tag;
 import org.noorganization.instalist.model.TaggedProduct;
 import org.noorganization.instalist.model.Unit;
 import org.noorganization.instalist.view.customview.AmountPicker;
-import org.noorganization.instalist.view.interfaces.IBaseActivity;
 import org.noorganization.instalist.view.utils.ViewUtils;
 
 import java.util.Arrays;
@@ -49,10 +47,12 @@ public class ProductChangeFragment extends DialogFragment {
 
     private static final String BUNDLE_KEY_LIST_ID      = "ListId";
     private static final String BUNDLE_KEY_PRODUCT_ID   = "ProductId";
-    private static final String BUNDLE_KEY_PRODUCT_USED = "ProductUsed";
+    private static final String BUNDLE_KEY_MODE         = "FragmentMode";
+    private static final int    FRAGMENT_MODE_CREATE    = 1;
+    private static final int    FRAGMENT_MODE_CHANGE    = 2;
+
     private ShoppingList        mCurrentShoppingList;
     private InputParamsHolder   mInputParams;
-    private IBaseActivity       mBaseActivityInterface;
     /**
      * used when product values should be rendered into view.
      */
@@ -236,70 +236,70 @@ public class ProductChangeFragment extends DialogFragment {
         }
     }
 
-        /**
-         * saves the new product.
-         * @return true by success false by fail.
-         */
-        private boolean saveProduct(){
-            IProductController productController = ControllerFactory.getProductController();
-            IListController    listController    = ControllerFactory.getListController();
+    /**
+     * saves the new product.
+     * @return true by success false by fail.
+     */
+    private boolean saveProduct(){
+        IProductController productController = ControllerFactory.getProductController();
+        IListController    listController    = ControllerFactory.getListController();
+
+        if (mProduct == null) {
+            mProduct = productController.createProduct(
+                    mInputParams.getProductName(),
+                    mInputParams.getProductDefaultUnit(),
+                    mInputParams.getProductAmount(),
+                    mInputParams.getProductStep()
+            );
 
             if (mProduct == null) {
-                mProduct = productController.createProduct(
-                        mInputParams.getProductName(),
-                        mInputParams.getProductDefaultUnit(),
-                        mInputParams.getProductAmount(),
-                        mInputParams.getProductStep()
-                );
-
-                if (mProduct == null) {
-                    return false;
-                }
-                listController.addOrChangeItem(mCurrentShoppingList, mProduct, mProduct.mDefaultAmount);
-            } else {
-                mProduct.mName          = mInputParams.getProductName();
-                mProduct.mDefaultAmount = mInputParams.getProductAmount();
-                mProduct.mStepAmount    = mInputParams.getProductStep();
-                mProduct.mUnit          = mInputParams.getProductDefaultUnit();
-
-                Product savedProduct = productController.modifyProduct(mProduct);
-                if (!mProduct.equals(savedProduct)) {
-                    return false;
-                }
+                return false;
             }
+            listController.addOrChangeItem(mCurrentShoppingList, mProduct, mProduct.mDefaultAmount);
+        } else {
+            mProduct.mName          = mInputParams.getProductName();
+            mProduct.mDefaultAmount = mInputParams.getProductAmount();
+            mProduct.mStepAmount    = mInputParams.getProductStep();
+            mProduct.mUnit          = mInputParams.getProductDefaultUnit();
 
-            return saveTags(mProduct);
+            Product savedProduct = productController.modifyProduct(mProduct);
+            if (!mProduct.equals(savedProduct)) {
+                return false;
+            }
         }
 
-        /**
-         * Saves all the given tags.
-         * @param _Product the product where they should be associated.
-         * @return true if all goes well, false if something is wrong.
-         */
-        private boolean saveTags(Product _Product){
-            String[] tagArray = mInputParams.getTags();
-            for (int Index = 0; Index < tagArray.length; ++Index) {
-                Tag tag = ControllerFactory.getTagController().createTag(tagArray[Index]);
-                if(tag == null){
-                    tag = Tag.find(Tag.class,"m_name = ?", tagArray[Index]).get(0);
-                }
-                if(!ControllerFactory.getProductController().addTagToProduct(_Product, tag)){
-                    return false;
-                }
+        return saveTags(mProduct);
+    }
+
+    /**
+     * Saves all the given tags.
+     * @param _Product the product where they should be associated.
+     * @return true if all goes well, false if something is wrong.
+     */
+    private boolean saveTags(Product _Product){
+        String[] tagArray = mInputParams.getTags();
+        for (String currentTag : tagArray) {
+            Tag tag = ControllerFactory.getTagController().createTag(currentTag);
+            if (tag == null) {
+                tag = Tag.find(Tag.class, "m_name = ?", currentTag).get(0);
             }
-            return true;
+            if (!ControllerFactory.getProductController().addTagToProduct(_Product, tag)) {
+                return false;
+            }
         }
+        return true;
+    }
 
     /**
      * Creates an instance of an ProductChangeFragment with the details of the product.
      * @param _listId The id of the list where the product should be added.
      * @return the new instance of this fragment.
      */
-    public static ProductChangeFragment newInstance(long _listId){
+    public static ProductChangeFragment newCreateInstance(long _listId){
         ProductChangeFragment fragment = new ProductChangeFragment();
         Bundle args = new Bundle();
+        args.putInt(BUNDLE_KEY_MODE, FRAGMENT_MODE_CREATE);
         args.putLong(BUNDLE_KEY_LIST_ID, _listId);
-        args.putBoolean(BUNDLE_KEY_PRODUCT_USED, false);
         fragment.setArguments(args);
         return fragment;
     }
@@ -307,66 +307,47 @@ public class ProductChangeFragment extends DialogFragment {
     /**
      * Creates an instance of an ProductChangeFragment.
      * @param _productId the id in the database of the product that should be edited.
-     * @param _listId the id of the list where the calling productlistselector should save the products.
      * @return the new instance of this fragment.
      */
-    public static ProductChangeFragment newInstance(long _listId, long _productId){
+    public static ProductChangeFragment newChangeInstance(long _productId){
         ProductChangeFragment fragment = new ProductChangeFragment();
         Bundle args = new Bundle();
-        args.putLong(BUNDLE_KEY_LIST_ID, _listId);
-        args.putBoolean(BUNDLE_KEY_PRODUCT_USED, true);
+        args.putInt(BUNDLE_KEY_MODE, FRAGMENT_MODE_CHANGE);
         args.putLong(BUNDLE_KEY_PRODUCT_ID, _productId);
         fragment.setArguments(args);
         return fragment;
     }
 
-    /*
-    @Override
-    public void onAttach(Activity _Activity) {
-        super.onAttach(_Activity);
-        mContext = _Activity;
-        try {
-            mBaseActivityInterface = (IBaseActivity) _Activity;
-        } catch (ClassCastException e) {
-            throw new ClassCastException(_Activity.toString()
-                    + " has no IBaseActivity interface attached.");
-        }
-    }*/
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mCurrentShoppingList = SugarRecord.findById(ShoppingList.class,
-                getArguments().getLong(BUNDLE_KEY_LIST_ID));
 
-        // check if an product should be shown
-        if (getArguments().getBoolean(BUNDLE_KEY_PRODUCT_USED)) {
-            mProduct = Product.findById(Product.class, getArguments().getLong(BUNDLE_KEY_PRODUCT_ID));
+        switch (getArguments().getInt(BUNDLE_KEY_MODE)) {
+            case FRAGMENT_MODE_CREATE:
+                mCurrentShoppingList = SugarRecord.findById(ShoppingList.class,
+                        getArguments().getLong(BUNDLE_KEY_LIST_ID));
+                break;
+            case FRAGMENT_MODE_CHANGE:
+                mProduct = SugarRecord.findById(Product.class, getArguments().
+                        getLong(BUNDLE_KEY_PRODUCT_ID));
+                break;
+        }
+
+        if (mProduct == null && mCurrentShoppingList == null) {
+            throw new IllegalStateException("Neither product nor list could be loaded for " +
+                    "adding/changing a product.");
         }
     }
 
     @Override
     public Dialog onCreateDialog(Bundle _savedInstanceState) {
 
-        Log.d("TEST", "Dialog gets created");
+        int positveButtonString = (mProduct == null ? R.string.action_add : R.string.action_save);
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setPositiveButton(R.string.product_details_action_add, new DialogInterface.OnClickListener() {
+        builder.setPositiveButton(positveButtonString, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                if (!mInputParams.isFilled()) {
-                    return;
-                }
-
-                if (!mInputParams.isValid()) {
-                    return;
-                }
-
-                if (saveProduct()) {
-                    Toast.makeText(getActivity(), R.string.product_saved_okay, Toast.LENGTH_LONG).show();
-                    ViewUtils.removeFragment(getActivity(), ProductChangeFragment.this);
-                } else {
-                    Toast.makeText(getActivity(), R.string.product_saved_fail, Toast.LENGTH_LONG).show();
-                }
+                // stub. will be replaced when showing dialog.
             }
         });
 
@@ -376,6 +357,51 @@ public class ProductChangeFragment extends DialogFragment {
 
         AlertDialog createdDialog = builder.create();
         mInputParams = new InputParamsHolder(createdDialog, inflatedDialogContents);
+        createdDialog.setOnShowListener(new ClickListenerAssignee(createdDialog));
         return createdDialog;
+    }
+
+    private class OnAddListener implements View.OnClickListener {
+
+        private AlertDialog mDialog;
+
+        public OnAddListener(AlertDialog _dialog) {
+            mDialog = _dialog;
+        }
+
+        @Override
+        public void onClick(View _clicked) {
+            if (!mInputParams.isFilled()) {
+                return;
+            }
+
+            if (!mInputParams.isValid()) {
+                return;
+            }
+
+            if (saveProduct()) {
+                Toast.makeText(getActivity(), R.string.product_saved_okay, Toast.LENGTH_LONG).show();
+                ViewUtils.removeFragment(getActivity(), ProductChangeFragment.this);
+            } else {
+                Toast.makeText(getActivity(), R.string.product_saved_fail, Toast.LENGTH_LONG).show();
+            }
+
+            mDialog.dismiss();
+        }
+    }
+
+    private class ClickListenerAssignee implements DialogInterface.OnShowListener {
+
+        private AlertDialog mDialog;
+
+        public ClickListenerAssignee(AlertDialog _dialog) {
+            mDialog = _dialog;
+        }
+
+        @Override
+        public void onShow(DialogInterface dialog) {
+            mDialog.getButton(DialogInterface.BUTTON_POSITIVE).
+                    setOnClickListener(new OnAddListener(mDialog));
+        }
     }
 }
