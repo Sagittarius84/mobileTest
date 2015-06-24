@@ -15,6 +15,7 @@ import org.noorganization.instalist.model.ListEntry;
 import org.noorganization.instalist.model.ShoppingList;
 import org.noorganization.instalist.view.ChangeHandler;
 import org.noorganization.instalist.view.IChangeHandler;
+import org.noorganization.instalist.view.utils.PreferencesManager;
 
 import java.util.ArrayList;
 import java.util.List;

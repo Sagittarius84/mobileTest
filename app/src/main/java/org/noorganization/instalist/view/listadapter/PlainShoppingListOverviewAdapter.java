@@ -7,6 +7,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
+import org.noorganization.instalist.R;
 import org.noorganization.instalist.model.ShoppingList;
 import org.noorganization.instalist.touchlistener.IOnShoppingListClickListenerEvents;
 import org.noorganization.instalist.touchlistener.OnShoppingListClickListener;
@@ -27,12 +28,12 @@ public class PlainShoppingListOverviewAdapter extends ArrayAdapter<ShoppingList>
 
     private final List<ShoppingList> mShoppingLists;
 
-    private final Activity                           mContext;
-    private       IOnShoppingListClickListenerEvents mIOnShoppingListClickEvents;
+    private final Activity mContext;
+    private IOnShoppingListClickListenerEvents mIOnShoppingListClickEvents;
 
     public PlainShoppingListOverviewAdapter(Activity _Context, List<ShoppingList> _ListOfShoppingLists) {
 
-        super(_Context, android.R.layout.simple_list_item_1, _ListOfShoppingLists);
+        super(_Context, R.layout.expandable_list_view_list_entry, _ListOfShoppingLists);
         this.mContext = _Context;
         this.mShoppingLists = _ListOfShoppingLists;
         try {
@@ -43,24 +44,32 @@ public class PlainShoppingListOverviewAdapter extends ArrayAdapter<ShoppingList>
         }
     }
 
+    private static class ViewHolder{
+        TextView mtvListName     ;
+        TextView mtvListItemCount;
+    }
 
     @Override
     public View getView(int _Position, View _ConvertView, ViewGroup _Parent) {
         View shoppingListNamesView = null;
 
         if (_ConvertView == null) {
+            ViewHolder holder = new ViewHolder();
             LayoutInflater shoppingListNamesInflater = mContext.getLayoutInflater();
-            shoppingListNamesView = shoppingListNamesInflater.inflate(android.R.layout.simple_list_item_1, null);
-
+            shoppingListNamesView = shoppingListNamesInflater.inflate(R.layout.expandable_list_view_list_entry, null);
+            holder.mtvListName      = (TextView) shoppingListNamesView.findViewById(R.id.expandable_list_view_list_name);
+            holder.mtvListItemCount = (TextView) shoppingListNamesView.findViewById(R.id.expandable_list_view_list_entries);
+            shoppingListNamesView.setLongClickable(true);
+            shoppingListNamesView.setTag(holder);
         } else {
             shoppingListNamesView = _ConvertView;
-
         }
 
-        String   listName = mShoppingLists.get(_Position).mName;
-        TextView textView = (TextView) shoppingListNamesView.findViewById(android.R.id.text1);
-        textView.setText(listName);
-
+        ViewHolder holder = (ViewHolder) shoppingListNamesView.getTag();
+        ShoppingList shoppingList = getItem(_Position);
+        String listName = shoppingList.mName;
+        holder.mtvListName.setText(listName);
+        holder.mtvListItemCount.setText(String.valueOf(shoppingList.getEntries().size()));
         shoppingListNamesView.setOnClickListener(
                 new OnShoppingListClickListener(mIOnShoppingListClickEvents, mShoppingLists.get(_Position)));
 
@@ -104,8 +113,8 @@ public class PlainShoppingListOverviewAdapter extends ArrayAdapter<ShoppingList>
      * @return -1 if not found, index of item when found.
      */
     private int indexOfShoppingList(ShoppingList _ShoppingList) {
-        int indexOfList = - 1;
-        for (int index = 0; index < mShoppingLists.size(); ++ index) {
+        int indexOfList = -1;
+        for (int index = 0; index < mShoppingLists.size(); ++index) {
             if (_ShoppingList.getId() == mShoppingLists.get(index).getId()) {
                 indexOfList = index;
                 break;
