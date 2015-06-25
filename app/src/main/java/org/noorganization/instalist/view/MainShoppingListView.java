@@ -45,6 +45,7 @@ import org.noorganization.instalist.view.interfaces.IBaseActivityListEvent;
 import org.noorganization.instalist.view.listadapter.CategoryListAdapter;
 import org.noorganization.instalist.view.listadapter.ExpandableCategoryItemListAdapter;
 import org.noorganization.instalist.view.listadapter.PlainShoppingListOverviewAdapter;
+import org.noorganization.instalist.view.middleware.MenuStates;
 import org.noorganization.instalist.view.utils.PreferencesManager;
 import org.noorganization.instalist.view.utils.ViewUtils;
 
@@ -64,18 +65,6 @@ public class MainShoppingListView extends ActionBarActivity implements IBaseActi
     private final static String DEFAULT_CATEGORY_NAME = "(default)";
 
     public final static String KEY_LISTNAME = "list_name";
-
-    private static final int GROUP_MENU = 2;
-    private static final int GROUP_MENU_ADD_LIST_ACTION = 0;
-    private static final int GROUP_MENU_REMOVE_CATEGORY_ACTION = 1;
-    private static final int GROUP_MENU_EDIT_CATEGORY_ACTION = 2;
-    private static final int CHILD_MENU = 3;
-    private static final int CHILD_MENU_EDIT_LIST_NAME_ACTION = 0;
-    private static final int CHILD_MENU_REMOVE_LIST_ACTION = 1;
-    private static final int CHILD_MENU_MOVE_TO_CATEGORY_ACTION = 2;
-    public static final int PLAIN_SHOPPINGLIST_MENU = 1;
-    public static final int PLAIN_SHOPPINGLIST_EDIT_LIST_NAME_ACTION = 0;
-    public static final int PLAIN_SHOPPINGLIST_REMOVE_LIST_ACTION = 1;
 
     private Toolbar mToolbar;
 
@@ -148,12 +137,14 @@ public class MainShoppingListView extends ActionBarActivity implements IBaseActi
         mLeftMenuDrawerRelativeLayout = (RelativeLayout) findViewById(R.id.list_view_left_side_navigation);
         mSettingsButton = (Button) findViewById(R.id.drawer_layout_custom_settings);
 
+        assignExpandableList();
+        assignPlainList();
+
         long categoryCount = Category.count(Category.class, null, new String[]{});
         // check if there are categories
         if (categoryCount > 1) {
-            assignExpandableList();
+
         } else {
-            assignPlainList();
         }
 
 
@@ -169,19 +160,19 @@ public class MainShoppingListView extends ActionBarActivity implements IBaseActi
     }
 
     @Override
-    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+    public void onCreateContextMenu(ContextMenu _Menu, View _View, ContextMenu.ContextMenuInfo _MenuInfo) {
         Log.i(LOG_TAG, "Context menu called.");
-        if(v.getId() == R.id.drawer_layout_custom_plain_shopping_list_overview) {
+        if(_View.getId() == R.id.drawer_layout_custom_plain_shopping_list_overview) {
             // then we have a plain list view
-            menu.setHeaderTitle(getString(R.string.shopping_list_action));
-            menu.add(PLAIN_SHOPPINGLIST_MENU, PLAIN_SHOPPINGLIST_EDIT_LIST_NAME_ACTION, 1, getString(R.string.edit_shopping_list));
-            menu.add(PLAIN_SHOPPINGLIST_MENU, PLAIN_SHOPPINGLIST_REMOVE_LIST_ACTION, 2, getString(R.string.remove_shopping_list));
-            super.onCreateContextMenu(menu, v, menuInfo);
+            _Menu.setHeaderTitle(getString(R.string.shopping_list_action));
+            _Menu.add(MenuStates.PLAIN_SHOPPINGLIST_MENU, MenuStates.PLAIN_SHOPPINGLIST_EDIT_LIST_NAME_ACTION, 1, getString(R.string.edit_shopping_list));
+            _Menu.add(MenuStates.PLAIN_SHOPPINGLIST_MENU, MenuStates.PLAIN_SHOPPINGLIST_REMOVE_LIST_ACTION, 2, getString(R.string.remove_shopping_list));
+            super.onCreateContextMenu(_Menu, _View, _MenuInfo);
             return;
         }
 
         ExpandableListView.ExpandableListContextMenuInfo contextMenuInfo =
-                (ExpandableListView.ExpandableListContextMenuInfo) menuInfo;
+                (ExpandableListView.ExpandableListContextMenuInfo) _MenuInfo;
 
         int entityType = ExpandableListView.getPackedPositionType(contextMenuInfo.packedPosition);
         int groupPosition = ExpandableListView.getPackedPositionGroup(contextMenuInfo.packedPosition);
@@ -189,23 +180,23 @@ public class MainShoppingListView extends ActionBarActivity implements IBaseActi
 
         switch (entityType) {
             case ExpandableListView.PACKED_POSITION_TYPE_GROUP:
-                menu.setHeaderTitle(getString(R.string.category_action));
-                menu.add(GROUP_MENU, GROUP_MENU_ADD_LIST_ACTION, 1, getString(R.string.add_list));
-                menu.add(GROUP_MENU, GROUP_MENU_REMOVE_CATEGORY_ACTION, 2, getString(R.string.remove_category));
-                menu.add(GROUP_MENU, GROUP_MENU_EDIT_CATEGORY_ACTION, 3, getString(R.string.edit_category_name));
+                _Menu.setHeaderTitle(getString(R.string.category_action));
+                _Menu.add(MenuStates.GROUP_MENU, MenuStates.GROUP_MENU_ADD_LIST_ACTION, 1, getString(R.string.add_list));
+                _Menu.add(MenuStates.GROUP_MENU, MenuStates.GROUP_MENU_REMOVE_CATEGORY_ACTION, 2, getString(R.string.remove_category));
+                _Menu.add(MenuStates.GROUP_MENU, MenuStates.GROUP_MENU_EDIT_CATEGORY_ACTION, 3, getString(R.string.edit_category_name));
                 break;
             case ExpandableListView.PACKED_POSITION_TYPE_CHILD:
-                menu.setHeaderTitle(getString(R.string.shopping_list_action));
-                menu.add(CHILD_MENU, CHILD_MENU_EDIT_LIST_NAME_ACTION, 1, getString(R.string.edit_shopping_list));
-                menu.add(CHILD_MENU, CHILD_MENU_REMOVE_LIST_ACTION, 2, getString(R.string.remove_shopping_list));
-                menu.add(CHILD_MENU, CHILD_MENU_MOVE_TO_CATEGORY_ACTION, 3, getString(R.string.move_category));
+                _Menu.setHeaderTitle(getString(R.string.shopping_list_action));
+                _Menu.add(MenuStates.CHILD_MENU, MenuStates.CHILD_MENU_EDIT_LIST_NAME_ACTION, 1, getString(R.string.edit_shopping_list));
+                _Menu.add(MenuStates.CHILD_MENU, MenuStates.CHILD_MENU_REMOVE_LIST_ACTION, 2, getString(R.string.remove_shopping_list));
+                _Menu.add(MenuStates.CHILD_MENU, MenuStates.CHILD_MENU_MOVE_TO_CATEGORY_ACTION, 3, getString(R.string.move_category));
                 break;
             default:
                 return;
         }
 
 
-        super.onCreateContextMenu(menu, v, menuInfo);
+        super.onCreateContextMenu(_Menu, _View, _MenuInfo);
     }
 
     @Override
@@ -250,17 +241,17 @@ public class MainShoppingListView extends ActionBarActivity implements IBaseActi
         viewSwitcher = (ViewSwitcher) view.findViewById(R.id.expandable_list_view_view_switcher);
 
         switch (groupId) {
-            case GROUP_MENU:
+            case MenuStates.GROUP_MENU:
                 //region GROUP_MENU
                 Category category = (Category) mCategoryItemListAdapter.getGroup(groupPosition);
                 String categoryName = category.mName;
 
                 switch (itemId) {
-                    case GROUP_MENU_ADD_LIST_ACTION:
+                    case MenuStates.GROUP_MENU_ADD_LIST_ACTION:
                         Toast.makeText(this, "Add list on category: " + categoryName, Toast.LENGTH_SHORT).show();
                         // best practice would be change dynamically id? or insert an edit text field at the first pos....
                         break;
-                    case GROUP_MENU_REMOVE_CATEGORY_ACTION:
+                    case MenuStates.GROUP_MENU_REMOVE_CATEGORY_ACTION:
                         Toast.makeText(this, "Remove group: " + categoryName, Toast.LENGTH_SHORT).show();
                         if (category.getId() == mDefaultCategoryId) {
                             Toast.makeText(this, getString(R.string.delete_category_error_category_is_default), Toast.LENGTH_LONG).show();
@@ -269,7 +260,7 @@ public class MainShoppingListView extends ActionBarActivity implements IBaseActi
                             onCategoryRemoved(category);
                         }
                         break;
-                    case GROUP_MENU_EDIT_CATEGORY_ACTION:
+                    case MenuStates.GROUP_MENU_EDIT_CATEGORY_ACTION:
                         //region Edit Category name
                         Toast.makeText(this, "Rename category: " + categoryName, Toast.LENGTH_SHORT).show();
 
@@ -303,7 +294,7 @@ public class MainShoppingListView extends ActionBarActivity implements IBaseActi
                 }
                 //endregion GROUP_MENU
                 break;
-            case CHILD_MENU:
+            case MenuStates.CHILD_MENU:
                 //region CHILD_MENU
                 ShoppingList shoppingList = (ShoppingList) mCategoryItemListAdapter.getChild(groupPosition, childPosition);
                 Category categoryForShoppingList = (Category) mCategoryItemListAdapter.getGroup(groupPosition);
@@ -314,25 +305,25 @@ public class MainShoppingListView extends ActionBarActivity implements IBaseActi
                 // get the shoppinglist from database
                 shoppingList = ShoppingList.findById(ShoppingList.class, shoppingList.getId());
                 switch (itemId) {
-                    case CHILD_MENU_EDIT_LIST_NAME_ACTION:
+                    case MenuStates.CHILD_MENU_EDIT_LIST_NAME_ACTION:
                         editListName(view, shoppingList, viewSwitcher);
                         break;
-                    case CHILD_MENU_REMOVE_LIST_ACTION:
+                    case MenuStates.CHILD_MENU_REMOVE_LIST_ACTION:
                         removeList(shoppingList);
                         break;
-                    case CHILD_MENU_MOVE_TO_CATEGORY_ACTION:
+                    case MenuStates.CHILD_MENU_MOVE_TO_CATEGORY_ACTION:
                         changeCategoryOfList(view, shoppingList, categoryForShoppingList, viewSwitcher);
                         break;
                 }
                 //endregion CHILD_MENU
                 break;
-            case PLAIN_SHOPPINGLIST_MENU:
+            case MenuStates.PLAIN_SHOPPINGLIST_MENU:
                 ShoppingList shoppingList1 = mPlainShoppingListAdapter.getItem(adapterContextMenuInfo.position);
                 switch (itemId) {
-                    case PLAIN_SHOPPINGLIST_EDIT_LIST_NAME_ACTION:
+                    case MenuStates.PLAIN_SHOPPINGLIST_EDIT_LIST_NAME_ACTION:
                         editListName(view, shoppingList1, viewSwitcher);
                         break;
-                    case PLAIN_SHOPPINGLIST_REMOVE_LIST_ACTION:
+                    case MenuStates.PLAIN_SHOPPINGLIST_REMOVE_LIST_ACTION:
                         removeList(shoppingList1);
                         break;
                 }
@@ -345,6 +336,7 @@ public class MainShoppingListView extends ActionBarActivity implements IBaseActi
         ImageView submitView;
         LinearLayout moveContainer;
         Spinner spinner;
+        List<Category> categories;
 
         moveContainer = (LinearLayout) view.findViewById(R.id.expandable_list_view_choose_move_category);
 
@@ -352,7 +344,7 @@ public class MainShoppingListView extends ActionBarActivity implements IBaseActi
         submitView = (ImageView) view.findViewById(R.id.expandable_list_view_move_submit);
         spinner = (Spinner) view.findViewById(R.id.expandable_list_view_list_move_spinner);
 
-        List<Category> categories = Category.listAll(Category.class);
+        categories = Category.listAll(Category.class);
         categories.remove(categoryForShoppingList);
 
         SpinnerAdapter spinnerAdapter = new CategoryListAdapter(this, categories);
