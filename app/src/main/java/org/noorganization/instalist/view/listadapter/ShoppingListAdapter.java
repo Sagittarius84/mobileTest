@@ -16,7 +16,8 @@ import org.noorganization.instalist.controller.implementation.ControllerFactory;
 import org.noorganization.instalist.model.ListEntry;
 import org.noorganization.instalist.touchlistener.OnSimpleSwipeGestureListener;
 
-import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -31,6 +32,7 @@ public class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingListAdapte
     private final Activity mActivity;
 
     private OnSimpleSwipeGestureListener mOnSimpleSwipeGestureListener;
+    private Comparator mComparator;
 
     // -----------------------------------------------------------
 
@@ -53,23 +55,36 @@ public class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingListAdapte
             mViewHolderRef = this;
             mContext = _Context;
 
+            mProductAmount.setOnTouchListener(new OnSimpleSwipeGestureListener(_ItemView.getContext(), _ItemView ){
+                @Override
+                public void onSingleTap(View childView) {
+                    super.onSingleTap(childView);
+                    childView.findViewById(R.id.list_product_shopping_product_amount);
+                }
+            });
+
             _ItemView.setOnTouchListener(new OnSimpleSwipeGestureListener(_ItemView.getContext(), _ItemView) {
+
+                private void toggleStrike(ListEntry _Entry){
+                    if(_Entry.mStruck){
+                        mListController.unstrikeItem(_Entry);
+                    } else {
+                        mListController.strikeItem(_Entry);
+                    }
+                }
 
                 @Override
                 public void onSwipeRight(View childView) {
                     super.onSwipeRight(childView);
                     ListEntry entry = mListOfEntries.get(mViewHolderRef.getAdapterPosition());
-                    mListController.strikeItem(entry);
-                    Toast.makeText( mContext, "Item striked: " + entry.mProduct.mName, Toast.LENGTH_SHORT).show();
-
+                    toggleStrike(entry);
                 }
 
                 @Override
                 public void onSwipeLeft(View childView) {
                     super.onSwipeLeft(childView);
                     ListEntry entry = mListOfEntries.get(mViewHolderRef.getAdapterPosition());
-                    mListController.unstrikeItem(entry);
-                    Toast.makeText( mContext, "Item unstriked: " + entry.mProduct.mName, Toast.LENGTH_SHORT).show();
+                    toggleStrike(entry);
 
                 }
 
@@ -166,13 +181,21 @@ public class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingListAdapte
         }
     }
 
-    /**--
+    /**
      * Adds the given entry to the list and notifies the adapter to update the view for this element.
      * @param _Entry entry element that should be added.
      */
     public void addItem(ListEntry _Entry){
         mListOfEntries.add(_Entry);
-        notifyItemInserted(mListOfEntries.size()-1);
+        Collections.sort(mListOfEntries, mComparator);
+        notifyDataSetChanged();
+    }
+
+    public void sortByComparator(Comparator _Comparator) {
+        mComparator = _Comparator;
+        // AlphabeticalListEntryComparator comparator = new AlphabeticalListEntryComparator();
+        Collections.sort(mListOfEntries, _Comparator);
+        notifyDataSetChanged();
     }
 
     /**
@@ -181,39 +204,46 @@ public class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingListAdapte
      */
     public void changeItem(ListEntry _Entry){
         // replace entry with changed entry
-        // TODO performance
+        // TODO performance, usage of some comperator or so...
 
         int positionToChange = -1;
         synchronized (mListOfEntries) {
+            //positionToChange = Collections.binarySearch(mListOfEntries, _Entry, mComparator);
+
             for (ListEntry listEntry : mListOfEntries) {
 
                 // somehow only this works for finding the equal ids
                 long id1 = _Entry.getId();
                 long id2 = listEntry.getId();
                 if (id1 == id2) {
-                    if(!_Entry.mStruck) {
-                        int index = mListOfEntries.indexOf(listEntry);
-                        positionToChange = index;
-
-                        listEntry = _Entry;
-                        mListOfEntries.set(index, listEntry);
-
-                        notifyItemMoved(index, mListOfEntries.size() - 1);
-                        notifyItemChanged(mListOfEntries.size() - 1);
-                    }
-
-                    // unstroke than on the upper side of the list.
+                    int index = mListOfEntries.indexOf(listEntry);
+                    positionToChange = index;
+                    // update reference to given entry from controller
+                    mListOfEntries.set(index, _Entry);
+                    break;
                 }
             }
         }
 
         if(positionToChange >= 0){
             ListEntry entry = mListOfEntries.get(positionToChange);
+
+            /** -6- 3 7 1 **/
+            notifyItemChanged(positionToChange);
+            Collections.sort(mListOfEntries, mComparator);
+
+            int indexOfMovedEntry = Collections.binarySearch(mListOfEntries, _Entry, mComparator);
+            /*
+            int posToMoveTo = mListOfEntries.indexOf(_Entry);
+
             mListOfEntries.remove(positionToChange);
-            mListOfEntries.add(entry);
+            mListOfEntries.add(posToMoveTo, entry);
+*/
+
+            notifyItemMoved(positionToChange, indexOfMovedEntry);
+            notifyItemChanged(indexOfMovedEntry);
+
+           // notifyDataSetChanged();
         }
     }
-
-
-
 }

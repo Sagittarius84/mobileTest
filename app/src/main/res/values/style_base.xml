@@ -8,17 +8,42 @@
         <item name="android:layout_width">@dimen/navigation_drawer_width</item>
         <item name="android:layout_height">match_parent</item>
         <item name="android:layout_gravity">start</item>
-        <item name="android:background">@color/primary_color_dark</item>
+        <item name="android:background">@color/back_background_color</item>
     </style>
     <style name="InstalistTheme1.base_text_style">
         <item name="android:textSize">@dimen/fragment_base_text_size</item>
-        <item name="android:textColor">@color/white</item>
+        <!--<item name="android:textColor">@color/white</item>!-->
     </style>
     <style name="InstalistTheme1.base_text_view_style" parent="InstalistTheme1.base_text_style">
-        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
     </style>
-    <style name="InstalistTheme1.base_edit_text_style" parent="InstalistTheme1.base_text_style">
+    <style name="InstalistTheme1.list_text_style_base" parent="InstalistTheme1.base_text_view_style">
+        <item name="android:paddingTop">@dimen/list_text_padding_top</item>
+        <item name="android:paddingBottom">@dimen/list_text_padding_bottom</item>
+        <item name="android:maxLines">1</item>
+    </style>
+    <style name="InstalistTheme1.list_text_style_left" parent="InstalistTheme1.list_text_style_base">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:layout_weight">0.85</item>
+    </style>
+    <style name="InstalistTheme1.weighted_text_style_right" parent="InstalistTheme1.list_text_style_base">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:layout_weight">.15</item>
+        <item name="android:paddingRight">@dimen/list_text_padding_right</item>
+        <item name="android:paddingLeft">@dimen/list_text_padding_left</item>
+        <item name="android:paddingTop">@dimen/list_text_padding_top</item>
+        <item name="android:paddingBottom">@dimen/list_text_padding_bottom</item>
+        <!--<item name="android:paddingEnd">@dimen/base_list_entry_padding_right</item>-->
+    </style>
+    <style name="InstalistTheme1.weighted_text_style_right_entry_count" parent="InstalistTheme1.weighted_text_style_right">
+        <item name="android:layout_margin">@dimen/base_margin</item>
+        <item name="android:background">@color/fab_material_blue_500</item>
+        <item name="android:gravity">center</item>
+    </style>
+    <style name="InstalistTheme1.base_edit_text_style">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">@dimen/base_edittext_height</item>
     </style>
@@ -42,9 +67,41 @@
         <item name="android:paddingTop">@dimen/base_list_entry_padding_top</item>-->
     </style>
 
-    <dimen name="base_list_entry_padding_left">16dp</dimen>
-    <dimen name="base_list_entry_padding_right">16dp</dimen>
-    <dimen name="base_list_entry_padding_top">16dp</dimen>
-    <dimen name="base_list_entry_height">48dp</dimen>
-    <dimen name="navigation_drawer_width">240dp</dimen>
+    <style name="InstalistTheme1.base_view_switcher" parent="InstalistTheme1.base_text_style">
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:paddingLeft">16dp</item>
+        <item name="android:paddingRight">16dp</item>
+    </style>
+<style name="InstalistTheme1.expandable_list_single_view_switcher" parent="InstalistTheme1.base_view_switcher">
+    <item name="android:paddingLeft">26dp</item><!--additional 20dp for child-->
+</style>
+    <style name="InstalistTheme1.weighted_edit_text_style_left" parent="InstalistTheme1.base_edit_text_style">
+        <item name="android:layout_height">fill_parent</item>
+    </style>
+
+    <style name="InstalistTheme1.base_edit_image">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:maxHeight">@dimen/base_edit_image_max_height</item>
+        <item name="android:maxWidth">@dimen/base_edit_image_max_width</item>
+    </style>
+    <style name="InstalistTheme1.edit_cancel_image" parent="InstalistTheme1.base_edit_image">
+        <item name="android:src">@mipmap/ic_close_black_36dp</item>
+    </style>
+
+    <style name="InstalistTheme1.edit_check_image" parent="InstalistTheme1.base_edit_image">
+        <item name="android:src">@mipmap/ic_check_black_36dp</item>
+    </style>
+<style name="InstalistTheme1.delete_image" parent="InstalistTheme1.base_edit_image">
+    <item name="android:src">@mipmap/ic_close_black_36dp</item>
+    <item name="android:tint">@color/fab_material_red_500</item>
+</style>
+
+
+    <dimen name="base_padding_left">8dp</dimen>
+    <dimen name="base_padding_right">8dp</dimen>
+    <dimen name="base_padding_bottom">8dp</dimen>
+    <dimen name="base_padding_top">8dp</dimen>
+    <dimen name="base_margin">8dp</dimen>
 </resources>

@@ -2,17 +2,18 @@ package org.noorganization.instalist.view.fragment;
 
 import android.app.Activity;
 import android.app.Fragment;
-import android.app.LauncherActivity;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
-import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -28,14 +29,21 @@ import org.noorganization.instalist.view.ChangeHandler;
 import org.noorganization.instalist.view.MainShoppingListView;
 import org.noorganization.instalist.view.datahandler.SelectableBaseItemListEntryDataHolder;
 import org.noorganization.instalist.view.decoration.DividerItemListDecoration;
+import org.noorganization.instalist.view.interfaces.IBaseActivity;
 import org.noorganization.instalist.view.listadapter.ShoppingListAdapter;
+import org.noorganization.instalist.view.sorting.AlphabeticalListEntryComparator;
+import org.noorganization.instalist.view.sorting.PriorityListEntryComparator;
+import org.noorganization.instalist.view.utils.ViewUtils;
 
+import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
+import java.util.WeakHashMap;
 
 /**
  * A ShoppingListOverviewFragment containing a list view.
  */
-public class ShoppingListOverviewFragment extends BaseCustomFragment {
+public class ShoppingListOverviewFragment extends Fragment{
 
     private String mCurrentListName;
     private ShoppingList mCurrentShoppingList;
@@ -50,6 +58,19 @@ public class ShoppingListOverviewFragment extends BaseCustomFragment {
     private ShoppingListAdapter mShoppingListAdapter;
 
     private IListController mListController;
+
+    private IBaseActivity mBaseActivityInterface;
+
+    private static String PREFERENCES_NAME = "SHOPPING_LIST_FRAGMENT";
+
+    private static String SORT_MODE = "SORT_MODE";
+    /**
+     * Contains the mapping from a Integer to comperators.
+     */
+    private Map<Integer, Comparator> mMapComperable;
+
+    private static Integer SORT_BY_NAME = 0;
+    private static Integer SORT_BY_PRIORITY = 1;
 
     // --------------------------------------------------------------------------------------------
 
@@ -79,14 +100,38 @@ public class ShoppingListOverviewFragment extends BaseCustomFragment {
 
 
     @Override
+    public void onAttach(Activity _Activity) {
+        super.onAttach(_Activity);
+        mContext            = _Activity;
+
+        try {
+            mBaseActivityInterface = (IBaseActivity) _Activity;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(_Activity.toString()
+                    + " has no IBaseActivity interface attached.");
+        }
+
+        mListController     = ControllerFactory.getListController();
+        ((ChangeHandler)((GlobalApplication)getActivity().getApplication()).getChangeHandler()).setCurrentFragment(this);
+    }
+
+    @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
         // get bundle args to get the listname that should be shown
         Bundle bundle = this.getArguments();
+
+        mMapComperable = new WeakHashMap<>();
+        mMapComperable.put(0, new AlphabeticalListEntryComparator());
+        mMapComperable.put(1, new PriorityListEntryComparator());
+
         if (bundle == null) {
             return;
         }
-        mCurrentListName    = bundle.getString(MainShoppingListView.KEY_LISTNAME);
+        mCurrentListName     = bundle.getString(MainShoppingListView.KEY_LISTNAME);
+        mCurrentShoppingList = ShoppingList.findByName(mCurrentListName);
+
     }
 
 
@@ -94,14 +139,46 @@ public class ShoppingListOverviewFragment extends BaseCustomFragment {
 
 
     @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        menu.clear();
+        inflater.inflate(R.menu.menu_main, menu);
+        super.onCreateOptionsMenu(menu, inflater);
+    }
+
+
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        SharedPreferences sortDetails = mContext.getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE);
+
+        // swtich which action item was pressed
+        switch (id) {
+            case R.id.list_items_sort_by_priority:
+                mShoppingListAdapter.sortByComparator(mMapComperable.get(SORT_BY_PRIORITY));
+
+                sortDetails.edit()
+                        .putInt(SORT_MODE, SORT_BY_PRIORITY)
+                        .apply();
+
+                break;
+            case R.id.list_items_sort_by_name:
+                mShoppingListAdapter.sortByComparator(mMapComperable.get(SORT_BY_NAME));
+                sortDetails.edit()
+                        .putInt(SORT_MODE, SORT_BY_NAME)
+                        .apply();
+                break;
+            default:
+                break;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        // get in here the actionbar
-        mActionBar = ((ActionBarActivity) getActivity()).getSupportActionBar();
-        // not needed to check for null, because we have a actionbar always assigned
-        mActionBar.setTitle(mCurrentListName);
         // set the title in "main" activity so that the current list name is shown on the actionbar
-        ((MainShoppingListView) getActivity()).setToolbarTitle(mCurrentListName);
+        mBaseActivityInterface.setToolbarTitle(mCurrentListName);
     }
 
 
@@ -112,7 +189,12 @@ public class ShoppingListOverviewFragment extends BaseCustomFragment {
     public void onPause() {
         super.onPause();
         mAddButton.setOnClickListener(null);
-        ((ChangeHandler)((GlobalApplication)getActivity().getApplication()).getChangeHandler()).setCurrentFragment(null);
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        ((ChangeHandler) ((GlobalApplication) getActivity().getApplication()).getChangeHandler()).setCurrentFragment(null);
     }
 
 
@@ -123,15 +205,13 @@ public class ShoppingListOverviewFragment extends BaseCustomFragment {
     public void onResume() {
         super.onResume();
 
-        mContext            = this.getActivity();
-        mListController     = ControllerFactory.getListController();
-        ((ChangeHandler)((GlobalApplication)getActivity().getApplication()).getChangeHandler()).setCurrentFragment(this);
-        unlockDrawerLayout();
+        SharedPreferences sortDetails = mContext.getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE);
 
         // decl
         final RecyclerView shoppingListView;
         // init
         shoppingListView = (RecyclerView) getActivity().findViewById(R.id.fragment_shopping_list);
+
         // assign other listname if none is assigned
         if (mCurrentListName == null) {
 
@@ -139,26 +219,38 @@ public class ShoppingListOverviewFragment extends BaseCustomFragment {
             if (mShoppingLists.size() > 0) {
                 mCurrentShoppingList = mShoppingLists.get(0);
                 mCurrentListName = mCurrentShoppingList.mName;
-                setToolbarTitle(mCurrentShoppingList.mName);
+                mBaseActivityInterface.setToolbarTitle(mCurrentShoppingList.mName);
             } else {
-                setToolbarTitle(mActivity.getResources().getString(R.string.shopping_list_overview_fragment_no_list_available));
+                mBaseActivityInterface.setToolbarTitle(mContext.getResources().getString(R.string.shopping_list_overview_fragment_no_list_available));
                 // do something to show that there are no shoppinglists!
                 return;
             }
         }
+        mBaseActivityInterface.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
 
         mShoppingListAdapter = new ShoppingListAdapter(getActivity(), GlobalApplication.getInstance().getListEntries(mCurrentListName));
+        mShoppingListAdapter.sortByComparator(mMapComperable.get(sortDetails.getInt(SORT_MODE, SORT_BY_PRIORITY)));
+
         // use a linear layout manager
         mLayoutManager = new LinearLayoutManager(this.getActivity());
         mLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
 
         shoppingListView.setLayoutManager(mLayoutManager);
-        shoppingListView.addItemDecoration(new DividerItemListDecoration(getResources().getDrawable(R.drawable.abc_list_divider_mtrl_alpha), false, false));
+        shoppingListView.addItemDecoration(new DividerItemListDecoration(getResources().getDrawable(R.drawable.list_divider), false, false));
         shoppingListView.setAdapter(mShoppingListAdapter);
         shoppingListView.setItemAnimator(new DefaultItemAnimator());
 
-        ((MainShoppingListView)mActivity).assignDrawer();
+        mAddButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // reset selected items ... (lazy resetting!)
+                SelectableBaseItemListEntryDataHolder.getInstance().clear();
+                ViewUtils.addFragment(getActivity(),
+                        ProductListDialogFragment.newInstance(mCurrentShoppingList.getId()));
+            }
+        });
 
+        mBaseActivityInterface.bindDrawerLayout();
     }
 
 
@@ -166,21 +258,12 @@ public class ShoppingListOverviewFragment extends BaseCustomFragment {
 
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        super.onCreateView(inflater, container, savedInstanceState);
+    public View onCreateView(LayoutInflater _Inflater, ViewGroup _Container, Bundle _SavedInstanceState) {
+        super.onCreateView(_Inflater, _Container, _SavedInstanceState);
 
-        View view = inflater.inflate(R.layout.fragment_main_shopping_list_view, container, false);
+        View view = _Inflater.inflate(R.layout.fragment_main_shopping_list_view, _Container, false);
         mAddButton = (ActionButton) view.findViewById(R.id.add_item_main_list_view);
 
-        mAddButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // reset selected items ... (lazy resetting!)
-                SelectableBaseItemListEntryDataHolder.getInstance().clear();
-                Fragment fragment = ProductListDialogFragment.newInstance(mCurrentListName);
-                changeFragment(fragment);
-            }
-        });
         return view;
     }
 
@@ -198,5 +281,18 @@ public class ShoppingListOverviewFragment extends BaseCustomFragment {
      */
     public void onListItemDeleted(ListEntry _Entry){
         mShoppingListAdapter.removeItem(_Entry);
+    }
+
+    /**
+     * Adds the given listentry to the listentry adapter.
+     * @param _Entry The entry that should be added to the list.
+     */
+    public void onListItemAdded(ListEntry _Entry){
+        if(_Entry.mList.getId().equals(mCurrentShoppingList.getId())) {
+            mShoppingListAdapter.addItem(_Entry);
+        }
+    }
+    public void onShoppingListItemChanged(ShoppingList _ShoppingList){
+        mBaseActivityInterface.updateChangedShoppingList(_ShoppingList);
     }
 }

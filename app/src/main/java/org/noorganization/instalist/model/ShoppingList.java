@@ -1,5 +1,6 @@
 package org.noorganization.instalist.model;
 
+import com.orm.StringUtil;
 import com.orm.SugarRecord;
 import com.orm.query.Condition;
 import com.orm.query.Select;
@@ -12,16 +13,25 @@ import java.util.List;
  * Created by michi on 14.04.15.
  */
 public class ShoppingList extends SugarRecord<ShoppingList> {
-    public final static String LIST_NAME_ATTR = "m_name";
+    public final static String ATTR_NAME = StringUtil.toSQLName("mName");
+    public final static String ATTR_CATEGORY = StringUtil.toSQLName("mCategory");
 
-    public String mName;
+    public String   mName;
+    public Category mCategory;
 
     public ShoppingList() {
-        mName = "";
+        mName     = "";
+        mCategory = null;
     }
 
     public ShoppingList(String _name) {
+        mName     = _name;
+        mCategory = null;
+    }
+
+    public ShoppingList(String _name, Category _category) {
         mName = _name;
+        mCategory = (_category != null ? SugarRecord.findById(Category.class, _category.getId()) : null);
     }
 
     public List<ListEntry> getEntries() {
@@ -33,7 +43,7 @@ public class ShoppingList extends SugarRecord<ShoppingList> {
      * @param _name The name of the list. Any String but not null.
      * @return Either the found list or null if no list is matching.
      */
-    public ShoppingList findByName(String _name) {
+    public static ShoppingList findByName(String _name) {
         if (_name == null) {
             return null;
         }
@@ -66,6 +76,11 @@ public class ShoppingList extends SugarRecord<ShoppingList> {
         }
 
         ShoppingList that = (ShoppingList) o;
+
+        if ((mCategory == null && that.mCategory != null) ||
+                (mCategory != null && !mCategory.equals(that.mCategory))) {
+            return false;
+        }
 
         return (getId().equals(that.getId()) && mName.equals(that.mName));
 

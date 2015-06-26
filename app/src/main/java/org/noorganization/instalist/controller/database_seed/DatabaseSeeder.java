@@ -6,9 +6,12 @@ import com.orm.query.Condition;
 import com.orm.query.Select;
 
 import org.noorganization.instalist.controller.IListController;
+import org.noorganization.instalist.controller.IUnitController;
 import org.noorganization.instalist.controller.implementation.ControllerFactory;
 import org.noorganization.instalist.controller.implementation.ListController;
 import org.noorganization.instalist.controller.implementation.ProductController;
+import org.noorganization.instalist.controller.implementation.UnitController;
+import org.noorganization.instalist.model.Category;
 import org.noorganization.instalist.model.Ingredient;
 import org.noorganization.instalist.model.ListEntry;
 import org.noorganization.instalist.model.Product;
@@ -33,7 +36,7 @@ public class DatabaseSeeder {
     private static DatabaseSeeder mInstance;
 
     private final String    SAMPLE_TAG              = "SAMPLE";
-    private final int       PRODUCT_TEST_DATA_SIZE  = 10;
+    private final int       PRODUCT_TEST_DATA_SIZE  = 25;
     private final long      PRODUCT_LIST_SEED       = 324982340237840L;
 
     private IListController mListController;
@@ -62,17 +65,29 @@ public class DatabaseSeeder {
         tearDown();
 
         Random rand = new Random(PRODUCT_LIST_SEED);
+        String[]        categoryNames       = new String[]{SAMPLE_TAG.concat("_ShoppingMall"), SAMPLE_TAG.concat("_ToolMarket")};
         String[]        listNames           = new String[]{SAMPLE_TAG.concat("_Home"), SAMPLE_TAG.concat("_Work")};
         String[]        listProductNames    = new String[]{"Sugar", "Beer", "Cheese", "Ham", "Nails", "Grenade Apple Juice"};
         String[]        listUnitNames       = new String[]{"g", "kg", "ml", "l", "hl", "pfund"};
         List<Product>       productList     = new ArrayList<>();
         List<ShoppingList>  shoppingLists   = new ArrayList<>();
+        List<Category>      categoryList      = new ArrayList<>();
+
+        for(String categoryName : categoryNames){
+            categoryList.add(ControllerFactory.getCategoryController().createCategory(categoryName));
+        }
 
         // add new lists
         for(String listName : listNames) {
-            shoppingLists.add(mListController.addList(listName));
+            shoppingLists.add(mListController.addList(listName,categoryList.get(0)));
             Log.d(LOG_TAG, "List name: " + listName);
             //shoppingLists[counter].save();
+        }
+
+        IUnitController unitController = ControllerFactory.getUnitController();
+        for (String unitName : listUnitNames) {
+            Unit createdUnit = unitController.createUnit(unitName);
+            Log.d(LOG_TAG, "Added unit: " + (createdUnit == null ? "FAILED! " : "") + unitName);
         }
 
 
@@ -91,7 +106,7 @@ public class DatabaseSeeder {
             productList.add(singleProduct);
         }
 
-        for(Product product : productList){
+        for(Product product : productList) {
             Log.d(LOG_TAG, "Add Product: " + product.mName);
 
             //mListController.addOrChangeItem(shoppingLists[rand.nextInt(shoppingLists.length)], product, rand.nextFloat());
@@ -99,7 +114,7 @@ public class DatabaseSeeder {
             Log.d(LOG_TAG, "List name: " + list.mName);
             ListEntry listEntry = ControllerFactory.getListController().addOrChangeItem(list, product, rand.nextFloat() * 100.0f);
             listEntry.mStruck = false;
-            listEntry=null;
+            listEntry = null;
         }
     }
 
@@ -111,6 +126,7 @@ public class DatabaseSeeder {
         List<ListEntry>     listEntries    = ListEntry.listAll(ListEntry.class);
         List<Product>       products        = Product.listAll(Product.class);
 
+        Category.deleteAll(Category.class);
         ListEntry.deleteAll(ListEntry.class);
         ShoppingList.deleteAll(ShoppingList.class);
         Product.deleteAll(Product.class);

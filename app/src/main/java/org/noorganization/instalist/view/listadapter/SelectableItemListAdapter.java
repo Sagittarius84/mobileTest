@@ -1,25 +1,26 @@
 package org.noorganization.instalist.view.listadapter;
 
 import android.app.Activity;
-import android.app.FragmentTransaction;
+import android.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
+import android.widget.Filter;
+import android.widget.Filterable;
 import android.widget.TextView;
 
+import com.orm.SugarRecord;
+
 import org.noorganization.instalist.R;
-import org.noorganization.instalist.model.ListEntry;
-import org.noorganization.instalist.model.Product;
-import org.noorganization.instalist.model.Recipe;
 import org.noorganization.instalist.model.ShoppingList;
 import org.noorganization.instalist.model.view.BaseItemListEntry;
 import org.noorganization.instalist.model.view.SelectableBaseItemListEntry;
 import org.noorganization.instalist.view.datahandler.SelectableBaseItemListEntryDataHolder;
-import org.noorganization.instalist.view.datahandler.SelectedProductDataHandler;
-import org.noorganization.instalist.view.fragment.ProductCreationFragment;
+import org.noorganization.instalist.view.fragment.ProductChangeFragment;
 import org.noorganization.instalist.view.fragment.RecipeCreationFragment;
+import org.noorganization.instalist.view.utils.ViewUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,19 +28,22 @@ import java.util.List;
 /**
  * Created by TS on 25.05.2015.
  */
-public class SelectableItemListAdapter extends ArrayAdapter<SelectableBaseItemListEntry> {
+public class SelectableItemListAdapter extends ArrayAdapter<SelectableBaseItemListEntry> implements Filterable{
 
     final String LOG_TAG    = SelectableProductListAdapter.class.getName();
 
-    private Activity mContext;
+    private Activity mActivity;
     private List<SelectableBaseItemListEntry> mSelectableItems;
+    private List<SelectableBaseItemListEntry> mResSelectableItems;
 
     private ShoppingList mCurrentShoppingList;
 
-    public SelectableItemListAdapter(Activity _Context, List<SelectableBaseItemListEntry> _ProductList, ShoppingList _CurrentShoppingList){
-        super(_Context, R.layout.list_selectable_product  , _ProductList);
-        mContext = _Context;
+    public SelectableItemListAdapter(Activity _activity, List<SelectableBaseItemListEntry> _ProductList, ShoppingList _CurrentShoppingList){
+        super(_activity, R.layout.list_selectable_product  , _ProductList);
+        mActivity = _activity;
         mSelectableItems = _ProductList;
+        mResSelectableItems = new ArrayList<>(_ProductList);
+
         mCurrentShoppingList = _CurrentShoppingList;
         if(SelectableBaseItemListEntryDataHolder.getInstance().getListEntries().size() > 0) {
             mSelectableItems = SelectableBaseItemListEntryDataHolder.getInstance().getListEntries();
@@ -61,7 +65,7 @@ public class SelectableItemListAdapter extends ArrayAdapter<SelectableBaseItemLi
         SelectableBaseItemListEntry listEntry      = mSelectableItems.get(_Position);
 
         if(_ConvertView == null){
-            LayoutInflater shoppingListNamesInflater = mContext.getLayoutInflater();
+            LayoutInflater shoppingListNamesInflater = mActivity.getLayoutInflater();
             view = shoppingListNamesInflater.inflate(R.layout.list_selectable_product, null);
         }else{
             view = _ConvertView;
@@ -130,24 +134,84 @@ public class SelectableItemListAdapter extends ArrayAdapter<SelectableBaseItemLi
 
         @Override
         public boolean onLongClick(View v) {
-            FragmentTransaction transaction = mContext.getFragmentManager().beginTransaction();
-            transaction.addToBackStack(null);
+            Fragment nextFragment;
+            SugarRecord currentEntry = (SugarRecord) (mListEntry.getEntry().getObject());
 
             switch (mListEntry.getType()){
                 case PRODUCT_LIST_ENTRY:
-                    transaction.replace(R.id.container, ProductCreationFragment
-                            .newInstance(mCurrentShoppingList.mName, ((Product) (mListEntry.getEntry().getObject())).getId()));
+                    nextFragment = ProductChangeFragment.newChangeInstance(currentEntry.getId());
                     break;
                 case RECIPE_LIST_ENTRY:
-                    transaction.replace(R.id.container, RecipeCreationFragment
-                            .newInstance(mCurrentShoppingList.mName, ((Recipe) (mListEntry.getEntry().getObject())).getId()));
+                    nextFragment = RecipeCreationFragment.newInstance(
+                            mCurrentShoppingList.mName, currentEntry.getId());
                     break;
                 default:
                     throw new IllegalStateException("There is no entry type defined.");
             }
-            transaction.commit();
+
+            ViewUtils.addFragment(mActivity, nextFragment);
+
             return true;
         }
+    }
+
+    @Override
+    public Filter getFilter() {
+        final Filter filter = new Filter() {
+
+            @Override
+            protected FilterResults performFiltering(CharSequence constraint) {
+                FilterResults result = new FilterResults();
+
+                // TODO: make it thread safe
+                List<SelectableBaseItemListEntry> listEntries = new ArrayList<>( mResSelectableItems);
+
+                if(constraint == null || constraint.length() == 0){
+                    result.values = listEntries;
+                    result.count = listEntries.size();
+                }else{
+                    BaseItemListEntry.eItemType filterType;
+                    ArrayList<SelectableBaseItemListEntry> filteredList = new ArrayList<SelectableBaseItemListEntry>();
+
+                    switch(Integer.parseInt(constraint.toString())){
+                        case 0:
+                            filterType = BaseItemListEntry.eItemType.PRODUCT_LIST_ENTRY;
+                            break;
+                        case 1:
+                            filterType = BaseItemListEntry.eItemType.RECIPE_LIST_ENTRY;
+                            break;
+                        case 2:
+                            filterType = BaseItemListEntry.eItemType.EMPTY;
+                            break;
+                        default:
+                            filterType = BaseItemListEntry.eItemType.EMPTY;
+                            break;
+                    }
+
+                    if(filterType != BaseItemListEntry.eItemType.EMPTY) {
+                        for (SelectableBaseItemListEntry entry : listEntries) {
+                            if (entry.getItemListEntry().getType() == filterType)
+                                filteredList.add(entry);
+                        }
+                    }
+                    else {
+                        filteredList = new ArrayList<>(mResSelectableItems);
+                    }
+                    result.values = filteredList;
+                    result.count = filteredList.size();
+                }
+
+                return result;
+            }
+
+            @SuppressWarnings("unchecked")
+            @Override
+            protected void publishResults(CharSequence constraint, FilterResults results) {
+                mSelectableItems = (ArrayList<SelectableBaseItemListEntry>) results.values;
+                notifyDataSetChanged();
+            }
+        };
+        return filter;
     }
 
 }

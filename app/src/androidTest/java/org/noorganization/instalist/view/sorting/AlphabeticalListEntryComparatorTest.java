@@ -9,8 +9,23 @@ import org.noorganization.instalist.model.Product;
 import org.noorganization.instalist.model.ShoppingList;
 
 import java.util.Comparator;
+import java.util.Locale;
 
 public class AlphabeticalListEntryComparatorTest extends AndroidTestCase {
+
+    private Locale defaultLocale;
+
+    @Override
+    public void setUp() throws Exception {
+        super.setUp();
+        defaultLocale = Locale.getDefault();
+        Locale.setDefault(Locale.GERMAN);
+    }
+
+    @Override
+    public void tearDown() throws Exception {
+        Locale.setDefault(defaultLocale);
+    }
 
     public void testCompare() throws Exception {
         ShoppingList list = new ShoppingList("_TEST_list");
@@ -22,9 +37,6 @@ public class AlphabeticalListEntryComparatorTest extends AndroidTestCase {
         ListEntry listEntryAUml = new ListEntry(list, productWithAUml, 1.0f);
         ListEntry listEntryB = new ListEntry(list, productWithB, 1.0f);
         ListEntry listEntryUUml = new ListEntry(list, productWithUUml, 1.0f);
-
-        // The Test works successfully with german locale. If it fails, ensure the locale of test
-        // device is set to german.
 
         Comparator<ListEntry> comp = new AlphabeticalListEntryComparator();
         assertEquals(0, comp.compare(listEntryA, listEntryA));

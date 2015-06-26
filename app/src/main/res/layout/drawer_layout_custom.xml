@@ -1,35 +1,60 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    style="@style/left_side_navigation_drawer"
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/list_view_left_side_navigation"
-    >
-
+    style="@style/left_side_navigation_drawer"
+    android:layout_width="match_parent">
+<LinearLayout
+    android:id="@+id/container_edittext_new_name"
+    style="@style/InstalistTheme1.linearlayout_card_style"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:scrollbarAlwaysDrawHorizontalTrack="false">
     <EditText
+        android:id="@+id/drawer_layout_custom_new_name"
+        style="@style/InstalistTheme1.base_edit_text_style"
+        android:hint="@string/drawer_layout_custom_new_addition_hint"
+        />
+    <Button
+        android:id="@+id/drawer_layout_custom_create_list"
+        android:text="@string/create_list"
+        style="?android:attr/borderlessButtonStyle"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/drawer_layout_custom_new_listname_edittext"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true"
-        android:hint="@string/drawer_layout_custom_new_listname_hint"
+        android:layout_height="@dimen/base_edittext_height"
+        android:textColor="@color/fab_material_light_blue_500"
+        android:gravity="right"
         />
 
     <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/drawer_layout_custom_add_list_button"
-        android:id="@+id/drawer_layout_custom_add_list_name_button"
-        android:layout_below="@+id/drawer_layout_custom_new_listname_edittext"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true" />
-
-    <ListView
+        android:id="@+id/drawer_layout_custom_create_category"
+        style="?android:attr/borderlessButtonStyle"
+        android:text="@string/create_category"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:visibility="visible"
+        android:textColor="@color/fab_material_light_blue_500"
+        android:gravity="right"
+        />
+
+</LinearLayout>
+
+    <ExpandableListView
         android:id="@+id/drawer_layout_custom_list_name_view"
-        android:layout_below="@+id/drawer_layout_custom_add_list_name_button"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
+        style="@style/InstalistTheme1.linearlayout_card_style"
+        android:layout_below="@+id/container_edittext_new_name"
+        android:layout_above="@+id/drawer_layout_custom_settings" />
+    <ListView
+        android:id="@+id/drawer_layout_custom_plain_shopping_list_overview"
+        style="@style/InstalistTheme1.linearlayout_card_style"
+        android:layout_below="@+id/container_edittext_new_name"
+        android:layout_above="@+id/drawer_layout_custom_settings"
+        android:visibility="gone"
+    />
+    <Button
+        android:id="@+id/drawer_layout_custom_settings"
+        style="@style/InstalistTheme1.base_button"
+        android:text="@string/action_settings"
+        android:layout_alignParentBottom="true"
+        />
+
 </RelativeLayout>

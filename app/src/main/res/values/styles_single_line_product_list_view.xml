@@ -1,18 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="single_line_product_list_view">
-        <item name="android:layout_height">48dp</item>
-        <item name="android:minHeight">48dp</item>
+    <style name="single_line_list_view">
         <item name="android:layout_width">match_parent</item>
-        <item name="android:paddingLeft">16dp</item>
-        <item name="android:paddingRight">16dp</item>
+        <item name="android:layout_height">@dimen/base_list_entry_height</item>
+        <item name="android:minHeight">@dimen/base_list_entry_height</item>
+        <item name="android:paddingLeft">@dimen/base_list_entry_padding_left</item>
+        <item name="android:paddingRight">@dimen/base_list_entry_padding_right</item>
         <item name="android:orientation">horizontal</item>
+        <item name="android:background">@color/for_background_color</item>
         <item name="android:alpha">0.87</item>
-        <item name="android:background">@color/white</item>
-        <item name="android:textSize">16sp</item>
         <item name="android:textColor">@color/black</item>
     </style>
-
     <style name="single_line_product_text_view">
         <item name="android:background">@color/white</item>
         <item name="android:textSize">16sp</item>

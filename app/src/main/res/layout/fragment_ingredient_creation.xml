@@ -39,7 +39,7 @@
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/product_details_action_add"
+        android:text="@string/action_add"
         android:id="@+id/fragment_ingredient_creation_button_add_ingredient"
         android:layout_below="@+id/fragment_ingredient_creation_spinner_ingredient_product"
         android:layout_alignParentRight="true"

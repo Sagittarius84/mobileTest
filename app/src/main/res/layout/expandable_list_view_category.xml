@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout android:id="@+id/expandable_list_view_category_item"
+              style="@style/InstalistTheme1.base_linear_layout_list"
+              xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <ViewSwitcher
+        android:id="@+id/expandable_list_view_view_switcher"
+        style="@style/InstalistTheme1.expandable_list_single_view_switcher">
+
+        <LinearLayout
+            android:id="@+id/expandable_list_view_text_view_layout"
+            style="@style/InstalistTheme1.expandable_list_first_linear_layout_container">
+
+            <TextView
+                android:id="@+id/expandable_list_view_category_name"
+                style="@style/InstalistTheme1.list_text_style_left"/>
+
+            <TextView
+                android:id="@+id/expandable_list_view_category_entries"
+                style="@style/InstalistTheme1.weighted_text_style_right_entry_count"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/expandable_list_view_text_edit_layout"
+            style="@style/InstalistTheme1.expandable_list_second_linear_layout_container"
+            android:gravity="center_vertical"
+            >
+
+            <EditText
+                android:id="@+id/expandable_list_view_category_name_edit"
+                style="@style/InstalistTheme1.list_text_style_left"/>
+
+            <ImageView
+                android:id="@+id/expandable_list_view_edit_cancel"
+                style="@style/InstalistTheme1.edit_cancel_image"
+                />
+
+            <ImageView
+                android:id="@+id/expandable_list_view_edit_submit"
+                style="@style/InstalistTheme1.edit_check_image"
+                />
+        </LinearLayout>
+    </ViewSwitcher>
+
+</LinearLayout>

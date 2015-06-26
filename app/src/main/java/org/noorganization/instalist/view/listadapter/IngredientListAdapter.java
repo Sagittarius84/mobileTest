@@ -14,6 +14,7 @@ import org.noorganization.instalist.view.MainShoppingListView;
 import org.noorganization.instalist.view.datahandler.RecipeDataHolder;
 import org.noorganization.instalist.view.fragment.IngredientCreationFragment;
 import org.noorganization.instalist.view.fragment.RecipeCreationFragment;
+import org.noorganization.instalist.view.interfaces.IBaseActivity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,12 +28,18 @@ public class IngredientListAdapter extends ArrayAdapter<Ingredient> {
     private List<Ingredient> mRemovedIngredients;
 
     private Activity mContext;
+    private IBaseActivity mBaseActivity;
 
     public IngredientListAdapter(Activity _Context, List<Ingredient> _IngredientList){
         super(_Context, R.layout.list_recipe_ingredient_entry  , _IngredientList);
         mIngredientList = _IngredientList;
         mRemovedIngredients = new ArrayList<>();
         mContext = _Context;
+        try{
+            mBaseActivity = (IBaseActivity) _Context;
+        } catch(ClassCastException e){
+            throw new ClassCastException(_Context.toString() + " has no IBaseActivity interface implemented.");
+        }
     }
 
     @Override

@@ -6,6 +6,7 @@ import android.os.Message;
 import android.util.Log;
 
 import org.noorganization.instalist.model.ListEntry;
+import org.noorganization.instalist.model.ShoppingList;
 import org.noorganization.instalist.view.fragment.ShoppingListOverviewFragment;
 
 /**
@@ -17,24 +18,26 @@ public class ChangeHandler extends IChangeHandler {
 
     @Override
     public void handleMessage(Message _message) {
-        switch (_message.what) {
+        if(mCurrentFragment == null) {
+            return;
+        }
+
+            switch (_message.what) {
             case ITEM_ADDED_TO_LIST:
                 Log.i("Handler", "Added Entry: " + _message.obj.toString());
+                mCurrentFragment.onListItemAdded((ListEntry) _message.obj);
                 break;
             case ITEM_UPDATED:
                 Log.i("Handler", "Updated Entry: " + _message.obj.toString());
-                if(mCurrentFragment != null){
                     mCurrentFragment.onListItemUpdated((ListEntry)_message.obj);
-                }
                 break;
             case ITEM_DELETED:
                 Log.i("Handler", "Deleted Entry: " + _message.obj.toString());
-                if(mCurrentFragment != null){
                     mCurrentFragment.onListItemDeleted((ListEntry)_message.obj);
-                }
                 break;
             case LISTS_CHANGED:
                 Log.i("Handler", "Changed a list.");
+                    mCurrentFragment.onShoppingListItemChanged((ShoppingList) _message.obj);
                 break;
             default:
                 Log.e("Handler", "Action for what = " + _message.what + " unknown.");

@@ -14,12 +14,13 @@
     <string name="menu_sort_by_amount">Amount</string>
     <string name="action_search_product">Search Product</string>
 
-    <string name="product_details_product_name">Name</string>
-    <string name="product_details_product_name_hint">Name of product</string>
-    <string name="product_details_tag_textview_text">Tags</string>
-    <string name="product_details_tag_edittext_hint">Name of tags (comma separated)</string>
-    <string name="product_details_action_add">Add</string>
-    <string name="product_details_product_amount_hint">Amount</string>
+    <string name="action_add">add</string>
+    <string name="action_save">save</string>
+
+    <string name="product_details_product_name_hint">product name</string>
+    <string name="product_details_tags_hint">tags (comma separated)</string>
+    <string name="product_details_step_hint">step (for increase/decrease buttons)</string>
+    <string name="product_details_amount_hint">Amount</string>
     <string name="recipe_details_recipe_name">Recipe name</string>
     <string name="recipe_details_recipe_name_hint">Name of the recipe</string>
     <string name="recipe_details_add_ingredient">+ Ingredient</string>
@@ -44,7 +45,42 @@
     <string name="fragment_recipe_creation_add_recipe_title">Create new Recipe</string>
     <string name="fragment_recipe_creation_update_recipe_title">Edit Recipe</string>
     <string name="drawer_layout_custom_add_list_button">Add List</string>
-    <string name="drawer_layout_custom_new_listname_hint">new listname</string>
+    <string name="drawer_layout_custom_new_addition_hint">New name</string>
     <string name="drawer_layout_custom_no_input">Please insert at least a sign</string>
-    <string name="drawer_layout_custom_exists">List already exists</string>
+    <string name="list_exists">List already exists</string>
+    <string name="menu_sort_by_priority">Priority</string>
+    <string name="menu_sort_text">Sort</string>
+    <string name="menu_product_list_dialog_search">Search</string>
+    <string name="menu_product_list_dialog_sort_by_name">Sort by name</string>
+    <string name="menu_product_list_dialog_sort_by">Sort by</string>
+    <string name="menu_product_list_dialog_sort_by_product">Sort by product</string>
+    <string name="menu_product_list_dialog_sort_by_recipe">Sort by recipe</string>
+    <string name="menu_product_list_dialog_filter_by">Filter by</string>
+    <string name="menu_product_list_dialog_filter_by_product">Show products</string>
+    <string name="menu_product_list_dialog_filter_by_recipe">Show recipes</string>
+    <string name="menu_product_list_dialog_filter_by_all">Show all</string>
+    <string name="advanced">advanced</string>
+    <string name="no_unit" translatable="false">-</string>
+    <string name="product_saved_okay">product was saved.</string>
+    <string name="product_saved_fail">product saving failed!</string>
+
+<!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="create_options">Create</string>
+    <string name="create_list">Create Shopping List</string>
+    <string name="create_category">Create Category</string>
+    <string name="category_exists">Category already exists</string>
+    <string name="category_not_found">Category not found. (Internal Failure)</string>
+    <string name="shopping_list_not_found">Shopping list not found. (Internal Failure)</string>
+    <string name="deletion_failed">Deletion failed.</string>
+    <string name="change_of_category_of_list_failed">Move of Shopping List failed...</string>
+    <string name="category_action">Actions on Group</string>
+    <string name="add_list">Add List</string>
+    <string name="remove_category">Remove Category</string>
+    <string name="edit_category_name">Edit Category Name</string>
+    <string name="shopping_list_action">Actions on Shopping List</string>
+    <string name="edit_shopping_list">Edit List</string>
+    <string name="remove_shopping_list">Remove Shopping List</string>
+    <string name="move_category">Move to Category</string>
+    <string name="delete_category_error_category_is_default">Cannot remove category. It is the current default list. Change the default list to delete this list.</string>
 </resources>

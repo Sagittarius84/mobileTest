@@ -7,7 +7,8 @@ public abstract class BaseItemListEntry {
 
     public enum eItemType{
         PRODUCT_LIST_ENTRY,
-        RECIPE_LIST_ENTRY
+        RECIPE_LIST_ENTRY,
+        EMPTY,
     }
 
     public abstract String getName();

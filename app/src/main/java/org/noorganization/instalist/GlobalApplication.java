@@ -15,6 +15,7 @@ import org.noorganization.instalist.model.ListEntry;
 import org.noorganization.instalist.model.ShoppingList;
 import org.noorganization.instalist.view.ChangeHandler;
 import org.noorganization.instalist.view.IChangeHandler;
+import org.noorganization.instalist.view.utils.PreferencesManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -65,26 +66,10 @@ public class GlobalApplication extends SugarApp {
     }
 
     public List<ListEntry> getListEntries(String listName){
-        ShoppingList shoppingList = Select.from(ShoppingList.class).where(Condition.prop(ShoppingList.LIST_NAME_ATTR).eq(listName)).first();
+        ShoppingList shoppingList = Select.from(ShoppingList.class).where(Condition.prop(ShoppingList.ATTR_NAME).eq(listName)).first();
         List<ListEntry> entries = shoppingList.getEntries();
         Log.d(LOG_TAG, "Get list entries of list: " + shoppingList.mName + " number of elements: " + entries.size());
         return entries;
-    }
-
-    /**
-     *
-     * @return global instance of IListController implmentation.
-     */
-    public IListController getListController(){
-        return mListController;
-    }
-
-    /**
-     *
-     * @return an instance of a productController.
-     */
-    public IProductController getProductController(){
-        return mProductController;
     }
 
     public static IChangeHandler getChangeHandler() {
