@@ -41,7 +41,7 @@ public class ChangeHandler extends IChangeHandler {
                 break;
             case LISTS_CHANGED:
                 Log.i("Handler", "Changed a list.");
-                mSideDrawerEvents.updateList((ShoppingList) _message.obj);
+                //mSideDrawerEvents.updateList((ShoppingList) _message.obj);
                 break;
             default:
                 Log.e("Handler", "Action for what = " + _message.what + " unknown.");

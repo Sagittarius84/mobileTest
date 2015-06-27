@@ -18,6 +18,7 @@ import org.noorganization.instalist.touchlistener.sidebar.OnCancelClickListenerW
 import org.noorganization.instalist.touchlistener.sidebar.OnCancelMoveClickListener;
 import org.noorganization.instalist.touchlistener.sidebar.OnSubmitClickListenerWithChildData;
 import org.noorganization.instalist.touchlistener.sidebar.OnSubmitMoveClickListener;
+import org.noorganization.instalist.view.interfaces.IBaseActivity;
 import org.noorganization.instalist.view.listadapter.CategoryListAdapter;
 import org.noorganization.instalist.view.middleware.helper.IContextItemClickedHelper;
 
@@ -57,7 +58,9 @@ public class ContextItemClickedHelper implements IContextItemClickedHelper {
         boolean deleted = ControllerFactory.getListController().removeList(_ShoppingList);
         if (!deleted) {
             Toast.makeText(mContext, mContext.getString(R.string.deletion_failed), Toast.LENGTH_SHORT).show();
+            return;
         }
+        ((IBaseActivity) mContext).removeList(_ShoppingList);
     }
 
     @Override

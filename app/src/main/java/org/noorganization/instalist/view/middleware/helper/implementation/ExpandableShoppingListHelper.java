@@ -30,18 +30,18 @@ import org.noorganization.instalist.view.utils.PreferencesManager;
 public class ExpandableShoppingListHelper implements IShoppingListHelper {
 
     private ExpandableCategoryItemListAdapter mExpandableListAdapter;
-    private ExpandableListView mExpandableListView;
-    private Context mContext;
-    private IContextItemClickedHelper mViewHelper;
-    private IBaseActivity mBaseActivity;
+    private ExpandableListView                mExpandableListView;
+    private Context                           mContext;
+    private IContextItemClickedHelper         mContextItemClickedHelper;
+    private IBaseActivity                     mBaseActivity;
 
     private boolean mIsActive;
 
-    public ExpandableShoppingListHelper(Context _Context,IBaseActivity _BaseActivityInterface, ExpandableListView _ExpandableListView){
+    public ExpandableShoppingListHelper(Context _Context, IBaseActivity _BaseActivityInterface, ExpandableListView _ExpandableListView) {
         mContext = _Context;
         mBaseActivity = _BaseActivityInterface;
         mExpandableListView = _ExpandableListView;
-        mViewHelper = new ContextItemClickedHelper(_Context);
+        mContextItemClickedHelper = new ContextItemClickedHelper(_Context);
 
         updateAdapter();
     }
@@ -51,7 +51,7 @@ public class ExpandableShoppingListHelper implements IShoppingListHelper {
         ExpandableListView.ExpandableListContextMenuInfo contextMenuInfo =
                 (ExpandableListView.ExpandableListContextMenuInfo) _MenuInfo;
 
-        int entityType = ExpandableListView.getPackedPositionType(contextMenuInfo.packedPosition);
+        int entityType    = ExpandableListView.getPackedPositionType(contextMenuInfo.packedPosition);
         int groupPosition = ExpandableListView.getPackedPositionGroup(contextMenuInfo.packedPosition);
         int childPosition = ExpandableListView.getPackedPositionChild(contextMenuInfo.packedPosition);
 
@@ -86,17 +86,17 @@ public class ExpandableShoppingListHelper implements IShoppingListHelper {
         long defaultCategoryId;
 
         ExpandableListView.ExpandableListContextMenuInfo contextMenuInfo;
-        View view;
-        ViewSwitcher viewSwitcher;
+        View                                             view;
+        ViewSwitcher                                     viewSwitcher;
 
         itemId = _Item.getItemId();
 
         contextMenuInfo = (ExpandableListView.ExpandableListContextMenuInfo) _Item.getMenuInfo();
-        entityType      = ExpandableListView.getPackedPositionType(contextMenuInfo.packedPosition);
-        groupPosition   = ExpandableListView.getPackedPositionGroup(contextMenuInfo.packedPosition);
-        childPosition   = ExpandableListView.getPackedPositionChild(contextMenuInfo.packedPosition);
+        entityType = ExpandableListView.getPackedPositionType(contextMenuInfo.packedPosition);
+        groupPosition = ExpandableListView.getPackedPositionGroup(contextMenuInfo.packedPosition);
+        childPosition = ExpandableListView.getPackedPositionChild(contextMenuInfo.packedPosition);
 
-        flatPosition         = mExpandableListView.getFlatListPosition(contextMenuInfo.packedPosition);
+        flatPosition = mExpandableListView.getFlatListPosition(contextMenuInfo.packedPosition);
         firstVisiblePosition = mExpandableListView.getFirstVisiblePosition();
 
         view = mExpandableListView.getChildAt(flatPosition - firstVisiblePosition);
@@ -164,8 +164,8 @@ public class ExpandableShoppingListHelper implements IShoppingListHelper {
                 Category categoryForShoppingList;
                 ShoppingList shoppingList;
                 EditText editText;
-                ImageView   cancelView,
-                            submitView;
+                ImageView cancelView,
+                        submitView;
 
                 shoppingList = (ShoppingList) mExpandableListAdapter.getChild(groupPosition, childPosition);
                 categoryForShoppingList = (Category) mExpandableListAdapter.getGroup(groupPosition);
@@ -174,13 +174,13 @@ public class ExpandableShoppingListHelper implements IShoppingListHelper {
                 shoppingList = ShoppingList.findById(ShoppingList.class, shoppingList.getId());
                 switch (itemId) {
                     case MenuStates.CHILD_MENU_EDIT_LIST_NAME_ACTION:
-                        mViewHelper.editListName(view, shoppingList, viewSwitcher);
+                        mContextItemClickedHelper.editListName(view, shoppingList, viewSwitcher);
                         break;
                     case MenuStates.CHILD_MENU_REMOVE_LIST_ACTION:
-                        mViewHelper.removeList(shoppingList);
+                        mContextItemClickedHelper.removeList(shoppingList);
                         break;
                     case MenuStates.CHILD_MENU_MOVE_TO_CATEGORY_ACTION:
-                        mViewHelper.changeCategoryOfList(view, shoppingList, categoryForShoppingList, viewSwitcher);
+                        mContextItemClickedHelper.changeCategoryOfList(view, shoppingList, categoryForShoppingList, viewSwitcher);
                         break;
                 }
                 //endregion CHILD_MENU
@@ -196,10 +196,10 @@ public class ExpandableShoppingListHelper implements IShoppingListHelper {
     @Override
     public void setActiveState(boolean _IsActive) {
         mIsActive = _IsActive;
-        if(_IsActive) {
+        if (_IsActive) {
             mExpandableListView.setVisibility(View.VISIBLE);
             mBaseActivity.registerForContextMenu(mExpandableListView);
-        } else{
+        } else {
             mExpandableListView.setVisibility(View.GONE);
             mBaseActivity.unregisterForContextMenu(mExpandableListView);
         }

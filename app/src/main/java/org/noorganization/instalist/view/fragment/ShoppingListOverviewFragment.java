@@ -226,7 +226,7 @@ public class ShoppingListOverviewFragment extends Fragment{
         }
         mBaseActivityInterface.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
 
-        mShoppingItemListAdapter = new ShoppingItemListAdapter(getActivity(), GlobalApplication.getInstance().getListEntries(mCurrentListName));
+        mShoppingItemListAdapter = new ShoppingItemListAdapter(getActivity(), mCurrentShoppingList.getEntries());
         mShoppingItemListAdapter.sortByComparator(mMapComperable.get(sortDetails.getInt(SORT_MODE, SORT_BY_PRIORITY)));
 
         // use a linear layout manager

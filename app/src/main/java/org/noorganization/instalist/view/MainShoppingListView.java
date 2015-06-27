@@ -2,6 +2,7 @@ package org.noorganization.instalist.view;
 
 import android.app.AlertDialog;
 import android.app.Fragment;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -16,6 +17,7 @@ import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ExpandableListView;
@@ -216,15 +218,21 @@ public class MainShoppingListView extends ActionBarActivity implements IBaseActi
                 }
 
                 ShoppingList shoppingList = ControllerFactory.getListController().addList(listName);
-                ControllerFactory.getListController().moveToCategory(shoppingList, Category.findById(Category.class, mDefaultCategoryId));
                 if (shoppingList == null) {
                     mNewNameEditText.setError(getResources().getString(R.string.list_exists));
                     return;
                 }
+                shoppingList = ControllerFactory.getListController().moveToCategory(shoppingList, Category.findById(Category.class, mDefaultCategoryId));
+                if(shoppingList == null){
+                    mNewNameEditText.setError(getResources().getString(R.string.list_to_category_failed));
+                    ControllerFactory.getListController().removeList(shoppingList);
+                    return;
+                }
+
+                ViewUtils.removeSoftKeyBoard(v.getContext(), mNewNameEditText);
 
                 // clear the field
                 mNewNameEditText.setText("");
-
                 addList(shoppingList);
 
                 changeFragment(ShoppingListOverviewFragment.newInstance(shoppingList.mName));
@@ -247,6 +255,7 @@ public class MainShoppingListView extends ActionBarActivity implements IBaseActi
                     return;
                 } else {
                     addCategory(category);
+                    ViewUtils.removeSoftKeyBoard(v.getContext(), mNewNameEditText);
                 }
             }
         });
@@ -428,7 +437,6 @@ public class MainShoppingListView extends ActionBarActivity implements IBaseActi
                 ShoppingList shoppingList1 = ControllerFactory.getListController().moveToCategory(shoppingList, category);
                 updateList(shoppingList1);
         }
-
         mDrawerListManager.removeCategory(_Category);
     }
 
@@ -487,4 +495,5 @@ public class MainShoppingListView extends ActionBarActivity implements IBaseActi
         };
         mDrawerLayout.setDrawerListener(mNavBarToggle);
     }
+
 }
