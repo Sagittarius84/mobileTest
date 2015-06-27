@@ -37,12 +37,12 @@ public class ExpandableShoppingListHelper implements IShoppingListHelper {
 
     private boolean mIsActive;
 
-    public ExpandableShoppingListHelper(Context _Context, IBaseActivity _BaseActivityInterface, ExpandableListView _ExpandableListView) {
+    public ExpandableShoppingListHelper(Context _Context, IBaseActivity _BaseActivityInterface,
+                                        ExpandableListView _ExpandableListView) {
         mContext = _Context;
         mBaseActivity = _BaseActivityInterface;
         mExpandableListView = _ExpandableListView;
         mContextItemClickedHelper = new ContextItemClickedHelper(_Context);
-
         updateAdapter();
     }
 
@@ -114,7 +114,7 @@ public class ExpandableShoppingListHelper implements IShoppingListHelper {
                 switch (itemId) {
                     case MenuStates.GROUP_MENU_ADD_LIST_ACTION:
                         Toast.makeText(mContext, "Add list on category: " + categoryName, Toast.LENGTH_SHORT).show();
-                        // best practice would be change dynamically id? or insert an edit text field at the first pos....
+                        ((IBaseActivity) mContext).setSideDrawerAddListButtonListener(category.getId());
                         break;
                     case MenuStates.GROUP_MENU_REMOVE_CATEGORY_ACTION:
                         Toast.makeText(mContext, "Remove group: " + categoryName, Toast.LENGTH_SHORT).show();

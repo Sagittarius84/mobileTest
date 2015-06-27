@@ -10,6 +10,10 @@
     android:layout_height="wrap_content"
     android:orientation="vertical"
     android:scrollbarAlwaysDrawHorizontalTrack="false">
+    <!-- Dummy item to prevent AutoCompleteTextView from receiving focus -->
+    <LinearLayout
+        android:focusable="true" android:focusableInTouchMode="true"
+        android:layout_width="0px" android:layout_height="0px"/>
     <EditText
         android:id="@+id/drawer_layout_custom_new_name"
         style="@style/InstalistTheme1.base_edit_text_style"
@@ -22,6 +26,7 @@
         android:layout_width="match_parent"
         android:layout_height="@dimen/base_edittext_height"
         android:textColor="@color/fab_material_light_blue_500"
+        android:visibility="gone"
         android:gravity="right"
         />
 
@@ -31,7 +36,7 @@
         android:text="@string/create_category"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:visibility="visible"
+        android:visibility="gone"
         android:textColor="@color/fab_material_light_blue_500"
         android:gravity="right"
         />

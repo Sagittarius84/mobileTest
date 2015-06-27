@@ -64,4 +64,10 @@ public interface IBaseActivity extends  ISideDrawerListDataEvents {
      * @param _View The view to be registered for the contextmenu.
      */
     void registerForContextMenu(View _View);
+
+    /**
+     * Create a new listener with the given category id.
+     * @param _CategoryId the Id of category where the category should be placed in.
+     */
+    void setSideDrawerAddListButtonListener(long _CategoryId);
 }

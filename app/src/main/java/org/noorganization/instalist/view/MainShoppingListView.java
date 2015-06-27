@@ -2,7 +2,6 @@ package org.noorganization.instalist.view;
 
 import android.app.AlertDialog;
 import android.app.Fragment;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -17,7 +16,6 @@ import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ExpandableListView;
@@ -30,6 +28,7 @@ import org.noorganization.instalist.controller.implementation.ControllerFactory;
 import org.noorganization.instalist.model.Category;
 import org.noorganization.instalist.model.ShoppingList;
 import org.noorganization.instalist.touchlistener.IOnShoppingListClickListenerEvents;
+import org.noorganization.instalist.touchlistener.sidebar.OnShoppingListAddClickListener;
 import org.noorganization.instalist.view.fragment.ShoppingListOverviewFragment;
 import org.noorganization.instalist.view.interfaces.IBaseActivity;
 import org.noorganization.instalist.view.interfaces.IBaseActivityListEvent;
@@ -208,41 +207,12 @@ public class MainShoppingListView extends ActionBarActivity implements IBaseActi
         super.onResume();
         ((ChangeHandler) GlobalApplication.getChangeHandler()).setCurrentBaseActivity(this);
 
-        mAddListButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                String listName = validateAndGetNewName();
-                if (listName == null) {
-                    return;
-                }
-
-                ShoppingList shoppingList = ControllerFactory.getListController().addList(listName);
-                if (shoppingList == null) {
-                    mNewNameEditText.setError(getResources().getString(R.string.list_exists));
-                    return;
-                }
-                shoppingList = ControllerFactory.getListController().moveToCategory(shoppingList, Category.findById(Category.class, mDefaultCategoryId));
-                if(shoppingList == null){
-                    mNewNameEditText.setError(getResources().getString(R.string.list_to_category_failed));
-                    ControllerFactory.getListController().removeList(shoppingList);
-                    return;
-                }
-
-                ViewUtils.removeSoftKeyBoard(v.getContext(), mNewNameEditText);
-
-                // clear the field
-                mNewNameEditText.setText("");
-                addList(shoppingList);
-
-                changeFragment(ShoppingListOverviewFragment.newInstance(shoppingList.mName));
-            }
-        });
+        mAddListButton.setOnClickListener(new OnShoppingListAddClickListener(mDefaultCategoryId, mNewNameEditText));
 
         mAddCategoryButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String categoryName = validateAndGetNewName();
+                String categoryName = ViewUtils.validateAndGetResultEditText(v.getContext(), mNewNameEditText);
                 if (categoryName == null) {
                     return;
                 }
@@ -255,16 +225,25 @@ public class MainShoppingListView extends ActionBarActivity implements IBaseActi
                     return;
                 } else {
                     addCategory(category);
+                    mAddCategoryButton.setVisibility(View.GONE);
                     ViewUtils.removeSoftKeyBoard(v.getContext(), mNewNameEditText);
+                    mNewNameEditText.setText("");
+                    mNewNameEditText.clearFocus();
                 }
             }
         });
 
         mNewNameEditText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
-            public void onFocusChange(View v, boolean hasFocus) {
-                if (hasFocus) {
-                    ((EditText) v).setError(null);
+            public void onFocusChange(View _View, boolean _HasFocus) {
+                if (_HasFocus) {
+                    ((EditText) _View).setError(null);
+                    mAddCategoryButton.setVisibility(View.VISIBLE);
+                    mAddListButton.setVisibility(View.VISIBLE);
+                } else {
+                    mAddCategoryButton.setVisibility(View.GONE);
+                    mAddListButton.setVisibility(View.GONE);
+                    ViewUtils.removeSoftKeyBoard(_View.getContext(), mNewNameEditText);
                 }
             }
         });
@@ -431,11 +410,11 @@ public class MainShoppingListView extends ActionBarActivity implements IBaseActi
 
     @Override
     public void removeCategory(Category _Category) {
-        Category category = Category.findById(Category.class, mDefaultCategoryId);
+        Category           category      = Category.findById(Category.class, mDefaultCategoryId);
         List<ShoppingList> shoppingLists = Category.getListsWithoutCategory();
-        for(ShoppingList shoppingList : shoppingLists){
-                ShoppingList shoppingList1 = ControllerFactory.getListController().moveToCategory(shoppingList, category);
-                updateList(shoppingList1);
+        for (ShoppingList shoppingList : shoppingLists) {
+            ShoppingList shoppingList1 = ControllerFactory.getListController().moveToCategory(shoppingList, category);
+            updateList(shoppingList1);
         }
         mDrawerListManager.removeCategory(_Category);
     }
@@ -453,6 +432,11 @@ public class MainShoppingListView extends ActionBarActivity implements IBaseActi
     @Override
     public void removeList(ShoppingList _ShoppingList) {
         mDrawerListManager.removeList(_ShoppingList);
+    }
+
+    @Override
+    public void setSideDrawerAddListButtonListener(long _CategoryId) {
+        mAddListButton.setOnClickListener(new OnShoppingListAddClickListener(_CategoryId, mNewNameEditText));
     }
 
     @Override
@@ -495,5 +479,4 @@ public class MainShoppingListView extends ActionBarActivity implements IBaseActi
         };
         mDrawerLayout.setDrawerListener(mNavBarToggle);
     }
-
 }
