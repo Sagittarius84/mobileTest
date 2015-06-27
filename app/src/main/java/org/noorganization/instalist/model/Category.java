@@ -33,6 +33,9 @@ public class Category extends SugarRecord<Category> {
                 Condition.prop(ShoppingList.ATTR_CATEGORY).eq(getId())).list();
     }
 
+    public static List<ShoppingList> getListsWithoutCategory(){
+        return Select.from(ShoppingList.class).where(ShoppingList.ATTR_CATEGORY + " IS NULL").list();
+    }
     @Override
     public boolean equals(Object _another) {
         if (_another == this) {

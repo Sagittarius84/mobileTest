@@ -1,4 +1,4 @@
-package org.noorganization.instalist.view.middleware;
+package org.noorganization.instalist.view.middleware.helper.implementation;
 
 import android.content.Context;
 import android.view.ContextMenu;
@@ -16,9 +16,11 @@ import org.noorganization.instalist.model.Category;
 import org.noorganization.instalist.model.ShoppingList;
 import org.noorganization.instalist.touchlistener.sidebar.OnCancelClickListenerWithData;
 import org.noorganization.instalist.touchlistener.sidebar.OnSubmitClickListenerWithParentData;
+import org.noorganization.instalist.view.interfaces.IBaseActivity;
 import org.noorganization.instalist.view.listadapter.ExpandableCategoryItemListAdapter;
+import org.noorganization.instalist.view.middleware.helper.IShoppingListHelper;
+import org.noorganization.instalist.view.middleware.MenuStates;
 import org.noorganization.instalist.view.middleware.helper.IContextItemClickedHelper;
-import org.noorganization.instalist.view.middleware.helper.implementation.ContextItemClickedHelper;
 import org.noorganization.instalist.view.utils.PreferencesManager;
 
 /**
@@ -31,15 +33,17 @@ public class ExpandableShoppingListHelper implements IShoppingListHelper {
     private ExpandableListView mExpandableListView;
     private Context mContext;
     private IContextItemClickedHelper mViewHelper;
+    private IBaseActivity mBaseActivity;
+
     private boolean mIsActive;
 
-    public ExpandableShoppingListHelper(ExpandableCategoryItemListAdapter _ExpandableListAdapter,
-                                        ExpandableListView _ExpandableListView,
-                                        Context _Context){
-        mExpandableListAdapter = _ExpandableListAdapter;
-        mExpandableListView = _ExpandableListView;
+    public ExpandableShoppingListHelper(Context _Context,IBaseActivity _BaseActivityInterface, ExpandableListView _ExpandableListView){
         mContext = _Context;
+        mBaseActivity = _BaseActivityInterface;
+        mExpandableListView = _ExpandableListView;
         mViewHelper = new ContextItemClickedHelper(_Context);
+
+        updateAdapter();
     }
 
     @Override
@@ -78,6 +82,7 @@ public class ExpandableShoppingListHelper implements IShoppingListHelper {
                 itemId,
                 flatPosition,
                 firstVisiblePosition;
+
         long defaultCategoryId;
 
         ExpandableListView.ExpandableListContextMenuInfo contextMenuInfo;
@@ -117,7 +122,7 @@ public class ExpandableShoppingListHelper implements IShoppingListHelper {
                             Toast.makeText(mContext, mContext.getString(R.string.delete_category_error_category_is_default), Toast.LENGTH_LONG).show();
                         } else {
                             ControllerFactory.getCategoryController().removeCategory(category);
-                            // TODO: onCategoryRemoved(category);
+                            mBaseActivity.removeCategory(category);
                         }
                         break;
                     case MenuStates.GROUP_MENU_EDIT_CATEGORY_ACTION:
@@ -191,6 +196,51 @@ public class ExpandableShoppingListHelper implements IShoppingListHelper {
     @Override
     public void setActiveState(boolean _IsActive) {
         mIsActive = _IsActive;
-        mExpandableListView.setVisibility(View.VISIBLE);
+        if(_IsActive) {
+            mExpandableListView.setVisibility(View.VISIBLE);
+            mBaseActivity.registerForContextMenu(mExpandableListView);
+        } else{
+            mExpandableListView.setVisibility(View.GONE);
+            mBaseActivity.unregisterForContextMenu(mExpandableListView);
+        }
+    }
+
+    @Override
+    public void addCategory(Category _Category) {
+        mExpandableListAdapter.addCategory(_Category);
+    }
+
+    @Override
+    public void updateCategory(Category _Category) {
+        mExpandableListAdapter.updateCategory(_Category);
+    }
+
+    @Override
+    public void removeCategory(Category _Category) {
+        mExpandableListAdapter.removeCategory(_Category);
+    }
+
+    @Override
+    public void addList(ShoppingList _ShoppingList) {
+        mExpandableListAdapter.notifyShoppingListChanged();
+        return;
+    }
+
+    @Override
+    public void updateList(ShoppingList _ShoppingList) {
+        mExpandableListAdapter.notifyShoppingListChanged();
+        return;
+    }
+
+    @Override
+    public void removeList(ShoppingList _ShoppingList) {
+        mExpandableListAdapter.notifyShoppingListChanged();
+        return;
+    }
+
+    @Override
+    public void updateAdapter() {
+        mExpandableListAdapter = new ExpandableCategoryItemListAdapter(mContext, Category.listAll(Category.class));
+        mExpandableListView.setAdapter(mExpandableListAdapter);
     }
 }

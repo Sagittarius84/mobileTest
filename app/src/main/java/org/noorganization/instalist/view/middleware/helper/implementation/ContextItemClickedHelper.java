@@ -24,6 +24,7 @@ import org.noorganization.instalist.view.middleware.helper.IContextItemClickedHe
 import java.util.List;
 
 /**
+ * Helper for when an Item of a context menu of side drawer was clicked.
  * Created by tinos_000 on 25.06.2015.
  */
 public class ContextItemClickedHelper implements IContextItemClickedHelper {

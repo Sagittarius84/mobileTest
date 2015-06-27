@@ -10,7 +10,8 @@ import org.noorganization.instalist.model.ShoppingList;
 /**
  * Provides standard functions to manipulate activity specific fields from a fragment.
  */
-public interface IBaseActivity{
+// TODO: Remove ISideDrawerListDataEvents when events are propagated
+public interface IBaseActivity extends  ISideDrawerListDataEvents {
     /**
      * Changes the current Fragment to the given Fragment.
      * @param _NewFragment The Fragment to move to.
@@ -53,14 +54,14 @@ public interface IBaseActivity{
     void bindDrawerLayout();
 
     /**
-     * Updates the view of shoppinglists.
-     * @param _ShoppingList The _ShoppingList that was changed.
+     * UnRegister the given view for context menu.
+     * @param _View the view to be registered for contextmenu.
      */
-    void updateChangedShoppingList(ShoppingList _ShoppingList);
+    void unregisterForContextMenu(View _View);
 
     /**
-     * Updates the view of categories.
-     * @param _Category The _Category that was changed.
+     * Register the vien view for the contextmenu.
+     * @param _View The view to be registered for the contextmenu.
      */
-    void updateChangedCategory(Category _Category);
+    void registerForContextMenu(View _View);
 }

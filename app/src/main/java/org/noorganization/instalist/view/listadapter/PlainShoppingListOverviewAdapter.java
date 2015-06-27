@@ -1,6 +1,7 @@
 package org.noorganization.instalist.view.listadapter;
 
 import android.app.Activity;
+import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,6 +12,7 @@ import org.noorganization.instalist.R;
 import org.noorganization.instalist.model.ShoppingList;
 import org.noorganization.instalist.touchlistener.IOnShoppingListClickListenerEvents;
 import org.noorganization.instalist.touchlistener.OnShoppingListClickListener;
+import org.noorganization.instalist.view.interfaces.IShoppingListAdapter;
 
 import java.util.List;
 
@@ -21,17 +23,17 @@ import java.util.List;
  */
 
 
-public class PlainShoppingListOverviewAdapter extends ArrayAdapter<ShoppingList> {
+public class PlainShoppingListOverviewAdapter extends ArrayAdapter<ShoppingList> implements IShoppingListAdapter{
 
 
     private static String LOG_TAG = PlainShoppingListOverviewAdapter.class.getName();
 
     private final List<ShoppingList> mShoppingLists;
 
-    private final Activity mContext;
-    private IOnShoppingListClickListenerEvents mIOnShoppingListClickEvents;
+    private final Context                            mContext;
+    private       IOnShoppingListClickListenerEvents mIOnShoppingListClickEvents;
 
-    public PlainShoppingListOverviewAdapter(Activity _Context, List<ShoppingList> _ListOfShoppingLists) {
+    public PlainShoppingListOverviewAdapter(Context _Context, List<ShoppingList> _ListOfShoppingLists) {
 
         super(_Context, R.layout.expandable_list_view_list_entry, _ListOfShoppingLists);
         this.mContext = _Context;
@@ -44,8 +46,8 @@ public class PlainShoppingListOverviewAdapter extends ArrayAdapter<ShoppingList>
         }
     }
 
-    private static class ViewHolder{
-        TextView mtvListName     ;
+    private static class ViewHolder {
+        TextView mtvListName;
         TextView mtvListItemCount;
     }
 
@@ -55,7 +57,7 @@ public class PlainShoppingListOverviewAdapter extends ArrayAdapter<ShoppingList>
 
         if (_ConvertView == null) {
             ViewHolder holder = new ViewHolder();
-            LayoutInflater shoppingListNamesInflater = mContext.getLayoutInflater();
+            LayoutInflater shoppingListNamesInflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             shoppingListNamesView = shoppingListNamesInflater.inflate(R.layout.expandable_list_view_list_entry, null);
             holder.mtvListName      = (TextView) shoppingListNamesView.findViewById(R.id.expandable_list_view_list_name);
             holder.mtvListItemCount = (TextView) shoppingListNamesView.findViewById(R.id.expandable_list_view_list_entries);
@@ -82,13 +84,15 @@ public class PlainShoppingListOverviewAdapter extends ArrayAdapter<ShoppingList>
 
     }
 
+    @Override
     public void addList(ShoppingList _ShoppingList) {
         mShoppingLists.add(_ShoppingList);
         notifyDataSetChanged();
 
     }
 
-    public void changeList(ShoppingList _ShoppingList) {
+    @Override
+    public void updateList(ShoppingList _ShoppingList) {
         int index = indexOfShoppingList(_ShoppingList);
         if (index < 0) {
             return;
@@ -97,6 +101,7 @@ public class PlainShoppingListOverviewAdapter extends ArrayAdapter<ShoppingList>
         notifyDataSetChanged();
     }
 
+    @Override
     public void removeList(ShoppingList _ShoppingList) {
         int index = indexOfShoppingList(_ShoppingList);
         if (index < 0) {
