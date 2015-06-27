@@ -5,8 +5,10 @@ import android.app.DialogFragment;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
+import android.content.Context;
 import android.text.method.DigitsKeyListener;
 import android.text.method.KeyListener;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 
 import org.noorganization.instalist.R;
@@ -88,5 +90,25 @@ public class ViewUtils {
         FragmentManager fragmentManager = _activity.getFragmentManager();
         fragmentManager.popBackStack(_oldFragment.getClass().getCanonicalName(),
                 FragmentManager.POP_BACK_STACK_INCLUSIVE);
+    }
+
+    /**
+     * Validate the Input of the given EditText and retrieve its value.
+     * @param _Context context of the app.
+     * @param _EditText the EditText with the want data.
+     * @return the inout string of the EditText field.
+     */
+    public static String validateAndGetResultEditText(Context _Context, EditText _EditText){
+        _EditText.setError(null);
+        if (! ViewUtils.checkEditTextIsFilled(_EditText)) {
+            _EditText.setError(_Context.getString(R.string.drawer_layout_custom_no_input));
+            return null;
+        }
+        return _EditText.getText().toString();
+    }
+
+    public static void removeSoftKeyBoard(Context _Context, EditText _EditText){
+        InputMethodManager imm = (InputMethodManager) _Context.getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.hideSoftInputFromWindow(_EditText.getWindowToken(), 0);
     }
 }

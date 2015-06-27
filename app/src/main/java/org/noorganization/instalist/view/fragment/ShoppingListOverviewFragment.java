@@ -30,7 +30,7 @@ import org.noorganization.instalist.view.MainShoppingListView;
 import org.noorganization.instalist.view.datahandler.SelectableBaseItemListEntryDataHolder;
 import org.noorganization.instalist.view.decoration.DividerItemListDecoration;
 import org.noorganization.instalist.view.interfaces.IBaseActivity;
-import org.noorganization.instalist.view.listadapter.ShoppingListAdapter;
+import org.noorganization.instalist.view.listadapter.ShoppingItemListAdapter;
 import org.noorganization.instalist.view.sorting.AlphabeticalListEntryComparator;
 import org.noorganization.instalist.view.sorting.PriorityListEntryComparator;
 import org.noorganization.instalist.view.utils.ViewUtils;
@@ -45,17 +45,17 @@ import java.util.WeakHashMap;
  */
 public class ShoppingListOverviewFragment extends Fragment{
 
-    private String mCurrentListName;
+    private String       mCurrentListName;
     private ShoppingList mCurrentShoppingList;
 
     private ActionBar mActionBar;
-    private Context mContext;
+    private Context   mContext;
 
     private ActionButton mAddButton;
 
     private LinearLayoutManager mLayoutManager;
 
-    private ShoppingListAdapter mShoppingListAdapter;
+    private ShoppingItemListAdapter mShoppingItemListAdapter;
 
     private IListController mListController;
 
@@ -69,7 +69,7 @@ public class ShoppingListOverviewFragment extends Fragment{
      */
     private Map<Integer, Comparator> mMapComperable;
 
-    private static Integer SORT_BY_NAME = 0;
+    private static Integer SORT_BY_NAME     = 0;
     private static Integer SORT_BY_PRIORITY = 1;
 
     // --------------------------------------------------------------------------------------------
@@ -84,16 +84,14 @@ public class ShoppingListOverviewFragment extends Fragment{
      * @param _ListName the name of the list that should be shown.
      * @return the new instance of this fragment.
      */
-    public static ShoppingListOverviewFragment newInstance(String _ListName){
+    public static ShoppingListOverviewFragment newInstance(String _ListName) {
 
         ShoppingListOverviewFragment fragment = new ShoppingListOverviewFragment();
-        Bundle args = new Bundle();
+        Bundle                       args     = new Bundle();
         args.putString(MainShoppingListView.KEY_LISTNAME, _ListName);
         fragment.setArguments(args);
         return fragment;
     }
-
-
 
 
     // --------------------------------------------------------------------------------------------
@@ -102,7 +100,7 @@ public class ShoppingListOverviewFragment extends Fragment{
     @Override
     public void onAttach(Activity _Activity) {
         super.onAttach(_Activity);
-        mContext            = _Activity;
+        mContext = _Activity;
 
         try {
             mBaseActivityInterface = (IBaseActivity) _Activity;
@@ -111,8 +109,8 @@ public class ShoppingListOverviewFragment extends Fragment{
                     + " has no IBaseActivity interface attached.");
         }
 
-        mListController     = ControllerFactory.getListController();
-        ((ChangeHandler)((GlobalApplication)getActivity().getApplication()).getChangeHandler()).setCurrentFragment(this);
+        mListController = ControllerFactory.getListController();
+        ((ChangeHandler) ((GlobalApplication) getActivity().getApplication()).getChangeHandler()).setCurrentFragment(this);
     }
 
     @Override
@@ -155,7 +153,7 @@ public class ShoppingListOverviewFragment extends Fragment{
         // swtich which action item was pressed
         switch (id) {
             case R.id.list_items_sort_by_priority:
-                mShoppingListAdapter.sortByComparator(mMapComperable.get(SORT_BY_PRIORITY));
+                mShoppingItemListAdapter.sortByComparator(mMapComperable.get(SORT_BY_PRIORITY));
 
                 sortDetails.edit()
                         .putInt(SORT_MODE, SORT_BY_PRIORITY)
@@ -163,7 +161,7 @@ public class ShoppingListOverviewFragment extends Fragment{
 
                 break;
             case R.id.list_items_sort_by_name:
-                mShoppingListAdapter.sortByComparator(mMapComperable.get(SORT_BY_NAME));
+                mShoppingItemListAdapter.sortByComparator(mMapComperable.get(SORT_BY_NAME));
                 sortDetails.edit()
                         .putInt(SORT_MODE, SORT_BY_NAME)
                         .apply();
@@ -228,8 +226,8 @@ public class ShoppingListOverviewFragment extends Fragment{
         }
         mBaseActivityInterface.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
 
-        mShoppingListAdapter = new ShoppingListAdapter(getActivity(), GlobalApplication.getInstance().getListEntries(mCurrentListName));
-        mShoppingListAdapter.sortByComparator(mMapComperable.get(sortDetails.getInt(SORT_MODE, SORT_BY_PRIORITY)));
+        mShoppingItemListAdapter = new ShoppingItemListAdapter(getActivity(), mCurrentShoppingList.getEntries());
+        mShoppingItemListAdapter.sortByComparator(mMapComperable.get(sortDetails.getInt(SORT_MODE, SORT_BY_PRIORITY)));
 
         // use a linear layout manager
         mLayoutManager = new LinearLayoutManager(this.getActivity());
@@ -237,7 +235,7 @@ public class ShoppingListOverviewFragment extends Fragment{
 
         shoppingListView.setLayoutManager(mLayoutManager);
         shoppingListView.addItemDecoration(new DividerItemListDecoration(getResources().getDrawable(R.drawable.list_divider), false, false));
-        shoppingListView.setAdapter(mShoppingListAdapter);
+        shoppingListView.setAdapter(mShoppingItemListAdapter);
         shoppingListView.setItemAnimator(new DefaultItemAnimator());
 
         mAddButton.setOnClickListener(new View.OnClickListener() {
@@ -272,7 +270,7 @@ public class ShoppingListOverviewFragment extends Fragment{
      * @param _Entry the item that should be deleted.
      */
     public void onListItemUpdated(ListEntry _Entry){
-        mShoppingListAdapter.changeItem(_Entry);
+        mShoppingItemListAdapter.changeItem(_Entry);
     }
 
     /**
@@ -280,7 +278,7 @@ public class ShoppingListOverviewFragment extends Fragment{
      * @param _Entry the item that should be deleted.
      */
     public void onListItemDeleted(ListEntry _Entry){
-        mShoppingListAdapter.removeItem(_Entry);
+        mShoppingItemListAdapter.removeItem(_Entry);
     }
 
     /**
@@ -289,10 +287,10 @@ public class ShoppingListOverviewFragment extends Fragment{
      */
     public void onListItemAdded(ListEntry _Entry){
         if(_Entry.mList.getId().equals(mCurrentShoppingList.getId())) {
-            mShoppingListAdapter.addItem(_Entry);
+            mShoppingItemListAdapter.addItem(_Entry);
         }
     }
-    public void onShoppingListItemChanged(ShoppingList _ShoppingList){
-        mBaseActivityInterface.updateChangedShoppingList(_ShoppingList);
+    public void onShoppingListItemChanged(ListEntry _Entry){
+        mShoppingItemListAdapter.changeItem(_Entry);
     }
 }

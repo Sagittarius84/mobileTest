@@ -82,4 +82,6 @@
     <string name="edit_shopping_list">Edit List</string>
     <string name="remove_shopping_list">Remove Shopping List</string>
     <string name="move_category">Move to Category</string>
+    <string name="delete_category_error_category_is_default">Cannot remove category. It is the current default list. Change the default list to delete this list.</string>
+    <string name="list_to_category_failed">Cannot move ShoppingList to Category.</string>
 </resources>

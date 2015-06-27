@@ -24,23 +24,23 @@ import java.util.List;
  * The Adapter for rendering the shopping list entries to the user.
  * Created by TS on 20.04.2015.
  */
-public class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingListAdapter.ShoppingListProductViewHolder> {
+public class ShoppingItemListAdapter extends RecyclerView.Adapter<ShoppingItemListAdapter.ShoppingListProductViewHolder> {
 
-    private static String LOG_TAG = ShoppingListAdapter.class.getName();
+    private static String LOG_TAG = ShoppingItemListAdapter.class.getName();
 
     private static List<ListEntry> mListOfEntries = null;
     private final Activity mActivity;
 
     private OnSimpleSwipeGestureListener mOnSimpleSwipeGestureListener;
-    private Comparator mComparator;
+    private Comparator                   mComparator;
 
     // -----------------------------------------------------------
 
-    public final static class ShoppingListProductViewHolder extends RecyclerView.ViewHolder{
+    public final static class ShoppingListProductViewHolder extends RecyclerView.ViewHolder {
         private TextView mProductAmount;
         private TextView mProductName;
 
-        private IListController mListController;
+        private IListController               mListController;
         private ShoppingListProductViewHolder mViewHolderRef;
 
         private Context mContext;
@@ -55,7 +55,7 @@ public class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingListAdapte
             mViewHolderRef = this;
             mContext = _Context;
 
-            mProductAmount.setOnTouchListener(new OnSimpleSwipeGestureListener(_ItemView.getContext(), _ItemView ){
+            mProductAmount.setOnTouchListener(new OnSimpleSwipeGestureListener(_ItemView.getContext(), _ItemView) {
                 @Override
                 public void onSingleTap(View childView) {
                     super.onSingleTap(childView);
@@ -113,7 +113,7 @@ public class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingListAdapte
 
     // -----------------------------------------------------------
 
-    public ShoppingListAdapter(Activity _Activity, List<ListEntry> _ListOfEntries){
+    public ShoppingItemListAdapter(Activity _Activity, List<ListEntry> _ListOfEntries){
         if(_ListOfEntries == null){
             throw new IllegalArgumentException("List cannot be null!");
         }

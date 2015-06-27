@@ -5,11 +5,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseExpandableListAdapter;
-import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.ViewSwitcher;
 
 import org.noorganization.instalist.R;
 import org.noorganization.instalist.controller.implementation.ControllerFactory;
@@ -17,9 +14,8 @@ import org.noorganization.instalist.model.Category;
 import org.noorganization.instalist.model.ShoppingList;
 import org.noorganization.instalist.touchlistener.IOnShoppingListClickListenerEvents;
 import org.noorganization.instalist.touchlistener.OnShoppingListClickListener;
-import org.noorganization.instalist.touchlistener.sidebar.OnShoppingListLongClickListener;
-import org.noorganization.instalist.view.interfaces.ICategoryListItemAccess;
-import org.noorganization.instalist.view.utils.ViewUtils;
+import org.noorganization.instalist.view.interfaces.IBaseActivity;
+import org.noorganization.instalist.view.interfaces.ICategoryAdapter;
 
 import java.util.List;
 
@@ -27,11 +23,13 @@ import java.util.List;
  * Displays Categories and possible lists of these categories.
  * Created by tinos_000 on 16.06.2015.
  */
-public class ExpandableCategoryItemListAdapter extends BaseExpandableListAdapter implements ICategoryListItemAccess {
+public class ExpandableCategoryItemListAdapter extends BaseExpandableListAdapter implements ICategoryAdapter {
 
     private LayoutInflater                     mInflater;
     private List<Category>                     mListOfCategories;
     private IOnShoppingListClickListenerEvents mIOnShoppingListClickEvents;
+
+    private IBaseActivity mBaseAcitvity;
 
     public ExpandableCategoryItemListAdapter(Context _Context, List<Category> _ListOfCategories) {
         if (_ListOfCategories == null) {
@@ -40,6 +38,7 @@ public class ExpandableCategoryItemListAdapter extends BaseExpandableListAdapter
 
         mInflater = (LayoutInflater) _Context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         mListOfCategories = _ListOfCategories;
+        mBaseAcitvity = (IBaseActivity) _Context;
         try {
             mIOnShoppingListClickEvents = (IOnShoppingListClickListenerEvents) _Context;
         } catch (ClassCastException e) {
@@ -157,6 +156,7 @@ public class ExpandableCategoryItemListAdapter extends BaseExpandableListAdapter
         notifyDataSetChanged();
     }
 
+    @Override
     public void updateCategory(Category _Category) {
         int indexToUpdate = indexOfCategory(_Category);
         if (indexToUpdate < 0) {
@@ -218,7 +218,8 @@ public class ExpandableCategoryItemListAdapter extends BaseExpandableListAdapter
         public void onClick(View v) {
             Category category = findCategoryById(mCategoryId);
             ControllerFactory.getCategoryController().removeCategory(category);
-            removeCategory(category);
+            mBaseAcitvity.removeCategory(category);
+            //removeCategory(category);
         }
     }
 

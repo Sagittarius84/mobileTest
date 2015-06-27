@@ -19,31 +19,21 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ExpandableListView;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
-import android.widget.Spinner;
-import android.widget.SpinnerAdapter;
-import android.widget.Toast;
-import android.widget.ViewSwitcher;
 
+import org.noorganization.instalist.GlobalApplication;
 import org.noorganization.instalist.R;
 import org.noorganization.instalist.controller.implementation.ControllerFactory;
 import org.noorganization.instalist.model.Category;
 import org.noorganization.instalist.model.ShoppingList;
 import org.noorganization.instalist.touchlistener.IOnShoppingListClickListenerEvents;
-import org.noorganization.instalist.touchlistener.sidebar.OnCancelClickListenerWithData;
-import org.noorganization.instalist.touchlistener.sidebar.OnCancelMoveClickListener;
-import org.noorganization.instalist.touchlistener.sidebar.OnSubmitClickListenerWithChildData;
-import org.noorganization.instalist.touchlistener.sidebar.OnSubmitClickListenerWithParentData;
-import org.noorganization.instalist.touchlistener.sidebar.OnSubmitMoveClickListener;
+import org.noorganization.instalist.touchlistener.sidebar.OnShoppingListAddClickListener;
 import org.noorganization.instalist.view.fragment.ShoppingListOverviewFragment;
 import org.noorganization.instalist.view.interfaces.IBaseActivity;
 import org.noorganization.instalist.view.interfaces.IBaseActivityListEvent;
-import org.noorganization.instalist.view.listadapter.CategoryListAdapter;
-import org.noorganization.instalist.view.listadapter.ExpandableCategoryItemListAdapter;
-import org.noorganization.instalist.view.listadapter.PlainShoppingListOverviewAdapter;
+import org.noorganization.instalist.view.interfaces.ISideDrawerListDataEvents;
+import org.noorganization.instalist.view.middleware.implementation.SideDrawerListManager;
 import org.noorganization.instalist.view.utils.PreferencesManager;
 import org.noorganization.instalist.view.utils.ViewUtils;
 
@@ -57,35 +47,21 @@ import java.util.List;
  *
  * @author TS
  */
-public class MainShoppingListView extends ActionBarActivity implements IBaseActivity, IBaseActivityListEvent, IOnShoppingListClickListenerEvents {
+public class MainShoppingListView extends ActionBarActivity implements IBaseActivity, IBaseActivityListEvent, IOnShoppingListClickListenerEvents, ISideDrawerListDataEvents {
 
-    private final static String LOG_TAG      = MainShoppingListView.class.getName();
+    private final static String LOG_TAG               = MainShoppingListView.class.getName();
     private final static String DEFAULT_CATEGORY_NAME = "(default)";
 
-    public final static  String KEY_LISTNAME = "list_name";
-
-    private static final int GROUP_MENU                         = 2;
-    private static final int GROUP_MENU_ADD_LIST_ACTION         = 0;
-    private static final int GROUP_MENU_REMOVE_CATEGORY_ACTION  = 1;
-    private static final int GROUP_MENU_EDIT_CATEGORY_ACTION    = 2;
-    private static final int CHILD_MENU                         = 3;
-    private static final int CHILD_MENU_EDIT_LIST_NAME_ACTION   = 0;
-    private static final int CHILD_MENU_REMOVE_LIST_ACTION      = 1;
-    private static final int CHILD_MENU_MOVE_TO_CATEGORY_ACTION = 2;
+    public final static String KEY_LISTNAME = "list_name";
 
     private Toolbar mToolbar;
 
-    private ExpandableListView mExpandableListView;
-    private ListView           mPlainListView;
 
     private RelativeLayout mLeftMenuDrawerRelativeLayout;
     private EditText       mNewNameEditText;
 
     private Button mAddListButton;
     private Button mAddCategoryButton;
-
-    private ExpandableCategoryItemListAdapter mCategoryItemListAdapter;
-    private PlainShoppingListOverviewAdapter  mPlainShoppingListAdapter;
 
     /**
      * For creation of an icon at the toolbar to toggle the navbar.
@@ -111,18 +87,26 @@ public class MainShoppingListView extends ActionBarActivity implements IBaseActi
 
     private long mDefaultCategoryId;
 
+    private SideDrawerListManager mDrawerListManager;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_shopping_list_view);
 
+        ExpandableListView expandableListView;
+        ListView           plainListView;
+
         // init PreferencesManager
         PreferencesManager.initializeInstance(this);
         mDefaultCategoryId = PreferencesManager.getInstance().getLongValue(PreferencesManager.KEY_DEFAULT_CATEGORY_ID);
-        if(mDefaultCategoryId == -1L){
-            // if not set
+        Category category = Category.findById(Category.class, mDefaultCategoryId);
+
+        if (category == null) {
+            // if not set generate a standard category and set the id of it to preferences
             mDefaultCategoryId = ControllerFactory.getCategoryController().createCategory(DEFAULT_CATEGORY_NAME).getId();
+            PreferencesManager.getInstance().setValue(PreferencesManager.KEY_DEFAULT_CATEGORY_ID, mDefaultCategoryId);
         }
 
         // init and setup toolbar
@@ -132,8 +116,9 @@ public class MainShoppingListView extends ActionBarActivity implements IBaseActi
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         mDrawerLayout = (DrawerLayout) findViewById(R.id.main_drawer_layout_container);
-        mExpandableListView = (ExpandableListView) findViewById(R.id.drawer_layout_custom_list_name_view);
-        mPlainListView = (ListView) findViewById(R.id.drawer_layout_custom_plain_shopping_list_overview);
+        expandableListView = (ExpandableListView) findViewById(R.id.drawer_layout_custom_list_name_view);
+
+        plainListView = (ListView) findViewById(R.id.drawer_layout_custom_plain_shopping_list_overview);
         mNewNameEditText = (EditText) findViewById(R.id.drawer_layout_custom_new_name);
 
         mAddListButton = (Button) findViewById(R.id.drawer_layout_custom_create_list);
@@ -142,20 +127,7 @@ public class MainShoppingListView extends ActionBarActivity implements IBaseActi
         mLeftMenuDrawerRelativeLayout = (RelativeLayout) findViewById(R.id.list_view_left_side_navigation);
         mSettingsButton = (Button) findViewById(R.id.drawer_layout_custom_settings);
 
-        long categoryCount = Category.count(Category.class, null, new String[]{});
-        // check if there are categories
-        if (categoryCount > 1) {
-            // more then 1 category, then display shoppinglists in expandable view
-            mCategoryItemListAdapter = new ExpandableCategoryItemListAdapter(this, Category.listAll(Category.class));
-            // fill the list with selectable lists
-            mExpandableListView.setAdapter(mCategoryItemListAdapter);
-        } else {
-            // display the shoppinglists in plain style
-            mPlainShoppingListAdapter = new PlainShoppingListOverviewAdapter(this, ShoppingList.listAll(ShoppingList.class));
-            mPlainListView.setAdapter(mPlainShoppingListAdapter);
-        }
-
-        registerForContextMenu(mExpandableListView);
+        mDrawerListManager = new SideDrawerListManager(this, plainListView, expandableListView);
 
         mDrawerLayout.setFitsSystemWindows(true);
         assignDrawer();
@@ -169,191 +141,19 @@ public class MainShoppingListView extends ActionBarActivity implements IBaseActi
     }
 
     @Override
-    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+    public void onCreateContextMenu(ContextMenu _Menu, View _View, ContextMenu.ContextMenuInfo _MenuInfo) {
         Log.i(LOG_TAG, "Context menu called.");
-        ExpandableListView.ExpandableListContextMenuInfo contextMenuInfo =
-                (ExpandableListView.ExpandableListContextMenuInfo) menuInfo;
-
-        int entityType    = ExpandableListView.getPackedPositionType(contextMenuInfo.packedPosition);
-        int groupPosition = ExpandableListView.getPackedPositionGroup(contextMenuInfo.packedPosition);
-        int childPosition = ExpandableListView.getPackedPositionChild(contextMenuInfo.packedPosition);
-
-        switch (entityType) {
-            case ExpandableListView.PACKED_POSITION_TYPE_GROUP:
-                menu.setHeaderTitle(getString(R.string.category_action));
-                menu.add(GROUP_MENU, GROUP_MENU_ADD_LIST_ACTION, 1, getString(R.string.add_list));
-                menu.add(GROUP_MENU, GROUP_MENU_REMOVE_CATEGORY_ACTION, 2, getString(R.string.remove_category));
-                menu.add(GROUP_MENU, GROUP_MENU_EDIT_CATEGORY_ACTION, 3, getString(R.string.edit_category_name));
-                break;
-            case ExpandableListView.PACKED_POSITION_TYPE_CHILD:
-                menu.setHeaderTitle(getString(R.string.shopping_list_action));
-                menu.add(CHILD_MENU, CHILD_MENU_EDIT_LIST_NAME_ACTION, 1, getString(R.string.edit_shopping_list));
-                menu.add(CHILD_MENU, CHILD_MENU_REMOVE_LIST_ACTION, 2, getString(R.string.remove_shopping_list));
-                menu.add(CHILD_MENU, CHILD_MENU_MOVE_TO_CATEGORY_ACTION, 3, getString(R.string.move_category));
-                break;
-            default:
-                return;
-        }
-
-        super.onCreateContextMenu(menu, v, menuInfo);
+        _Menu = mDrawerListManager.createContextMenu(_Menu, _View, _MenuInfo);
+        super.onCreateContextMenu(_Menu, _View, _MenuInfo);
     }
 
     @Override
-    public boolean onContextItemSelected(MenuItem item) {
+    public boolean onContextItemSelected(MenuItem _Item) {
         Log.i(LOG_TAG, "Context menu item selected.");
-        onContextItemClickProcessor(item);
-        return super.onContextItemSelected(item);
+        mDrawerListManager.onContextMenuItemClicked(_Item);
+        return super.onContextItemSelected(_Item);
     }
 
-
-    /**
-     * Handles the clicked ContextOption and processes the corresponding processes.
-     * @param item The MenuItem that was clicked.
-     */
-    private void onContextItemClickProcessor(MenuItem item) {
-        ExpandableListView.ExpandableListContextMenuInfo contextMenuInfo =
-                (ExpandableListView.ExpandableListContextMenuInfo) item.getMenuInfo();
-
-        int entityType    = ExpandableListView.getPackedPositionType(contextMenuInfo.packedPosition);
-        int groupPosition = ExpandableListView.getPackedPositionGroup(contextMenuInfo.packedPosition);
-        int childPosition = ExpandableListView.getPackedPositionChild(contextMenuInfo.packedPosition);
-
-        int groupId = item.getGroupId();
-        int itemId  = item.getItemId();
-
-        View view;
-
-        int flatPosition         = mExpandableListView.getFlatListPosition(contextMenuInfo.packedPosition);
-        int firstVisiblePosition = mExpandableListView.getFirstVisiblePosition();
-
-        view = mExpandableListView.getChildAt(flatPosition - firstVisiblePosition);
-
-        switch (groupId) {
-            case GROUP_MENU:
-                //region GROUP_MENU
-                Category category = (Category) mCategoryItemListAdapter.getGroup(groupPosition);
-
-                switch (itemId) {
-                    case GROUP_MENU_ADD_LIST_ACTION:
-                        Toast.makeText(this, "Add list on group: " + ((Category) mCategoryItemListAdapter.getGroup(groupPosition)).mName, Toast.LENGTH_SHORT).show();
-                        // best practice would be change dynamically id? or insert an edit text field at the first pos....
-                        break;
-                    case GROUP_MENU_REMOVE_CATEGORY_ACTION:
-                        Toast.makeText(this, "Remove group: " + ((Category) mCategoryItemListAdapter.getGroup(groupPosition)).mName, Toast.LENGTH_SHORT).show();
-                        ControllerFactory.getCategoryController().removeCategory(category);
-                        onCategoryRemoved(category);
-                        break;
-                    case GROUP_MENU_EDIT_CATEGORY_ACTION:
-                        //region Edit Category name
-                        Toast.makeText(this, "Rename group: " + ((Category) mCategoryItemListAdapter.getGroup(groupPosition)).mName, Toast.LENGTH_SHORT).show();
-
-                        final EditText editText;
-                        ImageView cancelView, submitView;
-                        ViewSwitcher viewSwitcher;
-
-                        cancelView = (ImageView) view.findViewById(R.id.expandable_list_view_edit_cancel);
-                        submitView = (ImageView) view.findViewById(R.id.expandable_list_view_edit_submit);
-
-                        viewSwitcher = (ViewSwitcher) view.findViewById(R.id.expandable_list_view_view_switcher);
-                        editText = (EditText) view.findViewById(R.id.expandable_list_view_category_name_edit);
-
-                        cancelView.setOnClickListener(new OnCancelClickListenerWithData(viewSwitcher));
-                        submitView.setOnClickListener(new OnSubmitClickListenerWithParentData(viewSwitcher, editText, category.getId(), mCategoryItemListAdapter));
-
-                        editText.setText(category.mName);
-                        // consume the longClickEvents and also mark whole edittext text
-                        /* Probably use this otherwise.
-                        editText.setOnLongClickListener(new View.OnLongClickListener() {
-
-                            @Override
-                            public boolean onLongClick(View v) {
-                                EditText newName = (EditText) v.findViewById(R.id.expandable_list_view_category_name_edit);
-                                newName.selectAll();
-                                return true;
-                            }
-                        });
-                         */
-                        viewSwitcher.showNext();
-                        //endregion
-                        break;
-                }
-                //endregion GROUP_MENU
-                break;
-            case CHILD_MENU:
-                //region CHILD_MENU
-                ShoppingList shoppingList = (ShoppingList) mCategoryItemListAdapter.getChild(groupPosition, childPosition);
-                Category categoryForShoppingList = (Category) mCategoryItemListAdapter.getGroup(groupPosition);
-
-                EditText editText;
-                ViewSwitcher viewSwitcher;
-                ImageView cancelView, submitView;
-
-                viewSwitcher = (ViewSwitcher) view.findViewById(R.id.expandable_list_view_view_switcher);
-                // get the shoppinglist from database
-                shoppingList = ShoppingList.findById(ShoppingList.class, shoppingList.getId());
-                switch (itemId) {
-                    case CHILD_MENU_EDIT_LIST_NAME_ACTION:
-
-                        editListName(view, shoppingList, viewSwitcher);
-                        break;
-                    case CHILD_MENU_REMOVE_LIST_ACTION:
-                        removeList(shoppingList);
-                        break;
-                    case CHILD_MENU_MOVE_TO_CATEGORY_ACTION:
-                        changeCategoryOfList(view, shoppingList, categoryForShoppingList, viewSwitcher);
-                        break;
-                }
-                //endregion CHILD_MENU
-                break;
-        }
-    }
-
-    private void changeCategoryOfList(View view, ShoppingList shoppingList, Category categoryForShoppingList, ViewSwitcher viewSwitcher) {
-        ImageView cancelView;
-        ImageView submitView;LinearLayout moveContainer;
-        Spinner                           spinner;
-
-        moveContainer = (LinearLayout) view.findViewById(R.id.expandable_list_view_choose_move_category);
-
-        cancelView = (ImageView) view.findViewById(R.id.expandable_list_view_move_cancel);
-        submitView = (ImageView) view.findViewById(R.id.expandable_list_view_move_submit);
-        spinner = (Spinner) view.findViewById(R.id.expandable_list_view_list_move_spinner);
-
-        List<Category> categories = Category.listAll(Category.class);
-        categories.remove(categoryForShoppingList);
-
-        SpinnerAdapter spinnerAdapter = new CategoryListAdapter(this, categories);
-        spinner.setAdapter(spinnerAdapter);
-
-        viewSwitcher.setVisibility(View.GONE);
-        moveContainer.setVisibility(View.VISIBLE);
-
-        cancelView.setOnClickListener(new OnCancelMoveClickListener(moveContainer, viewSwitcher));
-        submitView.setOnClickListener(new OnSubmitMoveClickListener(moveContainer, viewSwitcher, spinner, shoppingList));
-    }
-
-    private void removeList(ShoppingList shoppingList) {
-        boolean deleted = ControllerFactory.getListController().removeList(shoppingList);
-        if (! deleted) {
-            Toast.makeText(this, getString(R.string.deletion_failed), Toast.LENGTH_SHORT).show();
-        }
-    }
-
-    private void editListName(View view, ShoppingList shoppingList, ViewSwitcher viewSwitcher) {
-        ImageView cancelView;
-        ImageView submitView;
-        EditText  editText;
-        cancelView = (ImageView) view.findViewById(R.id.expandable_list_view_edit_cancel);
-        submitView = (ImageView) view.findViewById(R.id.expandable_list_view_edit_submit);
-
-        editText = (EditText) view.findViewById(R.id.expandable_list_view_list_edit_name);
-
-        cancelView.setOnClickListener(new OnCancelClickListenerWithData(viewSwitcher));
-        submitView.setOnClickListener(new OnSubmitClickListenerWithChildData(viewSwitcher, editText, shoppingList.getId()));
-
-        editText.setText(shoppingList.mName);
-        viewSwitcher.showNext();
-    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -405,40 +205,14 @@ public class MainShoppingListView extends ActionBarActivity implements IBaseActi
     @Override
     protected void onResume() {
         super.onResume();
+        ((ChangeHandler) GlobalApplication.getChangeHandler()).setCurrentBaseActivity(this);
 
-        // TODO: try to remove this
-        mCategoryItemListAdapter.notifyDataSetChanged();
-        // end todo
-
-        mAddListButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                String listName = validateAndGetNewName();
-                if (listName == null) {
-                    return;
-                }
-
-
-                ShoppingList shoppingList = ControllerFactory.getListController().addList(listName);
-                //ControllerFactory.getListController().moveToCategory(shoppingList, Category.find);
-                if (shoppingList == null) {
-                    mNewNameEditText.setError(getResources().getString(R.string.list_exists));
-                    return;
-                }
-
-                // clear the field
-                mNewNameEditText.setText("");
-                mCategoryItemListAdapter.notifyDataSetChanged();
-
-                changeFragment(ShoppingListOverviewFragment.newInstance(shoppingList.mName));
-            }
-        });
+        mAddListButton.setOnClickListener(new OnShoppingListAddClickListener(mDefaultCategoryId, mNewNameEditText));
 
         mAddCategoryButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String categoryName = validateAndGetNewName();
+                String categoryName = ViewUtils.validateAndGetResultEditText(v.getContext(), mNewNameEditText);
                 if (categoryName == null) {
                     return;
                 }
@@ -449,16 +223,27 @@ public class MainShoppingListView extends ActionBarActivity implements IBaseActi
                 if (category == null) {
                     mNewNameEditText.setError(getResources().getString(R.string.category_exists));
                     return;
+                } else {
+                    addCategory(category);
+                    mAddCategoryButton.setVisibility(View.GONE);
+                    ViewUtils.removeSoftKeyBoard(v.getContext(), mNewNameEditText);
+                    mNewNameEditText.setText("");
+                    mNewNameEditText.clearFocus();
                 }
-                mCategoryItemListAdapter.addCategory(category);
             }
         });
 
         mNewNameEditText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
-            public void onFocusChange(View v, boolean hasFocus) {
-                if (hasFocus) {
-                    ((EditText) v).setError(null);
+            public void onFocusChange(View _View, boolean _HasFocus) {
+                if (_HasFocus) {
+                    ((EditText) _View).setError(null);
+                    mAddCategoryButton.setVisibility(View.VISIBLE);
+                    mAddListButton.setVisibility(View.VISIBLE);
+                } else {
+                    mAddCategoryButton.setVisibility(View.GONE);
+                    mAddListButton.setVisibility(View.GONE);
+                    ViewUtils.removeSoftKeyBoard(_View.getContext(), mNewNameEditText);
                 }
             }
         });
@@ -498,6 +283,7 @@ public class MainShoppingListView extends ActionBarActivity implements IBaseActi
     @Override
     protected void onPause() {
         super.onPause();
+        ((ChangeHandler) GlobalApplication.getChangeHandler()).setCurrentBaseActivity(null);
         mAddListButton.setOnClickListener(null);
         mNewNameEditText.setOnKeyListener(null);
         mSettingsButton.setOnClickListener(null);
@@ -546,7 +332,7 @@ public class MainShoppingListView extends ActionBarActivity implements IBaseActi
 
     @Override
     public void selectList(ShoppingList _ShoppingList) {
-        if(_ShoppingList.mName == null){
+        if (_ShoppingList.mName == null) {
             throw new NullPointerException("Name of ShoppingList must be set.");
         }
 
@@ -613,76 +399,44 @@ public class MainShoppingListView extends ActionBarActivity implements IBaseActi
     }
 
     @Override
-    public void updateChangedShoppingList(ShoppingList _ShoppingList) {
-        mCategoryItemListAdapter.notifyDataSetChanged();
+    public void addCategory(Category _Category) {
+        mDrawerListManager.addCategory(_Category);
     }
 
     @Override
-    public void updateChangedCategory(Category _Category) {
-        mCategoryItemListAdapter.updateCategory(_Category);
+    public void updateCategory(Category _Category) {
+        mDrawerListManager.updateCategory(_Category);
     }
 
-
-    /**
-     * Pass created category to the underlying adapter.
-     * And also checks if it needs to switch layouts from plain to expandablelistview.
-     * @param _Category The created Category.
-     */
-    public void onCategoryCreated(Category _Category){
-        long categoryCount = 0L;
-
-        if(categoryCount == 1L || mCategoryItemListAdapter == null){
-           // if it is equal to 1 or the adapter is zero(not assigned) then we need to switch from plain list to ExpandableList with categories
-           // and also push the shoppinglist without categories into a separate category
-           assignExpandableList();
-        }else{
-            mCategoryItemListAdapter.addCategory(_Category);
+    @Override
+    public void removeCategory(Category _Category) {
+        Category           category      = Category.findById(Category.class, mDefaultCategoryId);
+        List<ShoppingList> shoppingLists = Category.getListsWithoutCategory();
+        for (ShoppingList shoppingList : shoppingLists) {
+            ShoppingList shoppingList1 = ControllerFactory.getListController().moveToCategory(shoppingList, category);
+            updateList(shoppingList1);
         }
-
+        mDrawerListManager.removeCategory(_Category);
     }
 
-    /**
-     * Set the PlainListView as current listview to display the shoppinglists.
-     */
-    private void assignPlainList(){
-        mPlainShoppingListAdapter = new PlainShoppingListOverviewAdapter(this, ShoppingList.listAll(ShoppingList.class));
-        mCategoryItemListAdapter = null;
-
-        mExpandableListView.setAdapter(mPlainShoppingListAdapter);
-        mPlainListView.setAdapter(mPlainShoppingListAdapter);
-
-        mExpandableListView.setVisibility(View.GONE);
-        mPlainListView.setVisibility(View.VISIBLE);
+    @Override
+    public void addList(ShoppingList _ShoppingList) {
+        mDrawerListManager.addList(_ShoppingList);
     }
 
-    /**
-     * Set the ExpandableListView to display categories and shoppinglists.
-     */
-    private void assignExpandableList() {
-
-            mPlainShoppingListAdapter = null;
-            mCategoryItemListAdapter = new ExpandableCategoryItemListAdapter(this, Category.listAll(Category.class));
-
-            mPlainListView.setAdapter(mPlainShoppingListAdapter);
-            mExpandableListView.setAdapter(mCategoryItemListAdapter);
-
-            mPlainListView.setVisibility(View.GONE);
-            mExpandableListView.setVisibility(View.VISIBLE);
-
+    @Override
+    public void updateList(ShoppingList _ShoppingList) {
+        mDrawerListManager.updateList(_ShoppingList);
     }
 
-    /**
-     * Pass the category which has been removed.
-     * @param _RemovedCategory the category that has been removed.
-     */
-    public void onCategoryRemoved(Category _RemovedCategory) {
-        long categoryCount = 0L;
-        if(categoryCount == 1L){
-            assignPlainList();
-        } else{
-            mCategoryItemListAdapter.removeCategory(_RemovedCategory);
-        }
+    @Override
+    public void removeList(ShoppingList _ShoppingList) {
+        mDrawerListManager.removeList(_ShoppingList);
+    }
 
+    @Override
+    public void setSideDrawerAddListButtonListener(long _CategoryId) {
+        mAddListButton.setOnClickListener(new OnShoppingListAddClickListener(_CategoryId, mNewNameEditText));
     }
 
     @Override

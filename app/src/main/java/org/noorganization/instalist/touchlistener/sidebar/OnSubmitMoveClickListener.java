@@ -13,6 +13,7 @@ import org.noorganization.instalist.R;
 import org.noorganization.instalist.controller.implementation.ControllerFactory;
 import org.noorganization.instalist.model.Category;
 import org.noorganization.instalist.model.ShoppingList;
+import org.noorganization.instalist.view.interfaces.IBaseActivity;
 
 /**
  * OnSubmitMoveClickListener handles the move action when a list should be moved to another category.
@@ -47,8 +48,12 @@ public class OnSubmitMoveClickListener implements View.OnClickListener {
         mShoppingList = ControllerFactory.getListController().moveToCategory(mShoppingList, category);
         if(mShoppingList == null){
             Toast.makeText(context, context.getString(R.string.change_of_category_of_list_failed), Toast.LENGTH_SHORT).show();
+            // TODO: remove this when callback for this kind is there.
+            ((IBaseActivity) context).updateList(mShoppingList);
         }
         mMoveCategoryLayout.setVisibility(View.GONE);
         mMainView.setVisibility(View.VISIBLE);
+
+
     }
 }

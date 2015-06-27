@@ -1,6 +1,7 @@
 package org.noorganization.instalist.view.listadapter;
 
 import android.app.Activity;
+import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,9 +18,9 @@ import java.util.List;
 public class CategoryListAdapter extends ArrayAdapter<Category> {
 
     private List<Category> mCategoryList;
-    private Activity       mContext;
+    private Context       mContext;
 
-    public CategoryListAdapter(Activity _Context, List<Category> _CategoryList) {
+    public CategoryListAdapter(Context _Context, List<Category> _CategoryList) {
         super(_Context, android.R.layout.simple_spinner_dropdown_item, _CategoryList);
         mCategoryList = _CategoryList;
         mContext = _Context;
@@ -37,7 +38,7 @@ public class CategoryListAdapter extends ArrayAdapter<Category> {
         Category category = mCategoryList.get(_Position);
 
         if (_ConvertView == null) {
-            LayoutInflater categoryNamesInflater = mContext.getLayoutInflater();
+            LayoutInflater categoryNamesInflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             view = categoryNamesInflater.inflate(android.R.layout.simple_spinner_dropdown_item, null);
         } else {
             view = _ConvertView;

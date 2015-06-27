@@ -9,6 +9,7 @@ import android.widget.ViewSwitcher;
 import org.noorganization.instalist.R;
 import org.noorganization.instalist.controller.implementation.ControllerFactory;
 import org.noorganization.instalist.model.Category;
+import org.noorganization.instalist.view.interfaces.IBaseActivity;
 import org.noorganization.instalist.view.listadapter.ExpandableCategoryItemListAdapter;
 import org.noorganization.instalist.view.utils.ViewUtils;
 
@@ -52,9 +53,11 @@ public class OnSubmitClickListenerWithParentData implements View.OnClickListener
                 return;
             }
         }
-
+        ViewUtils.removeSoftKeyBoard(context, mNameEditText);
         mViewSwitcher.showNext();
-        // TODO: remove this with a callback.
-        mAdapter.updateCategory(newCategory);
+        // TODO: remove this when callback for this kind is there.
+        ((IBaseActivity) context).updateCategory(newCategory);
+
+
     }
 }
