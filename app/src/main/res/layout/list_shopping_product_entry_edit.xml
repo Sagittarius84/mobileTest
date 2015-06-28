@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+<org.noorganization.instalist.view.customview.AmountPicker
+    android:id="@+id/list_product_shopping_product_amount_edit"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:layout_gravity="center_vertical"
+    android:layout_weight="0" />
+
+<Spinner
+    android:id="@+id/list_product_shopping_product_amount_type_edit"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center_vertical"
+    android:layout_weight="0"/>
+    </LinearLayout>
