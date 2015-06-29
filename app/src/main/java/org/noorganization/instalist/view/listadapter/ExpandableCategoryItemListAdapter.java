@@ -86,7 +86,6 @@ public class ExpandableCategoryItemListAdapter extends BaseExpandableListAdapter
     public View getGroupView(int groupPosition, boolean isExpanded, View convertView, ViewGroup parent) {
         ViewGroup view;
         Category  category = mListOfCategories.get(groupPosition);
-        category.mIsExpanded = isExpanded;
 
         // check if the converted view is not null and check if it is already an expandable_list_view_category_item
         if (convertView != null && convertView.getId() == R.id.expandable_list_view_category_item) {

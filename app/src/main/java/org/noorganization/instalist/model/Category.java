@@ -18,9 +18,6 @@ public class Category extends SugarRecord<Category> {
 
     public String mName;
 
-    @Ignore
-    public boolean mIsExpanded = false;
-
     public Category() {
     }
 
@@ -34,7 +31,8 @@ public class Category extends SugarRecord<Category> {
     }
 
     public static List<ShoppingList> getListsWithoutCategory(){
-        return Select.from(ShoppingList.class).where(ShoppingList.ATTR_CATEGORY + " IS NULL").list();
+        // WTF?! 0 as null value?! This was not documented in SugarORM's doc and is really weird.
+        return Select.from(ShoppingList.class).where(Condition.prop(ShoppingList.ATTR_CATEGORY).eq(0)).list();
     }
     @Override
     public boolean equals(Object _another) {
