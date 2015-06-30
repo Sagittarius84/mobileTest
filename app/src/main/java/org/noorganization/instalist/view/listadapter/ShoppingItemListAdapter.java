@@ -8,8 +8,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.LinearLayout;
-import android.widget.SimpleAdapter;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -19,10 +17,12 @@ import org.noorganization.instalist.controller.IListController;
 import org.noorganization.instalist.controller.implementation.ControllerFactory;
 import org.noorganization.instalist.model.ListEntry;
 import org.noorganization.instalist.model.Unit;
+import org.noorganization.instalist.model.view.ListEntryItemWrapper;
 import org.noorganization.instalist.touchlistener.OnSimpleSwipeGestureListener;
 import org.noorganization.instalist.view.customview.AmountPicker;
 import org.noorganization.instalist.view.utils.ViewUtils;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -33,13 +33,21 @@ import java.util.List;
  */
 public class ShoppingItemListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
-    private static String LOG_TAG = ShoppingItemListAdapter.class.getName();
+    public static final int    DEFAULT_VIEW       = 0;
+    public static final int    EDIT_MODE_VIEW     = 1;
+    public static final int    SELECTED_MODE_VIEW = 2;
+    private static      String LOG_TAG            = ShoppingItemListAdapter.class.getName();
 
-    private static List<ListEntry> mListOfEntries = null;
+    private static List<ListEntryItemWrapper> mListOfEntries = null;
     private final Activity mActivity;
 
     private OnSimpleSwipeGestureListener mOnSimpleSwipeGestureListener;
     private Comparator                   mComparator;
+
+    /**
+     * Indicates that this list is currently in edit mode.
+     */
+    private ListEntry mCurrentListInEditMode;
 
     // -----------------------------------------------------------
 
@@ -85,14 +93,14 @@ public class ShoppingItemListAdapter extends RecyclerView.Adapter<RecyclerView.V
                 @Override
                 public void onSwipeRight(View childView) {
                     super.onSwipeRight(childView);
-                    ListEntry entry = mListOfEntries.get(mViewHolderRef.getAdapterPosition());
+                    ListEntry entry = mListOfEntries.get(mViewHolderRef.getAdapterPosition()).getListEntry();
                     toggleStrike(entry);
                 }
 
                 @Override
                 public void onSwipeLeft(View childView) {
                     super.onSwipeLeft(childView);
-                    ListEntry entry = mListOfEntries.get(mViewHolderRef.getAdapterPosition());
+                    ListEntry entry = mListOfEntries.get(mViewHolderRef.getAdapterPosition()).getListEntry();
                     toggleStrike(entry);
 
                 }
@@ -100,15 +108,17 @@ public class ShoppingItemListAdapter extends RecyclerView.Adapter<RecyclerView.V
                 @Override
                 public void onSingleTap(View childView) {
                     super.onSingleTap(childView);
-                    ListEntry entry = mListOfEntries.get(mViewHolderRef.getAdapterPosition());
+                    ListEntry entry = mListOfEntries.get(mViewHolderRef.getAdapterPosition()).getListEntry();
                     Toast.makeText(mContext, "Item selected: " + entry.mProduct.mName, Toast.LENGTH_SHORT).show();
                 }
 
                 @Override
                 public void onLongTap(View childView) {
                     super.onLongTap(childView);
-                    ListEntry entry = mListOfEntries.get(mViewHolderRef.getAdapterPosition());
-                    Toast.makeText(mContext, "Item deleted: " + entry.mProduct.mName, Toast.LENGTH_SHORT).show();
+                    ListEntryItemWrapper entry = mListOfEntries.get(mViewHolderRef.getAdapterPosition());
+                    entry.setEditMode(true);
+
+                    // Toast.makeText(mContext, "Item deleted: " + entry.mProduct.mName, Toast.LENGTH_SHORT).show();
                     // ControllerFactory.getListController().removeItem(entry);
                     /*childView.findViewById(R.id.list_product_shopping_product_amount_type_edit);
                     childView.findViewById(R.id.list_product_shopping_product_amount_edit);
@@ -150,36 +160,54 @@ public class ShoppingItemListAdapter extends RecyclerView.Adapter<RecyclerView.V
         if (_ListOfEntries == null) {
             throw new IllegalArgumentException("List cannot be null!");
         }
-        this.mListOfEntries = _ListOfEntries;
+
+        mListOfEntries = new ArrayList<>(_ListOfEntries.size());
+        for (ListEntry listEntry : _ListOfEntries) {
+            mListOfEntries.add(new ListEntryItemWrapper(listEntry));
+        }
         this.mActivity = _Activity;
     }
 
     @Override
     public int getItemViewType(int position) {
-        return position % 2;
+        if (mListOfEntries.get(position).isEditMode()) {
+            return EDIT_MODE_VIEW;
+        }
+        if (mListOfEntries.get(position).isSelected()) {
+            return SELECTED_MODE_VIEW;
+        }
+
+        // if we are in normal mode, return 0
+        return DEFAULT_VIEW;
     }
 
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup _ViewGroup, int _ViewType) {
         View view;
         switch (_ViewType) {
-            case 0:
+            case DEFAULT_VIEW:
             default:
                 view = LayoutInflater.from(_ViewGroup.getContext()).inflate(R.layout.list_shopping_product_entry, _ViewGroup, false);
                 return new ShoppingListProductViewHolder(view, mActivity);
-            case 1:
+            case EDIT_MODE_VIEW:
                 view = LayoutInflater.from(_ViewGroup.getContext()).inflate(R.layout.list_shopping_product_entry_edit, _ViewGroup, false);
                 return new ShoppingListEditProductViewHolder(view, mActivity);
+            /*
+            TODO: Implement selectable list
+            case SELECTED_MODE_VIEW:
+                return ;*/
         }
     }
 
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder _ProductViewHolder, int _Position) {
-        final ListEntry singleEntry = mListOfEntries.get(_Position);
-        switch(getItemViewType(_Position)){
-            case 0:
+        final ListEntryItemWrapper singleEntryItemWrapper = mListOfEntries.get(_Position);
+        final ListEntry            singleEntry            = singleEntryItemWrapper.getListEntry();
+
+        switch (getItemViewType(_Position)) {
+            case DEFAULT_VIEW:
             default:
-                ShoppingListProductViewHolder viewHolder = (ShoppingListProductViewHolder)_ProductViewHolder;
+                ShoppingListProductViewHolder viewHolder = (ShoppingListProductViewHolder) _ProductViewHolder;
                 TextView productAmount = viewHolder.mProductAmount;
                 TextView productName = viewHolder.mProductName;
                 TextView productType = viewHolder.mProductType;
@@ -205,14 +233,17 @@ public class ShoppingItemListAdapter extends RecyclerView.Adapter<RecyclerView.V
                     productName.setPaintFlags(productName.getPaintFlags() & (~ Paint.STRIKE_THRU_TEXT_FLAG));
                 }
                 break;
-            case 1:
-                ShoppingListEditProductViewHolder viewHolderEdit = (ShoppingListEditProductViewHolder)_ProductViewHolder;
+            case EDIT_MODE_VIEW:
+                ShoppingListEditProductViewHolder viewHolderEdit = (ShoppingListEditProductViewHolder) _ProductViewHolder;
 
                 AmountPicker prodAmountPicker = viewHolderEdit.mProductAmount;
                 Spinner productType1 = viewHolderEdit.mProductType;
 
-                productType1.setAdapter(new ArrayAdapter<Unit>(mActivity, android.R.layout.simple_spinner_item,Unit.listAll(Unit.class)));
+                productType1.setAdapter(new ArrayAdapter<Unit>(mActivity, android.R.layout.simple_spinner_item, Unit.listAll(Unit.class)));
                 prodAmountPicker.setValue(singleEntry.mAmount);
+                break;
+            case SELECTED_MODE_VIEW:
+                // TODO: do some stuff :D
                 break;
         }
 
@@ -220,7 +251,7 @@ public class ShoppingItemListAdapter extends RecyclerView.Adapter<RecyclerView.V
 
     @Override
     public long getItemId(int position) {
-        return mListOfEntries.get(position).getId();
+        return mListOfEntries.get(position).getListEntry().getId();
     }
 
     @Override
@@ -237,11 +268,11 @@ public class ShoppingItemListAdapter extends RecyclerView.Adapter<RecyclerView.V
 
         int index = - 1;
         synchronized (mListOfEntries) {
-            for (ListEntry listEntry : mListOfEntries) {
+            for (ListEntryItemWrapper listEntry : mListOfEntries) {
 
                 // somehow only this works for finding the equal ids
                 long id1 = _Entry.getId();
-                long id2 = listEntry.getId();
+                long id2 = listEntry.getListEntry().getId();
                 if (id1 == id2) {
 
                     index = mListOfEntries.indexOf(listEntry);
@@ -260,7 +291,7 @@ public class ShoppingItemListAdapter extends RecyclerView.Adapter<RecyclerView.V
      * @param _Entry entry element that should be added.
      */
     public void addItem(ListEntry _Entry) {
-        mListOfEntries.add(_Entry);
+        mListOfEntries.add(new ListEntryItemWrapper(_Entry));
         Collections.sort(mListOfEntries, mComparator);
         notifyDataSetChanged();
     }
@@ -285,23 +316,23 @@ public class ShoppingItemListAdapter extends RecyclerView.Adapter<RecyclerView.V
         synchronized (mListOfEntries) {
             //positionToChange = Collections.binarySearch(mListOfEntries, _Entry, mComparator);
 
-            for (ListEntry listEntry : mListOfEntries) {
+            for (ListEntryItemWrapper listEntry : mListOfEntries) {
 
                 // somehow only this works for finding the equal ids
                 long id1 = _Entry.getId();
-                long id2 = listEntry.getId();
+                long id2 = listEntry.getListEntry().getId();
                 if (id1 == id2) {
                     int index = mListOfEntries.indexOf(listEntry);
                     positionToChange = index;
                     // update reference to given entry from controller
-                    mListOfEntries.set(index, _Entry);
+                    mListOfEntries.set(index, new ListEntryItemWrapper(_Entry));
                     break;
                 }
             }
         }
 
         if (positionToChange >= 0) {
-            ListEntry entry = mListOfEntries.get(positionToChange);
+            ListEntry entry = mListOfEntries.get(positionToChange).getListEntry();
 
             /** -6- 3 7 1 **/
             notifyItemChanged(positionToChange);

@@ -43,10 +43,11 @@ import java.util.WeakHashMap;
 /**
  * A ShoppingListOverviewFragment containing a list view.
  */
-public class ShoppingListOverviewFragment extends Fragment{
+public class ShoppingListOverviewFragment extends Fragment {
 
     private String       mCurrentListName;
     private ShoppingList mCurrentShoppingList;
+    private long         mShoppingListId;
 
     private ActionBar mActionBar;
     private Context   mContext;
@@ -81,6 +82,7 @@ public class ShoppingListOverviewFragment extends Fragment{
 
     /**
      * Creates an instance of an ShoppingListOverviewFragment.
+     *
      * @param _ListName the name of the list that should be shown.
      * @return the new instance of this fragment.
      */
@@ -93,6 +95,20 @@ public class ShoppingListOverviewFragment extends Fragment{
         return fragment;
     }
 
+    /**
+     * Creates an instance of an ShoppingListOverviewFragment.
+     *
+     * @param _ListId id of the @Link{ShoppingList} that should be shown.
+     * @return the new instance of this fragment.
+     */
+    public static ShoppingListOverviewFragment newInstance(long _ListId) {
+
+        ShoppingListOverviewFragment fragment = new ShoppingListOverviewFragment();
+        Bundle                       args     = new Bundle();
+        args.putLong(MainShoppingListView.KEY_LISTNAME, _ListId);
+        fragment.setArguments(args);
+        return fragment;
+    }
 
     // --------------------------------------------------------------------------------------------
 
@@ -127,8 +143,8 @@ public class ShoppingListOverviewFragment extends Fragment{
         if (bundle == null) {
             return;
         }
-        mCurrentListName     = bundle.getString(MainShoppingListView.KEY_LISTNAME);
-        mCurrentShoppingList = ShoppingList.findByName(mCurrentListName);
+        mCurrentListName = bundle.getString(MainShoppingListView.KEY_LISTNAME);
+        mCurrentShoppingList = /*ShoppingList.findById(mCategoryId);*/ShoppingList.findByName(mCurrentListName);
 
     }
 
@@ -144,10 +160,9 @@ public class ShoppingListOverviewFragment extends Fragment{
     }
 
 
-
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
+        int               id          = item.getItemId();
         SharedPreferences sortDetails = mContext.getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE);
 
         // swtich which action item was pressed
@@ -158,7 +173,6 @@ public class ShoppingListOverviewFragment extends Fragment{
                 sortDetails.edit()
                         .putInt(SORT_MODE, SORT_BY_PRIORITY)
                         .apply();
-
                 break;
             case R.id.list_items_sort_by_name:
                 mShoppingItemListAdapter.sortByComparator(mMapComperable.get(SORT_BY_NAME));
@@ -267,30 +281,34 @@ public class ShoppingListOverviewFragment extends Fragment{
 
     /**
      * Updates the adapter in the shoppinglistadapter with the given item.
+     *
      * @param _Entry the item that should be deleted.
      */
-    public void onListItemUpdated(ListEntry _Entry){
+    public void onListItemUpdated(ListEntry _Entry) {
         mShoppingItemListAdapter.changeItem(_Entry);
     }
 
     /**
      * Removes the given item from the containing listarray in the shoppinglistadapter.
+     *
      * @param _Entry the item that should be deleted.
      */
-    public void onListItemDeleted(ListEntry _Entry){
+    public void onListItemDeleted(ListEntry _Entry) {
         mShoppingItemListAdapter.removeItem(_Entry);
     }
 
     /**
      * Adds the given listentry to the listentry adapter.
+     *
      * @param _Entry The entry that should be added to the list.
      */
-    public void onListItemAdded(ListEntry _Entry){
-        if(_Entry.mList.getId().equals(mCurrentShoppingList.getId())) {
+    public void onListItemAdded(ListEntry _Entry) {
+        if (_Entry.mList.getId().equals(mCurrentShoppingList.getId())) {
             mShoppingItemListAdapter.addItem(_Entry);
         }
     }
-    public void onShoppingListItemChanged(ListEntry _Entry){
+
+    public void onShoppingListItemChanged(ListEntry _Entry) {
         mShoppingItemListAdapter.changeItem(_Entry);
     }
 }
