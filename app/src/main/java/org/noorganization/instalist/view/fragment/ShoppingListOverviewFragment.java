@@ -10,12 +10,16 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
+import android.view.ActionMode;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Spinner;
+import android.widget.Toast;
 
 import com.software.shell.fab.ActionButton;
 
@@ -25,14 +29,19 @@ import org.noorganization.instalist.controller.IListController;
 import org.noorganization.instalist.controller.implementation.ControllerFactory;
 import org.noorganization.instalist.model.ListEntry;
 import org.noorganization.instalist.model.ShoppingList;
+import org.noorganization.instalist.model.Unit;
+import org.noorganization.instalist.model.view.ListEntryItemWrapper;
+import org.noorganization.instalist.touchlistener.OnRecyclerItemTouchListener;
 import org.noorganization.instalist.view.ChangeHandler;
 import org.noorganization.instalist.view.MainShoppingListView;
+import org.noorganization.instalist.view.customview.AmountPicker;
 import org.noorganization.instalist.view.datahandler.SelectableBaseItemListEntryDataHolder;
 import org.noorganization.instalist.view.decoration.DividerItemListDecoration;
 import org.noorganization.instalist.view.interfaces.IBaseActivity;
 import org.noorganization.instalist.view.listadapter.ShoppingItemListAdapter;
 import org.noorganization.instalist.view.sorting.AlphabeticalListEntryComparator;
 import org.noorganization.instalist.view.sorting.PriorityListEntryComparator;
+import org.noorganization.instalist.view.spinneradapter.UnitSpinnerAdapter;
 import org.noorganization.instalist.view.utils.ViewUtils;
 
 import java.util.Comparator;
@@ -45,22 +54,28 @@ import java.util.WeakHashMap;
  */
 public class ShoppingListOverviewFragment extends Fragment {
 
-    private String       mCurrentListName;
+    private static final String LOG_TAG = ShoppingListOverviewFragment.class.toString();
+
+    private String mCurrentListName;
     private ShoppingList mCurrentShoppingList;
-    private long         mShoppingListId;
+    private long mShoppingListId;
 
     private ActionBar mActionBar;
-    private Context   mContext;
+    private Context mContext;
 
     private ActionButton mAddButton;
 
     private LinearLayoutManager mLayoutManager;
 
     private ShoppingItemListAdapter mShoppingItemListAdapter;
+    private RecyclerView mRecyclerView;
 
     private IListController mListController;
 
     private IBaseActivity mBaseActivityInterface;
+
+    private ActionMode mActionMode;
+
 
     private static String PREFERENCES_NAME = "SHOPPING_LIST_FRAGMENT";
 
@@ -70,8 +85,95 @@ public class ShoppingListOverviewFragment extends Fragment {
      */
     private Map<Integer, Comparator> mMapComperable;
 
-    private static Integer SORT_BY_NAME     = 0;
+    private static Integer SORT_BY_NAME = 0;
     private static Integer SORT_BY_PRIORITY = 1;
+
+    /**
+     * Used to inflate the actionbar.
+     */
+    private ActionMode.Callback mActionModeCallback;
+
+    private class OnShoppingListItemActionModeListener implements ActionMode.Callback {
+
+        private Context mContext;
+        private View    mView;
+        private long mListEntryId;
+
+        /**
+         * Constructor of OnShoppingListItemActionModeListener.
+         *
+         * @param _Context  the context of the Fragment.
+         * @param _View     the View of the selected element. Used to read the data from it.
+         * @param _ListEntryId the Id of the clicked ListEntry.
+         */
+        public OnShoppingListItemActionModeListener(Context _Context, View _View, long _ListEntryId) {
+            mContext = _Context;
+            mView  = _View;
+            mListEntryId = _ListEntryId;
+        }
+
+        @Override
+        public boolean onCreateActionMode(ActionMode _Mode, Menu _Menu) {
+            _Menu.clear();
+            MenuInflater menuInflater = _Mode.getMenuInflater();
+            menuInflater.inflate(R.menu.menu_cancel_add_actions, _Menu);
+            return true;
+        }
+
+        // called after onCreateActionMode
+        @Override
+        public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+            return true;
+        }
+
+        // called when user slected an item.
+        @Override
+        public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+            ListEntry entry = ListEntry.findById(ListEntry.class, mListEntryId);
+
+            switch (item.getItemId()) {
+                case R.id.menu_add_action:
+
+                    int position = mShoppingItemListAdapter.getPositionForId(mListEntryId);
+                    if(position == -1 || position >= mShoppingItemListAdapter.getItemCount()){
+                        Log.d(LOG_TAG, "Position is out of bounds. Return.");
+                        return true;
+                    }
+
+                    LinearLayoutManager layoutManager = (LinearLayoutManager) mRecyclerView.getLayoutManager();
+                    View view = layoutManager.getChildAt(position);
+
+                    AmountPicker amountPicker = (AmountPicker) view.findViewById(R.id.list_product_shopping_product_amount_edit);
+                    if(amountPicker == null){
+                        Log.e(LOG_TAG, "amountPicker is null.");
+                        return true;
+                    }
+                    float value = amountPicker.getValue();
+                    entry.mAmount = value;
+                    // entry.mUnit = unit;
+
+                    ControllerFactory.getListController().addOrChangeItem(mCurrentShoppingList, entry.mProduct, value);
+                    mShoppingItemListAdapter.resetEditModeView();
+                    mode.finish();
+                    break;
+                case R.id.menu_cancel_action:
+                    mShoppingItemListAdapter.resetEditModeView();
+                    mode.finish();
+                    break;
+                default:
+                    return false;
+            }
+            return true;
+        }
+
+        @Override
+        public void onDestroyActionMode(ActionMode mode) {
+            mActionMode = null;
+        }
+    }
+
+    ;
+
 
     // --------------------------------------------------------------------------------------------
 
@@ -89,7 +191,7 @@ public class ShoppingListOverviewFragment extends Fragment {
     public static ShoppingListOverviewFragment newInstance(String _ListName) {
 
         ShoppingListOverviewFragment fragment = new ShoppingListOverviewFragment();
-        Bundle                       args     = new Bundle();
+        Bundle args = new Bundle();
         args.putString(MainShoppingListView.KEY_LISTNAME, _ListName);
         fragment.setArguments(args);
         return fragment;
@@ -104,7 +206,7 @@ public class ShoppingListOverviewFragment extends Fragment {
     public static ShoppingListOverviewFragment newInstance(long _ListId) {
 
         ShoppingListOverviewFragment fragment = new ShoppingListOverviewFragment();
-        Bundle                       args     = new Bundle();
+        Bundle args = new Bundle();
         args.putLong(MainShoppingListView.KEY_LISTNAME, _ListId);
         fragment.setArguments(args);
         return fragment;
@@ -145,7 +247,6 @@ public class ShoppingListOverviewFragment extends Fragment {
         }
         mCurrentListName = bundle.getString(MainShoppingListView.KEY_LISTNAME);
         mCurrentShoppingList = /*ShoppingList.findById(mCategoryId);*/ShoppingList.findByName(mCurrentListName);
-
     }
 
 
@@ -159,10 +260,14 @@ public class ShoppingListOverviewFragment extends Fragment {
         super.onCreateOptionsMenu(menu, inflater);
     }
 
+    @Override
+    public void onPrepareOptionsMenu(Menu menu) {
+        super.onPrepareOptionsMenu(menu);
+    }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        int               id          = item.getItemId();
+        int id = item.getItemId();
         SharedPreferences sortDetails = mContext.getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE);
 
         // swtich which action item was pressed
@@ -220,9 +325,8 @@ public class ShoppingListOverviewFragment extends Fragment {
         SharedPreferences sortDetails = mContext.getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE);
 
         // decl
-        final RecyclerView shoppingListView;
         // init
-        shoppingListView = (RecyclerView) getActivity().findViewById(R.id.fragment_shopping_list);
+        mRecyclerView = (RecyclerView) getActivity().findViewById(R.id.fragment_shopping_list);
 
         // assign other listname if none is assigned
         if (mCurrentListName == null) {
@@ -247,10 +351,26 @@ public class ShoppingListOverviewFragment extends Fragment {
         mLayoutManager = new LinearLayoutManager(this.getActivity());
         mLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
 
-        shoppingListView.setLayoutManager(mLayoutManager);
-        shoppingListView.addItemDecoration(new DividerItemListDecoration(getResources().getDrawable(R.drawable.list_divider), false, false));
-        shoppingListView.setAdapter(mShoppingItemListAdapter);
-        shoppingListView.setItemAnimator(new DefaultItemAnimator());
+        mRecyclerView.setLayoutManager(mLayoutManager);
+        mRecyclerView.addItemDecoration(new DividerItemListDecoration(getResources().getDrawable(R.drawable.list_divider), false, false));
+        mRecyclerView.setAdapter(mShoppingItemListAdapter);
+        mRecyclerView.setItemAnimator(new DefaultItemAnimator());
+
+        mRecyclerView.addOnItemTouchListener(new OnRecyclerItemTouchListener(mContext, mRecyclerView) {
+
+            @Override
+            public void onLongPress(View _ChildView, int _Position) {
+                super.onLongPress(_ChildView, _Position);
+                mShoppingItemListAdapter.setToEditMode(_Position);
+                if (mActionMode != null) {
+                    return;
+                }
+                mActionModeCallback = new OnShoppingListItemActionModeListener(mContext, _ChildView, mShoppingItemListAdapter.getItemId(_Position));
+                // Start the CAB using the Callback defined above
+                mActionMode = getActivity().startActionMode(mActionModeCallback);
+                _ChildView.setSelected(true);
+            }
+        });
 
         mAddButton.setOnClickListener(new View.OnClickListener() {
             @Override

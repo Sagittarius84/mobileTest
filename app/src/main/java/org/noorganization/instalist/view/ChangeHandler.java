@@ -22,6 +22,7 @@ public class ChangeHandler extends IChangeHandler {
 
     @Override
     public void handleMessage(Message _message) {
+
         if (mCurrentFragment == null || mSideDrawerEvents == null) {
            return;
         }

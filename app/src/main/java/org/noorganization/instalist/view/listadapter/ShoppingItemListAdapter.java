@@ -7,10 +7,8 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import org.noorganization.instalist.R;
 import org.noorganization.instalist.controller.IListController;
@@ -20,6 +18,7 @@ import org.noorganization.instalist.model.Unit;
 import org.noorganization.instalist.model.view.ListEntryItemWrapper;
 import org.noorganization.instalist.touchlistener.OnSimpleSwipeGestureListener;
 import org.noorganization.instalist.view.customview.AmountPicker;
+import org.noorganization.instalist.view.spinneradapter.UnitSpinnerAdapter;
 import org.noorganization.instalist.view.utils.ViewUtils;
 
 import java.util.ArrayList;
@@ -47,7 +46,7 @@ public class ShoppingItemListAdapter extends RecyclerView.Adapter<RecyclerView.V
     /**
      * Indicates that this list is currently in edit mode.
      */
-    private ListEntry mCurrentListInEditMode;
+    private static ListEntryItemWrapper mCurrentListInEditMode;
 
     // -----------------------------------------------------------
 
@@ -72,7 +71,9 @@ public class ShoppingItemListAdapter extends RecyclerView.Adapter<RecyclerView.V
             mViewHolderRef = this;
             mContext = _Context;
 
+           /*
             mProductAmount.setOnTouchListener(new OnSimpleSwipeGestureListener(_ItemView.getContext(), _ItemView) {
+
                 @Override
                 public void onSingleTap(View childView) {
                     super.onSingleTap(childView);
@@ -116,29 +117,23 @@ public class ShoppingItemListAdapter extends RecyclerView.Adapter<RecyclerView.V
                 public void onLongTap(View childView) {
                     super.onLongTap(childView);
                     ListEntryItemWrapper entry = mListOfEntries.get(mViewHolderRef.getAdapterPosition());
+                    if(mCurrentListInEditMode != null){
+                        mCurrentListInEditMode.setEditMode(false);
+
+                    }
                     entry.setEditMode(true);
-
-                    // Toast.makeText(mContext, "Item deleted: " + entry.mProduct.mName, Toast.LENGTH_SHORT).show();
-                    // ControllerFactory.getListController().removeItem(entry);
-                    /*childView.findViewById(R.id.list_product_shopping_product_amount_type_edit);
-                    childView.findViewById(R.id.list_product_shopping_product_amount_edit);
-                    childView.findViewById(R.id.list_product_shopping_product_name_edit);
-                    LinearLayout l1 = (LinearLayout) childView.findViewById(R.id.list_shopping_product_edit_view);
-                    LinearLayout l2 = (LinearLayout) childView.findViewById(R.id.list_shopping_product_default_view);
-
-                    l1.setVisibility(View.GONE);
-                    l2.setVisibility(View.VISIBLE);*/
+                    mCurrentListInEditMode = entry;
                 }
-            });
+            }); */
         }
 
     }
 
     public final static class ShoppingListEditProductViewHolder extends RecyclerView.ViewHolder {
 
-        private AmountPicker mProductAmount;
-        private Spinner      mProductType;
-        // private EditText     mProductName;
+        public AmountPicker mProductAmount;
+        public Spinner      mProductType;
+        public TextView     mProductName;
 
         private IListController               mListController;
         private ShoppingListProductViewHolder mViewHolderRef;
@@ -147,6 +142,7 @@ public class ShoppingItemListAdapter extends RecyclerView.Adapter<RecyclerView.V
             super(_ItemView);
             mProductAmount = (AmountPicker) _ItemView.findViewById(R.id.list_product_shopping_product_amount_edit);
             mProductType = (Spinner) _ItemView.findViewById(R.id.list_product_shopping_product_amount_type_edit);
+            mProductName = (TextView)  _ItemView.findViewById(R.id.list_product_shopping_product_name);
         }
 
     }
@@ -238,8 +234,9 @@ public class ShoppingItemListAdapter extends RecyclerView.Adapter<RecyclerView.V
 
                 AmountPicker prodAmountPicker = viewHolderEdit.mProductAmount;
                 Spinner productType1 = viewHolderEdit.mProductType;
-
-                productType1.setAdapter(new ArrayAdapter<Unit>(mActivity, android.R.layout.simple_spinner_item, Unit.listAll(Unit.class)));
+                TextView productName1 = viewHolderEdit.mProductName;
+                productName1.setText(singleEntry.mProduct.mName);
+                productType1.setAdapter(new UnitSpinnerAdapter(mActivity, Unit.listAll(Unit.class)));
                 prodAmountPicker.setValue(singleEntry.mAmount);
                 break;
             case SELECTED_MODE_VIEW:
@@ -260,6 +257,21 @@ public class ShoppingItemListAdapter extends RecyclerView.Adapter<RecyclerView.V
     }
 
     /**
+     * Get the position of the given id.
+     * @param id the id to find.
+     * @return -1 if nothing was found, the index if found.
+     */
+    public int getPositionForId(long id){
+        int position = -1;
+        for(ListEntryItemWrapper listItem : mListOfEntries){
+            ++ position;
+            if(listItem.getListEntry().getId().equals(id)){
+                break;
+            }
+        }
+        return position;
+    }
+    /**
      * Removes the given entry from list and notfies the adapter that this object has been removed.
      *
      * @param _Entry the entry of the element that should be deleted.
@@ -267,15 +279,17 @@ public class ShoppingItemListAdapter extends RecyclerView.Adapter<RecyclerView.V
     public void removeItem(ListEntry _Entry) {
 
         int index = - 1;
+        ListEntryItemWrapper entryItemWrapper = new ListEntryItemWrapper(_Entry);
+
         synchronized (mListOfEntries) {
             for (ListEntryItemWrapper listEntry : mListOfEntries) {
 
                 // somehow only this works for finding the equal ids
-                long id1 = _Entry.getId();
+                long id1 = entryItemWrapper.getListEntry().getId();
                 long id2 = listEntry.getListEntry().getId();
                 if (id1 == id2) {
 
-                    index = mListOfEntries.indexOf(listEntry);
+                    index = mListOfEntries.indexOf(entryItemWrapper);
                     notifyItemRemoved(index);
                 }
             }
@@ -283,6 +297,32 @@ public class ShoppingItemListAdapter extends RecyclerView.Adapter<RecyclerView.V
         if (index >= 0) {
             mListOfEntries.remove(index);
         }
+    }
+
+    private void resetEditModeViewInternal(){
+        if(mCurrentListInEditMode != null){
+            mCurrentListInEditMode.setEditMode(false);
+            notifyItemChanged(mListOfEntries.indexOf(mCurrentListInEditMode));
+        }
+    }
+
+    /**
+     * Resets the view back to normal view mode. So one unified view will be displayed.
+     */
+    public void resetEditModeView(){
+        resetEditModeViewInternal();
+    }
+
+    /**
+     * The Entry that was choosed to be edited.
+     * @param _Position position of the selected list.
+     */
+    public void setToEditMode(int _Position){
+        resetEditModeViewInternal();
+
+        mCurrentListInEditMode = mListOfEntries.get(_Position);
+        mCurrentListInEditMode.setEditMode(true);
+        notifyItemChanged(_Position);
     }
 
     /**
@@ -298,7 +338,6 @@ public class ShoppingItemListAdapter extends RecyclerView.Adapter<RecyclerView.V
 
     public void sortByComparator(Comparator _Comparator) {
         mComparator = _Comparator;
-        // AlphabeticalListEntryComparator comparator = new AlphabeticalListEntryComparator();
         Collections.sort(mListOfEntries, _Comparator);
         notifyDataSetChanged();
     }
@@ -313,32 +352,31 @@ public class ShoppingItemListAdapter extends RecyclerView.Adapter<RecyclerView.V
         // TODO performance, usage of some comperator or so...
 
         int positionToChange = - 1;
+        ListEntryItemWrapper listEntryItemWrapper = new ListEntryItemWrapper(_Entry);
         synchronized (mListOfEntries) {
             //positionToChange = Collections.binarySearch(mListOfEntries, _Entry, mComparator);
 
             for (ListEntryItemWrapper listEntry : mListOfEntries) {
 
                 // somehow only this works for finding the equal ids
-                long id1 = _Entry.getId();
+                long id1 = listEntryItemWrapper.getListEntry().getId();
                 long id2 = listEntry.getListEntry().getId();
                 if (id1 == id2) {
                     int index = mListOfEntries.indexOf(listEntry);
                     positionToChange = index;
                     // update reference to given entry from controller
-                    mListOfEntries.set(index, new ListEntryItemWrapper(_Entry));
+                    mListOfEntries.set(index, listEntryItemWrapper);
                     break;
                 }
             }
         }
 
         if (positionToChange >= 0) {
-            ListEntry entry = mListOfEntries.get(positionToChange).getListEntry();
-
             /** -6- 3 7 1 **/
             notifyItemChanged(positionToChange);
             Collections.sort(mListOfEntries, mComparator);
 
-            int indexOfMovedEntry = Collections.binarySearch(mListOfEntries, _Entry, mComparator);
+            int indexOfMovedEntry = Collections.binarySearch(mListOfEntries, listEntryItemWrapper, mComparator);
             /*
             int posToMoveTo = mListOfEntries.indexOf(_Entry);
 

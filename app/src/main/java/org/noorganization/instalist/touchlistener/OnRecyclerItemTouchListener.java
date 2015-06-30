@@ -33,10 +33,31 @@ public class OnRecyclerItemTouchListener implements RecyclerView.OnItemTouchList
     }
 
 
+    /**
+     * Event fires if user flings from left to right.
+     * @param childView the view of the affected action.
+     * @param position the position in the recycleradapter.
+     */
     public void onSwipeRight(View childView, int position) {}
-    public void onSwipeLeft(View childView, int position) {}
-    public void onSingleTap(View childView, int position){}
 
+    /**
+     * Event fires if user flings from right to left.
+     * @param childView the view of the affected action.
+     * @param position the position in the recycleradapter.
+     */
+    public void onSwipeLeft(View childView, int position) {}
+    /**
+     * Event fires if user do a single tap on a item in the list.
+     * @param childView the view of the affected action.
+     * @param position the position in the recycleradapter.
+     */
+    public void onSingleTap(View childView, int position){}
+    /**
+     * Event fires if user do a LongPress on a item in the view..
+     * @param _ChildView the view of the affected action.
+     * @param _Position the position in the recycleradapter.
+     */
+    public void onLongPress(View _ChildView, int _Position){}
 
 
 
@@ -64,19 +85,28 @@ public class OnRecyclerItemTouchListener implements RecyclerView.OnItemTouchList
             int position    = mRecyclerView.getChildAdapterPosition(childView);
 
             mGestureListener.onSingleTap(childView, position);
-            return true;
+            return false;
+        }
+
+        @Override
+        public void onLongPress(MotionEvent e) {
+            super.onLongPress(e);
+            View childView  = mRecyclerView.findChildViewUnder(e.getX(), e.getY());
+            int position    = mRecyclerView.getChildAdapterPosition(childView);
+
+            mGestureListener.onLongPress(childView, position);
         }
 
         @Override
         public boolean onDown(MotionEvent e) {
-            return true;
+            return false;
         }
 
         @Override
         public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
 
             // boolean result = false;
-            if(e1 == null || e2 == null) return true;
+            if(e1 == null || e2 == null) return false;
 
             float diffX = e2.getX() - e1.getX();
 
