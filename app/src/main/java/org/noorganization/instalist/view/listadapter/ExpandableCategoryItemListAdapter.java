@@ -1,6 +1,7 @@
 package org.noorganization.instalist.view.listadapter;
 
 import android.content.Context;
+import android.text.method.ScrollingMovementMethod;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -96,6 +97,8 @@ public class ExpandableCategoryItemListAdapter extends BaseExpandableListAdapter
 
         TextView tvCategoryName      = (TextView) view.findViewById(R.id.expandable_list_view_category_name);
         TextView tvCategoryItemCount = (TextView) view.findViewById(R.id.expandable_list_view_category_entries);
+
+        tvCategoryName.setSelected(true);
         //ImageView deleteImage        = (ImageView) view.findViewById(R.id.expandable_list_view_edit_delete);
 
         //deleteImage.setOnClickListener(new OnDeleteCategoryClickListener(category.getId()));
@@ -123,6 +126,8 @@ public class ExpandableCategoryItemListAdapter extends BaseExpandableListAdapter
         TextView tvListName      = (TextView) view.findViewById(R.id.expandable_list_view_list_name);
         TextView tvListItemCount = (TextView) view.findViewById(R.id.expandable_list_view_list_entries);
         //ImageView deleteImage        = (ImageView) view.findViewById(R.id.expandable_list_view_edit_delete);
+
+        tvListName.setSelected(true);
 
         tvListName.setText(shoppingList.mName);
         tvListItemCount.setText(String.valueOf(shoppingList.getEntries().size()));

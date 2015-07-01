@@ -141,18 +141,7 @@ public class ExpandableShoppingListHelper implements IShoppingListHelper {
                         submitView.setOnClickListener(new OnSubmitClickListenerWithParentData(viewSwitcher, editText, category.getId(), mExpandableListAdapter));
 
                         editText.setText(category.mName);
-                        // consume the longClickEvents and also mark whole edittext text
-                        /* Probably use this otherwise.
-                        editText.setOnLongClickListener(new View.OnLongClickListener() {
 
-                            @Override
-                            public boolean onLongClick(View v) {
-                                EditText newName = (EditText) v.findViewById(R.id.expandable_list_view_category_name_edit);
-                                newName.selectAll();
-                                return true;
-                            }
-                        });
-                         */
                         viewSwitcher.showNext();
                         //endregion
                         break;

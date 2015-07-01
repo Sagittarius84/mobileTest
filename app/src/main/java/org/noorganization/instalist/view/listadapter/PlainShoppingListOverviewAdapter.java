@@ -71,7 +71,10 @@ public class PlainShoppingListOverviewAdapter extends ArrayAdapter<ShoppingList>
         ShoppingList shoppingList = getItem(_Position);
         String listName = shoppingList.mName;
         holder.mtvListName.setText(listName);
+
+        holder.mtvListName.setSelected(true);
         holder.mtvListItemCount.setText(String.valueOf(shoppingList.getEntries().size()));
+
         shoppingListNamesView.setOnClickListener(
                 new OnShoppingListClickListener(mIOnShoppingListClickEvents, mShoppingLists.get(_Position)));
 

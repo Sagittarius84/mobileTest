@@ -13,7 +13,7 @@
 
             <TextView
                 android:id="@+id/expandable_list_view_category_name"
-                style="@style/InstalistTheme1.list_text_style_left"/>
+                style="@style/InstalistTheme1.list_text_style_scrollable"/>
 
             <TextView
                 android:id="@+id/expandable_list_view_category_entries"
