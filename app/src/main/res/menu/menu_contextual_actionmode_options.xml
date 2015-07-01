@@ -1,17 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
+    <!--<item
+        android:id="@+id/menu_delete_action"
+        android:title="@string/delete"
+        android:icon="@mipmap/ic_delete_black_36dp"
+        app:showAsAction="ifRoom"
+        />-->
     <item
         android:id="@+id/menu_cancel_action"
         android:title="@string/menu_cancel_action"
         android:icon="@mipmap/ic_close_black_36dp"
-        android:orderInCategory="100"
         app:showAsAction="ifRoom" />
     <item
         android:id="@+id/menu_add_action"
         android:title="@string/menu_add_action"
-        android:icon="@mipmap/ic_add_black_24dp"
-        android:orderInCategory="100"
+        android:icon="@mipmap/ic_check_black_36dp"
         app:showAsAction="ifRoom" />
 
 </menu>

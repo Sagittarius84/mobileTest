@@ -87,4 +87,5 @@
     <string name="menu_add_item">Add</string>
     <string name="menu_add_action">Add</string>
     <string name="menu_cancel_action">Cancel</string>
+    <string name="delete">Delete</string>
 </resources>

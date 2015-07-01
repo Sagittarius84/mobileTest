@@ -40,7 +40,6 @@ public class GlobalApplication extends SugarApp {
 
         // Create a handler and attach it to current thread.
         mChangeHandler = new ChangeHandler();
-        mChangeHandler.setSend(false);
 
         // do this only in debug mode!
         // else it would destroy the database of a user and that would be the kill factor
@@ -48,7 +47,6 @@ public class GlobalApplication extends SugarApp {
             mDatabaseSeeder = DatabaseSeeder.getInstance();
             mDatabaseSeeder.startUp();
         }
-        mChangeHandler.setSend(true);
 
     }
 

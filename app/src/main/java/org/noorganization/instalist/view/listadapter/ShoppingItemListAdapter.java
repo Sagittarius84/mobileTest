@@ -331,6 +331,11 @@ public class ShoppingItemListAdapter extends RecyclerView.Adapter<RecyclerView.V
      * @param _Entry entry element that should be added.
      */
     public void addItem(ListEntry _Entry) {
+        // to prevent the same kind of entries in this list. Not nice but it works.
+        if(getPositionForId(_Entry.getId()) >=0 ){
+            return;
+        }
+
         mListOfEntries.add(new ListEntryItemWrapper(_Entry));
         Collections.sort(mListOfEntries, mComparator);
         notifyDataSetChanged();
