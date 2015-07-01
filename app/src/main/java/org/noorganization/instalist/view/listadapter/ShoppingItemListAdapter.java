@@ -70,61 +70,6 @@ public class ShoppingItemListAdapter extends RecyclerView.Adapter<RecyclerView.V
             mListController = ControllerFactory.getListController();
             mViewHolderRef = this;
             mContext = _Context;
-
-           /*
-            mProductAmount.setOnTouchListener(new OnSimpleSwipeGestureListener(_ItemView.getContext(), _ItemView) {
-
-                @Override
-                public void onSingleTap(View childView) {
-                    super.onSingleTap(childView);
-                    childView.findViewById(R.id.list_product_shopping_product_amount);
-                }
-            });
-
-            _ItemView.setOnTouchListener(new OnSimpleSwipeGestureListener(_ItemView.getContext(), _ItemView) {
-
-                private void toggleStrike(ListEntry _Entry) {
-                    if (_Entry.mStruck) {
-                        mListController.unstrikeItem(_Entry);
-                    } else {
-                        mListController.strikeItem(_Entry);
-                    }
-                }
-
-                @Override
-                public void onSwipeRight(View childView) {
-                    super.onSwipeRight(childView);
-                    ListEntry entry = mListOfEntries.get(mViewHolderRef.getAdapterPosition()).getListEntry();
-                    toggleStrike(entry);
-                }
-
-                @Override
-                public void onSwipeLeft(View childView) {
-                    super.onSwipeLeft(childView);
-                    ListEntry entry = mListOfEntries.get(mViewHolderRef.getAdapterPosition()).getListEntry();
-                    toggleStrike(entry);
-
-                }
-
-                @Override
-                public void onSingleTap(View childView) {
-                    super.onSingleTap(childView);
-                    ListEntry entry = mListOfEntries.get(mViewHolderRef.getAdapterPosition()).getListEntry();
-                    Toast.makeText(mContext, "Item selected: " + entry.mProduct.mName, Toast.LENGTH_SHORT).show();
-                }
-
-                @Override
-                public void onLongTap(View childView) {
-                    super.onLongTap(childView);
-                    ListEntryItemWrapper entry = mListOfEntries.get(mViewHolderRef.getAdapterPosition());
-                    if(mCurrentListInEditMode != null){
-                        mCurrentListInEditMode.setEditMode(false);
-
-                    }
-                    entry.setEditMode(true);
-                    mCurrentListInEditMode = entry;
-                }
-            }); */
         }
 
     }

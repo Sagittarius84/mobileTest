@@ -19,6 +19,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.software.shell.fab.ActionButton;
 
@@ -138,9 +139,8 @@ public class ShoppingListOverviewFragment extends Fragment {
                 case R.id.menu_add_action:
 
                     int position = mShoppingItemListAdapter.getPositionForId(mListEntryId);
-                    LinearLayoutManager layoutManager = (LinearLayoutManager) mRecyclerView.getLayoutManager();
 
-                    View view = layoutManager.findViewByPosition(position);
+                    View view = mLayoutManager.findViewByPosition(position);
                     AmountPicker amountPicker = (AmountPicker) view.findViewById(R.id.list_product_shopping_product_amount_edit);
 
                     if(amountPicker == null){
@@ -366,6 +366,36 @@ public class ShoppingListOverviewFragment extends Fragment {
         mRecyclerView.setItemAnimator(new DefaultItemAnimator());
 
         mRecyclerView.addOnItemTouchListener(new OnRecyclerItemTouchListener(mContext, mRecyclerView) {
+
+            private void toggleStrike(ListEntry _Entry) {
+                if (_Entry.mStruck) {
+                    mListController.unstrikeItem(_Entry);
+                } else {
+                    mListController.strikeItem(_Entry);
+                }
+            }
+
+            @Override
+            public void onSwipeRight(View _ChildView, int _Position) {
+                super.onSwipeRight(_ChildView, _Position);
+                ListEntry entry = ListEntry.findById(ListEntry.class, mShoppingItemListAdapter.getItemId(_Position));
+                toggleStrike(entry);
+            }
+
+            @Override
+            public void onSwipeLeft(View _ChildView, int _Position) {
+                super.onSwipeLeft(_ChildView, _Position);
+                ListEntry entry = ListEntry.findById(ListEntry.class, mShoppingItemListAdapter.getItemId(_Position));
+                toggleStrike(entry);
+
+            }
+
+            @Override
+            public void onSingleTap(View _ChildView, int _Position) {
+                super.onSingleTap(_ChildView, _Position);
+                ListEntry entry = ListEntry.findById(ListEntry.class, mShoppingItemListAdapter.getItemId(_Position));
+                Toast.makeText(mContext, "Item selected: " + entry.mProduct.mName, Toast.LENGTH_SHORT).show();
+            }
 
             @Override
             public void onLongPress(View _ChildView, int _Position) {
