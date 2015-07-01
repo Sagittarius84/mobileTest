@@ -12,6 +12,7 @@ import org.noorganization.instalist.model.Product;
 import java.util.List;
 
 /**
+ * Use it for displaying Product with a spinner.
  * Created by TS on 25.05.2015.
  */
 public class ProductSpinnerAdapter extends ArrayAdapter<Product> {

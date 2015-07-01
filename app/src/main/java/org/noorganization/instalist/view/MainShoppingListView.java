@@ -40,7 +40,7 @@ import org.noorganization.instalist.view.utils.ViewUtils;
 import java.util.List;
 
 /**
- * MainShoppingListView handles the display of an selected shoppinglist, so that the corresponding
+ * MainShoppingListView handles the display of an selected ShoppingList, so that the corresponding
  * items of this list are shown to the user.
  * <p/>
  * Is dependant on the selected list.
@@ -264,21 +264,6 @@ public class MainShoppingListView extends ActionBarActivity implements IBaseActi
         });
     }
 
-
-    /**
-     * Evaluates the EditText field for the new name {listname or category name} and returns the inserted text.
-     *
-     * @return the text that was inserted, else null.
-     */
-
-    private String validateAndGetNewName() {
-        mNewNameEditText.setError(null);
-        if (! ViewUtils.checkEditTextIsFilled(mNewNameEditText)) {
-            mNewNameEditText.setError(getString(R.string.drawer_layout_custom_no_input));
-            return null;
-        }
-        return mNewNameEditText.getText().toString();
-    }
 
     @Override
     protected void onPause() {

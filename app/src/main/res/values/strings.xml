@@ -84,4 +84,8 @@
     <string name="move_category">Move to Category</string>
     <string name="delete_category_error_category_is_default">Cannot remove category. It is the current default list. Change the default list to delete this list.</string>
     <string name="list_to_category_failed">Cannot move ShoppingList to Category.</string>
+    <string name="menu_add_item">Add</string>
+    <string name="menu_add_action">Add</string>
+    <string name="menu_cancel_action">Cancel</string>
+    <string name="delete">Delete</string>
 </resources>

@@ -7,23 +7,21 @@
     <TextView
         android:id = "@+id/list_product_shopping_product_amount"
         style="@style/single_line_product_text_view"
+        android:layout_width="0dp"
         android:layout_marginStart="16dp"
         android:layout_marginLeft="16dp"
         android:layout_weight="0.2"
-        android:minWidth="32dp"
     />
     <TextView
         android:id = "@+id/list_product_shopping_product_amount_type"
         style="@style/single_line_product_text_view"
-        android:layout_marginStart="16dp"
-        android:layout_marginLeft="16dp"
+        android:layout_width="0dp"
         android:layout_weight="0.1"
         />
     <TextView
         android:id = "@+id/list_product_shopping_product_name"
+        android:layout_width="0dp"
         style="@style/single_line_product_text_view"
-        android:layout_marginStart="16dp"
-        android:layout_marginLeft="16dp"
         android:layout_weight="0.7"
     />
 </LinearLayout>

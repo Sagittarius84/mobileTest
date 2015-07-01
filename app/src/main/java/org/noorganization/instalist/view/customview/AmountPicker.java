@@ -60,6 +60,7 @@ public class AmountPicker extends LinearLayout {
         mValueField.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
         mValueField.setKeyListener(ViewUtils.getNumberListener());
         mValueField.setHint(R.string.product_details_amount_hint);
+        mValueField.setGravity(View.TEXT_ALIGNMENT_CENTER);
 
         if (getOrientation() == LinearLayout.HORIZONTAL) {
             mDecreaseButton.setImageResource(R.mipmap.ic_remove_black_24dp);

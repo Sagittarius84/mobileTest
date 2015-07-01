@@ -9,6 +9,13 @@
         <item name="android:windowNoTitle">true</item>
         <item name="windowActionBar">false</item>
         <item name="android:windowBackground">@color/white</item>
+        <item name="android:actionModeCloseButtonStyle">@style/NoCloseButton</item>
+        <item name="windowActionModeOverlay">true</item>
+    </style>
+
+    <!-- remove the default close button in actionmode -->
+    <style name="NoCloseButton" parent="@android:style/Widget.ActionButton.CloseMode">
+        <item name="android:visibility">invisible</item>
     </style>
 
 </resources>
