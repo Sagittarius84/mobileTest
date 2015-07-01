@@ -1,65 +1,66 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/list_view_left_side_navigation"
     style="@style/left_side_navigation_drawer"
     android:layout_width="match_parent">
-<LinearLayout
-    android:id="@+id/container_edittext_new_name"
-    style="@style/InstalistTheme1.linearlayout_card_style"
-    android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:scrollbarAlwaysDrawHorizontalTrack="false">
-    <!-- Dummy item to prevent AutoCompleteTextView from receiving focus -->
+
     <LinearLayout
-        android:focusable="true" android:focusableInTouchMode="true"
-        android:layout_width="0px" android:layout_height="0px"/>
-    <EditText
-        android:id="@+id/drawer_layout_custom_new_name"
-        style="@style/InstalistTheme1.base_edit_text_style"
-        android:hint="@string/drawer_layout_custom_new_addition_hint"
-        />
-    <Button
-        android:id="@+id/drawer_layout_custom_create_list"
-        android:text="@string/create_list"
-        style="?android:attr/borderlessButtonStyle"
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/base_edittext_height"
-        android:textColor="@color/fab_material_light_blue_500"
-        android:visibility="gone"
-        android:gravity="right"
-        />
-
-    <Button
-        android:id="@+id/drawer_layout_custom_create_category"
-        style="?android:attr/borderlessButtonStyle"
-        android:text="@string/create_category"
-        android:layout_width="match_parent"
+        android:id="@+id/container_edittext_new_name"
+        style="@style/InstalistTheme1.linearlayout_card_style"
         android:layout_height="wrap_content"
-        android:visibility="gone"
-        android:textColor="@color/fab_material_light_blue_500"
-        android:gravity="right"
-        />
+        android:orientation="vertical"
+        android:scrollbarAlwaysDrawHorizontalTrack="false">
+        <!-- Dummy item to prevent AutoCompleteTextView from receiving focus -->
+        <LinearLayout
+            android:layout_width="0px"
+            android:layout_height="0px"
+            android:focusable="true"
+            android:focusableInTouchMode="true" />
 
-</LinearLayout>
+        <EditText
+            android:id="@+id/drawer_layout_custom_new_name"
+            style="@style/InstalistTheme1.base_edit_text_style"
+            android:hint="@string/drawer_layout_custom_new_addition_hint" />
+
+        <Button
+            android:id="@+id/drawer_layout_custom_create_list"
+            style="?android:attr/borderlessButtonStyle"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/base_edittext_height"
+            android:gravity="right"
+            android:text="@string/create_list"
+            android:textColor="@color/fab_material_light_blue_500"
+            android:visibility="gone" />
+
+        <Button
+            android:id="@+id/drawer_layout_custom_create_category"
+            style="?android:attr/borderlessButtonStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="right"
+            android:text="@string/create_category"
+            android:textColor="@color/fab_material_light_blue_500"
+            android:visibility="gone" />
+
+    </LinearLayout>
 
     <ExpandableListView
         android:id="@+id/drawer_layout_custom_list_name_view"
         style="@style/InstalistTheme1.linearlayout_card_style"
-        android:layout_below="@+id/container_edittext_new_name"
-        android:layout_above="@+id/drawer_layout_custom_settings" />
+        android:layout_above="@+id/drawer_layout_custom_settings"
+        android:layout_below="@+id/container_edittext_new_name" />
+
     <ListView
         android:id="@+id/drawer_layout_custom_plain_shopping_list_overview"
         style="@style/InstalistTheme1.linearlayout_card_style"
-        android:layout_below="@+id/container_edittext_new_name"
         android:layout_above="@+id/drawer_layout_custom_settings"
-        android:visibility="gone"
-    />
+        android:layout_below="@+id/container_edittext_new_name"
+        android:visibility="gone" />
+
     <Button
         android:id="@+id/drawer_layout_custom_settings"
-        style="@style/InstalistTheme1.base_button"
-        android:text="@string/action_settings"
+        style="@style/InstalistTheme1.base_list_button"
         android:layout_alignParentBottom="true"
-        />
+        android:text="@string/action_settings" />
 
 </RelativeLayout>

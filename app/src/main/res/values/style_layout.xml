@@ -1,33 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+
     <style name="InstalistTheme1.base_linear_layout_list">
         <item name="android:background">@color/for_background_color</item>
-        <item name = "android:orientation"  >horizontal</item>
-        <item name = "android:layout_width" >match_parent</item>
-        <item name = "android:layout_height">@dimen/base_list_entry_height</item>
-        <item name = "android:paddingLeft"  >@dimen/base_list_entry_padding_left</item>
-        <item name = "android:paddingRight" >0dp</item>
+        <item name="android:orientation">horizontal</item>
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">@dimen/base_list_entry_height</item>
+        <item name="android:paddingLeft">@dimen/base_list_entry_padding_left</item>
+        <item name="android:paddingRight">0dp</item>
     </style>
+
     <style name="InstalistTheme1.linearlayout_card_style">
-        <item name = "android:layout_width" >match_parent</item>
-        <item name = "android:layout_height">@dimen/base_list_entry_height</item>
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">@dimen/base_list_entry_height</item>
         <item name="android:layout_marginTop">@dimen/base_margin</item>
         <item name="android:layout_marginLeft">@dimen/base_padding_right</item>
         <item name="android:layout_marginRight">@dimen/base_padding_top</item>
-        <item name="android:background">@drawable/border_shadow</item>
-        <!--<item name="android:layout_marginBottom">@dimen/base_padding_bottom</item>-->
-        <!--
-        <item name="android:background">@color/for_background_color</item>
-        <item name="android:shadowDx">@dimen/shadow_dx</item>
-        <item name="android:shadowDy">@dimen/shadow_dy</item>
-        <item name="android:shadowColor">@color/shadow_color</item>
-        <item name="android:shadowRadius">@dimen/shadow_radius</item>-->
     </style>
     <!-- Probably for later tewaks-->
-    <style name="InstalistTheme1.expandable_list_first_linear_layout_container" parent="match_parent_width_height">
-    </style>
-    <style name="InstalistTheme1.expandable_list_second_linear_layout_container" parent="match_parent_width_height">
-    </style>
+    <style name="InstalistTheme1.expandable_list_first_linear_layout_container" parent="match_parent_width_height"></style>
+
+    <style name="InstalistTheme1.expandable_list_second_linear_layout_container" parent="match_parent_width_height"></style>
     <!-- -->
     <dimen name="shadow_dx">2dp</dimen>
     <dimen name="shadow_dy">2dp</dimen>

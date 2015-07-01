@@ -66,6 +66,10 @@
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">@dimen/base_flatten_button_height</item>
     </style>
+    <style name="InstalistTheme1.base_list_button" parent="InstalistTheme1.base_button">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">@dimen/base_list_entry_height</item>
+    </style>
     <style name="InstalistTheme1.base_list_entry" parent="InstalistTheme1.base_text_style">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">@dimen/base_list_entry_height</item>

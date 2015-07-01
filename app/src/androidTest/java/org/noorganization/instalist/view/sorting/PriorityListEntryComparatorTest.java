@@ -5,6 +5,7 @@ import android.test.AndroidTestCase;
 import org.noorganization.instalist.model.ListEntry;
 import org.noorganization.instalist.model.Product;
 import org.noorganization.instalist.model.ShoppingList;
+import org.noorganization.instalist.model.view.ListEntryItemWrapper;
 
 import java.util.Comparator;
 import java.util.Locale;
@@ -36,15 +37,20 @@ public class PriorityListEntryComparatorTest extends AndroidTestCase {
         ListEntry listEntryB = new ListEntry(list, productWithB, 1.0f, false, -1);
         ListEntry listEntryUUml = new ListEntry(list, productWithUUml, 1.0f, false, 0);
 
-        Comparator<ListEntry> comp = new PriorityListEntryComparator();
-        assertEquals(0, comp.compare(listEntryA, listEntryA));
-        assertTrue(comp.compare(listEntryAUml, listEntryA) > 0);
-        assertTrue(comp.compare(listEntryUUml, listEntryAUml) > 0);
-        assertTrue(comp.compare(listEntryB, listEntryUUml) > 0);
+        ListEntryItemWrapper listEntryItemWrapperA = new ListEntryItemWrapper(listEntryA);
+        ListEntryItemWrapper listEntryItemWrapperAUml = new ListEntryItemWrapper(listEntryAUml);
+        ListEntryItemWrapper listEntryItemWrapperB = new ListEntryItemWrapper(listEntryB);
+        ListEntryItemWrapper listEntryItemWrapperUUml = new ListEntryItemWrapper(listEntryUUml);
 
-        assertTrue(comp.compare(listEntryUUml, listEntryB) < 0);
-        assertTrue(comp.compare(listEntryAUml, listEntryUUml) < 0);
-        assertTrue(comp.compare(listEntryA, listEntryAUml) < 0);
+        Comparator<ListEntryItemWrapper> comp = new PriorityListEntryComparator();
+        assertEquals(0, comp.compare(listEntryItemWrapperA, listEntryItemWrapperA));
+        assertTrue(comp.compare(listEntryItemWrapperAUml, listEntryItemWrapperA) > 0);
+        assertTrue(comp.compare(listEntryItemWrapperUUml, listEntryItemWrapperAUml) > 0);
+        assertTrue(comp.compare(listEntryItemWrapperB, listEntryItemWrapperUUml) > 0);
+
+        assertTrue(comp.compare(listEntryItemWrapperUUml, listEntryItemWrapperB) < 0);
+        assertTrue(comp.compare(listEntryItemWrapperAUml, listEntryItemWrapperUUml) < 0);
+        assertTrue(comp.compare(listEntryItemWrapperA, listEntryItemWrapperAUml) < 0);
 
     }
 
