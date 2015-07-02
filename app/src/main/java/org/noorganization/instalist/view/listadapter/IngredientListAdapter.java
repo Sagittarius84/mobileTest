@@ -2,101 +2,138 @@ package org.noorganization.instalist.view.listadapter;
 
 import android.app.Activity;
 import android.app.Fragment;
+import android.content.Context;
+import android.database.DataSetObserver;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.ListAdapter;
 import android.widget.TextView;
 
 import org.noorganization.instalist.R;
 import org.noorganization.instalist.model.Ingredient;
 import org.noorganization.instalist.view.MainShoppingListView;
+import org.noorganization.instalist.view.customview.AmountPicker;
 import org.noorganization.instalist.view.datahandler.RecipeDataHolder;
 import org.noorganization.instalist.view.fragment.IngredientCreationFragment;
-import org.noorganization.instalist.view.fragment.RecipeCreationFragment;
 import org.noorganization.instalist.view.interfaces.IBaseActivity;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
  * Created by TS on 23.05.2015.
  */
-public class IngredientListAdapter extends ArrayAdapter<Ingredient> {
+public class IngredientListAdapter implements ListAdapter {
 
-    private List<Ingredient> mIngredientList;
-    private List<Ingredient> mRemovedIngredients;
+    private List<Ingredient>      mUnderlyingIngredients;
+    private List<DataSetObserver> mObservers;
+    private static final int TYPEID_INGREDIENT = 1;
+    private static final int TYPEID_BUTTON_BAR = 2;
 
-    private Activity mContext;
-    private IBaseActivity mBaseActivity;
+    private Context mContext;
 
-    public IngredientListAdapter(Activity _Context, List<Ingredient> _IngredientList){
-        super(_Context, R.layout.list_recipe_ingredient_entry  , _IngredientList);
-        mIngredientList = _IngredientList;
-        mRemovedIngredients = new ArrayList<>();
-        mContext = _Context;
-        try{
-            mBaseActivity = (IBaseActivity) _Context;
-        } catch(ClassCastException e){
-            throw new ClassCastException(_Context.toString() + " has no IBaseActivity interface implemented.");
-        }
+    public IngredientListAdapter(Context _context) {
+        mUnderlyingIngredients = new ArrayList<>();
+        mObservers = new LinkedList<>();
+
+        mContext = _context;
     }
 
     @Override
-    public View getView(int _Position, View _ConvertView, ViewGroup _Parent) {
-        View view = null;
-        Ingredient ingredientEntry      = mIngredientList.get(_Position);
+    public void registerDataSetObserver(DataSetObserver _dataSetObserver) {
+        mObservers.add(_dataSetObserver);
+    }
 
-        if(_ConvertView == null){
-            LayoutInflater shoppingListNamesInflater = mContext.getLayoutInflater();
-            view = shoppingListNamesInflater.inflate(R.layout.list_recipe_ingredient_entry, null);
-        }else{
-            view = _ConvertView;
+    @Override
+    public void unregisterDataSetObserver(DataSetObserver _dataSetObserver) {
+        mObservers.remove(_dataSetObserver);
+    }
+
+    @Override
+    public int getCount() {
+        return mUnderlyingIngredients.size() + 1;
+    }
+
+    @Override
+    public Object getItem(int _position) {
+        if (_position >= mUnderlyingIngredients.size()) {
+            return "data";
         }
 
-        TextView amountTextView     = (TextView) view.findViewById(R.id.list_recipe_ingredient_entry_amount);
-        TextView amountTypeTextView = (TextView) view.findViewById(R.id.list_recipe_ingredient_entry_amount_type);
-        TextView nameTextView       = (TextView) view.findViewById(R.id.list_recipe_ingredient_entry_name);
+        return mUnderlyingIngredients.get(_position);
+    }
 
-        if(ingredientEntry.mProduct.mUnit != null) {
-            amountTypeTextView.setText(ingredientEntry.mProduct.mUnit.mName);
+    @Override
+    public long getItemId(int _position) {
+        if (_position < mUnderlyingIngredients.size()) {
+            return mUnderlyingIngredients.get(_position).mProduct.getId();
         }
-        amountTextView.setText(String.valueOf(ingredientEntry.mAmount));
-        nameTextView.setText(ingredientEntry.mProduct.mName);
-
-        view.setOnLongClickListener(new IngredientOnLongClickListener(ingredientEntry));
-
-        return view;
+        return 0;
     }
 
-    public void addIngredient(Ingredient _Ingredient) {
-        mIngredientList.add(_Ingredient);
-        notifyDataSetChanged();
+    @Override
+    public boolean hasStableIds() {
+        return true;
     }
 
-    public void removeIngredient(Ingredient _Ingredient){
-        int index = mIngredientList.indexOf(_Ingredient);
-        Ingredient ingredient = mIngredientList.get(index);
-        if(ingredient != null){
-            mRemovedIngredients.add(ingredient);
+    @Override
+    public View getView(int _position, View _viewToRecycle, ViewGroup _parent) {
+        View rtn;
+        Log.d("Ingredient", "Wanted view for position " + _position);
+        if (_position >= mUnderlyingIngredients.size()) {
+            rtn = new TextView(mContext);
+            ((TextView) rtn).setText("Just a dummy");
+        } else {
+            /*Ingredient current = mUnderlyingIngredients.get(_position);
+
+            if (_viewToRecycle == null) {
+                LayoutInflater inflater = LayoutInflater.from(mContext);
+                rtn = inflater.inflate(R.layout.entry_ingredient, _parent);
+            } else {
+                rtn = _viewToRecycle;
+            }
+
+            AmountPicker picker = ((AmountPicker) rtn.findViewById(R.id.entry_ingredient_amount));
+            picker.setValue(current.mAmount);
+            picker.setStep(current.mProduct.mStepAmount);
+
+            TextView productLabel = ((TextView) rtn.findViewById(R.id.entry_ingredient_product));
+            productLabel.setText(current.mProduct.mName);
+
+            */
+            rtn = new TextView(mContext);
+            ((TextView) rtn).setText("Just another dummy");
         }
-
-        mIngredientList.remove(index);
-        notifyDataSetChanged();
+        return rtn;
     }
 
-    public List<Ingredient> getIngredients(){
-        return mIngredientList;
+    @Override
+    public int getItemViewType(int _position) {
+        return (mUnderlyingIngredients.size() > _position ? TYPEID_INGREDIENT : TYPEID_BUTTON_BAR);
     }
 
-    public List<Ingredient> getRemovedIngredients(){
-        return mRemovedIngredients;
+    @Override
+    public int getViewTypeCount() {
+        return 2;
     }
 
-    public void setData(List<Ingredient> _Ingredients, List<Ingredient> _RemovedIngredients) {
-        this.mIngredientList = _Ingredients;
-        this.mRemovedIngredients = _RemovedIngredients;
-        notifyDataSetChanged();
+    @Override
+    public boolean isEmpty() {
+        return false;
+    }
+
+    @Override
+    public boolean areAllItemsEnabled() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled(int _position) {
+        return true;
     }
 
     private class IngredientOnLongClickListener implements View.OnLongClickListener

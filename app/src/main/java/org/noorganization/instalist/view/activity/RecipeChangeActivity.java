@@ -1,42 +1,35 @@
-package org.noorganization.instalist.view.fragment;
+package org.noorganization.instalist.view.activity;
 
-import android.app.Activity;
-import android.app.Fragment;
+import android.app.FragmentManager;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
+import android.support.v4.app.FragmentActivity;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.ActionBarActivity;
+import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.widget.Button;
-import android.widget.EditText;
-import android.widget.ListView;
-import android.widget.Toast;
 
 import org.noorganization.instalist.R;
-import org.noorganization.instalist.controller.implementation.ControllerFactory;
-import org.noorganization.instalist.model.Ingredient;
 import org.noorganization.instalist.model.Recipe;
 import org.noorganization.instalist.model.ShoppingList;
-import org.noorganization.instalist.view.datahandler.RecipeDataHolder;
+import org.noorganization.instalist.view.fragment.RecipeEditorFragment;
 import org.noorganization.instalist.view.interfaces.IBaseActivity;
-import org.noorganization.instalist.view.listadapter.IngredientListAdapter;
 import org.noorganization.instalist.view.utils.ViewUtils;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Fragment that handles the creation of a recipe.
  * Created by TS on 28.04.2015.
  */
-public class RecipeCreationFragment extends Fragment {
+public class RecipeChangeActivity extends ActionBarActivity {
 
     private static final String ARGS_LIST_NAME = "list_name";
     private static final String ARGS_RECIPE_ID = "recipe_id";
 
 
     private ShoppingList mCurrentShoppingList;
-    private ViewAcccessor mViewAccessor;
+    //private ViewAcccessor mViewAccessor;
     private Recipe  mRecipe;
     private Button mAddIngredientButton;
     private Button mAddRecipeButton;
@@ -45,9 +38,9 @@ public class RecipeCreationFragment extends Fragment {
     private IBaseActivity mBaseActivityInterface;
     private Context mContext;
 
-    private static RecipeCreationFragment mInstance;
+    private static RecipeChangeActivity mInstance;
 
-    private View.OnClickListener mOnAddRecipeClickListener = new View.OnClickListener() {
+    /*private View.OnClickListener mOnAddRecipeClickListener = new View.OnClickListener() {
 
         @Override
         public void onClick(View v) {
@@ -152,45 +145,13 @@ public class RecipeCreationFragment extends Fragment {
 
             return true;
         }
-    };
+    };*/
 
-    /**
-     * Creates an instance of an ProductChangeFragment with the details of the product.
-     * @param _ListName the name of the list where the product should be added.
-     * @return the new instance of this fragment.
-     */
-    public static RecipeCreationFragment newInstance(String _ListName){
-        RecipeCreationFragment fragment = new RecipeCreationFragment();
-        Bundle args = new Bundle();
-        args.putString(ARGS_LIST_NAME, _ListName);
-        args.putLong(ARGS_RECIPE_ID, -1L);
-        fragment.setArguments(args);
-        mInstance = fragment;
-        return fragment;
-    }
-
-
-    /**
-     * Creates an instance of an ProductChangeFragment.
-     * @param _RecipeId the id in the database of the product that should be edited.
-     * @param _ListName the name of the list where the calling productlistselector should save the products.
-     * @return the new instance of this fragment.
-     */
-    public static RecipeCreationFragment newInstance(String _ListName, long _RecipeId){
-        RecipeCreationFragment fragment = new RecipeCreationFragment();
-        Bundle args = new Bundle();
-        args.putString(ARGS_LIST_NAME, _ListName);
-        args.putLong(ARGS_RECIPE_ID, _RecipeId);
-        fragment.setArguments(args);
-        mInstance = fragment;
-        return fragment;
-    }
-
-    public static RecipeCreationFragment getInstance(){
+    /*public static RecipeChangeActivity getInstance(){
         return mInstance;
-    }
+    }*/
 
-    @Override
+    /*@Override
     public void onAttach(Activity _Activity) {
         super.onAttach(_Activity);
         mContext = _Activity;
@@ -200,32 +161,53 @@ public class RecipeCreationFragment extends Fragment {
             throw new ClassCastException(_Activity.toString()
                     + " has no IBaseActivity interface attached.");
         }
-    }
+    }*/
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        mCurrentShoppingList = ShoppingList.find(ShoppingList.class, ShoppingList.ATTR_NAME + "=?", getArguments().getString(ARGS_LIST_NAME)).get(0);
+    public void onCreate(Bundle _savedInstanceState) {
+        super.onCreate(_savedInstanceState);
+
+        Log.i("Create", "created.");
+
+        setContentView(R.layout.activity_clean_w_actionbar);
+
+        setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
+        ActionBar bar = getSupportActionBar();
+        if (bar != null) {
+            bar.setTitle(R.string.edit_recipe);
+        }
+
+        if (_savedInstanceState == null) {
+            Intent intent = getIntent();
+            if (intent.getExtras() == null || intent.getExtras().isEmpty()) {
+                ViewUtils.addFragment(this, RecipeEditorFragment.newCreationInstance());
+            } else {
+                // TODO add also fragment, but for editing
+            }
+        }
+
+        /*mCurrentShoppingList = ShoppingList.find(ShoppingList.class, ShoppingList.ATTR_NAME + "=?", getArguments().getString(ARGS_LIST_NAME)).get(0);
 
         // check if an product should be shown
         if(getArguments().getInt(ARGS_RECIPE_ID) >= 0){
             long recipeId = getArguments().getLong(ARGS_RECIPE_ID);
             mRecipe = Recipe.findById(Recipe.class, recipeId);
-        }
+        }*/
     }
 
-    @Override
-    public View onCreateView(LayoutInflater _Inflater, ViewGroup _Container, Bundle _SavedInstanceState) {
-        super.onCreateView(_Inflater, _Container, _SavedInstanceState);
+    //@Override
+    //public View onCreateView(LayoutInflater _inflater, ViewGroup _container, Bundle _savedInstanceState) {
+        //super.onCreateView(_inflater, _container, _savedInstanceState);
 
-        String titleString;
-        View view = _Inflater.inflate(R.layout.fragment_recipe_details, _Container, false);
+      //  String titleString;
+        //View view = _inflater.inflate(R.layout.fragment_recipe_details, _container, false);
 
-        mAddIngredientButton = (Button) view.findViewById(R.id.fragment_recipe_details_add_ingredient);
-        mAddRecipeButton     = (Button) view.findViewById(R.id.fragment_recipe_details_add_recipe);
-        mCancelButton        = (Button) view.findViewById(R.id.fragment_recipe_details_cancel_recipe);
+        //Log.i("Create", "created view.");
+        //mAddIngredientButton = (Button) view.findViewById(R.id.fragment_recipe_details_add_ingredient);
+        //mAddRecipeButton     = (Button) view.findViewById(R.id.fragment_recipe_details_add_recipe);
+        //mCancelButton        = (Button) view.findViewById(R.id.fragment_recipe_details_cancel_recipe);
 
-        if(mRecipe == null) {
+        /*if(mRecipe == null) {
             mViewAccessor = new ViewAcccessor(view, getActivity());
             mAddRecipeButton.setText(mContext.getResources().getString(R.string.fragment_recipe_creation_add_recipe));
             titleString = mContext.getResources().getString(R.string.fragment_recipe_creation_add_recipe_title);
@@ -240,14 +222,16 @@ public class RecipeCreationFragment extends Fragment {
             mViewAccessor.loadRecipeFromDataHolder();
         }
 
-        mBaseActivityInterface.setToolbarTitle(titleString);
-        return view;
-    }
+        mBaseActivityInterface.setToolbarTitle(titleString);*/
+       // return view;
+    //}
+
 
     @Override
     public void onResume() {
         super.onResume();
-        mAddIngredientButton.setOnClickListener(new View.OnClickListener(){
+        Log.i("Create", "resumed view.");
+/*        mAddIngredientButton.setOnClickListener(new View.OnClickListener(){
 
             @Override
             public void onClick(View v) {
@@ -263,18 +247,20 @@ public class RecipeCreationFragment extends Fragment {
             public void onClick(View v) {
                 mBaseActivityInterface.onBackPressed();
             }
-        });
+        });*/
     }
+
 
     @Override
     public void onPause() {
         super.onPause();
-        mAddIngredientButton.setOnClickListener(null);
+        /*mAddIngredientButton.setOnClickListener(null);
         mAddRecipeButton.setOnClickListener(null);
-        mCancelButton.setOnClickListener(null);
+        mCancelButton.setOnClickListener(null);*/
+        Log.i("Create", "paused view.");
     }
 
-    private final static class ViewAcccessor{
+    /*private final static class ViewAcccessor{
 
         private EditText    mRecipeNameText;
         private ListView    mIngredientListView;
@@ -291,7 +277,7 @@ public class RecipeCreationFragment extends Fragment {
          * @param _View the view that is currently used.
          * @param _Context the context of the activity.
          */
-        public ViewAcccessor(View _View, Context _Context){
+/*        public ViewAcccessor(View _View, Context _Context){
             this.mView = _View;
             this.mContext = _Context;
             assignIds();
@@ -316,7 +302,7 @@ public class RecipeCreationFragment extends Fragment {
          * @param _Context the context of the activity.
          * @param _Recipe the recipe that should be filled in.
          */
-        public ViewAcccessor(View _View, Context _Context, Recipe _Recipe){
+/*        public ViewAcccessor(View _View, Context _Context, Recipe _Recipe){
 
            mView = _View;
            mContext = _Context;
@@ -343,7 +329,7 @@ public class RecipeCreationFragment extends Fragment {
          * Marks an unfilled entry as not filled.
          * @return true, if all elements are filled. false, if at least one element is not filled.
          */
-        public boolean isFilled(){
+/*        public boolean isFilled(){
             boolean returnValue = ViewUtils.checkEditTextIsFilled(mRecipeNameText);
             // check if at least on ingredient is there
             returnValue &= mIngredientListAdapter.getCount() > 0;
@@ -353,11 +339,11 @@ public class RecipeCreationFragment extends Fragment {
         /**
          * Assigns all related references to the single view components.
          */
-        private void assignIds(){
-            mRecipeNameText = (EditText) mView.findViewById(R.id.fragment_recipe_details_recipe_name);
+/*        private void assignIds(){
+            /*mRecipeNameText = (EditText) mView.findViewById(R.id.fragment_recipe_details_recipe_name);
             mRecipeTagText  = (EditText) mView.findViewById(R.id.fragment_recipe_details_recipe_tags);
-            mIngredientListView = (ListView) mView.findViewById(R.id.fragment_recipe_details_ingredient_container);
-        }
+            mIngredientListView = (ListView) mView.findViewById(R.id.fragment_recipe_details_ingredient_container);*/
+/*        }
 
         public String getRecipeName(){
             return mRecipeNameText.getText().toString();
@@ -367,7 +353,7 @@ public class RecipeCreationFragment extends Fragment {
          * Get the assigned tags from the recipe tags field
          * @return if any tags are entered an array of tags in string form, else you will receive null.
          */
-        public String[] getRecipeTags(){
+/*        public String[] getRecipeTags(){
             if(mRecipeTagText.getText().length() > 0) {
                 return mRecipeTagText.getText().toString().split(",");
             }
@@ -385,7 +371,7 @@ public class RecipeCreationFragment extends Fragment {
          * TODO: Add validation feature
          * @return true if input is valid, false if at least one input is invalid.
          */
-        public boolean isValid() {
+/*        public boolean isValid() {
             return true;
         }
 
@@ -393,7 +379,7 @@ public class RecipeCreationFragment extends Fragment {
         /**
          * Saves the current recipe to the RecipeDataHolder.
          */
-        public void saveRecipeToDataHolder(){
+/*        public void saveRecipeToDataHolder(){
             long id = -1L;
             boolean isNew = true;
             String recipeName = "";
@@ -415,7 +401,7 @@ public class RecipeCreationFragment extends Fragment {
         /**
          * Loads the recipe from the RecipeDataHolder.
          */
-        public void loadRecipeFromDataHolder(){
+/*        public void loadRecipeFromDataHolder(){
             if(mRecipeDataHolder.isNew()){
                 this.mRecipe = Recipe.findById(Recipe.class, mRecipeDataHolder.getRecipeID());
             }
@@ -423,6 +409,6 @@ public class RecipeCreationFragment extends Fragment {
             this.mIngredientListAdapter.setData(mRecipeDataHolder.getIngredients(), mRecipeDataHolder.getRemovedIngredients());
         }
 
-    }
+    }*/
 }
 

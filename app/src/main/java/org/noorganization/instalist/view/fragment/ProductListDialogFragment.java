@@ -3,6 +3,7 @@ package org.noorganization.instalist.view.fragment;
 import android.app.Activity;
 import android.app.Fragment;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.widget.DrawerLayout;
 import android.util.Log;
@@ -29,6 +30,7 @@ import org.noorganization.instalist.model.view.BaseItemListEntry;
 import org.noorganization.instalist.model.view.ProductListEntry;
 import org.noorganization.instalist.model.view.RecipeListEntry;
 import org.noorganization.instalist.model.view.SelectableBaseItemListEntry;
+import org.noorganization.instalist.view.activity.RecipeChangeActivity;
 import org.noorganization.instalist.view.datahandler.SelectableBaseItemListEntryDataHolder;
 import org.noorganization.instalist.view.interfaces.IBaseActivity;
 import org.noorganization.instalist.view.listadapter.SelectableItemListAdapter;
@@ -50,10 +52,10 @@ public class ProductListDialogFragment extends Fragment{
 
     private ShoppingList mCurrentShoppingList;
 
-    private Button mAddNewProductButton;
+    private Button mCreateProductButton;
     private Button mCancelButton;
     private Button mAddProductsButton;
-    private Button mTempAddRecipeButton;
+    private Button mCreateRecipeButton;
 
     private static final String BUNDLE_KEY_LIST_ID = "ListId";
 
@@ -145,10 +147,10 @@ public class ProductListDialogFragment extends Fragment{
 
         mListAdapter = new SelectableItemListAdapter(getActivity(), mSelectableBaseItemListEntries, mCurrentShoppingList);
 
-        mAddNewProductButton    = (Button) view.findViewById(R.id.fragment_product_list_dialog_add_new_product);
+        mCreateProductButton = (Button) view.findViewById(R.id.fragment_product_list_dialog_add_new_product);
         mCancelButton           = (Button) view.findViewById(R.id.fragment_product_list_dialog_cancel);
         mAddProductsButton      = (Button) view.findViewById(R.id.fragment_product_list_dialog_add_products_to_list);
-        mTempAddRecipeButton    = (Button) view.findViewById(R.id.testRecipeButton);
+        mCreateRecipeButton = (Button) view.findViewById(R.id.testRecipeButton);
 
         ListView listView           = (ListView) view.findViewById(R.id.fragment_product_list_dialog_product_list_view);
 
@@ -201,15 +203,15 @@ public class ProductListDialogFragment extends Fragment{
                 mBaseActivityInterface.onBackPressed();
             }
         });
-        mAddNewProductButton.setOnClickListener(mCreateProductListener);
+        mCreateProductButton.setOnClickListener(mCreateProductListener);
         mCancelButton.setOnClickListener(mCancelListener);
         mAddProductsButton.setOnClickListener(mAddProductsListener);
-        mTempAddRecipeButton.setOnClickListener(new View.OnClickListener() {
+        mCreateRecipeButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ViewUtils.addFragment(getActivity(),
-                        RecipeCreationFragment.newInstance(mCurrentShoppingList.mName));
-                ViewUtils.removeFragment(getActivity(), ProductListDialogFragment.this);
+
+                Intent recipeEditorIntent = new Intent(getActivity(), RecipeChangeActivity.class);
+                getActivity().startActivity(recipeEditorIntent);
             }
         });
     }
@@ -217,7 +219,7 @@ public class ProductListDialogFragment extends Fragment{
     @Override
     public void onPause() {
         super.onPause();
-        mAddNewProductButton.setOnClickListener(null);
+        mCreateProductButton.setOnClickListener(null);
         mCancelButton.setOnClickListener(null);
         mAddProductsButton.setOnClickListener(null);
     }

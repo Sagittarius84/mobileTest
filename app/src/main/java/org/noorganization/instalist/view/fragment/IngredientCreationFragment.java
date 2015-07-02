@@ -205,7 +205,8 @@ public class IngredientCreationFragment extends Fragment {
 
                 // push the changed data to the currently edited recipe.
                 RecipeDataHolder.getInstance().setIngredients(ingredients);
-                mBaseActivityInterface.changeFragment(RecipeCreationFragment.getInstance());
+                // TODO: return to the recipe
+                //mBaseActivityInterface.changeFragment(RecipeChangeActivity.newInstance(""));
             }
 
             /**

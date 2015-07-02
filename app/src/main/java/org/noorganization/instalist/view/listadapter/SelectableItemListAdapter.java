@@ -19,7 +19,6 @@ import org.noorganization.instalist.model.view.BaseItemListEntry;
 import org.noorganization.instalist.model.view.SelectableBaseItemListEntry;
 import org.noorganization.instalist.view.datahandler.SelectableBaseItemListEntryDataHolder;
 import org.noorganization.instalist.view.fragment.ProductChangeFragment;
-import org.noorganization.instalist.view.fragment.RecipeCreationFragment;
 import org.noorganization.instalist.view.utils.ViewUtils;
 
 import java.util.ArrayList;
@@ -142,9 +141,11 @@ public class SelectableItemListAdapter extends ArrayAdapter<SelectableBaseItemLi
                     nextFragment = ProductChangeFragment.newChangeInstance(currentEntry.getId());
                     break;
                 case RECIPE_LIST_ENTRY:
-                    nextFragment = RecipeCreationFragment.newInstance(
-                            mCurrentShoppingList.mName, currentEntry.getId());
-                    break;
+                    // TODO: start recipe editor
+                    //nextFragment = RecipeChangeActivity.newInstance(
+                    //        mCurrentShoppingList.mName, currentEntry.getId());
+                    //break;
+                    return true;
                 default:
                     throw new IllegalStateException("There is no entry type defined.");
             }
