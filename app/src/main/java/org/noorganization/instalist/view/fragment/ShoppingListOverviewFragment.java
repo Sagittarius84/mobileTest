@@ -13,10 +13,12 @@ import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
@@ -110,7 +112,6 @@ public class ShoppingListOverviewFragment extends Fragment {
             mContext = _Context;
             mView  = _View;
             mListEntryId = _ListEntryId;
-
         }
 
         @Override
@@ -121,6 +122,7 @@ public class ShoppingListOverviewFragment extends Fragment {
 
             ListEntry listEntry = ListEntry.findById(ListEntry.class, mListEntryId);
             _Mode.setTitle(listEntry.mProduct.mName);
+
             return true;
         }
 
@@ -304,6 +306,31 @@ public class ShoppingListOverviewFragment extends Fragment {
         super.onActivityCreated(savedInstanceState);
         // set the title in "main" activity so that the current list name is shown on the actionbar
         mBaseActivityInterface.setToolbarTitle(mCurrentListName);
+
+        View rootView = getView();
+        if(rootView == null){
+            throw new NullPointerException("Root view is null. Probably some initialization went wrong.");
+        }
+        rootView.setFocusableInTouchMode(true);
+        // set focus to this view to get key events.
+        rootView.requestFocus();
+
+        rootView.setOnKeyListener(new View.OnKeyListener() {
+            @Override
+            public boolean onKey(View _View, int _KeyCode, KeyEvent _Event) {
+                // onKey gets 2 calls when key was pressed ( up and down) only use the up action.
+                if (_Event.getAction() == MotionEvent.ACTION_UP) {
+                    if (_KeyCode == KeyEvent.KEYCODE_BACK) {
+                        if(mActionMode != null) {
+                            // only call back button when back button was pressed
+                            mActionMode.finish();
+                            return true;
+                        }
+                    }
+                }
+                return false;
+            }
+        });
     }
 
 
@@ -403,11 +430,12 @@ public class ShoppingListOverviewFragment extends Fragment {
                 if (mActionMode != null) {
                     mActionMode.finish();
                 }
+
                 mShoppingItemListAdapter.setToEditMode(_Position);
 
                 mActionModeCallback = new OnShoppingListItemActionModeListener(mContext, _ChildView, mShoppingItemListAdapter.getItemId(_Position));
                 // Start the CAB using the Callback defined above
-                mActionMode = ((ActionBarActivity)getActivity()).startSupportActionMode(mActionModeCallback);
+                mActionMode = ((ActionBarActivity) getActivity()).startSupportActionMode(mActionModeCallback);
                 _ChildView.setSelected(true);
             }
         });
@@ -424,7 +452,6 @@ public class ShoppingListOverviewFragment extends Fragment {
 
         mBaseActivityInterface.bindDrawerLayout();
     }
-
 
     // --------------------------------------------------------------------------------------------
 
