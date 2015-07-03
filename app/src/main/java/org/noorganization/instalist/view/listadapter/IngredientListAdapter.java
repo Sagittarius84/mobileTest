@@ -27,41 +27,38 @@ import java.util.List;
 /**
  * Created by TS on 23.05.2015.
  */
-public class IngredientListAdapter implements ListAdapter {
+public class IngredientListAdapter extends ArrayAdapter<Ingredient> {
 
-    private List<Ingredient>      mUnderlyingIngredients;
-    private List<DataSetObserver> mObservers;
-    private static final int TYPEID_INGREDIENT = 1;
-    private static final int TYPEID_BUTTON_BAR = 2;
+    private List<Ingredient> mUnderlyingIngredients;
+    private List<Ingredient> mRemovedIngredients;
 
     private Context mContext;
 
-    public IngredientListAdapter(Context _context) {
-        mUnderlyingIngredients = new ArrayList<>();
-        mObservers = new LinkedList<>();
+    public IngredientListAdapter(Context _context, List<Ingredient> _ingredients) {
+        super(_context, R.layout.entry_ingredient, _ingredients);
+        mUnderlyingIngredients = _ingredients;
+        mRemovedIngredients = new ArrayList<>();
 
         mContext = _context;
     }
 
-    @Override
-    public void registerDataSetObserver(DataSetObserver _dataSetObserver) {
-        mObservers.add(_dataSetObserver);
+    public void addIngredient(Ingredient _newIngredient) {
+        mUnderlyingIngredients.add(_newIngredient);
+        notifyDataSetChanged();
+    }
+
+    public List<Ingredient> getIngredients() {
+        return mUnderlyingIngredients;
+    }
+
+    public List<Ingredient> getDeleted() {
+        return mRemovedIngredients;
     }
 
     @Override
-    public void unregisterDataSetObserver(DataSetObserver _dataSetObserver) {
-        mObservers.remove(_dataSetObserver);
-    }
-
-    @Override
-    public int getCount() {
-        return mUnderlyingIngredients.size() + 1;
-    }
-
-    @Override
-    public Object getItem(int _position) {
+    public Ingredient getItem(int _position) {
         if (_position >= mUnderlyingIngredients.size()) {
-            return "data";
+            return null;
         }
 
         return mUnderlyingIngredients.get(_position);
@@ -82,58 +79,22 @@ public class IngredientListAdapter implements ListAdapter {
 
     @Override
     public View getView(int _position, View _viewToRecycle, ViewGroup _parent) {
-        View rtn;
-        Log.d("Ingredient", "Wanted view for position " + _position);
-        if (_position >= mUnderlyingIngredients.size()) {
-            rtn = new TextView(mContext);
-            ((TextView) rtn).setText("Just a dummy");
-        } else {
-            /*Ingredient current = mUnderlyingIngredients.get(_position);
-
-            if (_viewToRecycle == null) {
-                LayoutInflater inflater = LayoutInflater.from(mContext);
-                rtn = inflater.inflate(R.layout.entry_ingredient, _parent);
-            } else {
-                rtn = _viewToRecycle;
-            }
-
-            AmountPicker picker = ((AmountPicker) rtn.findViewById(R.id.entry_ingredient_amount));
-            picker.setValue(current.mAmount);
-            picker.setStep(current.mProduct.mStepAmount);
-
-            TextView productLabel = ((TextView) rtn.findViewById(R.id.entry_ingredient_product));
-            productLabel.setText(current.mProduct.mName);
-
-            */
-            rtn = new TextView(mContext);
-            ((TextView) rtn).setText("Just another dummy");
+        View rtn = _viewToRecycle;
+        if (rtn == null) {
+            LayoutInflater inflater = LayoutInflater.from(mContext);
+            rtn = inflater.inflate(R.layout.entry_ingredient, _parent);
         }
+
+        Ingredient current = mUnderlyingIngredients.get(_position);
+
+        AmountPicker picker = ((AmountPicker) rtn.findViewById(R.id.entry_ingredient_amount));
+        picker.setValue(current.mAmount);
+        picker.setStep(current.mProduct.mStepAmount);
+
+        TextView productLabel = ((TextView) rtn.findViewById(R.id.entry_ingredient_product));
+        productLabel.setText(current.mProduct.mName);
+
         return rtn;
-    }
-
-    @Override
-    public int getItemViewType(int _position) {
-        return (mUnderlyingIngredients.size() > _position ? TYPEID_INGREDIENT : TYPEID_BUTTON_BAR);
-    }
-
-    @Override
-    public int getViewTypeCount() {
-        return 2;
-    }
-
-    @Override
-    public boolean isEmpty() {
-        return false;
-    }
-
-    @Override
-    public boolean areAllItemsEnabled() {
-        return true;
-    }
-
-    @Override
-    public boolean isEnabled(int _position) {
-        return true;
     }
 
     private class IngredientOnLongClickListener implements View.OnLongClickListener

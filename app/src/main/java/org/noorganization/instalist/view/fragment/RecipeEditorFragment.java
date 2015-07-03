@@ -1,22 +1,29 @@
 package org.noorganization.instalist.view.fragment;
 
 import android.app.Fragment;
-import android.database.DataSetObserver;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ListAdapter;
 import android.widget.ListView;
-import android.widget.TextView;
+import android.widget.Toast;
 
 import com.orm.SugarRecord;
+import com.orm.query.Condition;
+import com.orm.query.Select;
 
 import org.noorganization.instalist.R;
+import org.noorganization.instalist.controller.IRecipeController;
+import org.noorganization.instalist.controller.implementation.ControllerFactory;
+import org.noorganization.instalist.model.Ingredient;
 import org.noorganization.instalist.model.Recipe;
 import org.noorganization.instalist.view.listadapter.IngredientListAdapter;
+import org.noorganization.instalist.view.utils.ViewUtils;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by michi on 01.07.15.
@@ -30,7 +37,12 @@ public class RecipeEditorFragment extends Fragment {
     private static final int    EDITOR_MODE_EDIT   = 2;
 
     private Recipe     mRecipe;
-    private ViewHolder mViews;
+
+    private ListView mIngredients;
+    private EditText mRecipeName;
+    private Button   mAddIngredient;
+    private Button   mSave;
+    private IngredientListAdapter mIngredientAdapter;
 
     /**
      * The default constructor needed by the FragmentManager. Use the newXXXInstance for creation
@@ -63,27 +75,82 @@ public class RecipeEditorFragment extends Fragment {
     public View onCreateView(LayoutInflater _inflater, ViewGroup _parent, Bundle _savedInstanceState) {
         View mainView = _inflater.inflate(R.layout.fragment_recipe_details, _parent, false);
 
-        mViews = new ViewHolder(mainView);
+        mIngredients = (ListView) mainView.findViewById(R.id.fragment_recipe_details_ingredients);
+        View actions = _inflater.inflate(R.layout.fragment_recipe_details_actions, null);
+        mIngredients.addFooterView(actions);
+
+        mAddIngredient = (Button) actions.findViewById(R.id.fragment_recipe_details_add_ingredient);
+        mSave          = (Button) actions.findViewById(R.id.fragment_recipe_details_save);
+        mRecipeName    = (EditText) mainView.findViewById(R.id.fragment_recipe_details_name);
+
+        fillViews();
 
         return mainView;
     }
 
-    private class ViewHolder {
-        private View     mParent;
-        private EditText mTitleInput;
-        private Button   mAddIngredientInput;
-        private Button   mSaveInput;
-        private ListView mIngredientsInput;
-
-        public ViewHolder(View _parent) {
-            mParent = _parent;
-            init();
+    private void fillViews() {
+        List<Ingredient> ingredientList;
+        if (mRecipe == null) {
+            ingredientList = new ArrayList<>();
+        } else {
+            ingredientList = mRecipe.getIngredients();
+            mRecipeName.setText(mRecipe.mName);
         }
 
-        private void init() {
-            mTitleInput = (EditText) mParent.findViewById(R.id.fragment_recipe_details_name);
-            mIngredientsInput = (ListView) mParent.findViewById(R.id.fragment_recipe_details_ingredients);
-            mIngredientsInput.setAdapter(new IngredientListAdapter(getActivity()));
+        mIngredientAdapter = new IngredientListAdapter(getActivity(), ingredientList);
+        mIngredients.setAdapter(mIngredientAdapter);
+
+        mSave.setOnClickListener(new OnSaveListener());
+    }
+
+    private boolean validate() {
+        boolean rtn = true;
+        if (mIngredientAdapter.getIngredients().size() == 0) {
+            Toast.makeText(getActivity(), "Just a test.", Toast.LENGTH_LONG).show();
+            rtn = false;
+        }
+
+        String newName = mRecipeName.getText().toString();
+        List<Recipe> recipesToValidate = Select.from(Recipe.class).
+                where(Condition.prop(Recipe.ATTR_NAME).eq(newName)).list();
+        if (mRecipeName.getText().length() == 0 ||
+                (recipesToValidate.size() != 0 &&
+                        (mRecipe == null || !mRecipe.getId().equals(recipesToValidate.get(0).getId())))) {
+            mRecipeName.setError("Just a second test.");
+            rtn = false;
+        }
+        return rtn;
+    }
+
+    private class OnSaveListener implements View.OnClickListener {
+
+        @Override
+        public void onClick(View view) {
+            if (validate()) {
+                IRecipeController controller = ControllerFactory.getRecipeController();
+
+                String newRecipeName = mRecipeName.getText().toString();
+                if (mRecipe == null) {
+                    mRecipe = controller.createRecipe(newRecipeName);
+                } else {
+                    mRecipe = controller.renameRecipe(mRecipe, newRecipeName);
+                }
+
+                if (mRecipe == null) {
+                    Toast.makeText(getActivity(), "Something went wrong while creating recipe.", Toast.LENGTH_LONG).show();
+                    return;
+                }
+
+                for (Ingredient toDelete : mIngredientAdapter.getDeleted()) {
+                    controller.removeIngredient(mRecipe, toDelete.mProduct);
+                }
+
+                for (Ingredient toSave : mIngredientAdapter.getIngredients()) {
+                    controller.addOrChangeIngredient(mRecipe, toSave.mProduct, toSave.mAmount);
+                }
+
+                ViewUtils.removeFragment(getActivity(), RecipeEditorFragment.this);
+            }
         }
     }
 }
