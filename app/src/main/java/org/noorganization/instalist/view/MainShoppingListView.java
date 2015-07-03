@@ -341,6 +341,18 @@ public class MainShoppingListView extends ActionBarActivity implements IBaseActi
         ViewUtils.addFragment(this, fragment);
     }
 
+
+    @Override
+    public boolean onKeyUp(int _KeyCode, KeyEvent _Event) {
+        if(_KeyCode == KeyEvent.KEYCODE_BACK){
+            if(mDrawerLayout.isDrawerOpen(mLeftMenuDrawerRelativeLayout)){
+                mDrawerLayout.closeDrawers();
+                return true;
+            }
+        }
+        return super.onKeyUp(_KeyCode, _Event);
+    }
+
     @Override
     public void setDrawerLockMode(int _DrawerLayoutMode) {
         mDrawerLayout.setDrawerLockMode(_DrawerLayoutMode);
