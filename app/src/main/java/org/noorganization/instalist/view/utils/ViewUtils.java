@@ -88,8 +88,7 @@ public class ViewUtils {
 
     public static void removeFragment(Activity _activity, Fragment _oldFragment) {
         FragmentManager fragmentManager = _activity.getFragmentManager();
-        fragmentManager.popBackStack(_oldFragment.getClass().getCanonicalName(),
-                FragmentManager.POP_BACK_STACK_INCLUSIVE);
+        fragmentManager.popBackStack(_oldFragment.getClass().getCanonicalName(), 0);
     }
 
     /**

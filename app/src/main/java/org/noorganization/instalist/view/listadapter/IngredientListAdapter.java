@@ -2,21 +2,26 @@ package org.noorganization.instalist.view.listadapter;
 
 import android.app.Activity;
 import android.app.Fragment;
+import android.content.Context;
+import android.database.DataSetObserver;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.ListAdapter;
 import android.widget.TextView;
 
 import org.noorganization.instalist.R;
 import org.noorganization.instalist.model.Ingredient;
 import org.noorganization.instalist.view.MainShoppingListView;
+import org.noorganization.instalist.view.customview.AmountPicker;
 import org.noorganization.instalist.view.datahandler.RecipeDataHolder;
 import org.noorganization.instalist.view.fragment.IngredientCreationFragment;
-import org.noorganization.instalist.view.fragment.RecipeCreationFragment;
 import org.noorganization.instalist.view.interfaces.IBaseActivity;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -24,79 +29,72 @@ import java.util.List;
  */
 public class IngredientListAdapter extends ArrayAdapter<Ingredient> {
 
-    private List<Ingredient> mIngredientList;
+    private List<Ingredient> mUnderlyingIngredients;
     private List<Ingredient> mRemovedIngredients;
 
-    private Activity mContext;
-    private IBaseActivity mBaseActivity;
+    private Context mContext;
 
-    public IngredientListAdapter(Activity _Context, List<Ingredient> _IngredientList){
-        super(_Context, R.layout.list_recipe_ingredient_entry  , _IngredientList);
-        mIngredientList = _IngredientList;
+    public IngredientListAdapter(Context _context, List<Ingredient> _ingredients) {
+        super(_context, R.layout.entry_ingredient, _ingredients);
+        mUnderlyingIngredients = _ingredients;
         mRemovedIngredients = new ArrayList<>();
-        mContext = _Context;
-        try{
-            mBaseActivity = (IBaseActivity) _Context;
-        } catch(ClassCastException e){
-            throw new ClassCastException(_Context.toString() + " has no IBaseActivity interface implemented.");
-        }
+
+        mContext = _context;
     }
 
-    @Override
-    public View getView(int _Position, View _ConvertView, ViewGroup _Parent) {
-        View view = null;
-        Ingredient ingredientEntry      = mIngredientList.get(_Position);
-
-        if(_ConvertView == null){
-            LayoutInflater shoppingListNamesInflater = mContext.getLayoutInflater();
-            view = shoppingListNamesInflater.inflate(R.layout.list_recipe_ingredient_entry, null);
-        }else{
-            view = _ConvertView;
-        }
-
-        TextView amountTextView     = (TextView) view.findViewById(R.id.list_recipe_ingredient_entry_amount);
-        TextView amountTypeTextView = (TextView) view.findViewById(R.id.list_recipe_ingredient_entry_amount_type);
-        TextView nameTextView       = (TextView) view.findViewById(R.id.list_recipe_ingredient_entry_name);
-
-        if(ingredientEntry.mProduct.mUnit != null) {
-            amountTypeTextView.setText(ingredientEntry.mProduct.mUnit.mName);
-        }
-        amountTextView.setText(String.valueOf(ingredientEntry.mAmount));
-        nameTextView.setText(ingredientEntry.mProduct.mName);
-
-        view.setOnLongClickListener(new IngredientOnLongClickListener(ingredientEntry));
-
-        return view;
-    }
-
-    public void addIngredient(Ingredient _Ingredient) {
-        mIngredientList.add(_Ingredient);
+    public void addIngredient(Ingredient _newIngredient) {
+        mUnderlyingIngredients.add(_newIngredient);
         notifyDataSetChanged();
     }
 
-    public void removeIngredient(Ingredient _Ingredient){
-        int index = mIngredientList.indexOf(_Ingredient);
-        Ingredient ingredient = mIngredientList.get(index);
-        if(ingredient != null){
-            mRemovedIngredients.add(ingredient);
-        }
-
-        mIngredientList.remove(index);
-        notifyDataSetChanged();
+    public List<Ingredient> getIngredients() {
+        return mUnderlyingIngredients;
     }
 
-    public List<Ingredient> getIngredients(){
-        return mIngredientList;
-    }
-
-    public List<Ingredient> getRemovedIngredients(){
+    public List<Ingredient> getDeleted() {
         return mRemovedIngredients;
     }
 
-    public void setData(List<Ingredient> _Ingredients, List<Ingredient> _RemovedIngredients) {
-        this.mIngredientList = _Ingredients;
-        this.mRemovedIngredients = _RemovedIngredients;
-        notifyDataSetChanged();
+    @Override
+    public Ingredient getItem(int _position) {
+        if (_position >= mUnderlyingIngredients.size()) {
+            return null;
+        }
+
+        return mUnderlyingIngredients.get(_position);
+    }
+
+    @Override
+    public long getItemId(int _position) {
+        if (_position < mUnderlyingIngredients.size()) {
+            return mUnderlyingIngredients.get(_position).mProduct.getId();
+        }
+        return 0;
+    }
+
+    @Override
+    public boolean hasStableIds() {
+        return true;
+    }
+
+    @Override
+    public View getView(int _position, View _viewToRecycle, ViewGroup _parent) {
+        View rtn = _viewToRecycle;
+        if (rtn == null) {
+            LayoutInflater inflater = LayoutInflater.from(mContext);
+            rtn = inflater.inflate(R.layout.entry_ingredient, _parent);
+        }
+
+        Ingredient current = mUnderlyingIngredients.get(_position);
+
+        AmountPicker picker = ((AmountPicker) rtn.findViewById(R.id.entry_ingredient_amount));
+        picker.setValue(current.mAmount);
+        picker.setStep(current.mProduct.mStepAmount);
+
+        TextView productLabel = ((TextView) rtn.findViewById(R.id.entry_ingredient_product));
+        productLabel.setText(current.mProduct.mName);
+
+        return rtn;
     }
 
     private class IngredientOnLongClickListener implements View.OnLongClickListener

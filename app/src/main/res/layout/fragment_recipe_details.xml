@@ -1,74 +1,37 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     style = "@style/style_fragment_general"
-    >
+    android:orientation="vertical"
+    android:padding="@dimen/base_margin">
 
-    <TextView
-        android:id="@+id/fragment_recipe_details_recipe_name_textview"
-        android:text="@string/recipe_details_recipe_name"
-        style="@style/InstalistTheme1.base_text_view_style" />
+    <org.noorganization.instalist.view.customview.FloatingLabelLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content">
+        <EditText
+            android:id="@+id/fragment_recipe_details_name"
+            android:hint="@string/recipe_details_recipe_name_hint"
+            style="@style/InstalistTheme1.base_edit_text_style" />
+    </org.noorganization.instalist.view.customview.FloatingLabelLayout>
 
-    <EditText
-        android:id="@+id/fragment_recipe_details_recipe_name"
-        android:hint="@string/recipe_details_recipe_name_hint"
-        style="@style/InstalistTheme1.base_edit_text_style"
-        android:layout_below="@+id/fragment_recipe_details_recipe_name_textview"
-        android:layout_alignRight="@+id/fragment_recipe_details_add_recipe"
-        android:layout_alignEnd="@+id/fragment_recipe_details_add_recipe" />
-
-    <Button
-        android:id="@+id/fragment_recipe_details_add_ingredient"
-        android:layout_width="wrap_content"
+    <org.noorganization.instalist.view.customview.FloatingLabelLayout
+        android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:text="@string/recipe_details_add_ingredient"
-        android:layout_marginTop="28dp"
-        android:layout_below="@+id/fragment_recipe_details_recipe_tags"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true" />
+        android:visibility="gone">
+        <EditText
+            android:id="@+id/fragment_recipe_details_tags"
+            android:hint="@string/product_details_tags_hint"
+            style="@style/InstalistTheme1.base_edit_text_style" />
+    </org.noorganization.instalist.view.customview.FloatingLabelLayout>
 
     <ListView
-        android:id="@+id/fragment_recipe_details_ingredient_container"
+        android:id="@+id/fragment_recipe_details_ingredients"
         android:layout_width="match_parent"
-        android:layout_height="fill_parent"
-        android:layout_above="@+id/fragment_recipe_details_add_recipe"
-        android:layout_below="@+id/fragment_recipe_details_add_ingredient">
-    </ListView>
+        android:layout_height="fill_parent" />
     <!--<android.support.v7.widget.RecyclerView
         android:id="@+id/fragment_recipe_details_ingredient_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/fragment_recipe_details_add_ingredient"
         />-->
-    <TextView
-        android:id="@+id/fragment_recipe_details_tags_textview"
-        android:text="@string/product_details_tags_hint"
-        style="@style/InstalistTheme1.base_text_view_style"
-        android:layout_below="@+id/fragment_recipe_details_recipe_name"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
 
-    <EditText
-        android:id="@+id/fragment_recipe_details_recipe_tags"
-        android:hint="@string/product_details_tags_hint"
-        style="@style/InstalistTheme1.base_edit_text_style"
-        android:layout_below="@+id/fragment_recipe_details_tags_textview"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
-    <Button
-        android:id="@+id/fragment_recipe_details_add_recipe"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/recipe_details_add"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true" />
-
-    <Button
-        android:id="@+id/fragment_recipe_details_cancel_recipe"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/recipe_details_cancel"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
-</RelativeLayout>
+</LinearLayout>

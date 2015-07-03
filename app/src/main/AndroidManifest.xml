@@ -20,6 +20,10 @@
             </intent-filter>
         </activity>
 
+        <activity android:name=".view.activity.RecipeChangeActivity"
+            android:label="@string/edit_recipe" />
+
+
         <!-- SugarORM Settings -->
         <meta-data
             android:name="DATABASE"
