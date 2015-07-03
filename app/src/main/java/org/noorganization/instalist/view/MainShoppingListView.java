@@ -345,7 +345,10 @@ public class MainShoppingListView extends ActionBarActivity implements IBaseActi
     @Override
     public boolean onKeyUp(int _KeyCode, KeyEvent _Event) {
         if(_KeyCode == KeyEvent.KEYCODE_BACK){
-            if(mDrawerLayout.isDrawerOpen(mLeftMenuDrawerRelativeLayout)){
+            if(mNewNameEditText.hasFocus()){
+                mNewNameEditText.clearFocus();
+                return true;
+            } else if (mDrawerLayout.isDrawerOpen(mLeftMenuDrawerRelativeLayout)){
                 mDrawerLayout.closeDrawers();
                 return true;
             }

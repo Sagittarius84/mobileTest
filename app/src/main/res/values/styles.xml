@@ -26,10 +26,10 @@
 <item name="android:fontFamily">sans-serif-light</item>
 </style>
 
-<style name="RobotoButtonStyle" parent="android:Widget.Holo.Button">
+<style name="RobotoButtonStyle" parent="android:Widget.Button">
 <item name="android:fontFamily">sans-serif-light</item>
 </style>
-<style name="RobotoEditTextStyle" parent="android:Widget.Holo.Button">
+<style name="RobotoEditTextStyle" parent="android:Widget.EditText">
     <item name="android:fontFamily">sans-serif-light</item>
 </style>
 </resources>
