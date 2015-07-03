@@ -22,6 +22,7 @@
 
     <style name="InstalistTheme1.expandable_list_second_linear_layout_container" parent="match_parent_width_height"></style>
     <!-- -->
+
     <dimen name="shadow_dx">2dp</dimen>
     <dimen name="shadow_dy">2dp</dimen>
     <dimen name="shadow_radius">4dp</dimen>

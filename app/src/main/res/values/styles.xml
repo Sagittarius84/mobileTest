@@ -5,6 +5,10 @@
         <item name="colorPrimary">@color/primary_color</item>
         <item name="colorAccent">@color/primary_color_light</item>
         <item name="colorPrimaryDark">@color/primary_color_dark</item>
+        <item name="android:textViewStyle">@style/RobotoTextViewStyle</item>
+        <item name="android:buttonStyle">@style/RobotoButtonStyle</item>
+        <item name="android:editTextStyle">@style/RobotoEditTextStyle</item>
+        <item name="android:textSize">@dimen/text_size</item>
         <!-- Following for toolbar displaying correctly-->
         <item name="android:windowNoTitle">true</item>
         <item name="windowActionBar">false</item>
@@ -18,4 +22,14 @@
         <item name="android:visibility">invisible</item>
     </style>
 
+<style name="RobotoTextViewStyle" parent="android:Widget.TextView">
+<item name="android:fontFamily">sans-serif-light</item>
+</style>
+
+<style name="RobotoButtonStyle" parent="android:Widget.Button">
+<item name="android:fontFamily">sans-serif-light</item>
+</style>
+<style name="RobotoEditTextStyle" parent="android:Widget.EditText">
+    <item name="android:fontFamily">sans-serif-light</item>
+</style>
 </resources>

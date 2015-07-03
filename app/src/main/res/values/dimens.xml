@@ -20,4 +20,5 @@
     <dimen name="base_edit_image_max_height">18dp</dimen>
     <dimen name="base_edit_image_max_width">18dp</dimen>
     <dimen name="border_radius">2dp</dimen>
+    <dimen name="text_size">16sp</dimen>
 </resources>

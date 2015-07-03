@@ -13,10 +13,12 @@ import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
@@ -53,19 +55,19 @@ public class ShoppingListOverviewFragment extends Fragment {
 
     private static final String LOG_TAG = ShoppingListOverviewFragment.class.toString();
 
-    private String mCurrentListName;
+    private String       mCurrentListName;
     private ShoppingList mCurrentShoppingList;
-    private long mShoppingListId;
+    private long         mShoppingListId;
 
     private ActionBar mActionBar;
-    private Context mContext;
+    private Context   mContext;
 
     private ActionButton mAddButton;
 
     private LinearLayoutManager mLayoutManager;
 
     private ShoppingItemListAdapter mShoppingItemListAdapter;
-    private RecyclerView mRecyclerView;
+    private RecyclerView            mRecyclerView;
 
     private IListController mListController;
 
@@ -82,13 +84,15 @@ public class ShoppingListOverviewFragment extends Fragment {
      */
     private Map<Integer, Comparator> mMapComperable;
 
-    private static Integer SORT_BY_NAME = 0;
+    private static Integer SORT_BY_NAME     = 0;
     private static Integer SORT_BY_PRIORITY = 1;
 
     /**
      * Used to inflate the actionbar.
      */
     private ActionMode.Callback mActionModeCallback;
+
+    private View mRootView;
 
     /**
      * Listener for Callback of ActionMode when editing an ListEntry.
@@ -97,7 +101,7 @@ public class ShoppingListOverviewFragment extends Fragment {
 
         private Context mContext;
         private View    mView;
-        private long mListEntryId;
+        private long    mListEntryId;
 
         /**
          * Constructor of OnShoppingListItemActionModeListener.
@@ -108,9 +112,22 @@ public class ShoppingListOverviewFragment extends Fragment {
          */
         public OnShoppingListItemActionModeListener(Context _Context, View _View, long _ListEntryId) {
             mContext = _Context;
-            mView  = _View;
+            mView = _View;
             mListEntryId = _ListEntryId;
+        }
 
+        /**
+         * Checks if any editable field of the editview has a focus.
+         * @return true if a component has focus, false otherwise.
+         */
+        public boolean hasFocus() {
+            boolean hasFocus = false;
+            // hasFocus |= mAmountPicker.hasFocus();
+            return hasFocus;
+        }
+
+        public void clearFocus() {
+            // mAmountPicker.clearFocus();
         }
 
         @Override
@@ -137,19 +154,17 @@ public class ShoppingListOverviewFragment extends Fragment {
 
             switch (_Item.getItemId()) {
                 case R.id.menu_add_action:
-
                     int position = mShoppingItemListAdapter.getPositionForId(mListEntryId);
 
                     View view = mLayoutManager.findViewByPosition(position);
                     AmountPicker amountPicker = (AmountPicker) view.findViewById(R.id.list_product_shopping_product_amount_edit);
-
-                    if(amountPicker == null){
-                        Log.e(LOG_TAG, "amountPicker is null.");
+                    if (amountPicker == null) {
+                        Log.e(LOG_TAG, "mAmountPicker is null.");
                         return true;
                     }
 
                     float value = amountPicker.getValue();
-                    if(value == 0.0f){
+                    if (value == 0.0f) {
                         // TODO: some error messaging
                         return true;
                     }
@@ -179,8 +194,6 @@ public class ShoppingListOverviewFragment extends Fragment {
             mActionMode = null;
         }
     }
-
-
 
 
     // --------------------------------------------------------------------------------------------
@@ -304,6 +317,31 @@ public class ShoppingListOverviewFragment extends Fragment {
         super.onActivityCreated(savedInstanceState);
         // set the title in "main" activity so that the current list name is shown on the actionbar
         mBaseActivityInterface.setToolbarTitle(mCurrentListName);
+
+        mRootView = getView();
+        if(mRootView == null){
+            throw new NullPointerException("Root view is null. Probably some initialization went wrong.");
+        }
+        mRootView.setFocusableInTouchMode(true);
+        // set focus to this view to get key events.
+        mRootView.requestFocus();
+
+        mRootView.setOnKeyListener(new View.OnKeyListener() {
+            @Override
+            public boolean onKey(View _View, int _KeyCode, KeyEvent _Event) {
+                // onKey gets 2 calls when key was pressed ( up and down) only use the up action.
+                if (_Event.getAction() == MotionEvent.ACTION_UP) {
+                    // only call back button when back button was released
+                    if (_KeyCode == KeyEvent.KEYCODE_BACK) {
+                        if (mActionMode != null) {
+                            mActionMode.finish();
+                            return true;
+                        }
+                    }
+                }
+                return false;
+            }
+        });
     }
 
 
@@ -393,6 +431,9 @@ public class ShoppingListOverviewFragment extends Fragment {
             @Override
             public void onSingleTap(View _ChildView, int _Position) {
                 super.onSingleTap(_ChildView, _Position);
+                if(mActionMode != null){
+                    mActionMode.finish();
+                }
                 ListEntry entry = ListEntry.findById(ListEntry.class, mShoppingItemListAdapter.getItemId(_Position));
                 Toast.makeText(mContext, "Item selected: " + entry.mProduct.mName, Toast.LENGTH_SHORT).show();
             }
@@ -403,11 +444,12 @@ public class ShoppingListOverviewFragment extends Fragment {
                 if (mActionMode != null) {
                     mActionMode.finish();
                 }
+
                 mShoppingItemListAdapter.setToEditMode(_Position);
 
                 mActionModeCallback = new OnShoppingListItemActionModeListener(mContext, _ChildView, mShoppingItemListAdapter.getItemId(_Position));
                 // Start the CAB using the Callback defined above
-                mActionMode = ((ActionBarActivity)getActivity()).startSupportActionMode(mActionModeCallback);
+                mActionMode = ((ActionBarActivity) getActivity()).startSupportActionMode(mActionModeCallback);
                 _ChildView.setSelected(true);
             }
         });
@@ -424,7 +466,6 @@ public class ShoppingListOverviewFragment extends Fragment {
 
         mBaseActivityInterface.bindDrawerLayout();
     }
-
 
     // --------------------------------------------------------------------------------------------
 
