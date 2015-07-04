@@ -16,6 +16,7 @@
         <item name="android:layout_marginTop">@dimen/base_margin</item>
         <item name="android:layout_marginLeft">@dimen/base_padding_right</item>
         <item name="android:layout_marginRight">@dimen/base_padding_top</item>
+        <item name="android:background">@drawable/shadow_grey</item>
     </style>
     <!-- Probably for later tewaks-->
     <style name="InstalistTheme1.expandable_list_first_linear_layout_container" parent="match_parent_width_height">

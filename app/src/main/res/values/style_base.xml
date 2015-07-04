@@ -4,6 +4,13 @@
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">match_parent</item>
     </style>
+    <style name="InstalistTheme1.fragment_card_style" parent="match_parent_width_height">
+        <item name="android:layout_marginTop">@dimen/card_margin_top</item>
+        <item name="android:layout_marginBottom">@dimen/card_margin_bottom</item>
+        <item name="android:layout_marginLeft">@dimen/card_margin_left</item>
+        <item name="android:layout_marginRight">@dimen/card_margin_right</item>
+        <item name="android:background">@drawable/shadow_grey</item>
+    </style>
     <style name="left_side_navigation_drawer">
         <item name="android:layout_width">@dimen/navigation_drawer_width</item>
         <item name="android:layout_height">match_parent</item>
@@ -71,6 +78,12 @@
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">@dimen/base_list_entry_height</item>
     </style>
+    <style name="InstalistTheme1.button_card_style" parent="InstalistTheme1.base_list_button">
+        <item name="android:background">@drawable/shadow_grey</item>
+        <item name="android:layout_marginTop">@dimen/base_margin</item>
+        <item name="android:layout_marginLeft">@dimen/base_padding_right</item>
+        <item name="android:layout_marginRight">@dimen/base_padding_top</item>
+    </style>
     <style name="InstalistTheme1.base_list_entry" parent="InstalistTheme1.base_text_style">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">@dimen/base_list_entry_height</item>
@@ -109,7 +122,6 @@
     <item name="android:src">@mipmap/ic_close_black_36dp</item>
     <item name="android:tint">@color/fab_material_red_500</item>
 </style>
-
 
     <dimen name="base_padding_left">8dp</dimen>
     <dimen name="base_padding_right">8dp</dimen>

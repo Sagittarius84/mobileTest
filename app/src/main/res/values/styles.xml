@@ -27,7 +27,8 @@
 </style>
 
 <style name="RobotoButtonStyle" parent="android:Widget.Button">
-<item name="android:fontFamily">sans-serif-light</item>
+    <item name="android:fontFamily">sans-serif-light</item>
+    <item name="android:colorFocusedHighlight">@color/grey_light</item>
 </style>
 <style name="RobotoEditTextStyle" parent="android:Widget.EditText">
     <item name="android:fontFamily">sans-serif-light</item>

@@ -1,14 +1,21 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     style="@style/match_parent_width_height">
-    <include layout="@layout/toolbar_main" />
+    <include
+        android:id="@+id/toolbar"
+        layout="@layout/toolbar_main" />
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="4dp"
+        android:layout_below="@id/toolbar"
+        android:background="@drawable/toolbar_dropshadow" />
     <android.support.v4.widget.DrawerLayout
         android:id="@+id/main_drawer_layout_container"
         style="@style/match_parent_width_height"
-        android:layout_marginTop="?attr/actionBarSize">
+        android:layout_below="@id/toolbar">
         <FrameLayout
             android:id="@+id/container"
-            style="@style/match_parent_width_height"
+            style="@style/InstalistTheme1.fragment_card_style"
             tools:context="org.noorganization.instalist.view.MainShoppingListView"
             tools:ignore="MergeRootFrame" />
         <include layout="@layout/drawer_layout_custom" />

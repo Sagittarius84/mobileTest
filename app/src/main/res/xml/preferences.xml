@@ -6,18 +6,38 @@
             >
             <!-- opens another nested subscreen -->
             <PreferenceScreen
-                android:key="button_voicemail_setting_key"
-                android:title="diputest"
-                android:persistent="false">
+                android:key="prefs_sort_mode"
+                android:title="@string/list_sort_mode"
+                android:persistent="false"
+                >
                 <Preference
                     android:key="sort_by_name"
-                    android:summary="dudududuu"
                     android:title="@string/menu_sort_by_product_name" />
                 <Preference
                     android:key="sort_by_prio"
-                    android:summary="dudududuu"
                     android:title="@string/menu_sort_by_priority" />
             </PreferenceScreen>
-
         </PreferenceCategory>
+    <PreferenceCategory
+        android:title="@string/prefs_productlist_dialog"
+        android:key="prefs_productlist_dialog">
+        <CheckBoxPreference
+            android:key="pref_collapsed_add_new_product_view"
+            android:title="@string/collapse_add_new_product_view"
+            android:defaultValue="true"
+            />
+    </PreferenceCategory>
+    <PreferenceCategory
+        android:title="@string/prefs_privacy_policy_eula_terms"
+        android:key="prefs_privacy_policy_eula_terms"
+        >
+        <Preference
+            android:key="privacypolicy_eula_terms"
+            android:title="@string/privacy_policy_eula_terms"
+            />
+        <Preference
+            android:key="open_source_licenses"
+            android:title="@string/open_source_licenses"
+            />
+    </PreferenceCategory>
 </PreferenceScreen>

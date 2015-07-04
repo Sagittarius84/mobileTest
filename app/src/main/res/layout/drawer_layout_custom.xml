@@ -59,7 +59,7 @@
 
     <Button
         android:id="@+id/drawer_layout_custom_settings"
-        style="@style/InstalistTheme1.base_list_button"
+        style="@style/InstalistTheme1.button_card_style"
         android:layout_alignParentBottom="true"
         android:text="@string/action_settings" />
 

@@ -93,4 +93,10 @@
     <string name="shopping_list_not_choosen">No Shopping List selected</string>
     <string name="shopping_list_item_preferences">Shopping List Preferences</string>
     <string name="settings">Settings</string>
+    <string name="prefs_privacy_policy_eula_terms">Privacy Policy, Eula and Terms</string>
+    <string name="privacy_policy_eula_terms">Privacy Policy, EULA and TERMS</string>
+    <string name="open_source_licenses">Open source licenses</string>
+    <string name="prefs_productlist_dialog">Productlist Dialog Preferences</string>
+    <string name="collapse_add_new_product_view">Collapse Add New Product View</string>
+    <string name="list_sort_mode">Shopping List Sort Mode</string>
 </resources>
