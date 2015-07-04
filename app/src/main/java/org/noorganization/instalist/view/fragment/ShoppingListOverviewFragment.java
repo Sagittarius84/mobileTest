@@ -516,6 +516,7 @@ public class ShoppingListOverviewFragment extends Fragment implements IFragment 
     public void onShoppingListRemoved(ShoppingList _ShoppingList) {
         if (mCurrentShoppingList.equals(_ShoppingList)) {
             // TODO:
+            mBaseActivityInterface.setToolbarTitle(mContext.getResources().getString(R.string.shopping_list_not_choosen));
             ViewUtils.removeFragment(getActivity(), this);
         }
     }
