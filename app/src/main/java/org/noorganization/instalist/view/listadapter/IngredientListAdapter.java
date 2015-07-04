@@ -1,6 +1,7 @@
 package org.noorganization.instalist.view.listadapter;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,7 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by TS on 23.05.2015.
+ * The adapter displays some ingredients for editing recipes.
  */
 public class IngredientListAdapter extends ArrayAdapter<Ingredient> {
 
@@ -78,13 +79,25 @@ public class IngredientListAdapter extends ArrayAdapter<Ingredient> {
         Ingredient current = mUnderlyingIngredients.get(_position);
 
         AmountPicker picker = ((AmountPicker) rtn.findViewById(R.id.entry_ingredient_amount));
+        picker.setTag(_position);
         picker.setValue(current.mAmount);
         picker.setStep(current.mProduct.mStepAmount);
+        picker.setChangeListener(new IngredientAmountChangeListener());
 
         TextView productLabel = ((TextView) rtn.findViewById(R.id.entry_ingredient_product));
         productLabel.setText(current.mProduct.mName);
 
         return rtn;
+    }
+
+    private class IngredientAmountChangeListener implements AmountPicker.IValueChangeListener {
+
+        @Override
+        public void onValueChanged(AmountPicker _picker, float _newValue) {
+            Log.d("vcl", "new value:" + _newValue);
+            int position = (int) _picker.getTag();
+            mUnderlyingIngredients.get(position).mAmount = _newValue;
+        }
     }
 
     /*private class IngredientOnLongClickListener implements View.OnLongClickListener

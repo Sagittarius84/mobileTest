@@ -30,6 +30,9 @@ import java.util.List;
 import de.greenrobot.event.EventBus;
 
 /**
+ * This fragment is an editor for recipes. It can create new recipes but does not add them to a
+ * list. Also it can change recipes. But list's then don't get modified i.e. to see the change on a
+ * list the recipe has to get added first.
  * Created by michi on 01.07.15.
  */
 public class RecipeEditorFragment extends Fragment {
@@ -49,8 +52,6 @@ public class RecipeEditorFragment extends Fragment {
     private Button   mAddIngredient;
     private Button   mSave;
     private IngredientListAdapter mIngredientAdapter;
-
-    private ProductSelectMessage mAddToList;
 
     /**
      * The default constructor needed by the FragmentManager. Use the newXXXInstance for creation
@@ -72,6 +73,22 @@ public class RecipeEditorFragment extends Fragment {
         Bundle parameters = new Bundle();
         parameters.putInt(BK_EDITOR_MODE, EDITOR_MODE_EDIT);
         parameters.putLong(BK_RECIPE_ID, _recipeId);
+
+        List<Ingredient> currentIngredients = SugarRecord.findById(Recipe.class, _recipeId).
+                getIngredients();
+
+        long resultingIds[] = new long[currentIngredients.size()];
+        float resultingAmounts[] = new float[currentIngredients.size()];
+        int convertIndex = 0;
+        for (Ingredient currentIngredient : currentIngredients) {
+            resultingIds[convertIndex] = currentIngredient.mProduct.getId();
+            resultingAmounts[convertIndex] = currentIngredient.mAmount;
+            convertIndex++;
+        }
+
+        parameters.putLongArray(BK_ADD_PRODUCTS, resultingIds);
+        parameters.putFloatArray(BK_ADD_AMOUNTS, resultingAmounts);
+
         rtn.setArguments(parameters);
         return rtn;
     }
@@ -108,25 +125,69 @@ public class RecipeEditorFragment extends Fragment {
         return mainView;
     }
 
-    /**
-     * EventBus-receiver for selections made via ProductListDialogFragment.
-     */
-    public void onEventBackgroundThread(ProductSelectMessage _selectedProducts) {
-        long productIds[] = new long[_selectedProducts.mProducts.size()];
-        float amounts[] = new float[_selectedProducts.mProducts.size()];
-        int currentIndex = 0;
-        for (Product currentProduct : _selectedProducts.mProducts.keySet()) {
-            productIds[currentIndex] = currentProduct.getId();
-            amounts[currentIndex] = _selectedProducts.mProducts.get(currentProduct);
-        }
-        getArguments().putLongArray(BK_ADD_PRODUCTS, productIds);
-        getArguments().putFloatArray(BK_ADD_AMOUNTS, amounts);
-    }
-
     @Override
     public void onDestroy() {
         EventBus.getDefault().unregister(this);
         super.onDestroy();
+    }
+
+    /**
+     * EventBus-receiver for selections made via ProductListDialogFragment.
+     */
+    public void onEvent(ProductSelectMessage _selectedProducts) {
+        long previousIds[] = getArguments().getLongArray(BK_ADD_PRODUCTS);
+        float previousAmounts[] = getArguments().getFloatArray(BK_ADD_AMOUNTS);
+
+        ArrayList<Long> newProductIds = new ArrayList<>();
+        ArrayList<Float> newAmounts = new ArrayList<>();
+
+        if (previousIds != null && previousAmounts != null) {
+            for (int convertIndex = 0; convertIndex < previousIds.length; convertIndex++) {
+                newProductIds.add(previousIds[convertIndex]);
+                newAmounts.add(previousAmounts[convertIndex]);
+            }
+        }
+
+        for (Product currentProduct : _selectedProducts.mProducts.keySet()) {
+            if (newProductIds.contains(currentProduct.getId())) {
+                int position = newProductIds.indexOf(currentProduct.getId());
+                newAmounts.set(position, newAmounts.get(position) +
+                        _selectedProducts.mProducts.get(currentProduct));
+            } else {
+                newProductIds.add(currentProduct.getId());
+                newAmounts.add(_selectedProducts.mProducts.get(currentProduct));
+            }
+        }
+
+        long resultingIds[] = new long[newProductIds.size()];
+        float resultingAmounts[] = new float[newProductIds.size()];
+        for (int convertIndex = 0; convertIndex < resultingIds.length; convertIndex++) {
+            resultingIds[convertIndex] = newProductIds.get(convertIndex);
+            resultingAmounts[convertIndex] = newAmounts.get(convertIndex);
+        }
+
+        getArguments().putLongArray(BK_ADD_PRODUCTS, resultingIds);
+        getArguments().putFloatArray(BK_ADD_AMOUNTS, resultingAmounts);
+    }
+
+    @Override
+    public void onPause() {
+
+        List<Ingredient> currentIngredients = mIngredientAdapter.getIngredients();
+
+        long resultingIds[] = new long[currentIngredients.size()];
+        float resultingAmounts[] = new float[currentIngredients.size()];
+        int convertIndex = 0;
+        for (Ingredient currentIngredient : currentIngredients) {
+            resultingIds[convertIndex] = currentIngredient.mProduct.getId();
+            resultingAmounts[convertIndex] = currentIngredient.mAmount;
+            convertIndex++;
+        }
+
+        getArguments().putLongArray(BK_ADD_PRODUCTS, resultingIds);
+        getArguments().putFloatArray(BK_ADD_AMOUNTS, resultingAmounts);
+
+        super.onPause();
     }
 
     private void addArgIngredients () {
@@ -142,17 +203,11 @@ public class RecipeEditorFragment extends Fragment {
                     amounts[currentIndex]);
             mIngredientAdapter.addIngredient(toAdd);
         }
-
-        getArguments().remove(BK_ADD_AMOUNTS);
-        getArguments().remove(BK_ADD_PRODUCTS);
     }
 
     private void fillViews() {
-        List<Ingredient> ingredientList;
-        if (mRecipe == null) {
-            ingredientList = new ArrayList<>();
-        } else {
-            ingredientList = mRecipe.getIngredients();
+        List<Ingredient> ingredientList = new ArrayList<>();
+        if (mRecipe != null) {
             mRecipeName.setText(mRecipe.mName);
         }
 
@@ -186,9 +241,6 @@ public class RecipeEditorFragment extends Fragment {
 
         @Override
         public void onClick(View view) {
-            //ProductListDialogFragment.
-            // TODO Add some action!
-
             ViewUtils.addFragment(getActivity(), ProductListDialogFragment.newInstance());
         }
     }

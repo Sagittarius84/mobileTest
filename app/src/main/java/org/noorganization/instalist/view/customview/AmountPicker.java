@@ -3,23 +3,19 @@ package org.noorganization.instalist.view.customview;
 import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.text.Editable;
 import android.text.InputType;
-import android.text.method.DigitsKeyListener;
+import android.text.TextWatcher;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 
-import org.noorganization.instalist.GlobalApplication;
 import org.noorganization.instalist.R;
 import org.noorganization.instalist.view.utils.ViewUtils;
 
 import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
-import java.text.ParseException;
-import java.util.Locale;
 
 /**
  * A picker for amounts. This is a compound view made with a LinearLayout, an EditText and two
@@ -36,6 +32,8 @@ public class AmountPicker extends LinearLayout {
 
     private static final Integer DECREASE_TAG = -1;
     private static final Integer INCREASE_TAG =  1;
+
+    private IValueChangeListener mListener;
 
     /**
      * Default constructor as described at the android docs.
@@ -60,6 +58,7 @@ public class AmountPicker extends LinearLayout {
         mValueField.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
         mValueField.setKeyListener(ViewUtils.getNumberListener());
         mValueField.setHint(R.string.product_details_amount_hint);
+        mValueField.addTextChangedListener(new TextValueChangedListener());
         mValueField.setGravity(View.TEXT_ALIGNMENT_CENTER);
 
         if (getOrientation() == LinearLayout.HORIZONTAL) {
@@ -79,6 +78,16 @@ public class AmountPicker extends LinearLayout {
         }
 
         mStep = 0.5f;
+    }
+
+    /**
+     * Sets a callback for changes. It will be called when a change was made via the UI. So calling
+     * {@link #setValue(float)} should have no effect.
+     * @param _newListener Either a listener or null to remove the listener. The given listener will
+     *                     replace the old one (if one was set).
+     */
+    public void setChangeListener(IValueChangeListener _newListener) {
+        mListener = _newListener;
     }
 
     /**
@@ -140,6 +149,10 @@ public class AmountPicker extends LinearLayout {
         mValueField.setText(savedData.mValue + "");
     }
 
+    public interface IValueChangeListener {
+        void onValueChanged(AmountPicker _picker, float _newValue);
+    }
+
     private static class SavedState extends BaseSavedState {
         public float mValue;
 
@@ -178,11 +191,42 @@ public class AmountPicker extends LinearLayout {
         public void onClick(View _view) {
             if (_view.getTag() instanceof Integer) {
                 Integer tag = (Integer) _view.getTag();
+
                 if (tag.compareTo(INCREASE_TAG) == 0) {
-                    setValue(getValue() + mStep);
+                    float newValue = getValue() + mStep;
+                    setValue(newValue);
+                    if (mListener != null) {
+                        mListener.onValueChanged(AmountPicker.this, newValue);
+                    }
                 } else if (tag.compareTo(DECREASE_TAG) == 0) {
-                    setValue(Math.max(0.0f, getValue() - mStep));
+                    float newValue = Math.max(0.0f, getValue() - mStep);
+                    setValue(newValue);
+                    if (mListener != null) {
+                        mListener.onValueChanged(AmountPicker.this, newValue);
+                    }
                 }
+
+            }
+        }
+    }
+
+    private class TextValueChangedListener implements TextWatcher {
+
+        @Override
+        public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+            // Not used.
+        }
+
+        @Override
+        public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+            // Not used.
+        }
+
+        @Override
+        public void afterTextChanged(Editable editable) {
+            if (mListener != null) {
+                float newValue = getValue();
+                mListener.onValueChanged(AmountPicker.this, newValue);
             }
         }
     }
