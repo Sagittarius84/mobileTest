@@ -136,7 +136,7 @@ public class ShoppingListOverviewFragment extends Fragment {
             MenuInflater menuInflater = _Mode.getMenuInflater();
             menuInflater.inflate(R.menu.menu_contextual_actionmode_options, _Menu);
 
-            ListEntry listEntry = ListEntry.findById(ListEntry.class, mListEntryId);
+            ListEntry listEntry = getListEntryById(mListEntryId);
             _Mode.setTitle(listEntry.mProduct.mName);
             return true;
         }
@@ -150,7 +150,7 @@ public class ShoppingListOverviewFragment extends Fragment {
         // called when user selected an item.
         @Override
         public boolean onActionItemClicked(ActionMode _Mode, MenuItem _Item) {
-            ListEntry entry = ListEntry.findById(ListEntry.class, mListEntryId);
+            ListEntry entry = getListEntryById(mListEntryId);
 
             switch (_Item.getItemId()) {
                 case R.id.menu_add_action:
@@ -177,10 +177,10 @@ public class ShoppingListOverviewFragment extends Fragment {
                 case R.id.menu_cancel_action:
                     _Mode.finish();
                     break;
-                /*case R.id.menu_delete_action:
+                case R.id.menu_delete_action:
                     ControllerFactory.getListController().removeItem(ListEntry.findById(ListEntry.class, mListEntryId));
                     _Mode.finish();
-                    break;*/
+                    break;
                 default:
                     return false;
             }
@@ -192,6 +192,20 @@ public class ShoppingListOverviewFragment extends Fragment {
             mShoppingItemListAdapter.resetEditModeView();
             mView.setSelected(false);
             mActionMode = null;
+        }
+
+        /**
+         * Gets the ListEntry by an id. If it is null then an @Link{NullPointerException} will be thrown.
+         * @param _Id the id of the ListEntry.
+         * @return the ListEntry.
+         */
+        private ListEntry getListEntryById(long _Id){
+            ListEntry listEntry = ListEntry.findById(ListEntry.class, mListEntryId);
+            if(listEntry == null){
+                Log.e(LOG_TAG,"ListEntry is not defined.");
+                throw new NullPointerException("ListEntry is not defined.");
+            }
+            return listEntry;
         }
     }
 

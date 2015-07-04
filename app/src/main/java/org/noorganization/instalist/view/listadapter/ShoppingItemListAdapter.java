@@ -206,11 +206,11 @@ public class ShoppingItemListAdapter extends RecyclerView.Adapter<RecyclerView.V
      * @param id the id to find.
      * @return -1 if nothing was found, the index if found.
      */
-    public int getPositionForId(long id){
+    public synchronized int getPositionForId(long id){
         int position = -1;
         for(ListEntryItemWrapper listItem : mListOfEntries){
-            ++ position;
             if(listItem.getListEntry().getId().equals(id)){
+                position = mListOfEntries.indexOf(listItem);
                 break;
             }
         }
@@ -226,22 +226,12 @@ public class ShoppingItemListAdapter extends RecyclerView.Adapter<RecyclerView.V
         int index = - 1;
         ListEntryItemWrapper entryItemWrapper = new ListEntryItemWrapper(_Entry);
 
-        synchronized (mListOfEntries) {
-            for (ListEntryItemWrapper listEntry : mListOfEntries) {
-
-                // somehow only this works for finding the equal ids
-                long id1 = entryItemWrapper.getListEntry().getId();
-                long id2 = listEntry.getListEntry().getId();
-                if (id1 == id2) {
-
-                    index = mListOfEntries.indexOf(entryItemWrapper);
-                    notifyItemRemoved(index);
-                }
-            }
-        }
+        index = getPositionForId(_Entry.getId());
         if (index >= 0) {
             mListOfEntries.remove(index);
+            notifyItemRemoved(index);
         }
+
     }
 
     private void resetEditModeViewInternal(){
@@ -303,22 +293,10 @@ public class ShoppingItemListAdapter extends RecyclerView.Adapter<RecyclerView.V
 
         int positionToChange = - 1;
         ListEntryItemWrapper listEntryItemWrapper = new ListEntryItemWrapper(_Entry);
+
+        positionToChange = getPositionForId(_Entry.getId());
         synchronized (mListOfEntries) {
-            //positionToChange = Collections.binarySearch(mListOfEntries, _Entry, mComparator);
-
-            for (ListEntryItemWrapper listEntry : mListOfEntries) {
-
-                // somehow only this works for finding the equal ids
-                long id1 = listEntryItemWrapper.getListEntry().getId();
-                long id2 = listEntry.getListEntry().getId();
-                if (id1 == id2) {
-                    int index = mListOfEntries.indexOf(listEntry);
-                    positionToChange = index;
-                    // update reference to given entry from controller
-                    mListOfEntries.set(index, listEntryItemWrapper);
-                    break;
-                }
-            }
+            mListOfEntries.set(positionToChange, listEntryItemWrapper);
         }
 
         if (positionToChange >= 0) {
