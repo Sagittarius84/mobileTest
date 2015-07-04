@@ -22,8 +22,8 @@
 
         <activity android:name=".view.activity.RecipeChangeActivity"
             android:label="@string/edit_recipe" />
-
-
+        <activity android:name=".view.activity.SettingsActivity"
+                  android:label="@string/settings" />
         <!-- SugarORM Settings -->
         <meta-data
             android:name="DATABASE"
@@ -37,7 +37,6 @@
         <meta-data
             android:name="DOMAIN_PACKAGE_NAME"
             android:value="org.noorganization.instalist.model" />
-
     </application>
 
 </manifest>

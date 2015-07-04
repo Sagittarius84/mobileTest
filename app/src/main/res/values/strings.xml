@@ -91,4 +91,6 @@
     <string name="add_ingredient">add ingredient</string>
     <string name="edit_recipe">edit recipe</string>
     <string name="shopping_list_not_choosen">No Shopping List selected</string>
+    <string name="shopping_list_item_preferences">Shopping List Preferences</string>
+    <string name="settings">Settings</string>
 </resources>

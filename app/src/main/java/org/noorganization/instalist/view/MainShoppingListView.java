@@ -1,5 +1,6 @@
 package org.noorganization.instalist.view;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Fragment;
 import android.content.DialogInterface;
@@ -33,6 +34,7 @@ import org.noorganization.instalist.model.Category;
 import org.noorganization.instalist.model.ShoppingList;
 import org.noorganization.instalist.touchlistener.IOnShoppingListClickListenerEvents;
 import org.noorganization.instalist.touchlistener.sidebar.OnShoppingListAddClickListener;
+import org.noorganization.instalist.view.activity.SettingsActivity;
 import org.noorganization.instalist.view.fragment.ShoppingListOverviewFragment;
 import org.noorganization.instalist.view.interfaces.IBaseActivity;
 import org.noorganization.instalist.view.interfaces.IBaseActivityListEvent;
@@ -58,8 +60,8 @@ public class MainShoppingListView extends ActionBarActivity implements IBaseActi
     private final static String LOG_TAG               = MainShoppingListView.class.getName();
     private final static String DEFAULT_CATEGORY_NAME = "(default)";
 
-    public final static String KEY_LISTNAME = "list_name";
-    public final static String KEY_LISTID   = "list_id";
+    public final static String KEY_LISTNAME          = "list_name";
+    public final static String KEY_LISTID            = "list_id";
     public static final String SIDE_DRAWER_TRANSLATE = "side_drawer_translate";
 
     private Toolbar mToolbar;
@@ -100,11 +102,13 @@ public class MainShoppingListView extends ActionBarActivity implements IBaseActi
     private List<IFragment> mFragments;
     private float mLastDrawerTranslate = 0.0f;
 
+    private Activity mActivity;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
+        mActivity = this;
         mFragments = new ArrayList<>(1);
         setContentView(R.layout.activity_main_shopping_list_view);
 
@@ -269,6 +273,8 @@ public class MainShoppingListView extends ActionBarActivity implements IBaseActi
             @Override
             public void onClick(View v) {
                 Intent settingsIntent;
+                settingsIntent = new Intent(mActivity, SettingsActivity.class);
+                startActivity(settingsIntent);
             }
         });
     }

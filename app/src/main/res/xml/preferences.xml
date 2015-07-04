@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+        <PreferenceCategory
+            android:title="@string/shopping_list_item_preferences"
+            android:key="preferences_key_list_item_preferences"
+            >
+            <!-- opens another nested subscreen -->
+            <PreferenceScreen
+                android:key="button_voicemail_setting_key"
+                android:title="diputest"
+                android:persistent="false">
+                <Preference
+                    android:key="sort_by_name"
+                    android:summary="dudududuu"
+                    android:title="@string/menu_sort_by_product_name" />
+                <Preference
+                    android:key="sort_by_prio"
+                    android:summary="dudududuu"
+                    android:title="@string/menu_sort_by_priority" />
+            </PreferenceScreen>
+
+        </PreferenceCategory>
+</PreferenceScreen>
