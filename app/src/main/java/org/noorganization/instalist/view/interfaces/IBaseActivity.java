@@ -70,4 +70,7 @@ public interface IBaseActivity extends  ISideDrawerListDataEvents {
      * @param _CategoryId the Id of category where the category should be placed in.
      */
     void setSideDrawerAddListButtonListener(long _CategoryId);
+
+    void registerFragment(Fragment fragment);
+    void unregisterFragment(Fragment fragment);
 }

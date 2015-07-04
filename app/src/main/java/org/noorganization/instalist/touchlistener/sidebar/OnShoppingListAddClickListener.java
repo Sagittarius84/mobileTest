@@ -67,6 +67,6 @@ public class OnShoppingListAddClickListener implements View.OnClickListener {
         mNewNameEditText.setText("");
         ((IBaseActivity) context).addList(shoppingList);
 
-        ((IBaseActivity) context).changeFragment(ShoppingListOverviewFragment.newInstance(shoppingList.mName));
+        ((IBaseActivity) context).changeFragment(ShoppingListOverviewFragment.newInstance(shoppingList.getId()));
     }
 }

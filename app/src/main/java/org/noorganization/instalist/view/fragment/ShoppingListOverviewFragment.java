@@ -38,6 +38,7 @@ import org.noorganization.instalist.view.customview.AmountPicker;
 import org.noorganization.instalist.view.datahandler.SelectableBaseItemListEntryDataHolder;
 import org.noorganization.instalist.view.decoration.DividerItemListDecoration;
 import org.noorganization.instalist.view.interfaces.IBaseActivity;
+import org.noorganization.instalist.view.interfaces.IFragment;
 import org.noorganization.instalist.view.listadapter.ShoppingItemListAdapter;
 import org.noorganization.instalist.view.sorting.AlphabeticalListEntryComparator;
 import org.noorganization.instalist.view.sorting.PriorityListEntryComparator;
@@ -51,13 +52,11 @@ import java.util.WeakHashMap;
 /**
  * A ShoppingListOverviewFragment containing a list view.
  */
-public class ShoppingListOverviewFragment extends Fragment {
+public class ShoppingListOverviewFragment extends Fragment implements IFragment {
 
     private static final String LOG_TAG = ShoppingListOverviewFragment.class.toString();
 
-    private String       mCurrentListName;
     private ShoppingList mCurrentShoppingList;
-    private long         mShoppingListId;
 
     private ActionBar mActionBar;
     private Context   mContext;
@@ -106,8 +105,8 @@ public class ShoppingListOverviewFragment extends Fragment {
         /**
          * Constructor of OnShoppingListItemActionModeListener.
          *
-         * @param _Context  the context of the Fragment.
-         * @param _View     the View of the selected element. Used to read the data from it.
+         * @param _Context     the context of the Fragment.
+         * @param _View        the View of the selected element. Used to read the data from it.
          * @param _ListEntryId the Id of the clicked ListEntry.
          */
         public OnShoppingListItemActionModeListener(Context _Context, View _View, long _ListEntryId) {
@@ -118,6 +117,7 @@ public class ShoppingListOverviewFragment extends Fragment {
 
         /**
          * Checks if any editable field of the editview has a focus.
+         *
          * @return true if a component has focus, false otherwise.
          */
         public boolean hasFocus() {
@@ -196,13 +196,14 @@ public class ShoppingListOverviewFragment extends Fragment {
 
         /**
          * Gets the ListEntry by an id. If it is null then an @Link{NullPointerException} will be thrown.
+         *
          * @param _Id the id of the ListEntry.
          * @return the ListEntry.
          */
-        private ListEntry getListEntryById(long _Id){
+        private ListEntry getListEntryById(long _Id) {
             ListEntry listEntry = ListEntry.findById(ListEntry.class, mListEntryId);
-            if(listEntry == null){
-                Log.e(LOG_TAG,"ListEntry is not defined.");
+            if (listEntry == null) {
+                Log.e(LOG_TAG, "ListEntry is not defined.");
                 throw new NullPointerException("ListEntry is not defined.");
             }
             return listEntry;
@@ -216,22 +217,6 @@ public class ShoppingListOverviewFragment extends Fragment {
     public ShoppingListOverviewFragment() {
     }
 
-
-    /**
-     * Creates an instance of an ShoppingListOverviewFragment.
-     *
-     * @param _ListName the name of the list that should be shown.
-     * @return the new instance of this fragment.
-     */
-    public static ShoppingListOverviewFragment newInstance(String _ListName) {
-
-        ShoppingListOverviewFragment fragment = new ShoppingListOverviewFragment();
-        Bundle args = new Bundle();
-        args.putString(MainShoppingListView.KEY_LISTNAME, _ListName);
-        fragment.setArguments(args);
-        return fragment;
-    }
-
     /**
      * Creates an instance of an ShoppingListOverviewFragment.
      *
@@ -241,8 +226,8 @@ public class ShoppingListOverviewFragment extends Fragment {
     public static ShoppingListOverviewFragment newInstance(long _ListId) {
 
         ShoppingListOverviewFragment fragment = new ShoppingListOverviewFragment();
-        Bundle args = new Bundle();
-        args.putLong(MainShoppingListView.KEY_LISTNAME, _ListId);
+        Bundle                       args     = new Bundle();
+        args.putLong(MainShoppingListView.KEY_LISTID, _ListId);
         fragment.setArguments(args);
         return fragment;
     }
@@ -280,8 +265,22 @@ public class ShoppingListOverviewFragment extends Fragment {
         if (bundle == null) {
             return;
         }
-        mCurrentListName = bundle.getString(MainShoppingListView.KEY_LISTNAME);
-        mCurrentShoppingList = /*ShoppingList.findById(mCategoryId);*/ShoppingList.findByName(mCurrentListName);
+
+        long listId = bundle.getLong(MainShoppingListView.KEY_LISTID);
+        mCurrentShoppingList = ShoppingList.findById(ShoppingList.class, listId);
+
+        // assign other listname if none is assigned
+        if (mCurrentShoppingList == null) {
+            List<ShoppingList> mShoppingLists = ShoppingList.listAll(ShoppingList.class);
+            if (mShoppingLists.size() > 0) {
+                mCurrentShoppingList = mShoppingLists.get(0);
+                mBaseActivityInterface.setToolbarTitle(mCurrentShoppingList.mName);
+            } else {
+                mBaseActivityInterface.setToolbarTitle(mContext.getResources().getString(R.string.shopping_list_overview_fragment_no_list_available));
+                // do something to show that there are no shoppinglists!
+                return;
+            }
+        }
     }
 
 
@@ -302,7 +301,7 @@ public class ShoppingListOverviewFragment extends Fragment {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
+        int               id          = item.getItemId();
         SharedPreferences sortDetails = mContext.getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE);
 
         // swtich which action item was pressed
@@ -330,10 +329,11 @@ public class ShoppingListOverviewFragment extends Fragment {
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         // set the title in "main" activity so that the current list name is shown on the actionbar
-        mBaseActivityInterface.setToolbarTitle(mCurrentListName);
+
+        mBaseActivityInterface.setToolbarTitle(mCurrentShoppingList.mName);
 
         mRootView = getView();
-        if(mRootView == null){
+        if (mRootView == null) {
             throw new NullPointerException("Root view is null. Probably some initialization went wrong.");
         }
         mRootView.setFocusableInTouchMode(true);
@@ -366,6 +366,7 @@ public class ShoppingListOverviewFragment extends Fragment {
     public void onPause() {
         super.onPause();
         mAddButton.setOnClickListener(null);
+        mBaseActivityInterface.unregisterFragment(this);
     }
 
     @Override
@@ -373,7 +374,6 @@ public class ShoppingListOverviewFragment extends Fragment {
         super.onDetach();
         ((ChangeHandler) ((GlobalApplication) getActivity().getApplication()).getChangeHandler()).setCurrentFragment(null);
     }
-
 
 
     // --------------------------------------------------------------------------------------------
@@ -384,25 +384,11 @@ public class ShoppingListOverviewFragment extends Fragment {
         super.onResume();
 
         SharedPreferences sortDetails = mContext.getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE);
-
+        mBaseActivityInterface.registerFragment(this);
         // decl
         // init
         mRecyclerView = (RecyclerView) getActivity().findViewById(R.id.fragment_shopping_list);
 
-        // assign other listname if none is assigned
-        if (mCurrentListName == null) {
-
-            List<ShoppingList> mShoppingLists = ShoppingList.listAll(ShoppingList.class);
-            if (mShoppingLists.size() > 0) {
-                mCurrentShoppingList = mShoppingLists.get(0);
-                mCurrentListName = mCurrentShoppingList.mName;
-                mBaseActivityInterface.setToolbarTitle(mCurrentShoppingList.mName);
-            } else {
-                mBaseActivityInterface.setToolbarTitle(mContext.getResources().getString(R.string.shopping_list_overview_fragment_no_list_available));
-                // do something to show that there are no shoppinglists!
-                return;
-            }
-        }
         mBaseActivityInterface.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
 
         mShoppingItemListAdapter = new ShoppingItemListAdapter(getActivity(), mCurrentShoppingList.getEntries());
@@ -445,8 +431,8 @@ public class ShoppingListOverviewFragment extends Fragment {
             @Override
             public void onSingleTap(View _ChildView, int _Position) {
                 super.onSingleTap(_ChildView, _Position);
-                if(mActionMode != null){
-                    if(mShoppingItemListAdapter.getItemViewType(_Position) != ShoppingItemListAdapter.EDIT_MODE_VIEW) {
+                if (mActionMode != null) {
+                    if (mShoppingItemListAdapter.getItemViewType(_Position) != ShoppingItemListAdapter.EDIT_MODE_VIEW) {
                         // only close edit field when this view is not currently in edit mode
                         mActionMode.finish();
                     }
@@ -526,7 +512,11 @@ public class ShoppingListOverviewFragment extends Fragment {
         }
     }
 
-    public void onShoppingListItemChanged(ListEntry _Entry) {
-        mShoppingItemListAdapter.changeItem(_Entry);
+    @Override
+    public void onShoppingListRemoved(ShoppingList _ShoppingList) {
+        if (mCurrentShoppingList.equals(_ShoppingList)) {
+            // TODO:
+            ViewUtils.removeFragment(getActivity(), this);
+        }
     }
 }

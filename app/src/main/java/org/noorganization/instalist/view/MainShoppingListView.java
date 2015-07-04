@@ -32,11 +32,13 @@ import org.noorganization.instalist.touchlistener.sidebar.OnShoppingListAddClick
 import org.noorganization.instalist.view.fragment.ShoppingListOverviewFragment;
 import org.noorganization.instalist.view.interfaces.IBaseActivity;
 import org.noorganization.instalist.view.interfaces.IBaseActivityListEvent;
+import org.noorganization.instalist.view.interfaces.IFragment;
 import org.noorganization.instalist.view.interfaces.ISideDrawerListDataEvents;
 import org.noorganization.instalist.view.middleware.implementation.SideDrawerListManager;
 import org.noorganization.instalist.view.utils.PreferencesManager;
 import org.noorganization.instalist.view.utils.ViewUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -53,6 +55,7 @@ public class MainShoppingListView extends ActionBarActivity implements IBaseActi
     private final static String DEFAULT_CATEGORY_NAME = "(default)";
 
     public final static String KEY_LISTNAME = "list_name";
+    public final static String KEY_LISTID   = "list_id";
 
     private Toolbar mToolbar;
 
@@ -89,10 +92,13 @@ public class MainShoppingListView extends ActionBarActivity implements IBaseActi
 
     private SideDrawerListManager mDrawerListManager;
 
+    private List<IFragment> mFragments;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
+        mFragments = new ArrayList<>(1);
         setContentView(R.layout.activity_main_shopping_list_view);
 
         ExpandableListView expandableListView;
@@ -337,7 +343,7 @@ public class MainShoppingListView extends ActionBarActivity implements IBaseActi
 
         // init
         mCurrentListName = _ShoppingList.mName;
-        fragment = ShoppingListOverviewFragment.newInstance(_ShoppingList.mName);
+        fragment = ShoppingListOverviewFragment.newInstance(_ShoppingList.getId());
         ViewUtils.addFragment(this, fragment);
     }
 
@@ -432,6 +438,7 @@ public class MainShoppingListView extends ActionBarActivity implements IBaseActi
     @Override
     public void removeList(ShoppingList _ShoppingList) {
         mDrawerListManager.removeList(_ShoppingList);
+        notifyFragmentsShoppingListRemoved(_ShoppingList);
     }
 
     @Override
@@ -478,5 +485,29 @@ public class MainShoppingListView extends ActionBarActivity implements IBaseActi
             }
         };
         mDrawerLayout.setDrawerListener(mNavBarToggle);
+    }
+
+    @Override
+    public void registerFragment(Fragment fragment) {
+        try {
+            mFragments.add((IFragment)fragment);
+        }catch(ClassCastException e){
+            throw new  ClassCastException(fragment.getClass().toString() + " has no IFragment implemented");
+        }
+    }
+
+    @Override
+    public void unregisterFragment(Fragment fragment) {
+        mFragments.remove((IFragment)fragment);
+    }
+
+    /**
+     * Notifies registered Fragments that an ShoppingList was removed.
+     * @param _ShoppingList the shopping list that was removed.
+     */
+    public void notifyFragmentsShoppingListRemoved(ShoppingList _ShoppingList){
+        for(IFragment fragment : mFragments){
+           fragment.onShoppingListRemoved(_ShoppingList);
+        }
     }
 }

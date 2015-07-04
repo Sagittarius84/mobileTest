@@ -87,7 +87,7 @@ public class ShoppingItemListAdapter extends RecyclerView.Adapter<RecyclerView.V
             super(_ItemView);
             mProductAmount = (AmountPicker) _ItemView.findViewById(R.id.list_product_shopping_product_amount_edit);
             mProductType = (Spinner) _ItemView.findViewById(R.id.list_product_shopping_product_amount_type_edit);
-            mProductName = (TextView)  _ItemView.findViewById(R.id.list_product_shopping_product_name);
+            mProductName = (TextView) _ItemView.findViewById(R.id.list_product_shopping_product_name);
         }
 
     }
@@ -203,19 +203,21 @@ public class ShoppingItemListAdapter extends RecyclerView.Adapter<RecyclerView.V
 
     /**
      * Get the position of the given id.
+     *
      * @param id the id to find.
      * @return -1 if nothing was found, the index if found.
      */
-    public synchronized int getPositionForId(long id){
-        int position = -1;
-        for(ListEntryItemWrapper listItem : mListOfEntries){
-            if(listItem.getListEntry().getId().equals(id)){
+    public synchronized int getPositionForId(long id) {
+        int position = - 1;
+        for (ListEntryItemWrapper listItem : mListOfEntries) {
+            if (listItem.getListEntry().getId().equals(id)) {
                 position = mListOfEntries.indexOf(listItem);
                 break;
             }
         }
         return position;
     }
+
     /**
      * Removes the given entry from list and notfies the adapter that this object has been removed.
      *
@@ -223,7 +225,7 @@ public class ShoppingItemListAdapter extends RecyclerView.Adapter<RecyclerView.V
      */
     public void removeItem(ListEntry _Entry) {
 
-        int index = - 1;
+        int                  index            = - 1;
         ListEntryItemWrapper entryItemWrapper = new ListEntryItemWrapper(_Entry);
 
         index = getPositionForId(_Entry.getId());
@@ -234,8 +236,8 @@ public class ShoppingItemListAdapter extends RecyclerView.Adapter<RecyclerView.V
 
     }
 
-    private void resetEditModeViewInternal(){
-        if(mCurrentListInEditMode != null){
+    private void resetEditModeViewInternal() {
+        if (mCurrentListInEditMode != null) {
             mCurrentListInEditMode.setEditMode(false);
             notifyItemChanged(mListOfEntries.indexOf(mCurrentListInEditMode));
         }
@@ -244,15 +246,16 @@ public class ShoppingItemListAdapter extends RecyclerView.Adapter<RecyclerView.V
     /**
      * Resets the view back to normal view mode. So one unified view will be displayed.
      */
-    public void resetEditModeView(){
+    public void resetEditModeView() {
         resetEditModeViewInternal();
     }
 
     /**
      * The Entry that was choosed to be edited.
+     *
      * @param _Position position of the selected list.
      */
-    public void setToEditMode(int _Position){
+    public void setToEditMode(int _Position) {
         resetEditModeViewInternal();
 
         mCurrentListInEditMode = mListOfEntries.get(_Position);
@@ -267,7 +270,7 @@ public class ShoppingItemListAdapter extends RecyclerView.Adapter<RecyclerView.V
      */
     public void addItem(ListEntry _Entry) {
         // to prevent the same kind of entries in this list. Not nice but it works.
-        if(getPositionForId(_Entry.getId()) >=0 ){
+        if (getPositionForId(_Entry.getId()) >= 0) {
             return;
         }
 
@@ -291,7 +294,7 @@ public class ShoppingItemListAdapter extends RecyclerView.Adapter<RecyclerView.V
         // replace entry with changed entry
         // TODO performance, usage of some comperator or so...
 
-        int positionToChange = - 1;
+        int                  positionToChange     = - 1;
         ListEntryItemWrapper listEntryItemWrapper = new ListEntryItemWrapper(_Entry);
 
         positionToChange = getPositionForId(_Entry.getId());
