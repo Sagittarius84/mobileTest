@@ -432,7 +432,10 @@ public class ShoppingListOverviewFragment extends Fragment {
             public void onSingleTap(View _ChildView, int _Position) {
                 super.onSingleTap(_ChildView, _Position);
                 if(mActionMode != null){
-                    mActionMode.finish();
+                    if(mShoppingItemListAdapter.getItemViewType(_Position) != ShoppingItemListAdapter.EDIT_MODE_VIEW) {
+                        // only close edit field when this view is not currently in edit mode
+                        mActionMode.finish();
+                    }
                 }
                 ListEntry entry = ListEntry.findById(ListEntry.class, mShoppingItemListAdapter.getItemId(_Position));
                 Toast.makeText(mContext, "Item selected: " + entry.mProduct.mName, Toast.LENGTH_SHORT).show();

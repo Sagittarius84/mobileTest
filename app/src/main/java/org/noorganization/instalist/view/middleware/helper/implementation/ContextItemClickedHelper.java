@@ -10,6 +10,8 @@ import android.widget.SpinnerAdapter;
 import android.widget.Toast;
 import android.widget.ViewSwitcher;
 
+import com.orm.query.Condition;
+
 import org.noorganization.instalist.R;
 import org.noorganization.instalist.controller.implementation.ControllerFactory;
 import org.noorganization.instalist.model.Category;
@@ -55,11 +57,12 @@ public class ContextItemClickedHelper implements IContextItemClickedHelper {
 
     @Override
     public void removeList(ShoppingList _ShoppingList) {
-        boolean deleted = ControllerFactory.getListController().removeList(_ShoppingList);
+        _ShoppingList.delete();
+        /*boolean deleted = ControllerFactory.getListController().removeList(_ShoppingList);
         if (!deleted) {
             Toast.makeText(mContext, mContext.getString(R.string.deletion_failed), Toast.LENGTH_SHORT).show();
             return;
-        }
+        }*/
         ((IBaseActivity) mContext).removeList(_ShoppingList);
     }
 
