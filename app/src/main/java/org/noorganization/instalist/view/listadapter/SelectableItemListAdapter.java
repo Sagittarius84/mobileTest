@@ -14,7 +14,6 @@ import android.widget.TextView;
 import com.orm.SugarRecord;
 
 import org.noorganization.instalist.R;
-import org.noorganization.instalist.model.ShoppingList;
 import org.noorganization.instalist.model.view.BaseItemListEntry;
 import org.noorganization.instalist.model.view.SelectableBaseItemListEntry;
 import org.noorganization.instalist.view.datahandler.SelectableBaseItemListEntryDataHolder;
@@ -35,15 +34,13 @@ public class SelectableItemListAdapter extends ArrayAdapter<SelectableBaseItemLi
     private List<SelectableBaseItemListEntry> mSelectableItems;
     private List<SelectableBaseItemListEntry> mResSelectableItems;
 
-    private ShoppingList mCurrentShoppingList;
 
-    public SelectableItemListAdapter(Activity _activity, List<SelectableBaseItemListEntry> _ProductList, ShoppingList _CurrentShoppingList){
+    public SelectableItemListAdapter(Activity _activity, List<SelectableBaseItemListEntry> _ProductList){
         super(_activity, R.layout.list_selectable_product  , _ProductList);
         mActivity = _activity;
         mSelectableItems = _ProductList;
         mResSelectableItems = new ArrayList<>(_ProductList);
 
-        mCurrentShoppingList = _CurrentShoppingList;
         if(SelectableBaseItemListEntryDataHolder.getInstance().getListEntries().size() > 0) {
             mSelectableItems = SelectableBaseItemListEntryDataHolder.getInstance().getListEntries();
         }else{
