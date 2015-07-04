@@ -1,27 +1,17 @@
 package org.noorganization.instalist.view.listadapter;
 
-import android.app.Activity;
-import android.app.Fragment;
 import android.content.Context;
-import android.database.DataSetObserver;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.ListAdapter;
 import android.widget.TextView;
 
 import org.noorganization.instalist.R;
 import org.noorganization.instalist.model.Ingredient;
-import org.noorganization.instalist.view.MainShoppingListView;
 import org.noorganization.instalist.view.customview.AmountPicker;
-import org.noorganization.instalist.view.datahandler.RecipeDataHolder;
-import org.noorganization.instalist.view.fragment.IngredientCreationFragment;
-import org.noorganization.instalist.view.interfaces.IBaseActivity;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -82,7 +72,7 @@ public class IngredientListAdapter extends ArrayAdapter<Ingredient> {
         View rtn = _viewToRecycle;
         if (rtn == null) {
             LayoutInflater inflater = LayoutInflater.from(mContext);
-            rtn = inflater.inflate(R.layout.entry_ingredient, _parent);
+            rtn = inflater.inflate(R.layout.entry_ingredient, null);
         }
 
         Ingredient current = mUnderlyingIngredients.get(_position);
@@ -97,7 +87,7 @@ public class IngredientListAdapter extends ArrayAdapter<Ingredient> {
         return rtn;
     }
 
-    private class IngredientOnLongClickListener implements View.OnLongClickListener
+    /*private class IngredientOnLongClickListener implements View.OnLongClickListener
     {
         private Ingredient mIngredient;
 
@@ -117,5 +107,5 @@ public class IngredientListAdapter extends ArrayAdapter<Ingredient> {
             ((MainShoppingListView) mContext).changeFragment(fragment);
             return true;
         }
-    }
+    }*/
 }

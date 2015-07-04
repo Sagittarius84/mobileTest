@@ -5,7 +5,6 @@ import android.app.Fragment;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.widget.DrawerLayout;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -32,36 +31,42 @@ import org.noorganization.instalist.model.view.RecipeListEntry;
 import org.noorganization.instalist.model.view.SelectableBaseItemListEntry;
 import org.noorganization.instalist.view.activity.RecipeChangeActivity;
 import org.noorganization.instalist.view.datahandler.SelectableBaseItemListEntryDataHolder;
+import org.noorganization.instalist.view.event.ProductSelectMessage;
 import org.noorganization.instalist.view.interfaces.IBaseActivity;
 import org.noorganization.instalist.view.listadapter.SelectableItemListAdapter;
 import org.noorganization.instalist.view.utils.ViewUtils;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
+import de.greenrobot.event.EventBus;
 
 /**
  * Created by TS on 10.05.2015.
  * Responsible to show a dialog with a list of selectable products to add them to an existing shopping
  * list.
  */
-public class ProductListDialogFragment extends Fragment{
+public class ProductListDialogFragment extends Fragment {
 
     public static final String FILTER_BY_PRODUCT = "0";
     public static final String FILTER_BY_RECIPE = "1";
     public static final String FILTER_SHOW_ALL = "2";
-
-    private ShoppingList mCurrentShoppingList;
 
     private Button mCreateProductButton;
     private Button mCancelButton;
     private Button mAddProductsButton;
     private Button mCreateRecipeButton;
 
-    private static final String BUNDLE_KEY_LIST_ID = "ListId";
+    private static final String BUNDLE_KEY_LIST_ID = "listId";
+    private static final String BK_COMPABILITY = "comp";
 
     // create the abstract selectable list entries to show mixed entries
     private List<SelectableBaseItemListEntry> mSelectableBaseItemListEntries = new ArrayList<>();
     private SelectableItemListAdapter mListAdapter;
+
+    private ListAddModeCompability mCompatibility;
 
     private IBaseActivity mBaseActivityInterface;
     private Context mContext;
@@ -74,7 +79,16 @@ public class ProductListDialogFragment extends Fragment{
     public static ProductListDialogFragment newInstance(long _ListId){
         ProductListDialogFragment fragment = new ProductListDialogFragment();
         Bundle args = new Bundle();
+        args.putBoolean(BK_COMPABILITY, true);
         args.putLong(BUNDLE_KEY_LIST_ID, _ListId);
+        fragment.setArguments(args);
+        return fragment;
+    }
+
+    public static ProductListDialogFragment newInstance() {
+        ProductListDialogFragment fragment = new ProductListDialogFragment();
+        Bundle args = new Bundle();
+        args.putBoolean(BK_COMPABILITY, false);
         fragment.setArguments(args);
         return fragment;
     }
@@ -83,12 +97,13 @@ public class ProductListDialogFragment extends Fragment{
     public void onAttach(Activity _Activity) {
         super.onAttach(_Activity);
         mContext = _Activity;
+        /* TODO remove if possible (because of events)
         try {
             mBaseActivityInterface = (IBaseActivity) _Activity;
         } catch (ClassCastException e) {
             throw new ClassCastException(_Activity.toString()
                     + " has no IBaseActivity interface attached.");
-        }
+        }*/
     }
 
     @Override
@@ -101,24 +116,21 @@ public class ProductListDialogFragment extends Fragment{
         }
 
         setHasOptionsMenu(true);
-        long currentListId = bundle.getLong(BUNDLE_KEY_LIST_ID);
-        mCurrentShoppingList = SugarRecord.findById(ShoppingList.class, currentListId);
-        //String currentListName = bundle.getString(MainShoppingListView.KEY_LISTNAME);
-        //mCurrentShoppingList = ShoppingList.findByName(currentListName);
 
-        if(mCurrentShoppingList == null){
-            throw new IllegalStateException(ProductListDialogFragment.class.toString() +
-                    ": Cannot find corresponding ShoppingList for id: " + currentListId);
+        if (bundle.getBoolean(BK_COMPABILITY)) {
+            mCompatibility = new ListAddModeCompability(bundle.getLong(BUNDLE_KEY_LIST_ID));
         }
+
 
         List<Product> productList = Product.listAll(Product.class);
         List<Recipe> recipeList = Recipe.listAll(Recipe.class);
-        List<ListEntry> listEntries = mCurrentShoppingList.getEntries();
+        //List<ListEntry> listEntries = mCurrentShoppingList.getEntries();
 
         // remove all inserted list entries
-        for(ListEntry listEntry : listEntries){
+        // TODO add a method for hiding products.
+        /*for(ListEntry listEntry : listEntries){
             productList.remove(listEntry.mProduct);
-        }
+        }*/
 
         for(Product product: productList){
             mSelectableBaseItemListEntries.add(new SelectableBaseItemListEntry(new ProductListEntry(product)));
@@ -145,7 +157,7 @@ public class ProductListDialogFragment extends Fragment{
 
         View view = _Inflater.inflate(R.layout.fragment_product_list_dialog, _Container, false);
 
-        mListAdapter = new SelectableItemListAdapter(getActivity(), mSelectableBaseItemListEntries, mCurrentShoppingList);
+        mListAdapter = new SelectableItemListAdapter(getActivity(), mSelectableBaseItemListEntries);
 
         mCreateProductButton = (Button) view.findViewById(R.id.fragment_product_list_dialog_add_new_product);
         mCancelButton           = (Button) view.findViewById(R.id.fragment_product_list_dialog_cancel);
@@ -156,7 +168,10 @@ public class ProductListDialogFragment extends Fragment{
 
         listView.setAdapter(mListAdapter);
 
-        mBaseActivityInterface.setToolbarTitle(mContext.getResources().getString(R.string.product_list_dialog_title) + " " + mCurrentShoppingList.mName);
+        /* TODO add event for changing title.
+        if (mBaseActivityInterface != null) {
+            mBaseActivityInterface.setToolbarTitle(mContext.getResources().getString(R.string.product_list_dialog_title) + " " + mCurrentShoppingList.mName);
+        }*/
 
         return view;
     }
@@ -193,6 +208,7 @@ public class ProductListDialogFragment extends Fragment{
     public void onResume() {
         super.onResume();
 
+        /* TODO create event for title and locking drawer.
         mBaseActivityInterface.setToolbarTitle(mContext.getResources().getString(R.string.product_list_dialog_title));
         mBaseActivityInterface.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
 
@@ -202,7 +218,7 @@ public class ProductListDialogFragment extends Fragment{
             public void onClick(View v) {
                 mBaseActivityInterface.onBackPressed();
             }
-        });
+        });*/
         mCreateProductButton.setOnClickListener(mCreateProductListener);
         mCancelButton.setOnClickListener(mCancelListener);
         mAddProductsButton.setOnClickListener(mAddProductsListener);
@@ -224,6 +240,22 @@ public class ProductListDialogFragment extends Fragment{
         mAddProductsButton.setOnClickListener(null);
     }
 
+    @Override
+    public void onStart() {
+        super.onStart();
+        if (mCompatibility != null) {
+            EventBus.getDefault().register(mCompatibility);
+        }
+    }
+
+    @Override
+    public void onStop() {
+        if (mCompatibility != null) {
+            EventBus.getDefault().unregister(mCompatibility);
+        }
+        super.onStop();
+    }
+
     /**
      * Assign to add all selected list items to the current list.
      */
@@ -239,39 +271,73 @@ public class ProductListDialogFragment extends Fragment{
      */
     private View.OnClickListener mCreateProductListener;
 
+    private class ListAddModeCompability {
+
+        private ShoppingList mCurrentShoppingList;
+
+        public ListAddModeCompability(long _id) {
+            mCurrentShoppingList = SugarRecord.findById(ShoppingList.class, _id);
+
+            if(mCurrentShoppingList == null){
+                throw new IllegalStateException(ProductListDialogFragment.class.toString() +
+                        ": Cannot find corresponding ShoppingList for id: " + _id);
+            }
+        }
+
+        /**
+         * EventBus-receiver for translation to listentries.
+         * @param _selectedProducts
+         */
+        public void onEventMainThread(ProductSelectMessage _selectedProducts) {
+            IListController mListController = ControllerFactory.getListController();
+
+            for(Product product : _selectedProducts.mProducts.keySet()){
+                // 2 possible solutions for adding to current shoppinglist
+                // first would be like add all single items with the controller
+                // second would be add all to added products to a list and persist it then to the database --> less db writes when recipes hold same items.
+
+                ListEntry listEntryIntern = mListController.addOrChangeItem(mCurrentShoppingList,
+                        product, _selectedProducts.mProducts.get(product));
+                if(listEntryIntern == null){
+                    Log.e(ProductListDialogFragment.class.getName(), "Insertion failed.");
+                }
+            }
+        }
+
+
+    }
+
     private class OnAddProductsListener implements View.OnClickListener {
 
         @Override
         public void onClick(View v) {
             List<SelectableBaseItemListEntry> listEntries = SelectableBaseItemListEntryDataHolder.getInstance().getListEntries();
-            IListController mListController = ControllerFactory.getListController();
+
+            Map<Product, Float> resultingProducts = new HashMap<>();
 
             for(SelectableBaseItemListEntry listEntry : listEntries){
-                // 2 possible solutions for adding to current shoppinglist
-                // first would be like add all single items with the controller
-                // second would be add all to added products to a list and persist it then to the database --> less db writes when recipes hold same items.
                 if(listEntry.isChecked()){
                     BaseItemListEntry baseItemListEntry = listEntry.getItemListEntry();
 
                     switch (baseItemListEntry.getType()){
                         case PRODUCT_LIST_ENTRY:
                             Product product = (Product)(baseItemListEntry.getEntry().getObject());
-                            ListEntry listEntryIntern = mListController.addOrChangeItem(mCurrentShoppingList, product, 1.0f);
-                            if(listEntryIntern == null){
-                                Log.e(ProductListDialogFragment.class.getName(), "Insertion failed.");
+                            if (resultingProducts.containsKey(product)) {
+                                resultingProducts.put(product, resultingProducts.get(product) + 1.0f);
+                            } else {
+                                resultingProducts.put(product, 1.0f);
                             }
                             break;
                         case RECIPE_LIST_ENTRY:
                             Recipe recipe = (Recipe) (baseItemListEntry.getEntry().getObject());
-                            if(recipe == null){
-                                Log.e(ProductListDialogFragment.class.getName(), "recipe is null.");
-                                throw new NullPointerException(ProductListDialogFragment.class.getName()
-                                        + ": Recipe cannot be found.");
-                            }
                             List<Ingredient> ingredients = recipe.getIngredients();
                             for(Ingredient ingredient : ingredients){
-                                product = ingredient.mProduct;
-                                mListController.addOrChangeItem(mCurrentShoppingList, product, ingredient.mAmount, true);
+                                if (resultingProducts.containsKey(ingredient.mProduct)) {
+                                    resultingProducts.put(ingredient.mProduct,
+                                            resultingProducts.get(ingredient.mProduct) + ingredient.mAmount);
+                                } else {
+                                    resultingProducts.put(ingredient.mProduct, ingredient.mAmount);
+                                }
                             }
                             break;
                         default:
@@ -280,6 +346,7 @@ public class ProductListDialogFragment extends Fragment{
                     }
                 }
             }
+            EventBus.getDefault().post(new ProductSelectMessage(resultingProducts));
 
             SelectableBaseItemListEntryDataHolder.getInstance().clear();
             // go back to old fragment
@@ -297,10 +364,13 @@ public class ProductListDialogFragment extends Fragment{
     private class OnCreateProductListener implements View.OnClickListener {
         @Override
         public void onClick(View v) {
-            ProductChangeFragment creationFragment =
+            // TODO add event for product creation
+            /*ProductChangeFragment creationFragment =
                     ProductChangeFragment.newCreateInstance(mCurrentShoppingList.getId());
-            ViewUtils.addFragment(getActivity(), creationFragment);
+            ViewUtils.addFragment(getActivity(), creationFragment);*/
             ViewUtils.removeFragment(getActivity(), ProductListDialogFragment.this);
         }
     }
+
+
 }

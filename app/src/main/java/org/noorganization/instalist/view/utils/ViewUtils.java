@@ -73,10 +73,6 @@ public class ViewUtils {
         FragmentManager fragmentManager = _activity.getFragmentManager();
         String canonicalName = _newFragment.getClass().getCanonicalName();
         FragmentTransaction transaction = fragmentManager.beginTransaction();
-        Fragment oldFragment = fragmentManager.findFragmentByTag(canonicalName);
-        if (oldFragment != null) {
-            fragmentManager.popBackStack(canonicalName, FragmentManager.POP_BACK_STACK_INCLUSIVE);
-        }
         if (_newFragment instanceof DialogFragment) {
             ((DialogFragment) _newFragment).show(transaction, canonicalName);
         } else{
@@ -88,7 +84,7 @@ public class ViewUtils {
 
     public static void removeFragment(Activity _activity, Fragment _oldFragment) {
         FragmentManager fragmentManager = _activity.getFragmentManager();
-        fragmentManager.popBackStack(_oldFragment.getClass().getCanonicalName(), 0);
+        fragmentManager.popBackStack(_oldFragment.getClass().getCanonicalName(), FragmentManager.POP_BACK_STACK_INCLUSIVE);
     }
 
     /**
