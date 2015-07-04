@@ -2,6 +2,7 @@ package org.noorganization.instalist.view.listadapter;
 
 import android.content.Context;
 import android.text.method.ScrollingMovementMethod;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,6 +26,7 @@ import java.util.List;
  * Created by tinos_000 on 16.06.2015.
  */
 public class ExpandableCategoryItemListAdapter extends BaseExpandableListAdapter implements ICategoryAdapter {
+
 
     private LayoutInflater                     mInflater;
     private List<Category>                     mListOfCategories;
@@ -164,6 +166,7 @@ public class ExpandableCategoryItemListAdapter extends BaseExpandableListAdapter
     public void updateCategory(Category _Category) {
         int indexToUpdate = indexOfCategory(_Category);
         if (indexToUpdate < 0) {
+            Log.e(ExpandableCategoryItemListAdapter.class.toString(), "No category to update was found.");
             // TODO: some error message or retry for change
             return;
         }
@@ -186,7 +189,7 @@ public class ExpandableCategoryItemListAdapter extends BaseExpandableListAdapter
         // loop through each item to find the desired item, binsearch won't work, because there is no sort list...
         int indexToUpdate = - 1;
         for (int Index = 0; Index < mListOfCategories.size(); ++ Index) {
-            if (mListOfCategories.get(Index).getId() == _Category.getId()) {
+            if (mListOfCategories.get(Index).getId().equals(_Category.getId())) {
                 indexToUpdate = Index;
                 break;
             }

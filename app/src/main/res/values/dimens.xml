@@ -21,4 +21,5 @@
     <dimen name="base_edit_image_max_width">18dp</dimen>
     <dimen name="border_radius">2dp</dimen>
     <dimen name="text_size">16sp</dimen>
+    <dimen name="expandable_list_sublist_item_margin_left">16dp</dimen>
 </resources>
