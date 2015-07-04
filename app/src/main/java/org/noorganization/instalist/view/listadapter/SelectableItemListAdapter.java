@@ -1,7 +1,7 @@
 package org.noorganization.instalist.view.listadapter;
 
 import android.app.Activity;
-import android.app.Fragment;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,6 +16,7 @@ import com.orm.SugarRecord;
 import org.noorganization.instalist.R;
 import org.noorganization.instalist.model.view.BaseItemListEntry;
 import org.noorganization.instalist.model.view.SelectableBaseItemListEntry;
+import org.noorganization.instalist.view.activity.RecipeChangeActivity;
 import org.noorganization.instalist.view.datahandler.SelectableBaseItemListEntryDataHolder;
 import org.noorganization.instalist.view.fragment.ProductChangeFragment;
 import org.noorganization.instalist.view.utils.ViewUtils;
@@ -130,24 +131,21 @@ public class SelectableItemListAdapter extends ArrayAdapter<SelectableBaseItemLi
 
         @Override
         public boolean onLongClick(View v) {
-            Fragment nextFragment;
             SugarRecord currentEntry = (SugarRecord) (mListEntry.getEntry().getObject());
 
             switch (mListEntry.getType()){
                 case PRODUCT_LIST_ENTRY:
-                    nextFragment = ProductChangeFragment.newChangeInstance(currentEntry.getId());
+                    ViewUtils.addFragment(mActivity, ProductChangeFragment.
+                            newChangeInstance(currentEntry.getId()));
                     break;
                 case RECIPE_LIST_ENTRY:
-                    // TODO: start recipe editor
-                    //nextFragment = RecipeChangeActivity.newInstance(
-                    //        mCurrentShoppingList.mName, currentEntry.getId());
-                    //break;
-                    return true;
+                    Intent startEditor = new Intent(getContext(), RecipeChangeActivity.class);
+                    startEditor.putExtra(RecipeChangeActivity.ARGS_RECIPE_ID, currentEntry.getId());
+                    getContext().startActivity(startEditor);
+                    break;
                 default:
                     throw new IllegalStateException("There is no entry type defined.");
             }
-
-            ViewUtils.addFragment(mActivity, nextFragment);
 
             return true;
         }

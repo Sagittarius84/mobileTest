@@ -8,7 +8,6 @@ import android.app.FragmentTransaction;
 import android.content.Context;
 import android.text.method.DigitsKeyListener;
 import android.text.method.KeyListener;
-import android.util.Log;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 
@@ -74,10 +73,6 @@ public class ViewUtils {
         FragmentManager fragmentManager = _activity.getFragmentManager();
         String canonicalName = _newFragment.getClass().getCanonicalName();
         FragmentTransaction transaction = fragmentManager.beginTransaction();
-        Fragment oldFragment = fragmentManager.findFragmentByTag(canonicalName);
-        if (oldFragment != null) {
-            fragmentManager.popBackStack(canonicalName, FragmentManager.POP_BACK_STACK_INCLUSIVE);
-        }
         if (_newFragment instanceof DialogFragment) {
             ((DialogFragment) _newFragment).show(transaction, canonicalName);
         } else{
@@ -88,10 +83,8 @@ public class ViewUtils {
     }
 
     public static void removeFragment(Activity _activity, Fragment _oldFragment) {
-        Log.e("frm", "Removing " + _oldFragment.getClass().getSimpleName() + " from " + _activity.getClass().getSimpleName());
         FragmentManager fragmentManager = _activity.getFragmentManager();
-        fragmentManager.popBackStack(_oldFragment.getClass().getCanonicalName(), 0);
-        Log.e("frm", "removed.");
+        fragmentManager.popBackStack(_oldFragment.getClass().getCanonicalName(), FragmentManager.POP_BACK_STACK_INCLUSIVE);
     }
 
     /**

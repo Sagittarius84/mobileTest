@@ -1,14 +1,11 @@
 package org.noorganization.instalist.view.activity;
 
-import android.app.FragmentManager;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.widget.Button;
 
 import org.noorganization.instalist.R;
@@ -25,7 +22,7 @@ import org.noorganization.instalist.view.utils.ViewUtils;
 public class RecipeChangeActivity extends ActionBarActivity {
 
     private static final String ARGS_LIST_NAME = "list_name";
-    private static final String ARGS_RECIPE_ID = "recipe_id";
+    public  static final String ARGS_RECIPE_ID = "recipe_id";
 
 
     private ShoppingList mCurrentShoppingList;
@@ -167,8 +164,6 @@ public class RecipeChangeActivity extends ActionBarActivity {
     public void onCreate(Bundle _savedInstanceState) {
         super.onCreate(_savedInstanceState);
 
-        Log.i("Create", "created.");
-
         setContentView(R.layout.activity_clean_w_actionbar);
 
         setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
@@ -182,7 +177,8 @@ public class RecipeChangeActivity extends ActionBarActivity {
             if (intent.getExtras() == null || intent.getExtras().isEmpty()) {
                 ViewUtils.addFragment(this, RecipeEditorFragment.newCreationInstance());
             } else {
-                // TODO add also fragment, but for editing
+                long recipeId = intent.getExtras().getLong(ARGS_RECIPE_ID);
+                ViewUtils.addFragment(this, RecipeEditorFragment.newUpdateInstance(recipeId));
             }
         }
 
@@ -230,7 +226,6 @@ public class RecipeChangeActivity extends ActionBarActivity {
     @Override
     public void onResume() {
         super.onResume();
-        Log.i("Create", "resumed view.");
 /*        mAddIngredientButton.setOnClickListener(new View.OnClickListener(){
 
             @Override
@@ -257,7 +252,6 @@ public class RecipeChangeActivity extends ActionBarActivity {
         /*mAddIngredientButton.setOnClickListener(null);
         mAddRecipeButton.setOnClickListener(null);
         mCancelButton.setOnClickListener(null);*/
-        Log.i("Create", "paused view.");
     }
 
     /*private final static class ViewAcccessor{

@@ -72,7 +72,7 @@ public class IngredientListAdapter extends ArrayAdapter<Ingredient> {
         View rtn = _viewToRecycle;
         if (rtn == null) {
             LayoutInflater inflater = LayoutInflater.from(mContext);
-            rtn = inflater.inflate(R.layout.entry_ingredient, _parent);
+            rtn = inflater.inflate(R.layout.entry_ingredient, null);
         }
 
         Ingredient current = mUnderlyingIngredients.get(_position);

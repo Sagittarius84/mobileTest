@@ -221,6 +221,7 @@ public class RecipeEditorFragment extends Fragment {
                 }
 
                 ViewUtils.removeFragment(getActivity(), RecipeEditorFragment.this);
+                getActivity().finish();
             }
         }
     }
