@@ -79,6 +79,18 @@ public class PreferencesManager {
      * @param _Key   the key of the value.
      * @param _Value the value that is assigned to the key.
      */
+    public void setValue(String _Key, int _Value){
+        mSharedPreferences.edit()
+                .putInt(_Key, _Value)
+                .apply();
+    }
+
+    /**
+     * Persists the given key value pair.
+     *
+     * @param _Key   the key of the value.
+     * @param _Value the value that is assigned to the key.
+     */
     public void setValue(String _Key, String _Value) {
         mSharedPreferences.edit()
                 .putString(_Key, _Value)
@@ -93,6 +105,16 @@ public class PreferencesManager {
      */
     public long getLongValue(String _Key) {
         return mSharedPreferences.getLong(_Key, -1L);
+    }
+
+    /**
+     * Retrieves the int value of the given key.
+     *
+     * @param _Key the key for which the value should be returned.
+     * @return if key exists the corresponding value of that key,  else -1.
+     */
+    public int getIntValue(String _Key) {
+        return mSharedPreferences.getInt(_Key, -1);
     }
 
     /**

@@ -42,6 +42,7 @@ import org.noorganization.instalist.view.interfaces.IFragment;
 import org.noorganization.instalist.view.listadapter.ShoppingItemListAdapter;
 import org.noorganization.instalist.view.sorting.AlphabeticalListEntryComparator;
 import org.noorganization.instalist.view.sorting.PriorityListEntryComparator;
+import org.noorganization.instalist.view.utils.PreferencesManager;
 import org.noorganization.instalist.view.utils.ViewUtils;
 
 import java.util.Comparator;
@@ -302,22 +303,15 @@ public class ShoppingListOverviewFragment extends Fragment implements IFragment 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int               id          = item.getItemId();
-        SharedPreferences sortDetails = mContext.getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE);
-
         // swtich which action item was pressed
         switch (id) {
             case R.id.list_items_sort_by_priority:
                 mShoppingItemListAdapter.sortByComparator(mMapComperable.get(SORT_BY_PRIORITY));
-
-                sortDetails.edit()
-                        .putInt(SORT_MODE, SORT_BY_PRIORITY)
-                        .apply();
+                PreferencesManager.getInstance().setValue(SORT_MODE, SORT_BY_PRIORITY);
                 break;
             case R.id.list_items_sort_by_name:
                 mShoppingItemListAdapter.sortByComparator(mMapComperable.get(SORT_BY_NAME));
-                sortDetails.edit()
-                        .putInt(SORT_MODE, SORT_BY_NAME)
-                        .apply();
+                PreferencesManager.getInstance().setValue(SORT_MODE, SORT_BY_NAME);
                 break;
             default:
                 break;
@@ -383,7 +377,6 @@ public class ShoppingListOverviewFragment extends Fragment implements IFragment 
     public void onResume() {
         super.onResume();
 
-        SharedPreferences sortDetails = mContext.getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE);
         mBaseActivityInterface.registerFragment(this);
         // decl
         // init
@@ -392,8 +385,10 @@ public class ShoppingListOverviewFragment extends Fragment implements IFragment 
         mBaseActivityInterface.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
 
         mShoppingItemListAdapter = new ShoppingItemListAdapter(getActivity(), mCurrentShoppingList.getEntries());
-        mShoppingItemListAdapter.sortByComparator(mMapComperable.get(sortDetails.getInt(SORT_MODE, SORT_BY_PRIORITY)));
-
+        int sortIndex = PreferencesManager.getInstance().getIntValue(SORT_MODE);
+        if(sortIndex >= 0) {
+            mShoppingItemListAdapter.sortByComparator(mMapComperable.get(sortIndex));
+        }
         // use a linear layout manager
         mLayoutManager = new LinearLayoutManager(mContext);
         mLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);

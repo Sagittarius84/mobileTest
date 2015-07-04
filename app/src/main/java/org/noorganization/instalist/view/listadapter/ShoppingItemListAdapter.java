@@ -279,7 +279,7 @@ public class ShoppingItemListAdapter extends RecyclerView.Adapter<RecyclerView.V
         notifyDataSetChanged();
     }
 
-    public void sortByComparator(Comparator _Comparator) {
+    public void sortByComparator(Comparator<ListEntryItemWrapper> _Comparator) {
         mComparator = _Comparator;
         Collections.sort(mListOfEntries, _Comparator);
         notifyDataSetChanged();

@@ -5,7 +5,9 @@ import android.app.Fragment;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.PersistableBundle;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -16,9 +18,11 @@ import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.animation.TranslateAnimation;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ExpandableListView;
+import android.widget.FrameLayout;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 
@@ -56,10 +60,11 @@ public class MainShoppingListView extends ActionBarActivity implements IBaseActi
 
     public final static String KEY_LISTNAME = "list_name";
     public final static String KEY_LISTID   = "list_id";
+    public static final String SIDE_DRAWER_TRANSLATE = "side_drawer_translate";
 
     private Toolbar mToolbar;
 
-
+    private FrameLayout    mFrameLayout;
     private RelativeLayout mLeftMenuDrawerRelativeLayout;
     private EditText       mNewNameEditText;
 
@@ -93,6 +98,8 @@ public class MainShoppingListView extends ActionBarActivity implements IBaseActi
     private SideDrawerListManager mDrawerListManager;
 
     private List<IFragment> mFragments;
+    private float mLastDrawerTranslate = 0.0f;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -132,13 +139,11 @@ public class MainShoppingListView extends ActionBarActivity implements IBaseActi
 
         mLeftMenuDrawerRelativeLayout = (RelativeLayout) findViewById(R.id.list_view_left_side_navigation);
         mSettingsButton = (Button) findViewById(R.id.drawer_layout_custom_settings);
-
+        mFrameLayout = (FrameLayout) findViewById(R.id.container);
         mDrawerListManager = new SideDrawerListManager(this, plainListView, expandableListView);
 
         mDrawerLayout.setFitsSystemWindows(true);
         assignDrawer();
-
-
         if (savedInstanceState == null) {
             if (ShoppingList.count(ShoppingList.class, null, new String[]{}) > 0) {
                 selectList(ShoppingList.listAll(ShoppingList.class).get(0));
@@ -159,7 +164,6 @@ public class MainShoppingListView extends ActionBarActivity implements IBaseActi
         mDrawerListManager.onContextMenuItemClicked(_Item);
         return super.onContextItemSelected(_Item);
     }
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -212,7 +216,6 @@ public class MainShoppingListView extends ActionBarActivity implements IBaseActi
     protected void onResume() {
         super.onResume();
         ((ChangeHandler) GlobalApplication.getChangeHandler()).setCurrentBaseActivity(this);
-
         mAddListButton.setOnClickListener(new OnShoppingListAddClickListener(mDefaultCategoryId, mNewNameEditText));
 
         mAddCategoryButton.setOnClickListener(new View.OnClickListener() {
@@ -347,10 +350,8 @@ public class MainShoppingListView extends ActionBarActivity implements IBaseActi
         ViewUtils.addFragment(this, fragment);
     }
 
-
-    /*
     @Override
-    publi   c boolean onKeyUp(int _KeyCode, KeyEvent _Event) {
+    public boolean onKeyUp(int _KeyCode, KeyEvent _Event) {
         if(_KeyCode == KeyEvent.KEYCODE_BACK){
             if(mNewNameEditText.hasFocus()){
                 mNewNameEditText.clearFocus();
@@ -362,7 +363,6 @@ public class MainShoppingListView extends ActionBarActivity implements IBaseActi
         }
         return super.onKeyUp(_KeyCode, _Event);
     }
-    */
 
     @Override
     public void setDrawerLockMode(int _DrawerLayoutMode) {
@@ -485,8 +485,30 @@ public class MainShoppingListView extends ActionBarActivity implements IBaseActi
                 // check if options menu has changed
                 invalidateOptionsMenu();
             }
+
+            @Override
+            public void onDrawerSlide(View _DrawerView, float _SlideOffset) {
+                super.onDrawerSlide(_DrawerView, _SlideOffset);
+                float moveFactor = (mDrawerLayout.getWidth() * _SlideOffset);
+                slideDrawer(moveFactor);
+            }
         };
         mDrawerLayout.setDrawerListener(mNavBarToggle);
+    }
+
+    private void slideDrawer(float _MoveFactor){
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB)
+        {
+            mFrameLayout.setTranslationX(_MoveFactor);
+        }
+        else
+        {
+            TranslateAnimation anim = new TranslateAnimation(mLastDrawerTranslate, _MoveFactor, 0.0f, 0.0f);
+            anim.setDuration(0);
+            anim.setFillAfter(true);
+            mFrameLayout.startAnimation(anim);
+            mLastDrawerTranslate = _MoveFactor;
+        }
     }
 
     @Override

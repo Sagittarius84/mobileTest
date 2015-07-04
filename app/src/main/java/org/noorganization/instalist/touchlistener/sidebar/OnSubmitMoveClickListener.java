@@ -45,15 +45,20 @@ public class OnSubmitMoveClickListener implements View.OnClickListener {
         Context context = _View.getContext();
 
         Category category = (Category) mSpinner.getSelectedItem();
+        Category oldCategory = mShoppingList.mCategory;
         mShoppingList = ControllerFactory.getListController().moveToCategory(mShoppingList, category);
         if(mShoppingList == null){
             Toast.makeText(context, context.getString(R.string.change_of_category_of_list_failed), Toast.LENGTH_SHORT).show();
-            // TODO: remove this when callback for this kind is there.
-            ((IBaseActivity) context).updateList(mShoppingList);
         }
+        // TODO: remove this when callback for this kind is there.
+        IBaseActivity baseActivity = ((IBaseActivity) context);
+        if(oldCategory != null){
+            baseActivity.updateCategory(oldCategory);
+        }
+        baseActivity.updateCategory(category);
+        // ENDTODO
         mMoveCategoryLayout.setVisibility(View.GONE);
         mMainView.setVisibility(View.VISIBLE);
-
 
     }
 }
