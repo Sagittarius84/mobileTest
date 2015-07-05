@@ -1,24 +1,24 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    tools:context="org.noorganization.instalist.view.MainShoppingListView">
+      xmlns:app="http://schemas.android.com/apk/res-auto"
+      xmlns:tools="http://schemas.android.com/tools"
+      tools:context="org.noorganization.instalist.view.MainShoppingListView">
     <item
         android:id="@+id/menu_sort_action"
+        android:icon="@drawable/ic_sort_by_alpha_white_36dp"
         android:title="@string/menu_sort_text"
         app:showAsAction="ifRoom"
-        android:icon="@drawable/ic_sort_by_alpha_white_36dp"
         >
         <menu>
-        <item
-            android:id="@+id/list_items_sort_by_name"
-            android:title="@string/menu_sort_by_product_name"
-            android:orderInCategory="100"
-            app:showAsAction="never" />
-        <item
-            android:id="@+id/list_items_sort_by_priority"
-            android:title="@string/menu_sort_by_priority"
-            android:orderInCategory="100"
-            app:showAsAction="never" />
-    </menu>
+            <item
+                android:id="@+id/list_items_sort_by_name"
+                android:orderInCategory="100"
+                android:title="@string/menu_sort_by_product_name"
+                app:showAsAction="never"/>
+            <item
+                android:id="@+id/list_items_sort_by_priority"
+                android:orderInCategory="100"
+                android:title="@string/menu_sort_by_priority"
+                app:showAsAction="never"/>
+        </menu>
     </item>
 </menu>

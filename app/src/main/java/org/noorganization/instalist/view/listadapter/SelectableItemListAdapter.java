@@ -19,12 +19,14 @@ import org.noorganization.instalist.model.view.SelectableBaseItemListEntry;
 import org.noorganization.instalist.view.activity.RecipeChangeActivity;
 import org.noorganization.instalist.view.datahandler.SelectableBaseItemListEntryDataHolder;
 import org.noorganization.instalist.view.fragment.ProductChangeFragment;
+import org.noorganization.instalist.view.fragment.ProductListDialogFragment;
 import org.noorganization.instalist.view.utils.ViewUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * Represents the adapter for handling Selectable data such as products and recipes.
  * Created by TS on 25.05.2015.
  */
 public class SelectableItemListAdapter extends ArrayAdapter<SelectableBaseItemListEntry> implements Filterable{
@@ -158,7 +160,6 @@ public class SelectableItemListAdapter extends ArrayAdapter<SelectableBaseItemLi
             @Override
             protected FilterResults performFiltering(CharSequence constraint) {
                 FilterResults result = new FilterResults();
-
                 // TODO: make it thread safe
                 List<SelectableBaseItemListEntry> listEntries = new ArrayList<>( mResSelectableItems);
 
@@ -169,18 +170,24 @@ public class SelectableItemListAdapter extends ArrayAdapter<SelectableBaseItemLi
                     BaseItemListEntry.eItemType filterType;
                     ArrayList<SelectableBaseItemListEntry> filteredList = new ArrayList<SelectableBaseItemListEntry>();
 
-                    switch(Integer.parseInt(constraint.toString())){
-                        case 0:
+                    switch(constraint.toString()){
+                        case ProductListDialogFragment.FILTER_BY_PRODUCT:
                             filterType = BaseItemListEntry.eItemType.PRODUCT_LIST_ENTRY;
                             break;
-                        case 1:
+                        case ProductListDialogFragment.FILTER_BY_RECIPE:
                             filterType = BaseItemListEntry.eItemType.RECIPE_LIST_ENTRY;
                             break;
-                        case 2:
+                        case ProductListDialogFragment.FILTER_SHOW_ALL:
                             filterType = BaseItemListEntry.eItemType.EMPTY;
                             break;
                         default:
-                            filterType = BaseItemListEntry.eItemType.EMPTY;
+                            filterType = BaseItemListEntry.eItemType.NAME_SEARCH;;
+                            String contraintToFind = constraint.toString().toLowerCase();
+                            for (SelectableBaseItemListEntry entry : listEntries) {
+                                if (entry.getItemListEntry().getName().toLowerCase().startsWith(contraintToFind)) {
+                                    filteredList.add(entry);
+                                }
+                            }
                             break;
                     }
 
@@ -196,7 +203,6 @@ public class SelectableItemListAdapter extends ArrayAdapter<SelectableBaseItemLi
                     result.values = filteredList;
                     result.count = filteredList.size();
                 }
-
                 return result;
             }
 

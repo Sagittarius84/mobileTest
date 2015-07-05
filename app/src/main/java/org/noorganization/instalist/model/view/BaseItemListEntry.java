@@ -8,6 +8,7 @@ public abstract class BaseItemListEntry {
     public enum eItemType{
         PRODUCT_LIST_ENTRY,
         RECIPE_LIST_ENTRY,
+        NAME_SEARCH, // no good art
         EMPTY,
     }
 

@@ -462,7 +462,6 @@ public class ShoppingListOverviewFragment extends Fragment implements IFragment 
             }
         });
 
-        mBaseActivityInterface.bindDrawerLayout();
     }
 
     // --------------------------------------------------------------------------------------------
@@ -474,7 +473,7 @@ public class ShoppingListOverviewFragment extends Fragment implements IFragment 
 
         View view = _Inflater.inflate(R.layout.fragment_main_shopping_list_view, _Container, false);
         mAddButton = (ActionButton) view.findViewById(R.id.add_item_main_list_view);
-
+        mBaseActivityInterface.bindDrawerLayout();
         return view;
     }
 

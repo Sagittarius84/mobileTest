@@ -463,7 +463,7 @@ public class MainShoppingListView extends ActionBarActivity implements IBaseActi
      * Set a drawer to a fragmentlayout.
      */
     public void assignDrawer() {
-        mToolbar.setNavigationIcon(R.mipmap.ic_menu_white_36dp);
+        //mToolbar.setNavigationIcon(R.mipmap.ic_menu_white_36dp);
         // navbar custom design of toolbar
         mNavBarToggle = new ActionBarDrawerToggle(
                 this,                       // host activity
@@ -476,7 +476,7 @@ public class MainShoppingListView extends ActionBarActivity implements IBaseActi
             @Override
             public void onDrawerClosed(View drawerView) {
                 super.onDrawerClosed(drawerView);
-                mToolbar.setNavigationIcon(R.mipmap.ic_menu_white_36dp);
+                // mToolbar.setNavigationIcon(R.mipmap.ic_menu_white_36dp);
                 mToolbar.setTitle(mTitle);
                 // check if options menu has changed
                 invalidateOptionsMenu();
@@ -485,7 +485,7 @@ public class MainShoppingListView extends ActionBarActivity implements IBaseActi
             @Override
             public void onDrawerOpened(View drawerView) {
                 super.onDrawerOpened(drawerView);
-                mToolbar.setNavigationIcon(R.mipmap.ic_arrow_back_white_36dp);
+                //mToolbar.setNavigationIcon(R.mipmap.ic_arrow_back_white_36dp);
                 String tmpTitle = getString(R.string.choose_list);
                 mToolbar.setTitle(tmpTitle);
                 // check if options menu has changed

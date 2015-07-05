@@ -1,18 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    tools:context="org.noorganization.instalist.view.fragment.ProductListDialogFragment">
+      xmlns:app="http://schemas.android.com/apk/res-auto"
+      xmlns:tools="http://schemas.android.com/tools"
+      tools:context="org.noorganization.instalist.view.fragment.ProductListDialogFragment">
 
     <item
         android:id="@+id/menu_product_list_dialog_search"
         android:icon="@drawable/ic_search_white_36dp"
-        app:showAsAction="ifRoom"
-        android:title="@string/menu_product_list_dialog_search" />
+        android:title="@string/menu_product_list_dialog_search"
+        app:actionViewClass="android.support.v7.widget.SearchView"
+        app:showAsAction="always"/>
     <item
         android:id="@+id/menu_product_list_dialog_sort_by"
-        android:title="@string/menu_product_list_dialog_sort_by"
         android:icon="@drawable/ic_sort_white_36dp"
+        android:title="@string/menu_product_list_dialog_sort_by"
         app:showAsAction="ifRoom"
         >
         <menu>
@@ -24,8 +25,8 @@
     </item>
     <item
         android:id="@+id/menu_product_list_dialog_filter_by"
-        android:title="@string/menu_product_list_dialog_filter_by"
         android:icon="@drawable/ic_filter_list_white_36dp"
+        android:title="@string/menu_product_list_dialog_filter_by"
         app:showAsAction="ifRoom"
         >
         <menu>
