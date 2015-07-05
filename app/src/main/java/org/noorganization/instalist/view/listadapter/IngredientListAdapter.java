@@ -85,7 +85,11 @@ public class IngredientListAdapter extends ArrayAdapter<Ingredient> {
         picker.setChangeListener(new IngredientAmountChangeListener());
 
         TextView productLabel = ((TextView) rtn.findViewById(R.id.entry_ingredient_product));
-        productLabel.setText(current.mProduct.mName);
+        String ingredientText = current.mProduct.mName;
+        if (current.mProduct.mUnit != null) {
+            ingredientText = current.mProduct.mUnit.mName + " " + ingredientText;
+        }
+        productLabel.setText(ingredientText);
 
         return rtn;
     }

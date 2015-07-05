@@ -18,6 +18,7 @@ import org.noorganization.instalist.model.Unit;
 import org.noorganization.instalist.model.view.ListEntryItemWrapper;
 import org.noorganization.instalist.touchlistener.OnSimpleSwipeGestureListener;
 import org.noorganization.instalist.view.customview.AmountPicker;
+import org.noorganization.instalist.view.sorting.AlphabeticalListEntryComparator;
 import org.noorganization.instalist.view.spinneradapter.UnitSpinnerAdapter;
 import org.noorganization.instalist.view.utils.ViewUtils;
 
@@ -107,6 +108,7 @@ public class ShoppingItemListAdapter extends RecyclerView.Adapter<RecyclerView.V
             mListOfEntries.add(new ListEntryItemWrapper(listEntry));
         }
         this.mActivity = _Activity;
+        mComparator = new AlphabeticalListEntryComparator();
     }
 
     @Override

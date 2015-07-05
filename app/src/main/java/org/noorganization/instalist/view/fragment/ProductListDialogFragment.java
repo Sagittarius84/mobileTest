@@ -72,7 +72,8 @@ public class ProductListDialogFragment extends Fragment {
     private Button mCreateRecipeButton;
 
     private static final String BUNDLE_KEY_LIST_ID = "listId";
-    private static final String BK_COMPABILITY     = "comp";
+    private static final String BK_COMPABILITY = "comp";
+    private static final String BK_ALLOW_RECIPE_CREATION = "recipeCreation";
 
     // create the abstract selectable list entries to show mixed entries
     private List<SelectableBaseItemListEntry> mSelectableBaseItemListEntries = new ArrayList<>();
@@ -83,9 +84,33 @@ public class ProductListDialogFragment extends Fragment {
     private IBaseActivity mBaseActivityInterface;
     private Context       mContext;
 
+
+    /**
+     * Creates an instance with coupling to ShoppingList.
+     * @param _listId The list's id to couple. If not existing, an instance without coupling will be
+     *                returned.
+     * @param _recipeCreationEnabled Whether recipe creation should be allowed or not.
+     * @return The new instance.
+     */
+    public static ProductListDialogFragment newInstance(long _listId, boolean _recipeCreationEnabled){
+        ProductListDialogFragment instance = newInstance(_listId);
+        instance.getArguments().putBoolean(BK_ALLOW_RECIPE_CREATION, _recipeCreationEnabled);
+        return instance;
+    }
+
+    /**
+     * Creates an instance without coupling to ShoppingList.
+     * @param _recipeCreationEnabled Whether recipe creation should be allowed or not.
+     * @return The new instance.
+     */
+    public static ProductListDialogFragment newInstance(boolean _recipeCreationEnabled){
+        ProductListDialogFragment instance = newInstance();
+        instance.getArguments().putBoolean(BK_ALLOW_RECIPE_CREATION, _recipeCreationEnabled);
+        return instance;
+    }
+
     /**
      * Creates an instance of an ProductListDialogFragment.
-     *
      * @param _ListId the id of the list where the products should be added.
      * @return the new instance of this fragment.
      */
@@ -94,6 +119,7 @@ public class ProductListDialogFragment extends Fragment {
         Bundle                    args     = new Bundle();
         args.putBoolean(BK_COMPABILITY, true);
         args.putLong(BUNDLE_KEY_LIST_ID, _ListId);
+        args.putBoolean(BK_ALLOW_RECIPE_CREATION, true);
         fragment.setArguments(args);
         return fragment;
     }
@@ -102,6 +128,7 @@ public class ProductListDialogFragment extends Fragment {
         ProductListDialogFragment fragment = new ProductListDialogFragment();
         Bundle                    args     = new Bundle();
         args.putBoolean(BK_COMPABILITY, false);
+        args.putBoolean(BK_ALLOW_RECIPE_CREATION, true);
         fragment.setArguments(args);
         return fragment;
     }
@@ -180,6 +207,10 @@ public class ProductListDialogFragment extends Fragment {
         ListView listView = (ListView) view.findViewById(R.id.fragment_product_list_dialog_product_list_view);
 
         listView.setAdapter(mListAdapter);
+
+        if (!getArguments().getBoolean(BK_ALLOW_RECIPE_CREATION)) {
+            mCreateRecipeButton.setVisibility(View.GONE);
+        }
 
         /* TODO add event for changing title.
         if (mBaseActivityInterface != null) {
