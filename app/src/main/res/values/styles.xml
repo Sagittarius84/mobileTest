@@ -4,8 +4,7 @@
     <style name="InstalistTheme1" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="colorPrimary">@color/primary_color</item>
         <item name="colorAccent">@color/white</item>
-        <item name="colorPrimaryDark">@color/primary_color_dark</item>
-
+        <item name="colorPrimaryDark">@color/primary_color_dark</item>w
         <item name="android:textViewStyle">@style/RobotoTextViewStyle</item>
         <item name="android:buttonStyle">@style/RobotoButtonStyle</item>
         <item name="android:editTextStyle">@style/RobotoEditTextStyle</item>

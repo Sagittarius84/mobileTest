@@ -27,7 +27,7 @@
     <string name="product_list_dialog_add">Add</string>
     <string name="product_list_dialog_cancel">Cancel</string>
     <string name="product_list_dialog_title">Add product to list</string>
-    <string name="product_list_dialog_add_new_product">Add new product!</string>
+    <string name="product_list_dialog_add_new_product">Create Product</string>
     <string name="recipe_details_add">Add</string>
     <string name="recipe_details_cancel">Cancel</string>
     <string name="product_creation_fragment">Illegal amount type. Choose values greater than 0.</string>
@@ -76,7 +76,7 @@
     <string name="create_options">Create</string>
     <string name="create_list">Create Shopping List</string>
     <string name="create_category">Create Category</string>
-    <string name="create_recipe">create new recipe</string>
+    <string name="create_recipe">Create Recipe</string>
     <string name="delete">Delete</string>
     <string name="delete_category_error_category_is_default">Cannot remove category. It is the current default list. Change the default list to delete this list.</string>
     <string name="deletion_failed">Deletion failed.</string>

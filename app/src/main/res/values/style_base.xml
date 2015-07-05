@@ -65,9 +65,12 @@
         <item name="android:inputType">numberDecimal</item>
         <item name="android:gravity">center_horizontal</item>
     </style>
-    <style name="InstalistTheme1.base_flatten_button" parent="InstalistTheme1.base_text_style">
+    <style name="InstalistTheme1.base_flatten_button">
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">@dimen/base_flatten_button_height</item>
+        <item name="android:textColor">@color/flat_button_color</item>
+        <item name="android:background">@android:color/transparent</item>
+        <item name="android:textSize">@dimen/fragment_base_text_size</item>
     </style>
     <style name="InstalistTheme1.base_button" parent="InstalistTheme1.base_text_style">
         <item name="android:layout_width">wrap_content</item>

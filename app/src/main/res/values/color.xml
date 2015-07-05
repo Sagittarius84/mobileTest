@@ -16,4 +16,6 @@
     <color name="back_background_color">@color/white</color>
     <color name="for_background_color">@color/white</color>
     <color name="shadow_color">@color/black</color>
+
+    <color name="flat_button_color">#3393FF</color>
 </resources>
