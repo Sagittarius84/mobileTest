@@ -14,4 +14,9 @@
                 <item name="android:shadowColor">@color/shadow_color</item>
                 <item name="android:elevation">2dp</item>
         </style>
+
+        <style name="InstalistTheme1.shadow">
+                <item name="android:layout_height">0dp</item>
+                <item name="android:background">@drawable/toolbar_dropshadow</item>
+        </style>
 </resources>

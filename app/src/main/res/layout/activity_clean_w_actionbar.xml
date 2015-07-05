@@ -1,20 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:orientation="vertical">
 
     <include
         android:id="@+id/toolbar"
         layout="@layout/toolbar_main" />
+
     <View
-        android:layout_width="match_parent"
-        android:layout_height="4dp"
-        android:background="@drawable/toolbar_dropshadow" />
+        style="@style/InstalistTheme1.shadow"
+        android:layout_width="match_parent" />
+
     <FrameLayout
+        android:id="@+id/container"
+        style="@style/style_fragment_general"
         android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:id="@+id/container" />
+        android:layout_height="fill_parent" />
 
 </LinearLayout>
