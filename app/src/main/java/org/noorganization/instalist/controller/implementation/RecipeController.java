@@ -5,13 +5,17 @@ import com.orm.query.Condition;
 import com.orm.query.Select;
 
 import org.noorganization.instalist.controller.IRecipeController;
+import org.noorganization.instalist.controller.event.RecipeChangedMessage;
 import org.noorganization.instalist.model.Ingredient;
 import org.noorganization.instalist.model.ListEntry;
 import org.noorganization.instalist.model.Product;
 import org.noorganization.instalist.model.Recipe;
 
+import de.greenrobot.event.EventBus;
+
 public class RecipeController implements IRecipeController {
     private static RecipeController mInstance;
+    private EventBus mBus;
 
     static IRecipeController getInstance() {
         if (mInstance == null) {
@@ -31,6 +35,8 @@ public class RecipeController implements IRecipeController {
 
         Recipe rtn = new Recipe(_name);
         rtn.save();
+
+        mBus.post(new RecipeChangedMessage(rtn, RecipeChangedMessage.Change.CREATED));
 
         return rtn;
     }
@@ -55,6 +61,8 @@ public class RecipeController implements IRecipeController {
         toRename.mName = _newName;
         toRename.save();
 
+        mBus.post(new RecipeChangedMessage(toRename, RecipeChangedMessage.Change.CHANGED));
+
         return toRename;
     }
 
@@ -69,6 +77,8 @@ public class RecipeController implements IRecipeController {
             SugarRecord.deleteAll(Ingredient.class, "m_recipe = ?", _toRemove.getId() + "");
             toDelete.delete();
         }
+
+        mBus.post(new RecipeChangedMessage(toDelete, RecipeChangedMessage.Change.DELETED));
     }
 
     @Override
@@ -126,5 +136,6 @@ public class RecipeController implements IRecipeController {
     }
 
     private RecipeController() {
+        mBus = EventBus.getDefault();
     }
 }

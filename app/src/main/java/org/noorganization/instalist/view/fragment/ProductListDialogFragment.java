@@ -28,6 +28,7 @@ import com.orm.SugarRecord;
 import org.noorganization.instalist.GlobalApplication;
 import org.noorganization.instalist.R;
 import org.noorganization.instalist.controller.IListController;
+import org.noorganization.instalist.controller.event.RecipeChangedMessage;
 import org.noorganization.instalist.controller.implementation.ControllerFactory;
 import org.noorganization.instalist.model.Ingredient;
 import org.noorganization.instalist.model.ListEntry;
@@ -70,6 +71,7 @@ public class ProductListDialogFragment extends Fragment {
     private Button mCreateProductButton;
     private Button mAddProductsButton;
     private Button mCreateRecipeButton;
+    private ListView mMixedListView;
 
     private static final String BUNDLE_KEY_LIST_ID = "listId";
     private static final String BK_COMPABILITY = "comp";
@@ -181,7 +183,6 @@ public class ProductListDialogFragment extends Fragment {
         }
 
         mAddProductsListener = new OnAddProductsListener();
-        mCancelListener = new OnCancelListener();
         mCreateProductListener = new OnCreateProductListener();
     }
 
@@ -203,9 +204,9 @@ public class ProductListDialogFragment extends Fragment {
         mAddProductsButton = (Button) view.findViewById(R.id.fragment_product_list_dialog_add_products_to_list);
         mCreateRecipeButton = (Button) view.findViewById(R.id.testRecipeButton);
 
-        ListView listView = (ListView) view.findViewById(R.id.fragment_product_list_dialog_product_list_view);
+        mMixedListView = (ListView) view.findViewById(R.id.fragment_product_list_dialog_product_list_view);
 
-        listView.setAdapter(mListAdapter);
+        mMixedListView.setAdapter(mListAdapter);
 
         if (!getArguments().getBoolean(BK_ALLOW_RECIPE_CREATION)) {
             mCreateRecipeButton.setVisibility(View.GONE);
@@ -262,6 +263,18 @@ public class ProductListDialogFragment extends Fragment {
         /*searchView.setSearchableInfo(MainShoppingListView.this.getComponentName());*/
         super.onCreateOptionsMenu(_Menu, _Inflater);
     }
+
+    public void onEventMainThread(RecipeChangedMessage _message) {
+        if (_message.mChange == RecipeChangedMessage.Change.CREATED) {
+            mSelectableBaseItemListEntries.add(new SelectableBaseItemListEntry(
+                    new RecipeListEntry(_message.mRecipe), true));
+            mListAdapter = new SelectableItemListAdapter(getActivity(),
+                    mSelectableBaseItemListEntries);
+            mMixedListView.setAdapter(mListAdapter);
+        }
+        // TODO add for other changes.
+    }
+
 
     @Override
     public void onPrepareOptionsMenu(Menu _Menu) {
@@ -365,11 +378,6 @@ public class ProductListDialogFragment extends Fragment {
      * Assign to add all selected list items to the current list.
      */
     private View.OnClickListener mAddProductsListener;
-
-    /**
-     * Assign to go back to the last fragment.
-     */
-    private View.OnClickListener mCancelListener;
 
     /**
      * Assign to call add new product overview.
