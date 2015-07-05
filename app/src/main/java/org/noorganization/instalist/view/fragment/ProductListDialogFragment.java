@@ -42,6 +42,7 @@ import org.noorganization.instalist.view.MainShoppingListView;
 import org.noorganization.instalist.view.activity.RecipeChangeActivity;
 import org.noorganization.instalist.view.datahandler.SelectableBaseItemListEntryDataHolder;
 import org.noorganization.instalist.view.event.ProductSelectMessage;
+import org.noorganization.instalist.view.event.ToolbarChangeMessage;
 import org.noorganization.instalist.view.interfaces.IBaseActivity;
 import org.noorganization.instalist.view.listadapter.SelectableItemListAdapter;
 import org.noorganization.instalist.view.utils.ViewUtils;
@@ -316,9 +317,6 @@ public class ProductListDialogFragment extends Fragment {
         super.onResume();
 
         /* TODO create event for title and locking drawer.
-        mBaseActivityInterface.setToolbarTitle(mContext.getResources().getString(R.string.product_list_dialog_title));
-        mBaseActivityInterface.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
-
         mBaseActivityInterface.setNavigationIcon(R.mipmap.ic_arrow_back_white_36dp);
         mBaseActivityInterface.setNavigationClickListener(new View.OnClickListener() {
             @Override
@@ -326,6 +324,8 @@ public class ProductListDialogFragment extends Fragment {
                 mBaseActivityInterface.onBackPressed();
             }
         });*/
+        EventBus.getDefault().post(new ToolbarChangeMessage(true, mContext.getString(R.string.product_list_dialog_title)));
+
         mCreateProductButton.setOnClickListener(mCreateProductListener);
         mAddProductsButton.setOnClickListener(mAddProductsListener);
         mCreateRecipeButton.setOnClickListener(new View.OnClickListener() {
@@ -391,7 +391,6 @@ public class ProductListDialogFragment extends Fragment {
 
         /**
          * EventBus-receiver for translation to listentries.
-         *
          * @param _selectedProducts
          */
         public void onEventMainThread(ProductSelectMessage _selectedProducts) {
@@ -470,10 +469,8 @@ public class ProductListDialogFragment extends Fragment {
     private class OnCreateProductListener implements View.OnClickListener {
         @Override
         public void onClick(View v) {
-            // TODO add event for product creation
-            /*ProductChangeFragment creationFragment =
-                    ProductChangeFragment.newCreateInstance(mCurrentShoppingList.getId());
-            ViewUtils.addFragment(getActivity(), creationFragment);*/
+            ProductChangeFragment creationFragment = ProductChangeFragment.newCreateInstance();
+            ViewUtils.addFragment(getActivity(), creationFragment);
             ViewUtils.removeFragment(getActivity(), ProductListDialogFragment.this);
         }
     }

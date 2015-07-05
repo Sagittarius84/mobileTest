@@ -30,7 +30,9 @@ import org.noorganization.instalist.GlobalApplication;
 import org.noorganization.instalist.R;
 import org.noorganization.instalist.controller.IListController;
 import org.noorganization.instalist.controller.implementation.ControllerFactory;
+import org.noorganization.instalist.controller.implementation.ListController;
 import org.noorganization.instalist.model.ListEntry;
+import org.noorganization.instalist.model.Product;
 import org.noorganization.instalist.model.ShoppingList;
 import org.noorganization.instalist.touchlistener.OnRecyclerItemTouchListener;
 import org.noorganization.instalist.view.ChangeHandler;
@@ -38,6 +40,8 @@ import org.noorganization.instalist.view.MainShoppingListView;
 import org.noorganization.instalist.view.customview.AmountPicker;
 import org.noorganization.instalist.view.datahandler.SelectableBaseItemListEntryDataHolder;
 import org.noorganization.instalist.view.decoration.DividerItemListDecoration;
+import org.noorganization.instalist.view.event.ActivityStateMessage;
+import org.noorganization.instalist.view.event.ProductSelectMessage;
 import org.noorganization.instalist.view.interfaces.IBaseActivity;
 import org.noorganization.instalist.view.interfaces.IFragment;
 import org.noorganization.instalist.view.listadapter.ShoppingItemListAdapter;
@@ -51,6 +55,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.WeakHashMap;
 
+import de.greenrobot.event.EventBus;
+
 /**
  * A ShoppingListOverviewFragment containing a list view.
  */
@@ -59,6 +65,7 @@ public class ShoppingListOverviewFragment extends Fragment implements IFragment 
     private static final String LOG_TAG = ShoppingListOverviewFragment.class.toString();
 
     private ShoppingList mCurrentShoppingList;
+    private boolean mHandlingProductSelectedMessages;
 
     private ActionBar mActionBar;
     private Context   mContext;
@@ -283,6 +290,9 @@ public class ShoppingListOverviewFragment extends Fragment implements IFragment 
                 return;
             }
         }
+
+        mHandlingProductSelectedMessages = true;
+        EventBus.getDefault().register(this);
     }
 
 
@@ -368,6 +378,7 @@ public class ShoppingListOverviewFragment extends Fragment implements IFragment 
     public void onDetach() {
         super.onDetach();
         ((ChangeHandler) ((GlobalApplication) getActivity().getApplication()).getChangeHandler()).setCurrentFragment(null);
+        EventBus.getDefault().unregister(this);
     }
 
 
@@ -459,7 +470,7 @@ public class ShoppingListOverviewFragment extends Fragment implements IFragment 
                 // reset selected items ... (lazy resetting!)
                 SelectableBaseItemListEntryDataHolder.getInstance().clear();
                 ViewUtils.addFragment(getActivity(),
-                        ProductListDialogFragment.newInstance(mCurrentShoppingList.getId()));
+                        ProductListDialogFragment.newInstance());
             }
         });
 
@@ -476,6 +487,23 @@ public class ShoppingListOverviewFragment extends Fragment implements IFragment 
         mAddButton = (ActionButton) view.findViewById(R.id.add_item_main_list_view);
         mBaseActivityInterface.bindDrawerLayout();
         return view;
+    }
+
+    public void onEvent(ActivityStateMessage _message) {
+        if (_message.mActivity == getActivity()) {
+            mHandlingProductSelectedMessages = (_message.mState == ActivityStateMessage.State.RESUMED);
+        }
+    }
+
+    public void onEvent(ProductSelectMessage _message) {
+        if (mHandlingProductSelectedMessages) {
+            Map<Product, Float> productAmounts = _message.mProducts;
+            IListController controller = ControllerFactory.getListController();
+            for (Product currentProduct : productAmounts.keySet()) {
+                controller.addOrChangeItem(mCurrentShoppingList, currentProduct,
+                        productAmounts.get(currentProduct), true);
+            }
+        }
     }
 
     /**

@@ -23,21 +23,24 @@ import com.orm.SugarRecord;
 import com.orm.query.Select;
 
 import org.noorganization.instalist.R;
-import org.noorganization.instalist.controller.IListController;
 import org.noorganization.instalist.controller.IProductController;
 import org.noorganization.instalist.controller.implementation.ControllerFactory;
 import org.noorganization.instalist.model.Product;
-import org.noorganization.instalist.model.ShoppingList;
 import org.noorganization.instalist.model.Tag;
 import org.noorganization.instalist.model.TaggedProduct;
 import org.noorganization.instalist.model.Unit;
 import org.noorganization.instalist.view.customview.AmountPicker;
+import org.noorganization.instalist.view.event.ProductSelectMessage;
 import org.noorganization.instalist.view.utils.ViewUtils;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+
+import de.greenrobot.event.EventBus;
 
 /**
  * Fragment where the creation and the editing of an product is handled.
@@ -45,13 +48,8 @@ import java.util.List;
  */
 public class ProductChangeFragment extends DialogFragment {
 
-    private static final String BUNDLE_KEY_LIST_ID      = "ListId";
     private static final String BUNDLE_KEY_PRODUCT_ID   = "ProductId";
-    private static final String BUNDLE_KEY_MODE         = "FragmentMode";
-    private static final int    FRAGMENT_MODE_CREATE    = 1;
-    private static final int    FRAGMENT_MODE_CHANGE    = 2;
 
-    private ShoppingList        mCurrentShoppingList;
     private InputParamsHolder   mInputParams;
     /**
      * used when product values should be rendered into view.
@@ -242,7 +240,6 @@ public class ProductChangeFragment extends DialogFragment {
      */
     private boolean saveProduct(){
         IProductController productController = ControllerFactory.getProductController();
-        IListController    listController    = ControllerFactory.getListController();
 
         if (mProduct == null) {
             mProduct = productController.createProduct(
@@ -255,7 +252,10 @@ public class ProductChangeFragment extends DialogFragment {
             if (mProduct == null) {
                 return false;
             }
-            listController.addOrChangeItem(mCurrentShoppingList, mProduct, mProduct.mDefaultAmount);
+
+            Map<Product, Float> selectedProducts = new HashMap<>();
+            selectedProducts.put(mProduct, mProduct.mDefaultAmount);
+            EventBus.getDefault().post(new ProductSelectMessage(selectedProducts));
         } else {
             mProduct.mName          = mInputParams.getProductName();
             mProduct.mDefaultAmount = mInputParams.getProductAmount();
@@ -292,14 +292,11 @@ public class ProductChangeFragment extends DialogFragment {
 
     /**
      * Creates an instance of an ProductChangeFragment with the details of the product.
-     * @param _listId The id of the list where the product should be added.
      * @return the new instance of this fragment.
      */
-    public static ProductChangeFragment newCreateInstance(long _listId){
+    public static ProductChangeFragment newCreateInstance(){
         ProductChangeFragment fragment = new ProductChangeFragment();
         Bundle args = new Bundle();
-        args.putInt(BUNDLE_KEY_MODE, FRAGMENT_MODE_CREATE);
-        args.putLong(BUNDLE_KEY_LIST_ID, _listId);
         fragment.setArguments(args);
         return fragment;
     }
@@ -312,7 +309,6 @@ public class ProductChangeFragment extends DialogFragment {
     public static ProductChangeFragment newChangeInstance(long _productId){
         ProductChangeFragment fragment = new ProductChangeFragment();
         Bundle args = new Bundle();
-        args.putInt(BUNDLE_KEY_MODE, FRAGMENT_MODE_CHANGE);
         args.putLong(BUNDLE_KEY_PRODUCT_ID, _productId);
         fragment.setArguments(args);
         return fragment;
@@ -322,20 +318,8 @@ public class ProductChangeFragment extends DialogFragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        switch (getArguments().getInt(BUNDLE_KEY_MODE)) {
-            case FRAGMENT_MODE_CREATE:
-                mCurrentShoppingList = SugarRecord.findById(ShoppingList.class,
-                        getArguments().getLong(BUNDLE_KEY_LIST_ID));
-                break;
-            case FRAGMENT_MODE_CHANGE:
-                mProduct = SugarRecord.findById(Product.class, getArguments().
-                        getLong(BUNDLE_KEY_PRODUCT_ID));
-                break;
-        }
-
-        if (mProduct == null && mCurrentShoppingList == null) {
-            throw new IllegalStateException("Neither product nor list could be loaded for " +
-                    "adding/changing a product.");
+        if (getArguments().containsKey(BUNDLE_KEY_PRODUCT_ID)) {
+            mProduct = SugarRecord.findById(Product.class, getArguments().getLong(BUNDLE_KEY_PRODUCT_ID));
         }
     }
 

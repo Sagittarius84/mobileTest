@@ -36,6 +36,8 @@ import org.noorganization.instalist.model.ShoppingList;
 import org.noorganization.instalist.touchlistener.IOnShoppingListClickListenerEvents;
 import org.noorganization.instalist.touchlistener.sidebar.OnShoppingListAddClickListener;
 import org.noorganization.instalist.view.activity.SettingsActivity;
+import org.noorganization.instalist.view.event.ActivityStateMessage;
+import org.noorganization.instalist.view.event.ToolbarChangeMessage;
 import org.noorganization.instalist.view.fragment.ShoppingListOverviewFragment;
 import org.noorganization.instalist.view.interfaces.IBaseActivity;
 import org.noorganization.instalist.view.interfaces.IBaseActivityListEvent;
@@ -47,6 +49,8 @@ import org.noorganization.instalist.view.utils.ViewUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import de.greenrobot.event.EventBus;
 
 /**
  * MainShoppingListView handles the display of an selected ShoppingList, so that the corresponding
@@ -180,6 +184,18 @@ public class MainShoppingListView extends AppCompatActivity implements IBaseActi
         return true;
     }
 
+    public void onEventMainThread(ToolbarChangeMessage _message) {
+        if (_message.mNewLockState != null) {
+            Log.d("recv", "lock");
+            setDrawerLockMode(_message.mNewLockState ? DrawerLayout.LOCK_MODE_LOCKED_CLOSED :
+                    DrawerLayout.LOCK_MODE_UNLOCKED);
+        }
+        if (_message.mNewTitle != null) {
+            Log.d("recv", "title");
+            setToolbarTitle(_message.mNewTitle);
+        }
+    }
+
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
@@ -278,6 +294,10 @@ public class MainShoppingListView extends AppCompatActivity implements IBaseActi
                 startActivity(settingsIntent);
             }
         });
+
+        EventBus bus = EventBus.getDefault();
+        bus.register(this);
+        bus.post(new ActivityStateMessage(this, ActivityStateMessage.State.RESUMED));
     }
 
 
@@ -288,6 +308,10 @@ public class MainShoppingListView extends AppCompatActivity implements IBaseActi
         mAddListButton.setOnClickListener(null);
         mNewNameEditText.setOnKeyListener(null);
         mSettingsButton.setOnClickListener(null);
+
+        EventBus bus = EventBus.getDefault();
+        bus.unregister(this);
+        bus.post(new ActivityStateMessage(this, ActivityStateMessage.State.PAUSED));
     }
 
     @Override
@@ -411,6 +435,7 @@ public class MainShoppingListView extends AppCompatActivity implements IBaseActi
     @Override
     public void setToolbarTitle(String _Title) {
         mTitle = _Title;
+        mToolbar.setTitle(mTitle);
     }
 
     @Override
