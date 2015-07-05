@@ -1,7 +1,7 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
 
     <!-- Base application theme. -->
-    <style name="InstalistTheme1" parent="Theme.AppCompat.Light.DarkActionBar">
+    <style name="InstalistTheme1" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="colorPrimary">@color/primary_color</item>
         <item name="colorAccent">@color/primary_color_light</item>
         <item name="colorPrimaryDark">@color/primary_color_dark</item>
@@ -9,12 +9,14 @@
         <item name="android:buttonStyle">@style/RobotoButtonStyle</item>
         <item name="android:editTextStyle">@style/RobotoEditTextStyle</item>
         <item name="android:textSize">@dimen/text_size</item>
-        <item name="toolbarStyle">@style/ToolbarStyle</item>
+        <item name="android:textColor">@color/black</item>
+        <item name="android:editTextColor">@color/black</item>
+        <item name="android:textColorPrimary">@color/white</item>
         <item name="colorControlNormal">@color/white</item>
         <!-- on API 21 the overflow icon ignores colorControlNormal attr in favor of the native version -->
         <item name="android:colorControlNormal" tools:ignore="NewApi">?colorControlNormal</item>
         <!-- Following for toolbar displaying correctly-->
-        <item name="android:windowNoTitle">true</item>
+        <item name="windowNoTitle">true</item>
         <item name="windowActionBar">false</item>
         <item name="android:windowBackground">@color/white</item>
         <item name="android:actionModeCloseButtonStyle">@style/NoCloseButton</item>
@@ -36,8 +38,5 @@
 </style>
 <style name="RobotoEditTextStyle" parent="android:Widget.EditText">
     <item name="android:fontFamily">sans-serif-light</item>
-</style>
-<style name="ToolbarStyle" parent="Base.Widget.AppCompat.Toolbar">
-    <item name="colorPrimary">@color/white</item>
 </style>
 </resources>

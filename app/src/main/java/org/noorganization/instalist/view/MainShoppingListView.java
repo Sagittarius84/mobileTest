@@ -12,6 +12,7 @@ import android.os.PersistableBundle;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.ContextMenu;
@@ -55,7 +56,7 @@ import java.util.List;
  *
  * @author TS
  */
-public class MainShoppingListView extends ActionBarActivity implements IBaseActivity, IBaseActivityListEvent, IOnShoppingListClickListenerEvents, ISideDrawerListDataEvents {
+public class MainShoppingListView extends AppCompatActivity implements IBaseActivity, IBaseActivityListEvent, IOnShoppingListClickListenerEvents, ISideDrawerListDataEvents {
 
     private final static String LOG_TAG               = MainShoppingListView.class.getName();
     private final static String DEFAULT_CATEGORY_NAME = "(default)";

@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.view.ActionMode;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
@@ -447,7 +448,7 @@ public class ShoppingListOverviewFragment extends Fragment implements IFragment 
 
                 mActionModeCallback = new OnShoppingListItemActionModeListener(mContext, _ChildView, mShoppingItemListAdapter.getItemId(_Position));
                 // Start the CAB using the Callback defined above
-                mActionMode = ((ActionBarActivity) getActivity()).startSupportActionMode(mActionModeCallback);
+                mActionMode = ((AppCompatActivity) getActivity()).startSupportActionMode(mActionModeCallback);
                 _ChildView.setSelected(true);
             }
         });

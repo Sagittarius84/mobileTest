@@ -32,6 +32,10 @@ public class OnRecyclerItemTouchListener implements RecyclerView.OnItemTouchList
         return mGestureDetector.onTouchEvent(e);
     }
 
+    @Override
+    public void onRequestDisallowInterceptTouchEvent(boolean b) {
+
+    }
 
     /**
      * Event fires if user flings from left to right.
