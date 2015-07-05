@@ -241,7 +241,7 @@ public class RecipeEditorFragment extends Fragment {
 
         @Override
         public void onClick(View view) {
-            ViewUtils.addFragment(getActivity(), ProductListDialogFragment.newInstance());
+            ViewUtils.addFragment(getActivity(), ProductListDialogFragment.newInstance(false));
         }
     }
 
