@@ -67,7 +67,6 @@ public class ProductListDialogFragment extends Fragment {
     public static final String FILTER_SHOW_ALL   = "2";
 
     private Button mCreateProductButton;
-    private Button mCancelButton;
     private Button mAddProductsButton;
     private Button mCreateRecipeButton;
 
@@ -200,7 +199,6 @@ public class ProductListDialogFragment extends Fragment {
         mListAdapter = new SelectableItemListAdapter(getActivity(), mSelectableBaseItemListEntries);
 
         mCreateProductButton = (Button) view.findViewById(R.id.fragment_product_list_dialog_add_new_product);
-        mCancelButton = (Button) view.findViewById(R.id.fragment_product_list_dialog_cancel);
         mAddProductsButton = (Button) view.findViewById(R.id.fragment_product_list_dialog_add_products_to_list);
         mCreateRecipeButton = (Button) view.findViewById(R.id.testRecipeButton);
 
@@ -329,7 +327,6 @@ public class ProductListDialogFragment extends Fragment {
             }
         });*/
         mCreateProductButton.setOnClickListener(mCreateProductListener);
-        mCancelButton.setOnClickListener(mCancelListener);
         mAddProductsButton.setOnClickListener(mAddProductsListener);
         mCreateRecipeButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -345,7 +342,6 @@ public class ProductListDialogFragment extends Fragment {
     public void onPause() {
         super.onPause();
         mCreateProductButton.setOnClickListener(null);
-        mCancelButton.setOnClickListener(null);
         mAddProductsButton.setOnClickListener(null);
     }
 
