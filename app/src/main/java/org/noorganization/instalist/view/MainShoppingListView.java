@@ -36,6 +36,7 @@ import org.noorganization.instalist.model.ShoppingList;
 import org.noorganization.instalist.touchlistener.IOnShoppingListClickListenerEvents;
 import org.noorganization.instalist.touchlistener.sidebar.OnShoppingListAddClickListener;
 import org.noorganization.instalist.view.activity.SettingsActivity;
+import org.noorganization.instalist.view.event.ActivityStateMessage;
 import org.noorganization.instalist.view.event.ToolbarChangeMessage;
 import org.noorganization.instalist.view.fragment.ShoppingListOverviewFragment;
 import org.noorganization.instalist.view.interfaces.IBaseActivity;
@@ -294,7 +295,9 @@ public class MainShoppingListView extends AppCompatActivity implements IBaseActi
             }
         });
 
-        EventBus.getDefault().register(this);
+        EventBus bus = EventBus.getDefault();
+        bus.register(this);
+        bus.post(new ActivityStateMessage(this, ActivityStateMessage.State.RESUMED));
     }
 
 
@@ -306,7 +309,9 @@ public class MainShoppingListView extends AppCompatActivity implements IBaseActi
         mNewNameEditText.setOnKeyListener(null);
         mSettingsButton.setOnClickListener(null);
 
-        EventBus.getDefault().unregister(this);
+        EventBus bus = EventBus.getDefault();
+        bus.unregister(this);
+        bus.post(new ActivityStateMessage(this, ActivityStateMessage.State.PAUSED));
     }
 
     @Override

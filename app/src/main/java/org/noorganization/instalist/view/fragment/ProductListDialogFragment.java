@@ -395,7 +395,6 @@ public class ProductListDialogFragment extends Fragment {
 
         /**
          * EventBus-receiver for translation to listentries.
-         *
          * @param _selectedProducts
          */
         public void onEventMainThread(ProductSelectMessage _selectedProducts) {
@@ -474,10 +473,8 @@ public class ProductListDialogFragment extends Fragment {
     private class OnCreateProductListener implements View.OnClickListener {
         @Override
         public void onClick(View v) {
-            // TODO add event for product creation
-            /*ProductChangeFragment creationFragment =
-                    ProductChangeFragment.newCreateInstance(mCurrentShoppingList.getId());
-            ViewUtils.addFragment(getActivity(), creationFragment);*/
+            ProductChangeFragment creationFragment = ProductChangeFragment.newCreateInstance();
+            ViewUtils.addFragment(getActivity(), creationFragment);
             ViewUtils.removeFragment(getActivity(), ProductListDialogFragment.this);
         }
     }

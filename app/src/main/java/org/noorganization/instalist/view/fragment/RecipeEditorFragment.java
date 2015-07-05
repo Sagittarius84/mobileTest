@@ -149,14 +149,16 @@ public class RecipeEditorFragment extends Fragment {
         }
 
         for (Product currentProduct : _selectedProducts.mProducts.keySet()) {
+            float amount = _selectedProducts.mProducts.get(currentProduct);
             if (newProductIds.contains(currentProduct.getId())) {
                 int position = newProductIds.indexOf(currentProduct.getId());
-                newAmounts.set(position, newAmounts.get(position) +
-                        _selectedProducts.mProducts.get(currentProduct));
+                newAmounts.set(position, newAmounts.get(position) + amount);
             } else {
                 newProductIds.add(currentProduct.getId());
-                newAmounts.add(_selectedProducts.mProducts.get(currentProduct));
+                newAmounts.add(amount);
             }
+
+            mIngredientAdapter.addIngredient(new Ingredient(currentProduct, null, amount));
         }
 
         long resultingIds[] = new long[newProductIds.size()];
