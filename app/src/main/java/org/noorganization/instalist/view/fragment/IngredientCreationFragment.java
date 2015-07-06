@@ -16,7 +16,7 @@ import android.widget.Toast;
 import org.noorganization.instalist.R;
 import org.noorganization.instalist.model.Ingredient;
 import org.noorganization.instalist.model.Product;
-import org.noorganization.instalist.view.datahandler.RecipeDataHolder;
+import org.noorganization.instalist.view.dataholder.RecipeDataHolder;
 import org.noorganization.instalist.view.interfaces.IBaseActivity;
 import org.noorganization.instalist.view.spinneradapter.ProductSpinnerAdapter;
 import org.noorganization.instalist.view.utils.ViewUtils;

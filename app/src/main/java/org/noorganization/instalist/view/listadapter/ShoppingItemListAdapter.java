@@ -19,6 +19,7 @@ import org.noorganization.instalist.model.view.ListEntryItemWrapper;
 import org.noorganization.instalist.touchlistener.OnSimpleSwipeGestureListener;
 import org.noorganization.instalist.view.customview.AmountPicker;
 import org.noorganization.instalist.view.sorting.AlphabeticalListEntryComparator;
+import org.noorganization.instalist.view.spinneradapter.CategorySpinnerAdapter;
 import org.noorganization.instalist.view.spinneradapter.UnitSpinnerAdapter;
 import org.noorganization.instalist.view.utils.ViewUtils;
 

@@ -24,22 +24,20 @@
 
         <Button
             android:id="@+id/drawer_layout_custom_create_list"
-            style="?android:attr/borderlessButtonStyle"
+            style="@style/InstalistTheme1.base_flatten_button"
             android:layout_width="match_parent"
             android:layout_height="@dimen/base_edittext_height"
             android:gravity="right"
             android:text="@string/create_list"
-            android:textColor="@color/fab_material_light_blue_500"
             android:visibility="gone" />
 
         <Button
             android:id="@+id/drawer_layout_custom_create_category"
-            style="?android:attr/borderlessButtonStyle"
+            style="@style/InstalistTheme1.base_flatten_button"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="right"
             android:text="@string/create_category"
-            android:textColor="@color/fab_material_light_blue_500"
             android:visibility="gone" />
 
     </LinearLayout>

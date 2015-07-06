@@ -1,7 +1,6 @@
-package org.noorganization.instalist.view.datahandler;
+package org.noorganization.instalist.view.dataholder;
 
 import org.noorganization.instalist.model.Ingredient;
-import org.noorganization.instalist.model.Recipe;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,9 +29,9 @@ public class RecipeDataHolder {
     private List<Ingredient> mRemovedIngredients;
 
     /**
-     * Retrieves an instance of SelectedProductDataHandler.
+     * Retrieves an instance of SelectedProductDataHolder.
      *
-     * @return instance of SelectedProductDataHandler.
+     * @return instance of SelectedProductDataHolder.
      */
     public static RecipeDataHolder getInstance() {
         if (mInstance == null) {

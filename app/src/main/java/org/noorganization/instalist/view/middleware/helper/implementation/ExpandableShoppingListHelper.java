@@ -18,9 +18,9 @@ import org.noorganization.instalist.touchlistener.sidebar.OnCancelClickListenerW
 import org.noorganization.instalist.touchlistener.sidebar.OnSubmitClickListenerWithParentData;
 import org.noorganization.instalist.view.interfaces.IBaseActivity;
 import org.noorganization.instalist.view.listadapter.ExpandableCategoryItemListAdapter;
-import org.noorganization.instalist.view.middleware.helper.IShoppingListHelper;
 import org.noorganization.instalist.view.middleware.MenuStates;
 import org.noorganization.instalist.view.middleware.helper.IContextItemClickedHelper;
+import org.noorganization.instalist.view.middleware.helper.IShoppingListHelper;
 import org.noorganization.instalist.view.utils.PreferencesManager;
 
 /**

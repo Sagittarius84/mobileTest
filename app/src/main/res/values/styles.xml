@@ -16,14 +16,14 @@
         <item name="android:textColorPrimary">@color/white</item>
         <item name="android:textColorSecondary">@color/black</item>
         <item name="colorControlNormal">@color/white</item>
-
+        <item name="colorControlHighlight">@color/control_highlight_color</item>k
         <!-- on API 21 the overflow icon ignores colorControlNormal attr in favor of the native version -->
         <item name="android:colorControlNormal" tools:ignore="NewApi">?colorControlNormal</item>
         <!-- Following for toolbar displaying correctly-->
 
         <item name="windowNoTitle">true</item>
         <item name="windowActionBar">false</item>
-
+        <item name="actionModeBackground">@color/actionmode_background_color</item>
         <item name="android:windowBackground">@color/white</item>
         <item name="android:actionModeCloseButtonStyle">@style/NoCloseButton</item>
         <item name="windowActionModeOverlay">true</item>

@@ -13,7 +13,7 @@ import org.noorganization.instalist.R;
 import org.noorganization.instalist.model.ListEntry;
 import org.noorganization.instalist.model.Product;
 import org.noorganization.instalist.model.ShoppingList;
-import org.noorganization.instalist.view.datahandler.SelectedProductDataHandler;
+import org.noorganization.instalist.view.dataholder.SelectedProductDataHolder;
 import org.noorganization.instalist.view.fragment.ProductChangeFragment;
 
 import java.util.List;
@@ -36,7 +36,7 @@ public class SelectableProductListAdapter extends ArrayAdapter<Product> {
         mContext = _Context;
         mProducts = _ProductList;
         // get saved entries
-        mSelectableProduct = SelectedProductDataHandler.getInstance().getListEntries();
+        mSelectableProduct = SelectedProductDataHolder.getInstance().getListEntries();
         mCurrentShoppingList = _CurrentShoppingList;
 
         if(mSelectableProduct.size() <= 0) {
@@ -48,7 +48,7 @@ public class SelectableProductListAdapter extends ArrayAdapter<Product> {
                 mSelectableProduct.add(entry);
             }
         }
-        SelectedProductDataHandler.getInstance().setListEntries(mSelectableProduct);
+        SelectedProductDataHolder.getInstance().setListEntries(mSelectableProduct);
     }
 
 
@@ -91,7 +91,7 @@ public class SelectableProductListAdapter extends ArrayAdapter<Product> {
             mListEntry.mStruck = !mListEntry.mStruck;
             mCheckBox.setChecked(mListEntry.mStruck);
 
-            SelectedProductDataHandler.getInstance().setListEntries(mSelectableProduct);
+            SelectedProductDataHolder.getInstance().setListEntries(mSelectableProduct);
         }
     }
 

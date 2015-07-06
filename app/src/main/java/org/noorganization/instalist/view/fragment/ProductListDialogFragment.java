@@ -20,12 +20,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.ListView;
 
 import com.orm.SugarRecord;
 
-import org.noorganization.instalist.GlobalApplication;
 import org.noorganization.instalist.R;
 import org.noorganization.instalist.controller.IListController;
 import org.noorganization.instalist.controller.event.RecipeChangedMessage;
@@ -39,9 +37,8 @@ import org.noorganization.instalist.model.view.BaseItemListEntry;
 import org.noorganization.instalist.model.view.ProductListEntry;
 import org.noorganization.instalist.model.view.RecipeListEntry;
 import org.noorganization.instalist.model.view.SelectableBaseItemListEntry;
-import org.noorganization.instalist.view.MainShoppingListView;
 import org.noorganization.instalist.view.activity.RecipeChangeActivity;
-import org.noorganization.instalist.view.datahandler.SelectableBaseItemListEntryDataHolder;
+import org.noorganization.instalist.view.dataholder.SelectableBaseItemListEntryDataHolder;
 import org.noorganization.instalist.view.event.ProductSelectMessage;
 import org.noorganization.instalist.view.event.ToolbarChangeMessage;
 import org.noorganization.instalist.view.interfaces.IBaseActivity;

@@ -3,11 +3,9 @@ package org.noorganization.instalist.view.fragment;
 import android.app.Activity;
 import android.app.Fragment;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
-import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.view.ActionMode;
 import android.support.v7.widget.DefaultItemAnimator;
@@ -30,7 +28,6 @@ import org.noorganization.instalist.GlobalApplication;
 import org.noorganization.instalist.R;
 import org.noorganization.instalist.controller.IListController;
 import org.noorganization.instalist.controller.implementation.ControllerFactory;
-import org.noorganization.instalist.controller.implementation.ListController;
 import org.noorganization.instalist.model.ListEntry;
 import org.noorganization.instalist.model.Product;
 import org.noorganization.instalist.model.ShoppingList;
@@ -38,7 +35,7 @@ import org.noorganization.instalist.touchlistener.OnRecyclerItemTouchListener;
 import org.noorganization.instalist.view.ChangeHandler;
 import org.noorganization.instalist.view.MainShoppingListView;
 import org.noorganization.instalist.view.customview.AmountPicker;
-import org.noorganization.instalist.view.datahandler.SelectableBaseItemListEntryDataHolder;
+import org.noorganization.instalist.view.dataholder.SelectableBaseItemListEntryDataHolder;
 import org.noorganization.instalist.view.decoration.DividerItemListDecoration;
 import org.noorganization.instalist.view.event.ActivityStateMessage;
 import org.noorganization.instalist.view.event.ProductSelectMessage;
@@ -400,6 +397,10 @@ public class ShoppingListOverviewFragment extends Fragment implements IFragment 
         int sortIndex = PreferencesManager.getInstance().getIntValue(SORT_MODE);
         if(sortIndex >= 0) {
             mShoppingItemListAdapter.sortByComparator(mMapComperable.get(sortIndex));
+        } else {
+            // set it by default to sort by name
+            mShoppingItemListAdapter.sortByComparator(mMapComperable.get(SORT_BY_NAME));
+            PreferencesManager.getInstance().setValue(SORT_MODE, SORT_BY_NAME);
         }
         // use a linear layout manager
         mLayoutManager = new LinearLayoutManager(mContext);
@@ -444,8 +445,8 @@ public class ShoppingListOverviewFragment extends Fragment implements IFragment 
                         mActionMode.finish();
                     }
                 }
-                ListEntry entry = ListEntry.findById(ListEntry.class, mShoppingItemListAdapter.getItemId(_Position));
-                Toast.makeText(mContext, "Item selected: " + entry.mProduct.mName, Toast.LENGTH_SHORT).show();
+                // ListEntry entry = ListEntry.findById(ListEntry.class, mShoppingItemListAdapter.getItemId(_Position));
+                // Toast.makeText(mContext, "Item selected: " + entry.mProduct.mName, Toast.LENGTH_SHORT).show();
             }
 
             @Override

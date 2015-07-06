@@ -7,13 +7,9 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.SpinnerAdapter;
-import android.widget.Toast;
 import android.widget.ViewSwitcher;
 
-import com.orm.query.Condition;
-
 import org.noorganization.instalist.R;
-import org.noorganization.instalist.controller.implementation.ControllerFactory;
 import org.noorganization.instalist.model.Category;
 import org.noorganization.instalist.model.ShoppingList;
 import org.noorganization.instalist.touchlistener.sidebar.OnCancelClickListenerWithData;
@@ -21,8 +17,8 @@ import org.noorganization.instalist.touchlistener.sidebar.OnCancelMoveClickListe
 import org.noorganization.instalist.touchlistener.sidebar.OnSubmitClickListenerWithChildData;
 import org.noorganization.instalist.touchlistener.sidebar.OnSubmitMoveClickListener;
 import org.noorganization.instalist.view.interfaces.IBaseActivity;
-import org.noorganization.instalist.view.listadapter.CategoryListAdapter;
 import org.noorganization.instalist.view.middleware.helper.IContextItemClickedHelper;
+import org.noorganization.instalist.view.spinneradapter.CategorySpinnerAdapter;
 
 import java.util.List;
 
@@ -83,7 +79,7 @@ public class ContextItemClickedHelper implements IContextItemClickedHelper {
         categories = Category.listAll(Category.class);
         categories.remove(_CategoryForShoppingList);
 
-        SpinnerAdapter spinnerAdapter = new CategoryListAdapter(mContext, categories);
+        SpinnerAdapter spinnerAdapter = new CategorySpinnerAdapter(mContext, categories);
         spinner.setAdapter(spinnerAdapter);
 
         _ViewSwitcher.setVisibility(View.GONE);

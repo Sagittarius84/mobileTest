@@ -1,4 +1,4 @@
-package org.noorganization.instalist.view.datahandler;
+package org.noorganization.instalist.view.dataholder;
 
 import org.noorganization.instalist.model.ListEntry;
 
@@ -9,24 +9,24 @@ import java.util.List;
  * Created by TS on 10.05.2015.
  * Holds data of selected product in SelectableProductListAdapter.
  */
-public class SelectedProductDataHandler {
+public class SelectedProductDataHolder {
 
-    private static SelectedProductDataHandler mInstance;
+    private static SelectedProductDataHolder mInstance;
 
     private List<ListEntry> mListEntries;
 
     /**
-     * Retrieves an instance of SelectedProductDataHandler.
-     * @return instance of SelectedProductDataHandler.
+     * Retrieves an instance of SelectedProductDataHolder.
+     * @return instance of SelectedProductDataHolder.
      */
-    public static SelectedProductDataHandler getInstance(){
-        if(mInstance == null){
-            mInstance = new SelectedProductDataHandler();
+    public static SelectedProductDataHolder getInstance() {
+        if (mInstance == null) {
+            mInstance = new SelectedProductDataHolder();
         }
         return mInstance;
     }
 
-    private SelectedProductDataHandler(){
+    private SelectedProductDataHolder(){
         mListEntries = new ArrayList<ListEntry>();
     }
 

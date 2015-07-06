@@ -17,7 +17,7 @@ import org.noorganization.instalist.R;
 import org.noorganization.instalist.model.view.BaseItemListEntry;
 import org.noorganization.instalist.model.view.SelectableBaseItemListEntry;
 import org.noorganization.instalist.view.activity.RecipeChangeActivity;
-import org.noorganization.instalist.view.datahandler.SelectableBaseItemListEntryDataHolder;
+import org.noorganization.instalist.view.dataholder.SelectableBaseItemListEntryDataHolder;
 import org.noorganization.instalist.view.fragment.ProductChangeFragment;
 import org.noorganization.instalist.view.fragment.ProductListDialogFragment;
 import org.noorganization.instalist.view.utils.ViewUtils;
