@@ -397,6 +397,17 @@ public class MainShoppingListView extends AppCompatActivity implements IBaseActi
 
     @Override
     public void setDrawerLockMode(int _DrawerLayoutMode) {
+        if(_DrawerLayoutMode == DrawerLayout.LOCK_MODE_LOCKED_CLOSED){
+            setNavigationIcon(R.drawable.abc_ic_ab_back_mtrl_am_alpha);
+            setNavigationClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    onBackPressed();
+                }
+            });
+        }else {
+            //setNavigationIcon(R.drawable.);
+        }
         mDrawerLayout.setDrawerLockMode(_DrawerLayoutMode);
     }
 

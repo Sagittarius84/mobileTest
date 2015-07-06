@@ -19,7 +19,6 @@ import org.noorganization.instalist.model.view.ListEntryItemWrapper;
 import org.noorganization.instalist.touchlistener.OnSimpleSwipeGestureListener;
 import org.noorganization.instalist.view.customview.AmountPicker;
 import org.noorganization.instalist.view.sorting.AlphabeticalListEntryComparator;
-import org.noorganization.instalist.view.spinneradapter.CategorySpinnerAdapter;
 import org.noorganization.instalist.view.spinneradapter.UnitSpinnerAdapter;
 import org.noorganization.instalist.view.utils.ViewUtils;
 
@@ -259,6 +258,9 @@ public class ShoppingItemListAdapter extends RecyclerView.Adapter<RecyclerView.V
      * @param _Position position of the selected list.
      */
     public void setToEditMode(int _Position) {
+        if (_Position < 0) {
+            return;
+        }
         resetEditModeViewInternal();
 
         mCurrentListInEditMode = mListOfEntries.get(_Position);

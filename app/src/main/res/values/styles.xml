@@ -1,9 +1,11 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
 
     <!-- Base application theme. -->
-    <style name="InstalistTheme1" parent="Theme.AppCompat.Light.NoActionBar">
+    <style name="InstalistTheme1" parent="Theme.AppCompat.Light.DarkActionBar">
         <item name="colorPrimary">@color/primary_color</item>
-        <item name="colorAccent">@color/white</item>
+<!--        <item name="colorAccent">@color/white</item>-->
+        <item name="colorAccent">@color/light_blue_500</item>
+
         <item name="colorPrimaryDark">@color/primary_color_dark</item>w
         <item name="android:textViewStyle">@style/RobotoTextViewStyle</item>
         <item name="android:buttonStyle">@style/RobotoButtonStyle</item>
@@ -15,7 +17,7 @@
         <item name="android:editTextColor">@color/black</item>
         <item name="android:textColorPrimary">@color/white</item>
         <item name="android:textColorSecondary">@color/black</item>
-        <item name="colorControlNormal">@color/white</item>
+        <item name="colorControlNormal">@color/grey_light</item>
         <item name="colorControlHighlight">@color/control_highlight_color</item>k
         <!-- on API 21 the overflow icon ignores colorControlNormal attr in favor of the native version -->
         <item name="android:colorControlNormal" tools:ignore="NewApi">?colorControlNormal</item>

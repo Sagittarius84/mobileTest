@@ -181,6 +181,10 @@ public class ProductListDialogFragment extends Fragment {
 
         mAddProductsListener = new OnAddProductsListener();
         mCreateProductListener = new OnCreateProductListener();
+        if (mCompatibility != null) {
+            EventBus.getDefault().register(mCompatibility);
+        }
+        EventBus.getDefault().register(this);
     }
 
     @Override
@@ -355,20 +359,14 @@ public class ProductListDialogFragment extends Fragment {
         mAddProductsButton.setOnClickListener(null);
     }
 
-    @Override
-    public void onStart() {
-        super.onStart();
-        if (mCompatibility != null) {
-            EventBus.getDefault().register(mCompatibility);
-        }
-    }
 
     @Override
-    public void onStop() {
+    public void onDestroy() {
         if (mCompatibility != null) {
             EventBus.getDefault().unregister(mCompatibility);
         }
-        super.onStop();
+        EventBus.getDefault().unregister(this);
+        super.onDestroy();
     }
 
     /**

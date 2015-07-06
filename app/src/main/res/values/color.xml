@@ -19,6 +19,6 @@
     <color name="shadow_color">@color/black</color>
     <color name="text_color_inverted">@color/black</color>
     <color name="light_blue_500">#03a9f4</color>
-    <color name="flat_button_color">@color/light_blue_500</color>
+    <color name="flat_button_color">@color/primary_color</color>
     <color name="actionmode_background_color">@color/secondary_color</color>
 </resources>

@@ -117,6 +117,9 @@ public class OnRecyclerItemTouchListener implements RecyclerView.OnItemTouchList
             if (Math.abs(diffX) > SWIPE_THRESHOLD && Math.abs(velocityX) > SWIPE_VELOCITY_THRESHOLD) {
                 View childView  = mRecyclerView.findChildViewUnder(e1.getX(), e1.getY());
                 int position    = mRecyclerView.getChildAdapterPosition(childView);
+                if(position < 0){
+                    return false;
+                }
 
                 if (diffX > 0) {
                     mGestureListener.onSwipeRight(childView, position);
