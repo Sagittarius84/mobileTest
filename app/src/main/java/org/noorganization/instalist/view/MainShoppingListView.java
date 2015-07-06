@@ -70,11 +70,11 @@ public class MainShoppingListView extends AppCompatActivity implements IBaseActi
     public final static String KEY_LISTID            = "list_id";
     public static final String SIDE_DRAWER_TRANSLATE = "side_drawer_translate";
 
-    private Toolbar mToolbar;
-
-    private FrameLayout    mFrameLayout;
-    private RelativeLayout mLeftMenuDrawerRelativeLayout;
-    private EditText       mNewNameEditText;
+    private Toolbar              mToolbar;
+    private View.OnClickListener mToolbarClickListener;
+    private FrameLayout          mFrameLayout;
+    private RelativeLayout       mLeftMenuDrawerRelativeLayout;
+    private EditText             mNewNameEditText;
 
     private Button mAddListButton;
     private Button mAddCategoryButton;
@@ -154,8 +154,9 @@ public class MainShoppingListView extends AppCompatActivity implements IBaseActi
         mDrawerLayout.setFitsSystemWindows(true);
         assignDrawer();
         mNavBarToggle.setHomeAsUpIndicator(R.drawable.abc_ic_ab_back_mtrl_am_alpha);
-      //  setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
-       // setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_OPEN);
+        mToolbarClickListener = mNavBarToggle.getToolbarNavigationClickListener();
+        //  setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
+        // setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_OPEN);
 
         if (savedInstanceState == null) {
             if (ShoppingList.count(ShoppingList.class, null, new String[]{}) > 0) {
@@ -401,10 +402,11 @@ public class MainShoppingListView extends AppCompatActivity implements IBaseActi
 
     @Override
     public void setDrawerLockMode(int _DrawerLayoutMode) {
+        // bindDrawerLayout();
         if(_DrawerLayoutMode == DrawerLayout.LOCK_MODE_LOCKED_CLOSED){
             mNavBarToggle.setDrawerIndicatorEnabled(false);
 
-            //setNavigationIcon(R.drawable.abc_ic_ab_back_mtrl_am_alpha);
+            mToolbar.setNavigationIcon(R.drawable.abc_ic_ab_back_mtrl_am_alpha);
             setNavigationClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -412,7 +414,10 @@ public class MainShoppingListView extends AppCompatActivity implements IBaseActi
                 }
             });
         }else {
+            assignDrawer();
+            //setNavigationClickListener(mToolbarClickListener);
             mNavBarToggle.setDrawerIndicatorEnabled(true);
+            mNavBarToggle.syncState();
         }
         mDrawerLayout.setDrawerLockMode(_DrawerLayoutMode);
     }
@@ -441,7 +446,7 @@ public class MainShoppingListView extends AppCompatActivity implements IBaseActi
 
     @Override
     public void bindDrawerLayout() {
-        assignDrawer();
+        setNavigationClickListener(mToolbarClickListener);
     }
 
     /**
@@ -508,6 +513,7 @@ public class MainShoppingListView extends AppCompatActivity implements IBaseActi
     public void assignDrawer() {
         //mToolbar.setNavigationIcon(R.mipmap.ic_menu_white_36dp);
         // navbar custom design of toolbar
+
         mNavBarToggle = new ActionBarDrawerToggle(
                 this,                       // host activity
                 mDrawerLayout,              // DrawerLayout instance
