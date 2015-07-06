@@ -30,7 +30,8 @@ public class ChangeHandler extends IChangeHandler {
         switch (_message.what) {
             case ITEM_ADDED_TO_LIST:
                 Log.i("Handler", "Added Entry: " + _message.obj.toString());
-                mCurrentFragment.onListItemAdded((ListEntry) _message.obj);
+               // mCurrentFragment.onListItemAdded((ListEntry) _message.obj);
+                mSideDrawerEvents.updateList(((ListEntry) _message.obj).mList);
                 break;
             case ITEM_UPDATED:
                 Log.i("Handler", "Updated Entry: " + _message.obj.toString());

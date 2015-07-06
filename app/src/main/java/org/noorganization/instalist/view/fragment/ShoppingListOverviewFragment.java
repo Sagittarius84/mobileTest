@@ -39,6 +39,7 @@ import org.noorganization.instalist.view.dataholder.SelectableBaseItemListEntryD
 import org.noorganization.instalist.view.decoration.DividerItemListDecoration;
 import org.noorganization.instalist.view.event.ActivityStateMessage;
 import org.noorganization.instalist.view.event.ProductSelectMessage;
+import org.noorganization.instalist.view.event.ToolbarChangeMessage;
 import org.noorganization.instalist.view.interfaces.IBaseActivity;
 import org.noorganization.instalist.view.interfaces.IFragment;
 import org.noorganization.instalist.view.listadapter.ShoppingItemListAdapter;
@@ -475,6 +476,7 @@ public class ShoppingListOverviewFragment extends Fragment implements IFragment 
             }
         });
 
+        EventBus.getDefault().post(new ToolbarChangeMessage(false, mCurrentShoppingList.mName));
     }
 
     // --------------------------------------------------------------------------------------------

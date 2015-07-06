@@ -6,6 +6,7 @@ import android.app.Fragment;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.PersistableBundle;
@@ -133,7 +134,6 @@ public class MainShoppingListView extends AppCompatActivity implements IBaseActi
 
         // init and setup toolbar
         mToolbar = (Toolbar) findViewById(R.id.toolbar);
-
         setSupportActionBar(mToolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
@@ -153,6 +153,10 @@ public class MainShoppingListView extends AppCompatActivity implements IBaseActi
 
         mDrawerLayout.setFitsSystemWindows(true);
         assignDrawer();
+        mNavBarToggle.setHomeAsUpIndicator(R.drawable.abc_ic_ab_back_mtrl_am_alpha);
+      //  setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
+       // setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_OPEN);
+
         if (savedInstanceState == null) {
             if (ShoppingList.count(ShoppingList.class, null, new String[]{}) > 0) {
                 selectList(ShoppingList.listAll(ShoppingList.class).get(0));
@@ -398,7 +402,9 @@ public class MainShoppingListView extends AppCompatActivity implements IBaseActi
     @Override
     public void setDrawerLockMode(int _DrawerLayoutMode) {
         if(_DrawerLayoutMode == DrawerLayout.LOCK_MODE_LOCKED_CLOSED){
-            setNavigationIcon(R.drawable.abc_ic_ab_back_mtrl_am_alpha);
+            mNavBarToggle.setDrawerIndicatorEnabled(false);
+
+            //setNavigationIcon(R.drawable.abc_ic_ab_back_mtrl_am_alpha);
             setNavigationClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -406,7 +412,7 @@ public class MainShoppingListView extends AppCompatActivity implements IBaseActi
                 }
             });
         }else {
-            //setNavigationIcon(R.drawable.);
+            mNavBarToggle.setDrawerIndicatorEnabled(true);
         }
         mDrawerLayout.setDrawerLockMode(_DrawerLayoutMode);
     }
@@ -422,11 +428,11 @@ public class MainShoppingListView extends AppCompatActivity implements IBaseActi
         Log.w("NoOrg Deprecated", "MainShoppingListView's changeFragment.");
         ViewUtils.addFragment(this, _Fragment);
     }
-
+/*
     @Override
     public void setNavigationIcon(int _ResId) {
-        mToolbar.setNavigationIcon(_ResId);
-    }
+        //mToolbar.setNavigationIcon(_ResId);
+    }*/
 
     @Override
     public void setNavigationClickListener(View.OnClickListener _ClickListener) {
@@ -537,6 +543,7 @@ public class MainShoppingListView extends AppCompatActivity implements IBaseActi
             }
         };
         mDrawerLayout.setDrawerListener(mNavBarToggle);
+        mNavBarToggle.setDrawerIndicatorEnabled(true);
     }
 
     private void slideDrawer(float _MoveFactor){

@@ -39,7 +39,7 @@ public interface IBaseActivity extends  ISideDrawerListDataEvents {
      * Sets the Navigation Icon.
      * @param _ResId the resource id of the resource. (drawable|mipmap)
      */
-    void setNavigationIcon(int _ResId);
+    //void setNavigationIcon(int _ResId);
 
     /**
      * Set the NavigationClickListener.
