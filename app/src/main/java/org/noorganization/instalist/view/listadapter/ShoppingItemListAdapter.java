@@ -304,7 +304,11 @@ public class ShoppingItemListAdapter extends RecyclerView.Adapter<RecyclerView.V
 
         positionToChange = getPositionForId(_Entry.getId());
         synchronized (mListOfEntries) {
-            mListOfEntries.set(positionToChange, listEntryItemWrapper);
+            if (positionToChange >= 0) {
+                mListOfEntries.set(positionToChange, listEntryItemWrapper);
+            } else {
+                mListOfEntries.add(listEntryItemWrapper);
+            }
         }
 
         if (positionToChange >= 0) {

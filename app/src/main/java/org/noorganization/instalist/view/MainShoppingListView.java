@@ -6,12 +6,9 @@ import android.app.Fragment;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
-import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.PersistableBundle;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -191,12 +188,10 @@ public class MainShoppingListView extends AppCompatActivity implements IBaseActi
 
     public void onEventMainThread(ToolbarChangeMessage _message) {
         if (_message.mNewLockState != null) {
-            Log.d("recv", "lock");
             setDrawerLockMode(_message.mNewLockState ? DrawerLayout.LOCK_MODE_LOCKED_CLOSED :
                     DrawerLayout.LOCK_MODE_UNLOCKED);
         }
         if (_message.mNewTitle != null) {
-            Log.d("recv", "title");
             setToolbarTitle(_message.mNewTitle);
         }
     }
