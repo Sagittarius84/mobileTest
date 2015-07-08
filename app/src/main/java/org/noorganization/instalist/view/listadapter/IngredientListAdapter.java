@@ -1,7 +1,6 @@
 package org.noorganization.instalist.view.listadapter;
 
 import android.content.Context;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -72,8 +71,9 @@ public class IngredientListAdapter extends ArrayAdapter<Ingredient> {
     public View getView(int _position, View _viewToRecycle, ViewGroup _parent) {
         View rtn = _viewToRecycle;
         if (rtn == null) {
-            LayoutInflater inflater = LayoutInflater.from(mContext);
-            rtn = inflater.inflate(R.layout.entry_ingredient, null);
+            LayoutInflater inflater = (LayoutInflater) mContext.
+                    getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            rtn = inflater.inflate(R.layout.entry_ingredient, _parent, false);
         }
 
         Ingredient current = mUnderlyingIngredients.get(_position);
@@ -98,31 +98,8 @@ public class IngredientListAdapter extends ArrayAdapter<Ingredient> {
 
         @Override
         public void onValueChanged(AmountPicker _picker, float _newValue) {
-            Log.d("vcl", "new value:" + _newValue);
             int position = (int) _picker.getTag();
             mUnderlyingIngredients.get(position).mAmount = _newValue;
         }
     }
-
-    /*private class IngredientOnLongClickListener implements View.OnLongClickListener
-    {
-        private Ingredient mIngredient;
-
-        public IngredientOnLongClickListener(Ingredient _Ingredient){
-            mIngredient = _Ingredient;
-        }
-
-        @Override
-        public boolean onLongClick(View v) {
-            Fragment fragment;
-            if(mIngredient.getId() != null) {
-                fragment = IngredientCreationFragment.newInstance(mIngredient.getId());
-            }else{
-                int index = RecipeDataHolder.getInstance().getIngredients().indexOf(mIngredient);
-                fragment = IngredientCreationFragment.newInstance(index);
-            }
-            ((MainShoppingListView) mContext).changeFragment(fragment);
-            return true;
-        }
-    }*/
 }
