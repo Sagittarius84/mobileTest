@@ -4,8 +4,8 @@ import android.app.Activity;
 import android.app.Fragment;
 import android.content.Context;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.view.ActionMode;
 import android.support.v7.widget.DefaultItemAnimator;
@@ -20,7 +20,6 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import com.software.shell.fab.ActionButton;
 
@@ -63,12 +62,11 @@ public class ShoppingListOverviewFragment extends Fragment implements IFragment 
     private static final String LOG_TAG = ShoppingListOverviewFragment.class.toString();
 
     private ShoppingList mCurrentShoppingList;
-    private boolean mHandlingProductSelectedMessages;
+    private boolean      mHandlingProductSelectedMessages;
 
-    private ActionBar mActionBar;
-    private Context   mContext;
+    private Context mContext;
 
-    private ActionButton mAddButton;
+    private FloatingActionButton mAddButton;
 
     private LinearLayoutManager mLayoutManager;
 
@@ -208,7 +206,7 @@ public class ShoppingListOverviewFragment extends Fragment implements IFragment 
          * @return the ListEntry.
          */
         private ListEntry getListEntryById(long _Id) {
-            ListEntry listEntry = ListEntry.findById(ListEntry.class, mListEntryId);
+            ListEntry listEntry = ListEntry.findById(ListEntry.class, _Id);
             if (listEntry == null) {
                 Log.e(LOG_TAG, "ListEntry is not defined.");
                 throw new NullPointerException("ListEntry is not defined.");
@@ -311,7 +309,7 @@ public class ShoppingListOverviewFragment extends Fragment implements IFragment 
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        int               id          = item.getItemId();
+        int id = item.getItemId();
         // swtich which action item was pressed
         switch (id) {
             case R.id.list_items_sort_by_priority:
@@ -396,7 +394,7 @@ public class ShoppingListOverviewFragment extends Fragment implements IFragment 
 
         mShoppingItemListAdapter = new ShoppingItemListAdapter(getActivity(), mCurrentShoppingList.getEntries());
         int sortIndex = PreferencesManager.getInstance().getIntValue(SORT_MODE);
-        if(sortIndex >= 0) {
+        if (sortIndex >= 0) {
             mShoppingItemListAdapter.sortByComparator(mMapComperable.get(sortIndex));
         } else {
             // set it by default to sort by name
@@ -441,8 +439,8 @@ public class ShoppingListOverviewFragment extends Fragment implements IFragment 
             public void onSingleTap(View _ChildView, int _Position) {
                 super.onSingleTap(_ChildView, _Position);
                 if (mActionMode != null) {
-                    if (mShoppingItemListAdapter.getItemViewType(_Position) != ShoppingItemListAdapter.EDIT_MODE_VIEW) {
-                        // only close edit field when this view is not currently in edit mode
+                    if (_Position < 0 || mShoppingItemListAdapter.getItemViewType(_Position) != ShoppingItemListAdapter.ViewType.EDIT_MODE_VIEW) {
+                        // only close edit field when this view is not currently in edit mode or the user clicked not on an listelement
                         mActionMode.finish();
                     }
                 }
@@ -455,6 +453,11 @@ public class ShoppingListOverviewFragment extends Fragment implements IFragment 
                 super.onLongPress(_ChildView, _Position);
                 if (mActionMode != null) {
                     mActionMode.finish();
+                }
+
+                // return if there was a long press on a position where no listitem is specified.
+                if (_Position < 0) {
+                    return;
                 }
 
                 mShoppingItemListAdapter.setToEditMode(_Position);
@@ -487,7 +490,7 @@ public class ShoppingListOverviewFragment extends Fragment implements IFragment 
         super.onCreateView(_Inflater, _Container, _SavedInstanceState);
 
         View view = _Inflater.inflate(R.layout.fragment_main_shopping_list_view, _Container, false);
-        mAddButton = (ActionButton) view.findViewById(R.id.add_item_main_list_view);
+        mAddButton = (FloatingActionButton) view.findViewById(R.id.add_item_main_list_view);
         return view;
     }
 
@@ -514,7 +517,7 @@ public class ShoppingListOverviewFragment extends Fragment implements IFragment 
      * @param _Entry the item that should be deleted.
      */
     public void onListItemUpdated(ListEntry _Entry) {
-        mShoppingItemListAdapter.changeItem(_Entry);
+        mShoppingItemListAdapter.updateListEntry(_Entry.getId());
     }
 
     /**
@@ -523,7 +526,7 @@ public class ShoppingListOverviewFragment extends Fragment implements IFragment 
      * @param _Entry the item that should be deleted.
      */
     public void onListItemDeleted(ListEntry _Entry) {
-        mShoppingItemListAdapter.removeItem(_Entry);
+        mShoppingItemListAdapter.removeListEntry(_Entry.getId());
     }
 
     /**
@@ -533,14 +536,14 @@ public class ShoppingListOverviewFragment extends Fragment implements IFragment 
      */
     public void onListItemAdded(ListEntry _Entry) {
         if (_Entry.mList.getId().equals(mCurrentShoppingList.getId())) {
-            mShoppingItemListAdapter.addItem(_Entry);
+            mShoppingItemListAdapter.addListEntry(_Entry.getId());
         }
     }
 
     @Override
     public void onShoppingListRemoved(ShoppingList _ShoppingList) {
         if (mCurrentShoppingList.equals(_ShoppingList)) {
-            // TODO:
+            // TODO: set text that there is no shopping list
             mBaseActivityInterface.setToolbarTitle(mContext.getResources().getString(R.string.shopping_list_not_choosen));
             ViewUtils.removeFragment(getActivity(), this);
         }

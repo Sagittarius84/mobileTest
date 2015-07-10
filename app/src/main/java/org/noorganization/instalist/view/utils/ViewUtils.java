@@ -6,16 +6,19 @@ import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.Context;
+import android.graphics.Paint;
 import android.text.method.DigitsKeyListener;
 import android.text.method.KeyListener;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
+import android.widget.TextView;
 
 import org.noorganization.instalist.R;
 
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
+import java.util.List;
 
 /**
  * Created by tinos_000 on 18.05.2015.
@@ -47,6 +50,26 @@ public class ViewUtils {
 
         _EditText.setError(null);
         return true;
+    }
+
+
+    /**
+     * Sets/unsets the Stroke fields for an view or removes them.
+     * @param _StrikeViews if true, all given view components are stroke. else they will be unstroke.
+     * @param _Views the list of views that should be stroke or unstroke.
+     */
+    public static void setStrokeView(boolean _StrikeViews, List<TextView> _Views) {
+        if (_StrikeViews) {
+            // element is striked
+            for(TextView textView : _Views){
+                textView.setPaintFlags(textView.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+            }
+        } else {
+            // element is unstriked
+            for(TextView textView : _Views){
+                textView.setPaintFlags(textView.getPaintFlags() & (~ Paint.STRIKE_THRU_TEXT_FLAG));
+            }
+        }
     }
 
     public static KeyListener getNumberListener() {

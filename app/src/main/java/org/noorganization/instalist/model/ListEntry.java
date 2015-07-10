@@ -72,6 +72,10 @@ public class ListEntry extends SugarRecord<ListEntry> {
         return true;
     }
 
+    public static ListEntry getListEntryById(long _Id){
+        return ListEntry.findById(ListEntry.class, _Id);
+    }
+
     @Override
     public int hashCode() {
         return getId().intValue();

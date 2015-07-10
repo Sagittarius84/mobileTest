@@ -9,6 +9,33 @@ import org.noorganization.instalist.model.ListEntry;
 public class ListEntryItemWrapper {
 
     /**
+     * Flag that holds the current actionmode of an item. It should not hold multiple actions at once,
+     * it can but do not missuse it!
+     */
+    private int mActionMode;
+
+    /**
+     * The possible Action mode codes of ListEntry.
+     */
+    public final static class ACTION_MODE {
+
+        /**
+         * The code that indicates that this entry is in normal mode.
+         */
+        public final static int NORMAL_MODE = 0x00000001;
+
+        /**
+         * The code that indicates that this entry is in edit mode.
+         */
+        public final static int EDIT_MODE = 0x00000002;
+
+        /**
+         * The code that indicates that this entry is in select mode.
+         */
+        public final static int SELECT_MODE = 0x00000004;
+    }
+
+    /**
      * Reference to the @Link{ListEntry]
      */
     private ListEntry mListEntry;
@@ -26,8 +53,7 @@ public class ListEntryItemWrapper {
 
     public ListEntryItemWrapper(ListEntry _ListEntry){
         mListEntry = _ListEntry;
-        mEditMode = false;
-        mSelected = false;
+        mActionMode = ACTION_MODE.NORMAL_MODE;
     }
 
     /**
@@ -38,20 +64,28 @@ public class ListEntryItemWrapper {
         return mListEntry;
     }
 
+
+    /**
+     * Get the current Mode of this ListItem. Therefore see @see{ACTION_MODE}.
+     * @return the current Action Mode of this ListItem.
+     */
+    public int getMode(){
+        return mActionMode;
+    }
     /**
      * Checks if entity is currently in EditMode.
      * @return true, if in Edit Mode, else false.
      */
     public boolean isEditMode() {
-        return mEditMode;
+        return mActionMode == ACTION_MODE.EDIT_MODE;
     }
 
     /**
      * Setter EditMode.
-     * @param mEditMode true for EditMode, false for normal Mode.
+     * @param _EditMode true for EditMode, false for normal Mode.
      */
-    public void setEditMode(boolean mEditMode) {
-        this.mEditMode = mEditMode;
+    public void setEditMode(boolean _EditMode) {
+        mActionMode = ACTION_MODE.EDIT_MODE;
     }
 
     /**
@@ -59,14 +93,18 @@ public class ListEntryItemWrapper {
      * @return true if selected, else false.
      */
     public boolean isSelected() {
-        return mSelected;
+        return mActionMode == ACTION_MODE.SELECT_MODE;
     }
 
     /**
      * Setter for Selected value.
-     * @param mSelected true for selected, else false.
+     * @param _Selected true for selected, else false.
      */
-    public void setSelected(boolean mSelected) {
-        this.mSelected = mSelected;
+    public void setSelected(boolean _Selected) {
+        mActionMode = ACTION_MODE.SELECT_MODE;
+    }
+
+    public void resetModeToNormalView(){
+        mActionMode = ACTION_MODE.NORMAL_MODE;
     }
 }

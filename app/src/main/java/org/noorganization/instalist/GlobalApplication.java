@@ -53,7 +53,7 @@ public class GlobalApplication extends SugarApp {
     @Override
     public void onTerminate() {
         super.onTerminate();
-        mDatabaseSeeder.tearDown();
+        //mDatabaseSeeder.tearDown();
     }
 
     public static GlobalApplication getInstance() {
