@@ -8,6 +8,7 @@ import com.orm.query.Select;
 
 import org.noorganization.instalist.GlobalApplication;
 import org.noorganization.instalist.controller.IListController;
+import org.noorganization.instalist.controller.event.ListItemChangedMessage;
 import org.noorganization.instalist.model.Category;
 import org.noorganization.instalist.model.ListEntry;
 import org.noorganization.instalist.model.Product;
@@ -16,6 +17,8 @@ import org.noorganization.instalist.view.ChangeHandler;
 import org.noorganization.instalist.view.IChangeHandler;
 
 import java.util.List;
+
+import de.greenrobot.event.EventBus;
 
 
 /**
@@ -26,7 +29,10 @@ public class ListController implements IListController {
 
     private static ListController mInstance;
 
+    private EventBus mBus;
+
     private ListController() {
+        mBus = EventBus.getDefault();
     }
 
     static ListController getInstance() {
@@ -52,6 +58,7 @@ public class ListController implements IListController {
         ListEntry item = Select.from(ListEntry.class).where(
                 Condition.prop("m_list").eq(savedList.getId()),
                 Condition.prop("m_product").eq(savedProduct.getId())).first();
+        ListItemChangedMessage.Change changeMade;
         if (item == null) {
             if (_amount < 0.001f) {
                 return null;
@@ -59,10 +66,12 @@ public class ListController implements IListController {
             item = new ListEntry(savedList, savedProduct, _amount, false, (_prioUsed ? _prio : 0));
             item.save();
 
-            IChangeHandler target = GlobalApplication.getChangeHandler();
-            if (target != null) {
-                Message.obtain(target, IChangeHandler.ITEM_ADDED_TO_LIST, item).sendToTarget();
-            }
+            changeMade = ListItemChangedMessage.Change.CREATED;
+
+            //IChangeHandler target = GlobalApplication.getChangeHandler();
+            //if (target != null) {
+            //    Message.obtain(target, IChangeHandler.ITEM_ADDED_TO_LIST, item).sendToTarget();
+            //}
         } else {
             if (_amount < 0.001f) {
                 return item;
@@ -73,11 +82,14 @@ public class ListController implements IListController {
             }
             item.save();
 
-            IChangeHandler target = GlobalApplication.getChangeHandler();
-            if (target != null) {
-                Message.obtain(target, IChangeHandler.ITEM_UPDATED, item).sendToTarget();
-            }
+            changeMade = ListItemChangedMessage.Change.CHANGED;
+            //IChangeHandler target = GlobalApplication.getChangeHandler();
+            //if (target != null) {
+            //    Message.obtain(target, IChangeHandler.ITEM_UPDATED, item).sendToTarget();
+            //}
         }
+
+        mBus.post(new ListItemChangedMessage(changeMade, item));
 
         return item;
     }
@@ -119,12 +131,13 @@ public class ListController implements IListController {
         }
         SugarRecord.saveInTx(entries);
 
-        IChangeHandler target = GlobalApplication.getChangeHandler();
-        if (target != null) {
+        //IChangeHandler target = GlobalApplication.getChangeHandler();
+        //if (target != null) {
             for (ListEntry entry : entries) {
-                Message.obtain(target, IChangeHandler.ITEM_UPDATED, entry).sendToTarget();
+                mBus.post(new ListItemChangedMessage(ListItemChangedMessage.Change.CHANGED, entry));
+                //Message.obtain(target, IChangeHandler.ITEM_UPDATED, entry).sendToTarget();
             }
-        }
+        //}
     }
 
     @Override
@@ -143,12 +156,13 @@ public class ListController implements IListController {
         }
         SugarRecord.saveInTx(entries);
 
-        IChangeHandler target = GlobalApplication.getChangeHandler();
-        if (target != null) {
+        //IChangeHandler target = GlobalApplication.getChangeHandler();
+        //if (target != null) {
             for (ListEntry entry : entries) {
-                Message.obtain(target, IChangeHandler.ITEM_UPDATED, entry).sendToTarget();
+                mBus.post(new ListItemChangedMessage(ListItemChangedMessage.Change.CHANGED, entry));
+                //Message.obtain(target, IChangeHandler.ITEM_UPDATED, entry).sendToTarget();
             }
-        }
+        //}
     }
 
     @Override
@@ -184,10 +198,11 @@ public class ListController implements IListController {
         rtn.mStruck = false;
         rtn.save();
 
-        IChangeHandler target = GlobalApplication.getChangeHandler();
-        if (target != null) {
-            Message.obtain(target, IChangeHandler.ITEM_UPDATED, rtn).sendToTarget();
-        }
+        //IChangeHandler target = GlobalApplication.getChangeHandler();
+        //if (target != null) {
+        //    Message.obtain(target, IChangeHandler.ITEM_UPDATED, rtn).sendToTarget();
+        //}
+        mBus.post(new ListItemChangedMessage(ListItemChangedMessage.Change.CHANGED, rtn));
 
         return rtn;
     }
@@ -201,10 +216,11 @@ public class ListController implements IListController {
         rtn.mStruck = true;
         rtn.save();
 
-        IChangeHandler target = GlobalApplication.getChangeHandler();
-        if (target != null) {
-            Message.obtain(target, IChangeHandler.ITEM_UPDATED, rtn).sendToTarget();
-        }
+        //IChangeHandler target = GlobalApplication.getChangeHandler();
+        //if (target != null) {
+        //    Message.obtain(target, IChangeHandler.ITEM_UPDATED, rtn).sendToTarget();
+        //}
+        mBus.post(new ListItemChangedMessage(ListItemChangedMessage.Change.CHANGED, rtn));
 
         return rtn;
     }
@@ -242,10 +258,11 @@ public class ListController implements IListController {
         Long productId = _item.mProduct.getId();
         _item.delete();
 
-        IChangeHandler target = GlobalApplication.getChangeHandler();
-        if (target != null) {
-            Message.obtain(target, IChangeHandler.ITEM_DELETED, _item).sendToTarget();
-        }
+        //IChangeHandler target = GlobalApplication.getChangeHandler();
+        //if (target != null) {
+        //    Message.obtain(target, IChangeHandler.ITEM_DELETED, _item).sendToTarget();
+        //}
+        mBus.post(new ListItemChangedMessage(ListItemChangedMessage.Change.DELETED, _item));
 
          long deletedEntryCount = Select.from(ListEntry.class).where(
                 Condition.prop("m_list").eq(listId),
@@ -268,10 +285,11 @@ public class ListController implements IListController {
         toChange.mPriority = _newPrio;
         toChange.save();
 
-        IChangeHandler target = GlobalApplication.getChangeHandler();
-        if (target != null) {
-            Message.obtain(target, IChangeHandler.ITEM_UPDATED, toChange).sendToTarget();
-        }
+        //IChangeHandler target = GlobalApplication.getChangeHandler();
+        //if (target != null) {
+        //    Message.obtain(target, IChangeHandler.ITEM_UPDATED, toChange).sendToTarget();
+        //}
+        mBus.post(new ListItemChangedMessage(ListItemChangedMessage.Change.CHANGED, toChange));
 
         return toChange;
     }
