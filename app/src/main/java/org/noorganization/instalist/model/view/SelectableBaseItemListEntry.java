@@ -5,14 +5,14 @@ package org.noorganization.instalist.model.view;
  */
 public class SelectableBaseItemListEntry {
 
-    private boolean mChecked;
-    private BaseItemListEntry mItemListEntry;
+    private boolean        mChecked;
+    private IBaseListEntry mItemListEntry;
 
     /**
      * Creates a instance of SelectableBaseItemListEntry, sets the selected field to false.
      * @param _ItemListEntry the entry of the item.
      */
-    public SelectableBaseItemListEntry(BaseItemListEntry _ItemListEntry){
+    public SelectableBaseItemListEntry(IBaseListEntry _ItemListEntry){
         mItemListEntry = _ItemListEntry;
         mChecked = false;
     }
@@ -22,7 +22,7 @@ public class SelectableBaseItemListEntry {
      * @param _ItemListEntry the entry of the item.
      * @param _Checked the information if it is checked or not.
      */
-    public SelectableBaseItemListEntry(BaseItemListEntry _ItemListEntry, boolean _Checked){
+    public SelectableBaseItemListEntry(IBaseListEntry _ItemListEntry, boolean _Checked){
         mItemListEntry = _ItemListEntry;
         mChecked = _Checked;
     }
@@ -35,11 +35,11 @@ public class SelectableBaseItemListEntry {
         this.mChecked = _Checked;
     }
 
-    public BaseItemListEntry getItemListEntry() {
+    public IBaseListEntry getItemListEntry() {
         return mItemListEntry;
     }
 
-    public void setItemListEntry(BaseItemListEntry _ItemListEntry) {
+    public void setItemListEntry(IBaseListEntry _ItemListEntry) {
         this.mItemListEntry = _ItemListEntry;
     }
 }

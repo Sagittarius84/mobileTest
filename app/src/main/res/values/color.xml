@@ -21,4 +21,7 @@
     <color name="light_blue_500">#03a9f4</color>
     <color name="flat_button_color">@color/primary_color</color>
     <color name="actionmode_background_color">@color/secondary_color</color>
+
+    <color name="checkbox_checked_color">@color/primary_color</color>
+    <color name="checkbox_unchecked_color">@color/grey_light</color>
 </resources>

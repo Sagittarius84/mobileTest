@@ -5,7 +5,7 @@ import org.noorganization.instalist.model.Product;
 /**
  * Created by TS on 25.05.2015.
  */
-public class ProductListEntry extends BaseItemListEntry {
+public class ProductListEntry implements IBaseListEntry {
     private Product mProduct;
 
     public ProductListEntry(Product _Product){

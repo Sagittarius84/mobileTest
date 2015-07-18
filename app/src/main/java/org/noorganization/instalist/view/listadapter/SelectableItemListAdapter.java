@@ -14,7 +14,7 @@ import android.widget.TextView;
 import com.orm.SugarRecord;
 
 import org.noorganization.instalist.R;
-import org.noorganization.instalist.model.view.BaseItemListEntry;
+import org.noorganization.instalist.model.view.IBaseListEntry;
 import org.noorganization.instalist.model.view.SelectableBaseItemListEntry;
 import org.noorganization.instalist.view.activity.RecipeChangeActivity;
 import org.noorganization.instalist.view.dataholder.SelectableBaseItemListEntryDataHolder;
@@ -125,9 +125,9 @@ public class SelectableItemListAdapter extends ArrayAdapter<SelectableBaseItemLi
      */
     private class OnLongClickListenerListEntry implements View.OnLongClickListener {
 
-        private final BaseItemListEntry   mListEntry;
+        private final IBaseListEntry mListEntry;
 
-        public OnLongClickListenerListEntry(BaseItemListEntry _ListEntry){
+        public OnLongClickListenerListEntry(IBaseListEntry _ListEntry) {
             mListEntry = _ListEntry;
         }
 
@@ -135,7 +135,7 @@ public class SelectableItemListAdapter extends ArrayAdapter<SelectableBaseItemLi
         public boolean onLongClick(View v) {
             SugarRecord currentEntry = (SugarRecord) (mListEntry.getEntry().getObject());
 
-            switch (mListEntry.getType()){
+            switch (mListEntry.getType()) {
                 case PRODUCT_LIST_ENTRY:
                     ViewUtils.addFragment(mActivity, ProductChangeFragment.
                             newChangeInstance(currentEntry.getId()));
@@ -161,27 +161,28 @@ public class SelectableItemListAdapter extends ArrayAdapter<SelectableBaseItemLi
             protected FilterResults performFiltering(CharSequence constraint) {
                 FilterResults result = new FilterResults();
                 // TODO: make it thread safe
-                List<SelectableBaseItemListEntry> listEntries = new ArrayList<>( mResSelectableItems);
+                List<SelectableBaseItemListEntry> listEntries = new ArrayList<>(mResSelectableItems);
 
-                if(constraint == null || constraint.length() == 0){
+                if (constraint == null || constraint.length() == 0) {
                     result.values = listEntries;
                     result.count = listEntries.size();
-                }else{
-                    BaseItemListEntry.eItemType filterType;
+                } else {
+                    IBaseListEntry.eItemType filterType;
                     ArrayList<SelectableBaseItemListEntry> filteredList = new ArrayList<SelectableBaseItemListEntry>();
 
-                    switch(constraint.toString()){
+                    switch (constraint.toString()) {
                         case ProductListDialogFragment.FILTER_BY_PRODUCT:
-                            filterType = BaseItemListEntry.eItemType.PRODUCT_LIST_ENTRY;
+                            filterType = IBaseListEntry.eItemType.PRODUCT_LIST_ENTRY;
                             break;
                         case ProductListDialogFragment.FILTER_BY_RECIPE:
-                            filterType = BaseItemListEntry.eItemType.RECIPE_LIST_ENTRY;
+                            filterType = IBaseListEntry.eItemType.RECIPE_LIST_ENTRY;
                             break;
                         case ProductListDialogFragment.FILTER_SHOW_ALL:
-                            filterType = BaseItemListEntry.eItemType.EMPTY;
+                            filterType = IBaseListEntry.eItemType.EMPTY;
                             break;
                         default:
-                            filterType = BaseItemListEntry.eItemType.NAME_SEARCH;;
+                            filterType = IBaseListEntry.eItemType.NAME_SEARCH;
+                            ;
                             String contraintToFind = constraint.toString().toLowerCase();
                             for (SelectableBaseItemListEntry entry : listEntries) {
                                 if (entry.getItemListEntry().getName().toLowerCase().startsWith(contraintToFind)) {
@@ -191,13 +192,12 @@ public class SelectableItemListAdapter extends ArrayAdapter<SelectableBaseItemLi
                             break;
                     }
 
-                    if(filterType != BaseItemListEntry.eItemType.EMPTY) {
+                    if (filterType != IBaseListEntry.eItemType.EMPTY) {
                         for (SelectableBaseItemListEntry entry : listEntries) {
                             if (entry.getItemListEntry().getType() == filterType)
                                 filteredList.add(entry);
                         }
-                    }
-                    else {
+                    } else {
                         filteredList = new ArrayList<>(mResSelectableItems);
                     }
                     result.values = filteredList;

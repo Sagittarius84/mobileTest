@@ -3,7 +3,7 @@
     <!-- Base application theme. -->
     <style name="InstalistTheme1" parent="Theme.AppCompat.Light.DarkActionBar">
         <item name="colorPrimary">@color/primary_color</item>
-<!--        <item name="colorAccent">@color/white</item>-->
+        <!--        <item name="colorAccent">@color/white</item>-->
         <item name="colorAccent">@color/light_blue_500</item>
 
         <item name="colorPrimaryDark">@color/primary_color_dark</item>w
@@ -29,7 +29,6 @@
         <item name="android:windowBackground">@color/white</item>
         <item name="android:actionModeCloseButtonStyle">@style/NoCloseButton</item>
         <item name="windowActionModeOverlay">true</item>
-        <item name="android:listChoiceIndicatorMultiple">@drawable/checkbox</item>
     </style>
 
     <!-- remove the default close button in actionmode -->
@@ -50,6 +49,7 @@
     <style name="RobotoEditTextStyle" parent="android:Widget.EditText">
         <item name="android:fontFamily">sans-serif-light</item>
     </style>
+
     <style name="InstalistTheme1.Toolbar">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">?attr/actionBarSize</item>

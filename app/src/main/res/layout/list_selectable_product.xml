@@ -11,7 +11,6 @@
         android:id="@+id/product_list_product_selected"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:padding="4dp"
         />
     <!--android:button="@mipmap/ic_check_box_outline_blank_black_36dp"-->
 

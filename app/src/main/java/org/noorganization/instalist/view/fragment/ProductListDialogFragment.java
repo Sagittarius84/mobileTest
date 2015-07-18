@@ -33,7 +33,7 @@ import org.noorganization.instalist.model.ListEntry;
 import org.noorganization.instalist.model.Product;
 import org.noorganization.instalist.model.Recipe;
 import org.noorganization.instalist.model.ShoppingList;
-import org.noorganization.instalist.model.view.BaseItemListEntry;
+import org.noorganization.instalist.model.view.IBaseListEntry;
 import org.noorganization.instalist.model.view.ProductListEntry;
 import org.noorganization.instalist.model.view.RecipeListEntry;
 import org.noorganization.instalist.model.view.SelectableBaseItemListEntry;
@@ -425,7 +425,7 @@ public class ProductListDialogFragment extends Fragment {
 
             for (SelectableBaseItemListEntry listEntry : listEntries) {
                 if (listEntry.isChecked()) {
-                    BaseItemListEntry baseItemListEntry = listEntry.getItemListEntry();
+                    IBaseListEntry baseItemListEntry = listEntry.getItemListEntry();
 
                     switch (baseItemListEntry.getType()) {
                         case PRODUCT_LIST_ENTRY:

@@ -5,7 +5,7 @@ import org.noorganization.instalist.model.Recipe;
 /**
  * Created by TS on 25.05.2015.
  */
-public class RecipeListEntry extends BaseItemListEntry {
+public class RecipeListEntry implements IBaseListEntry {
 
     private Recipe mRecipe;
 
