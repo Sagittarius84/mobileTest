@@ -26,6 +26,7 @@ import com.software.shell.fab.ActionButton;
 import org.noorganization.instalist.GlobalApplication;
 import org.noorganization.instalist.R;
 import org.noorganization.instalist.controller.IListController;
+import org.noorganization.instalist.controller.event.ListItemChangedMessage;
 import org.noorganization.instalist.controller.implementation.ControllerFactory;
 import org.noorganization.instalist.model.ListEntry;
 import org.noorganization.instalist.model.Product;
@@ -259,6 +260,7 @@ public class ShoppingListOverviewFragment extends Fragment implements IFragment 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setHasOptionsMenu(true);
         // get bundle args to get the listname that should be shown
         Bundle bundle = this.getArguments();
@@ -279,9 +281,9 @@ public class ShoppingListOverviewFragment extends Fragment implements IFragment 
             List<ShoppingList> mShoppingLists = ShoppingList.listAll(ShoppingList.class);
             if (mShoppingLists.size() > 0) {
                 mCurrentShoppingList = mShoppingLists.get(0);
-                mBaseActivityInterface.setToolbarTitle(mCurrentShoppingList.mName);
+                //mBaseActivityInterface.setToolbarTitle(mCurrentShoppingList.mName);
             } else {
-                mBaseActivityInterface.setToolbarTitle(mContext.getResources().getString(R.string.shopping_list_overview_fragment_no_list_available));
+                //mBaseActivityInterface.setToolbarTitle(mContext.getResources().getString(R.string.shopping_list_overview_fragment_no_list_available));
                 // do something to show that there are no shoppinglists!
                 return;
             }
@@ -331,7 +333,8 @@ public class ShoppingListOverviewFragment extends Fragment implements IFragment 
         super.onActivityCreated(savedInstanceState);
         // set the title in "main" activity so that the current list name is shown on the actionbar
 
-        mBaseActivityInterface.setToolbarTitle(mCurrentShoppingList.mName);
+        //mBaseActivityInterface.setToolbarTitle(mCurrentShoppingList.mName);
+
 
         mRootView = getView();
         if (mRootView == null) {
@@ -479,7 +482,8 @@ public class ShoppingListOverviewFragment extends Fragment implements IFragment 
             }
         });
 
-        EventBus.getDefault().post(new ToolbarChangeMessage(false, mCurrentShoppingList.mName));
+        String title = (mCurrentShoppingList == null ? "" : mCurrentShoppingList.mName);
+        EventBus.getDefault().post(new ToolbarChangeMessage(false, title));
     }
 
     // --------------------------------------------------------------------------------------------
@@ -509,6 +513,21 @@ public class ShoppingListOverviewFragment extends Fragment implements IFragment 
                         productAmounts.get(currentProduct), true);
             }
         }
+    }
+
+    public void onEvent(ListItemChangedMessage _message) {
+        switch (_message.mChange) {
+            case CHANGED:
+                onListItemUpdated(_message.mEntry);
+                break;
+            case CREATED:
+                onListItemAdded(_message.mEntry);
+                break;
+            case DELETED:
+                onListItemDeleted(_message.mEntry);
+                break;
+        }
+
     }
 
     /**

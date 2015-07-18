@@ -28,6 +28,7 @@ import android.widget.RelativeLayout;
 
 import org.noorganization.instalist.GlobalApplication;
 import org.noorganization.instalist.R;
+import org.noorganization.instalist.controller.event.ListItemChangedMessage;
 import org.noorganization.instalist.controller.implementation.ControllerFactory;
 import org.noorganization.instalist.model.Category;
 import org.noorganization.instalist.model.ShoppingList;
@@ -193,6 +194,17 @@ public class MainShoppingListView extends AppCompatActivity implements IBaseActi
         }
         if (_message.mNewTitle != null) {
             setToolbarTitle(_message.mNewTitle);
+        }
+    }
+
+    /**
+     * EventBus-Method for catching messages about created or deleted ListItem's.
+     */
+    public void onEventMainThread(ListItemChangedMessage _message) {
+        switch (_message.mChange) {
+            case CREATED:
+            case DELETED:
+                updateList(_message.mEntry.mList);
         }
     }
 
