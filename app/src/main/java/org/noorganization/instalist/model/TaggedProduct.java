@@ -1,5 +1,6 @@
 package org.noorganization.instalist.model;
 
+import com.orm.StringUtil;
 import com.orm.SugarRecord;
 
 import java.util.ArrayList;
@@ -13,6 +14,8 @@ import java.util.concurrent.locks.Condition;
  * Created by michi on 14.04.15.
  */
 public class TaggedProduct extends SugarRecord<TaggedProduct> {
+    public final static String ATTR_TAG     = StringUtil.toSQLName("mTag");
+    public final static String ATTR_PRODUCT = StringUtil.toSQLName("mProduct");
 
     public Tag     mTag;
     public Product mProduct;

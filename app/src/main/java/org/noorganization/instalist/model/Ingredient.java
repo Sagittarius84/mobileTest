@@ -1,5 +1,6 @@
 package org.noorganization.instalist.model;
 
+import com.orm.StringUtil;
 import com.orm.SugarRecord;
 
 /**
@@ -7,6 +8,10 @@ import com.orm.SugarRecord;
  * Created by michi on 14.04.15.
  */
 public class Ingredient extends SugarRecord<Ingredient> {
+
+    public final static String ATTR_PRODUCT = StringUtil.toSQLName("mProduct");
+    public final static String ATTR_AMOUNT  = StringUtil.toSQLName("mAmount");
+    public final static String ATTR_RECIPE  = StringUtil.toSQLName("mRecipe");
 
     public Product mProduct;
     public Recipe  mRecipe;

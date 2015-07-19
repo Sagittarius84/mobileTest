@@ -77,7 +77,7 @@ public class AmountPicker extends LinearLayout {
             addView(mDecreaseButton);
         }
 
-        mStep = 0.5f;
+        mStep = 1.0f;
     }
 
     /**

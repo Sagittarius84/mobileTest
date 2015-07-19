@@ -26,6 +26,7 @@ import com.orm.SugarRecord;
 
 import org.noorganization.instalist.R;
 import org.noorganization.instalist.controller.IListController;
+import org.noorganization.instalist.controller.event.ProductChangedMessage;
 import org.noorganization.instalist.controller.event.RecipeChangedMessage;
 import org.noorganization.instalist.controller.implementation.ControllerFactory;
 import org.noorganization.instalist.model.Ingredient;
@@ -276,6 +277,15 @@ public class ProductListDialogFragment extends Fragment {
         // TODO add for other changes.
     }
 
+    public void onEventMainThread(ProductChangedMessage _message) {
+        // TODO update list of products and recipes
+        switch (_message.mChange) {
+            case CHANGED:
+            case DELETED:
+                Log.d("TODO", "Implement handler for Product " + _message.mChange.name());
+        }
+    }
+
 
     @Override
     public void onPrepareOptionsMenu(Menu _Menu) {
@@ -330,14 +340,6 @@ public class ProductListDialogFragment extends Fragment {
     public void onResume() {
         super.onResume();
 
-        /* TODO create event for title and locking drawer.
-        mBaseActivityInterface.setNavigationIcon(R.mipmap.ic_arrow_back_white_36dp);
-        mBaseActivityInterface.setNavigationClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mBaseActivityInterface.onBackPressed();
-            }
-        });*/
         EventBus.getDefault().post(new ToolbarChangeMessage(true, mContext.getString(R.string.product_list_dialog_title)));
 
         mCreateProductButton.setOnClickListener(mCreateProductListener);

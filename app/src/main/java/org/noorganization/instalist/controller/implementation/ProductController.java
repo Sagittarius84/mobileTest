@@ -5,6 +5,9 @@ import com.orm.query.Condition;
 import com.orm.query.Select;
 
 import org.noorganization.instalist.controller.IProductController;
+import org.noorganization.instalist.controller.event.ListItemChangedMessage;
+import org.noorganization.instalist.controller.event.ProductChangedMessage;
+import org.noorganization.instalist.controller.event.RecipeChangedMessage;
 import org.noorganization.instalist.model.Ingredient;
 import org.noorganization.instalist.model.ListEntry;
 import org.noorganization.instalist.model.Product;
@@ -12,10 +15,16 @@ import org.noorganization.instalist.model.Tag;
 import org.noorganization.instalist.model.TaggedProduct;
 import org.noorganization.instalist.model.Unit;
 
+import java.util.List;
+
+import de.greenrobot.event.EventBus;
+
 
 public class ProductController implements IProductController {
 
     private static ProductController mInstance;
+
+    private EventBus mBus;
 
     static ProductController getInstance() {
         if (mInstance == null) {
@@ -44,6 +53,8 @@ public class ProductController implements IProductController {
 
         Product rtn = new Product(_name, _unit, _defaultAmount, _stepAmount);
         rtn.save();
+
+        mBus.post(new ProductChangedMessage(ProductChangedMessage.Change.CREATED, rtn));
 
         return rtn;
     }
@@ -86,6 +97,8 @@ public class ProductController implements IProductController {
         rtn.mStepAmount = _toChange.mStepAmount;
         rtn.save();
 
+        mBus.post(new ProductChangedMessage(ProductChangedMessage.Change.CHANGED, rtn));
+
         return rtn;
     }
 
@@ -95,39 +108,53 @@ public class ProductController implements IProductController {
             return false;
         }
 
-        if (!_deleteCompletely) {
-            // first, here were also counted references of TaggedProducts. That's not useful.
-            long countOfRefs = Select.from(ListEntry.class).
-                    where(Condition.prop("m_product").eq(_toRemove.getId())).count();
-            countOfRefs += Select.from(Ingredient.class).
-                    where(Condition.prop("m_product").eq(_toRemove.getId())).count();
-            if (countOfRefs > 0) {
-                return false;
-            }
+        Product foundProduct = SugarRecord.findById(Product.class, _toRemove.getId());
+        if (foundProduct == null) {
+            return false;
         }
 
-        SugarRecord.deleteAll(ListEntry.class, "m_product = ?", _toRemove.getId() + "");
+        List<ListEntry>  foundEntries     = Select.from(ListEntry.class).
+                where(Condition.prop(ListEntry.ATTR_PRODUCT).eq(_toRemove.getId())).list();
+        List<Ingredient> foundIngredients = Select.from(Ingredient.class).
+                where(Condition.prop(Ingredient.ATTR_PRODUCT).eq(_toRemove.getId())).list();
+        if (!_deleteCompletely && (foundEntries.size() > 0 || foundIngredients.size() > 0)) {
+            return false;
+        }
+
+        for (ListEntry currentEntry : foundEntries) {
+            currentEntry.delete();
+            mBus.post(new ListItemChangedMessage(ListItemChangedMessage.Change.DELETED, currentEntry));
+        }
+        for (Ingredient currentIngredient : foundIngredients) {
+            currentIngredient.delete();
+            mBus.post(new RecipeChangedMessage(RecipeChangedMessage.Change.CHANGED,
+                    currentIngredient.mRecipe));
+        }
         SugarRecord.deleteAll(TaggedProduct.class, "m_product = ?", _toRemove.getId() + "");
-        SugarRecord.deleteAll(Ingredient.class, "m_product = ?", _toRemove.getId() + "");
         _toRemove.delete();
+        mBus.post(new ProductChangedMessage(ProductChangedMessage.Change.DELETED, foundProduct));
 
         return true;
     }
 
     @Override
     public boolean addTagToProduct(Product _product, Tag _tag) {
-        if (_product == null || _tag == null ||
-                SugarRecord.findById(Product.class, _product.getId()) == null ||
-                SugarRecord.findById(Tag.class, _tag.getId()) == null) {
+        if (_product == null || _tag == null) {
+            return false;
+        }
+        Product foundProduct = SugarRecord.findById(Product.class, _product.getId());
+        Tag     foundTag     = SugarRecord.findById(Tag.class, _tag.getId());
+        if (foundProduct == null || foundTag == null) {
             return false;
         }
 
         long existingTagCount = Select.from(TaggedProduct.class).where(
-                Condition.prop("m_product").eq(_product.getId())).and(
-                Condition.prop("m_tag").eq(_tag.getId())).count();
+                Condition.prop(TaggedProduct.ATTR_PRODUCT).eq(foundProduct.getId())).and(
+                Condition.prop(TaggedProduct.ATTR_TAG).eq(foundTag.getId())).count();
         if (existingTagCount == 0) {
             TaggedProduct newProductsTag = new TaggedProduct(_tag, _product);
             newProductsTag.save();
+            mBus.post(new ProductChangedMessage(ProductChangedMessage.Change.CHANGED, foundProduct));
         }
 
         return true;
@@ -139,9 +166,23 @@ public class ProductController implements IProductController {
             return;
         }
 
-        SugarRecord.deleteAll(TaggedProduct.class, "m_product = ? and m_tag = ?",
-                _product.getId()+"", _tag.getId()+"");
+        Product foundProduct = SugarRecord.findById(Product.class, _product.getId());
+        if (foundProduct == null) {
+            return;
+        }
+
+        List<TaggedProduct> taggedProducts = Select.from(TaggedProduct.class).where(
+                Condition.prop(TaggedProduct.ATTR_PRODUCT).eq(foundProduct.getId())).and(
+                Condition.prop(TaggedProduct.ATTR_TAG).eq(_tag.getId())).list();
+        if (taggedProducts.size() != 0) {
+            for (TaggedProduct currentToDelete : taggedProducts) {
+                currentToDelete.delete();
+            }
+            mBus.post(new ProductChangedMessage(ProductChangedMessage.Change.CHANGED, foundProduct));
+        }
     }
 
-
+    private ProductController() {
+        mBus = EventBus.getDefault();
+    }
 }

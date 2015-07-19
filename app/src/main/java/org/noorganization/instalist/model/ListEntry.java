@@ -1,5 +1,6 @@
 package org.noorganization.instalist.model;
 
+import com.orm.StringUtil;
 import com.orm.SugarRecord;
 
 /**
@@ -7,6 +8,12 @@ import com.orm.SugarRecord;
  * Created by michi on 14.04.15.
  */
 public class ListEntry extends SugarRecord<ListEntry> {
+
+    public final static String ATTR_LIST     = StringUtil.toSQLName("mList");
+    public final static String ATTR_PRODUCT  = StringUtil.toSQLName("mProduct");
+    public final static String ATTR_AMOUNT   = StringUtil.toSQLName("mAmount");
+    public final static String ATTR_STRUCK   = StringUtil.toSQLName("mStruck");
+    public final static String ATTR_PRIORITY = StringUtil.toSQLName("mPriority");
 
     public ShoppingList mList;
     public Product      mProduct;

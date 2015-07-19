@@ -16,7 +16,7 @@ public class RecipeChangedMessage {
     public Recipe mRecipe;
     public Change mChange;
 
-    public RecipeChangedMessage(Recipe _recipe, Change _change) {
+    public RecipeChangedMessage(Change _change, Recipe _recipe) {
         mRecipe = _recipe;
         mChange = _change;
     }

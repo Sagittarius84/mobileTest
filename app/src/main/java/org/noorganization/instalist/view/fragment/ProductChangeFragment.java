@@ -75,8 +75,6 @@ public class ProductChangeFragment extends DialogFragment {
         public InputParamsHolder(Dialog _dialog, View _parentView){
             this.mContext = _dialog.getContext();
             initViews(_parentView);
-
-            mProductAmount.setValue(1.0f);
         }
 
         /**
@@ -229,7 +227,11 @@ public class ProductChangeFragment extends DialogFragment {
 
                 mProductStep.setText(ViewUtils.formatFloat(currentProduct.mStepAmount));
                 mProductAmount.setStep(currentProduct.mStepAmount);
-                mUnits.setSelection(mUnitList.indexOf(mProduct.mUnit) + 1);
+                if (mProduct.mUnit != null) {
+                    mUnits.setSelection(mUnitList.indexOf(mProduct.mUnit) + 1);
+                } else {
+                    mUnits.setSelection(0);
+                }
             }
         }
     }
