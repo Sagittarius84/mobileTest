@@ -10,35 +10,30 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:scrollbarAlwaysDrawHorizontalTrack="false">
-        <!-- Dummy item to prevent AutoCompleteTextView from receiving focus -->
-        <LinearLayout
-            android:layout_width="0px"
-            android:layout_height="0px"
-            android:focusable="true"
-            android:focusableInTouchMode="true" />
+        <!-- Dummy item to prevent EditText from receiving focus -->
+        <LinearLayout style="@style/InstalistTheme1.DummyFocus" />
 
-        <EditText
-            android:id="@+id/drawer_layout_custom_new_name"
-            style="@style/InstalistTheme1.base_edit_text_style"
-            android:hint="@string/drawer_layout_custom_new_addition_hint" />
+        <android.support.design.widget.TextInputLayout
+            android:id="@+id/et_drawer_layout_custom_new_name_wrapper"
+            style="@style/InstalistTheme1.base_edit_text_wrapper_style">
+
+            <EditText
+                android:id="@+id/drawer_layout_custom_new_name"
+                style="@style/InstalistTheme1.base_edit_text_style"
+                android:hint="@string/drawer_layout_custom_new_addition_hint" />
+        </android.support.design.widget.TextInputLayout>
 
         <Button
             android:id="@+id/drawer_layout_custom_create_list"
-            style="@style/InstalistTheme1.base_flatten_button"
+            style="@style/InstalistTheme1.base_flatten_button.disappeared_right_aligned"
             android:layout_width="match_parent"
-            android:layout_height="@dimen/base_edittext_height"
-            android:gravity="right"
-            android:text="@string/create_list"
-            android:visibility="gone" />
+            android:text="@string/create_list" />
 
         <Button
             android:id="@+id/drawer_layout_custom_create_category"
-            style="@style/InstalistTheme1.base_flatten_button"
+            style="@style/InstalistTheme1.base_flatten_button.disappeared_right_aligned"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="right"
-            android:text="@string/create_category"
-            android:visibility="gone" />
+            android:text="@string/create_category" />
 
     </LinearLayout>
 

@@ -1,22 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-        <style name="InstalistTheme1.linearlayout_card_style">
-                <item name="android:layout_width">match_parent</item>
-                <item name="android:layout_height">@dimen/base_list_entry_height</item>
-                <item name="android:layout_marginTop">@dimen/base_margin</item>
-                <item name="android:layout_marginLeft">@dimen/base_padding_right</item>
-                <item name="android:layout_marginRight">@dimen/base_padding_top</item>
-                <!--<item name="android:layout_marginBottom">@dimen/base_padding_bottom</item>-->
-                <item name="android:background">@color/for_background_color</item>
-                <item name="android:shadowDx">@dimen/shadow_dx</item>
-                <item name="android:shadowDy">@dimen/shadow_dy</item>
-                <item name="android:shadowColor">@color/shadow_color</item>
-                <item name="android:elevation">2dp</item>
-        </style>
+    <style name="InstalistTheme1.linearlayout_card_style">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">@dimen/base_list_entry_height</item>
+        <item name="android:layout_marginTop">@dimen/base_margin</item>
+        <item name="android:layout_marginLeft">@dimen/base_padding_right</item>
+        <item name="android:layout_marginRight">@dimen/base_padding_top</item>
+        <!--<item name="android:layout_marginBottom">@dimen/base_padding_bottom</item>-->
+        <item name="android:background">@color/for_background_color</item>
+        <item name="android:shadowDx">@dimen/shadow_dx</item>
+        <item name="android:shadowDy">@dimen/shadow_dy</item>
+        <item name="android:shadowColor">@color/shadow_color</item>
+        <item name="android:elevation">2dp</item>
+    </style>
 
-        <style name="InstalistTheme1.shadow">
-                <item name="android:layout_height">0dp</item>
-                <item name="android:background">@drawable/toolbar_dropshadow</item>
-        </style>
+    <style name="InstalistTheme1.shadow">
+        <item name="android:visibility">invisible</item>
+        <item name="android:layout_height">0dp</item>
+        <item name="android:layout_width">match_parent</item>
+    </style>
 </resources>
