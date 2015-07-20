@@ -1,4 +1,4 @@
-package org.noorganization.instalist.model.view;
+package org.noorganization.instalist.view.modelwrappers;
 
 import org.noorganization.instalist.model.ListEntry;
 

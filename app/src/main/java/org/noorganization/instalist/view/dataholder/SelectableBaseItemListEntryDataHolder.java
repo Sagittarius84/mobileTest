@@ -1,6 +1,6 @@
 package org.noorganization.instalist.view.dataholder;
 
-import org.noorganization.instalist.model.view.SelectableBaseItemListEntry;
+import org.noorganization.instalist.view.modelwrappers.SelectableBaseItemListEntry;
 
 import java.util.ArrayList;
 import java.util.List;

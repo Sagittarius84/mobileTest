@@ -14,12 +14,12 @@ import android.widget.TextView;
 import com.orm.SugarRecord;
 
 import org.noorganization.instalist.R;
-import org.noorganization.instalist.model.view.IBaseListEntry;
-import org.noorganization.instalist.model.view.SelectableBaseItemListEntry;
 import org.noorganization.instalist.view.activity.RecipeChangeActivity;
 import org.noorganization.instalist.view.dataholder.SelectableBaseItemListEntryDataHolder;
 import org.noorganization.instalist.view.fragment.ProductChangeFragment;
 import org.noorganization.instalist.view.fragment.ProductListDialogFragment;
+import org.noorganization.instalist.view.modelwrappers.IBaseListEntry;
+import org.noorganization.instalist.view.modelwrappers.SelectableBaseItemListEntry;
 import org.noorganization.instalist.view.utils.ViewUtils;
 
 import java.util.ArrayList;

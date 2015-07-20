@@ -1,4 +1,4 @@
-package org.noorganization.instalist.model.view;
+package org.noorganization.instalist.view.modelwrappers;
 
 /**
  * Created by TS on 25.05.2015.

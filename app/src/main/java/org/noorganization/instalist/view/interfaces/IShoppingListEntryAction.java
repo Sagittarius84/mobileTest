@@ -1,9 +1,7 @@
 package org.noorganization.instalist.view.interfaces;
 
-import org.noorganization.instalist.model.ListEntry;
-import org.noorganization.instalist.model.view.ListEntryItemWrapper;
+import org.noorganization.instalist.view.modelwrappers.ListEntryItemWrapper;
 
-import java.util.Collections;
 import java.util.Comparator;
 
 /**

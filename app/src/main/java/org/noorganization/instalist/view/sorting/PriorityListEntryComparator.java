@@ -1,7 +1,7 @@
 package org.noorganization.instalist.view.sorting;
 
 import org.noorganization.instalist.model.ListEntry;
-import org.noorganization.instalist.model.view.ListEntryItemWrapper;
+import org.noorganization.instalist.view.modelwrappers.ListEntryItemWrapper;
 
 import java.text.Collator;
 import java.util.Comparator;
