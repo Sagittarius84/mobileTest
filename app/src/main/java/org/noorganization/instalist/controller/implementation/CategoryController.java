@@ -5,15 +5,23 @@ import com.orm.query.Condition;
 import com.orm.query.Select;
 
 import org.noorganization.instalist.controller.ICategoryController;
+import org.noorganization.instalist.controller.event.CategoryChangedMessage;
+import org.noorganization.instalist.controller.event.Change;
+import org.noorganization.instalist.controller.event.ListChangedMessage;
 import org.noorganization.instalist.model.Category;
 import org.noorganization.instalist.model.ShoppingList;
 
 import java.util.List;
 
+import de.greenrobot.event.EventBus;
+
 public class CategoryController implements ICategoryController {
     private static CategoryController mInstance;
 
+    private EventBus mBus;
+
     private CategoryController() {
+        mBus = EventBus.getDefault();
     }
 
     static CategoryController getInstance() {
@@ -31,6 +39,8 @@ public class CategoryController implements ICategoryController {
 
         Category rtn = new Category(_name);
         rtn.save();
+
+        mBus.post(new CategoryChangedMessage(Change.CREATED, rtn));
 
         return rtn;
     }
@@ -51,6 +61,8 @@ public class CategoryController implements ICategoryController {
             rtn.save();
         }
 
+        mBus.post(new CategoryChangedMessage(Change.CHANGED, rtn));
+
         return rtn;
     }
 
@@ -69,6 +81,11 @@ public class CategoryController implements ICategoryController {
             SugarRecord.saveInTx(listsToUnlink);
 
             _toRemove.delete();
+
+            for (ShoppingList savedList : listsToUnlink) {
+                mBus.post(new ListChangedMessage(Change.CHANGED, savedList));
+            }
+            mBus.post(new CategoryChangedMessage(Change.DELETED, _toRemove));
         }
     }
 

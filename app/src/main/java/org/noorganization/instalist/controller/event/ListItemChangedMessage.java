@@ -7,12 +7,6 @@ import org.noorganization.instalist.model.ListEntry;
  * Created by daMihe on 17.07.2015.
  */
 public class ListItemChangedMessage {
-    public enum Change {
-        CREATED,
-        CHANGED,
-        DELETED
-    }
-
     public Change    mChange;
     public ListEntry mEntry;
 

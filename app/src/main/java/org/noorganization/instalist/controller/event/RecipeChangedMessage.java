@@ -7,12 +7,6 @@ import org.noorganization.instalist.model.Recipe;
  * Created by daMihe on 05.07.2015.
  */
 public class RecipeChangedMessage {
-    public enum Change {
-        CREATED,
-        CHANGED,
-        DELETED
-    }
-
     public Recipe mRecipe;
     public Change mChange;
 

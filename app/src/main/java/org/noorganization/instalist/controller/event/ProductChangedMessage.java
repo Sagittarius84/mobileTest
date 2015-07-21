@@ -3,15 +3,10 @@ package org.noorganization.instalist.controller.event;
 import org.noorganization.instalist.model.Product;
 
 /**
+ * This event will be fired by teh controller if a Product gets changed.
  * Created by daMihe on 19.07.2015.
  */
 public class ProductChangedMessage {
-    public enum Change {
-        CREATED,
-        CHANGED,
-        DELETED
-    }
-
     public Change  mChange;
     public Product mProduct;
 

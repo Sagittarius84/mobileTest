@@ -5,6 +5,7 @@ import com.orm.query.Condition;
 import com.orm.query.Select;
 
 import org.noorganization.instalist.controller.IProductController;
+import org.noorganization.instalist.controller.event.Change;
 import org.noorganization.instalist.controller.event.ListItemChangedMessage;
 import org.noorganization.instalist.controller.event.ProductChangedMessage;
 import org.noorganization.instalist.controller.event.RecipeChangedMessage;
@@ -54,7 +55,7 @@ public class ProductController implements IProductController {
         Product rtn = new Product(_name, _unit, _defaultAmount, _stepAmount);
         rtn.save();
 
-        mBus.post(new ProductChangedMessage(ProductChangedMessage.Change.CREATED, rtn));
+        mBus.post(new ProductChangedMessage(Change.CREATED, rtn));
 
         return rtn;
     }
@@ -97,7 +98,7 @@ public class ProductController implements IProductController {
         rtn.mStepAmount = _toChange.mStepAmount;
         rtn.save();
 
-        mBus.post(new ProductChangedMessage(ProductChangedMessage.Change.CHANGED, rtn));
+        mBus.post(new ProductChangedMessage(Change.CHANGED, rtn));
 
         return rtn;
     }
@@ -123,16 +124,16 @@ public class ProductController implements IProductController {
 
         for (ListEntry currentEntry : foundEntries) {
             currentEntry.delete();
-            mBus.post(new ListItemChangedMessage(ListItemChangedMessage.Change.DELETED, currentEntry));
+            mBus.post(new ListItemChangedMessage(Change.DELETED, currentEntry));
         }
         for (Ingredient currentIngredient : foundIngredients) {
             currentIngredient.delete();
-            mBus.post(new RecipeChangedMessage(RecipeChangedMessage.Change.CHANGED,
+            mBus.post(new RecipeChangedMessage(Change.CHANGED,
                     currentIngredient.mRecipe));
         }
         SugarRecord.deleteAll(TaggedProduct.class, "m_product = ?", _toRemove.getId() + "");
         _toRemove.delete();
-        mBus.post(new ProductChangedMessage(ProductChangedMessage.Change.DELETED, foundProduct));
+        mBus.post(new ProductChangedMessage(Change.DELETED, foundProduct));
 
         return true;
     }
@@ -154,7 +155,7 @@ public class ProductController implements IProductController {
         if (existingTagCount == 0) {
             TaggedProduct newProductsTag = new TaggedProduct(_tag, _product);
             newProductsTag.save();
-            mBus.post(new ProductChangedMessage(ProductChangedMessage.Change.CHANGED, foundProduct));
+            mBus.post(new ProductChangedMessage(Change.CHANGED, foundProduct));
         }
 
         return true;
@@ -178,7 +179,7 @@ public class ProductController implements IProductController {
             for (TaggedProduct currentToDelete : taggedProducts) {
                 currentToDelete.delete();
             }
-            mBus.post(new ProductChangedMessage(ProductChangedMessage.Change.CHANGED, foundProduct));
+            mBus.post(new ProductChangedMessage(Change.CHANGED, foundProduct));
         }
     }
 

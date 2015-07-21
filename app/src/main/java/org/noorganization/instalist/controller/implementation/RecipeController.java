@@ -5,6 +5,7 @@ import com.orm.query.Condition;
 import com.orm.query.Select;
 
 import org.noorganization.instalist.controller.IRecipeController;
+import org.noorganization.instalist.controller.event.Change;
 import org.noorganization.instalist.controller.event.RecipeChangedMessage;
 import org.noorganization.instalist.model.Ingredient;
 import org.noorganization.instalist.model.Product;
@@ -35,7 +36,7 @@ public class RecipeController implements IRecipeController {
         Recipe rtn = new Recipe(_name);
         rtn.save();
 
-        mBus.post(new RecipeChangedMessage(RecipeChangedMessage.Change.CREATED, rtn));
+        mBus.post(new RecipeChangedMessage(Change.CREATED, rtn));
 
         return rtn;
     }
@@ -60,7 +61,7 @@ public class RecipeController implements IRecipeController {
         toRename.mName = _newName;
         toRename.save();
 
-        mBus.post(new RecipeChangedMessage(RecipeChangedMessage.Change.CHANGED, toRename));
+        mBus.post(new RecipeChangedMessage(Change.CHANGED, toRename));
 
         return toRename;
     }
@@ -77,7 +78,7 @@ public class RecipeController implements IRecipeController {
             toDelete.delete();
         }
 
-        mBus.post(new RecipeChangedMessage(RecipeChangedMessage.Change.DELETED, toDelete));
+        mBus.post(new RecipeChangedMessage(Change.DELETED, toDelete));
     }
 
     @Override
@@ -104,6 +105,8 @@ public class RecipeController implements IRecipeController {
         }
         toCreateOrChange.save();
 
+        mBus.post(new RecipeChangedMessage(Change.CHANGED, savedRecipe));
+
         return toCreateOrChange;
     }
 
@@ -126,12 +129,14 @@ public class RecipeController implements IRecipeController {
         if (_toRemove == null) {
             return;
         }
-        Ingredient toRemove = _toRemove;
-        toRemove = SugarRecord.findById(Ingredient.class, _toRemove.getId());
+
+        Ingredient toRemove = SugarRecord.findById(Ingredient.class, _toRemove.getId());
         if (toRemove == null) {
             return;
         }
         toRemove.delete();
+
+        mBus.post(new RecipeChangedMessage(Change.CHANGED, toRemove.mRecipe));
     }
 
     private RecipeController() {

@@ -26,6 +26,7 @@ import com.orm.SugarRecord;
 
 import org.noorganization.instalist.R;
 import org.noorganization.instalist.controller.IListController;
+import org.noorganization.instalist.controller.event.Change;
 import org.noorganization.instalist.controller.event.ProductChangedMessage;
 import org.noorganization.instalist.controller.event.RecipeChangedMessage;
 import org.noorganization.instalist.controller.implementation.ControllerFactory;
@@ -267,7 +268,7 @@ public class ProductListDialogFragment extends Fragment {
     }
 
     public void onEventMainThread(RecipeChangedMessage _message) {
-        if (_message.mChange == RecipeChangedMessage.Change.CREATED) {
+        if (_message.mChange == Change.CREATED) {
             mSelectableBaseItemListEntries.add(new SelectableBaseItemListEntry(
                     new RecipeListEntry(_message.mRecipe), true));
             mListAdapter = new SelectableItemListAdapter(getActivity(),
