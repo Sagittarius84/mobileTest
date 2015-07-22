@@ -41,6 +41,7 @@ import org.noorganization.instalist.view.event.ProductSelectMessage;
 import org.noorganization.instalist.view.event.ToolbarChangeMessage;
 import org.noorganization.instalist.view.interfaces.IBaseActivity;
 import org.noorganization.instalist.view.listadapter.SelectableItemListAdapter;
+import org.noorganization.instalist.view.listadapter.SelectableItemListAdapter2;
 import org.noorganization.instalist.view.modelwrappers.IBaseListEntry;
 import org.noorganization.instalist.view.modelwrappers.ProductListEntry;
 import org.noorganization.instalist.view.modelwrappers.RecipeListEntry;
@@ -77,8 +78,8 @@ public class ProductListDialogFragment extends Fragment {
     private static final String BK_ALLOW_RECIPE_CREATION = "recipeCreation";
 
     // create the abstract selectable list entries to show mixed entries
-    private List<SelectableBaseItemListEntry> mSelectableBaseItemListEntries = new ArrayList<>();
-    private SelectableItemListAdapter mListAdapter;
+    private List<IBaseListEntry> mSelectableBaseItemListEntries = new ArrayList<>();
+    private SelectableItemListAdapter2 mListAdapter;
 
     private ListAddModeCompability mCompatibility;
 
@@ -174,11 +175,11 @@ public class ProductListDialogFragment extends Fragment {
         }*/
 
         for (Product product : productList) {
-            mSelectableBaseItemListEntries.add(new SelectableBaseItemListEntry(new ProductListEntry(product)));
+            mSelectableBaseItemListEntries.add(new ProductListEntry(product));
         }
 
         for (Recipe recipe : recipeList) {
-            mSelectableBaseItemListEntries.add(new SelectableBaseItemListEntry(new RecipeListEntry(recipe)));
+            mSelectableBaseItemListEntries.add(new RecipeListEntry(recipe));
         }
 
         mAddProductsListener = new OnAddProductsListener();
@@ -201,7 +202,7 @@ public class ProductListDialogFragment extends Fragment {
 
         View view = _Inflater.inflate(R.layout.fragment_product_list_dialog, _Container, false);
 
-        mListAdapter = new SelectableItemListAdapter(getActivity(), mSelectableBaseItemListEntries);
+        mListAdapter = new SelectableItemListAdapter2(getActivity(), R.layout.list_selectable_product, mSelectableBaseItemListEntries);
 
         mCreateProductButton = (Button) view.findViewById(R.id.fragment_product_list_dialog_add_new_product);
         mAddProductsButton = (Button) view.findViewById(R.id.fragment_product_list_dialog_add_products_to_list);
@@ -269,9 +270,8 @@ public class ProductListDialogFragment extends Fragment {
 
     public void onEventMainThread(RecipeChangedMessage _message) {
         if (_message.mChange == Change.CREATED) {
-            mSelectableBaseItemListEntries.add(new SelectableBaseItemListEntry(
-                    new RecipeListEntry(_message.mRecipe), true));
-            mListAdapter = new SelectableItemListAdapter(getActivity(),
+            mSelectableBaseItemListEntries.add(new RecipeListEntry(_message.mRecipe));
+            mListAdapter = new SelectableItemListAdapter2(getActivity(), R.layout.list_selectable_product,
                     mSelectableBaseItemListEntries);
             mMixedListView.setAdapter(mListAdapter);
         }
