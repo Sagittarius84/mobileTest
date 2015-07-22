@@ -20,7 +20,7 @@
             <EditText
                 android:id="@+id/drawer_layout_custom_new_name"
                 style="@style/InstalistTheme1.base_edit_text_style"
-                android:hint="@string/drawer_layout_custom_new_addition_hint" />
+                android:hint="@string/new_name" />
         </android.support.design.widget.TextInputLayout>
 
         <Button

@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
         <PreferenceCategory
-            android:title="@string/shopping_list_item_preferences"
-            android:key="preferences_key_list_item_preferences"
-            >
+            android:title="@string/general_preferences"
+            android:key="preferences_key_list_item_preferences">
             <!-- opens another nested subscreen -->
             <PreferenceScreen
                 android:key="prefs_sort_mode"
@@ -17,6 +16,12 @@
                     android:key="sort_by_prio"
                     android:title="@string/menu_sort_by_priority" />
             </PreferenceScreen>
+
+            <PreferenceScreen
+                android:title="@string/unit_editor">
+                <intent android:action=".view.activity.UnitEditorActivity" />
+            </PreferenceScreen>
+
         </PreferenceCategory>
     <PreferenceCategory
         android:title="@string/prefs_productlist_dialog"

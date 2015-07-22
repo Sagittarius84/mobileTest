@@ -4,12 +4,20 @@ import com.orm.SugarRecord;
 import com.orm.query.Condition;
 import com.orm.query.Select;
 
+import org.noorganization.instalist.controller.IProductController;
 import org.noorganization.instalist.controller.IUnitController;
+import org.noorganization.instalist.controller.event.Change;
+import org.noorganization.instalist.controller.event.UnitChangedMessage;
 import org.noorganization.instalist.model.Product;
 import org.noorganization.instalist.model.Unit;
 
+import de.greenrobot.event.EventBus;
+
 public class UnitController implements IUnitController {
+
     private static UnitController mInstance;
+
+    private EventBus mBus;
 
     static UnitController getInstance() {
         if (mInstance == null) {
@@ -27,6 +35,8 @@ public class UnitController implements IUnitController {
 
         Unit newUnit = new Unit(_name);
         newUnit.save();
+
+        mBus.post(new UnitChangedMessage(Change.CREATED, newUnit));
 
         return newUnit;
     }
@@ -51,6 +61,8 @@ public class UnitController implements IUnitController {
         toChange.mName = _newName;
         toChange.save();
 
+        mBus.post(new UnitChangedMessage(Change.CHANGED, toChange));
+
         return toChange;
     }
 
@@ -60,15 +72,20 @@ public class UnitController implements IUnitController {
             return true;
         }
 
+        IProductController productController = ControllerFactory.getProductController();
+
         switch (_mode) {
             case MODE_DELETE_REFERENCES:
-                SugarRecord.deleteAll(Product.class, "m_unit = ?", _unit.getId() + "");
+                for (Product toDelete : Select.from(Product.class).
+                        where(Condition.prop("m_unit").eq(_unit.getId())).list()) {
+                    productController.removeProduct(toDelete, true);
+                }
                 break;
             case MODE_UNLINK_REFERENCES:
-                for (Product _toUnlink : Select.from(Product.class).
+                for (Product toUnlink : Select.from(Product.class).
                         where(Condition.prop("m_unit").eq(_unit.getId())).list()) {
-                    _toUnlink.mUnit = null;
-                    _toUnlink.save();
+                    toUnlink.mUnit = null;
+                    productController.modifyProduct(toUnlink);
                 }
                 break;
             case MODE_BREAK_DELETION:
@@ -81,9 +98,13 @@ public class UnitController implements IUnitController {
         }
 
         _unit.delete();
+
+        mBus.post(new UnitChangedMessage(Change.DELETED, _unit));
+
         return true;
     }
 
     private UnitController() {
+        mBus = EventBus.getDefault();
     }
 }
