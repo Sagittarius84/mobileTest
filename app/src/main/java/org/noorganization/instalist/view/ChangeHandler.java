@@ -15,6 +15,7 @@ import org.noorganization.instalist.view.interfaces.ISideDrawerListDataEvents;
 /**
  * Created by daMihe on 18.05.2015.
  */
+@Deprecated
 public class ChangeHandler extends IChangeHandler {
 
     private ShoppingListOverviewFragment mCurrentFragment;
@@ -22,6 +23,8 @@ public class ChangeHandler extends IChangeHandler {
 
     @Override
     public void handleMessage(Message _message) {
+
+        Log.d("Deprecation Warning", "Received message of type " + _message.what);
 
         if (mCurrentFragment == null || mSideDrawerEvents == null) {
            return;
