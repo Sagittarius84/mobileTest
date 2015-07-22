@@ -69,6 +69,7 @@ public class OnRecyclerItemTouchListener implements RecyclerView.OnItemTouchList
 
         private static final int SWIPE_THRESHOLD = 80;
         private static final int SWIPE_VELOCITY_THRESHOLD = 20;
+        private static final float SWIPE_MAX_ANGLE = 3.1415f / 5;
 
         private OnRecyclerItemTouchListener mGestureListener;
         private RecyclerView mRecyclerView;
@@ -121,10 +122,16 @@ public class OnRecyclerItemTouchListener implements RecyclerView.OnItemTouchList
                     return false;
                 }
 
-                if (diffX > 0) {
-                    mGestureListener.onSwipeRight(childView, position);
-                } else {
-                    mGestureListener.onSwipeLeft(childView, position);
+                float diffY = e2.getY() - e1.getY();
+                double normY = diffY / Math.sqrt(diffX * diffX + diffY * diffY);
+                double absMaxNormY = Math.sin((SWIPE_MAX_ANGLE / 2.0f));
+
+                if (normY <= absMaxNormY && normY >= -absMaxNormY) {
+                    if (diffX > 0) {
+                        mGestureListener.onSwipeRight(childView, position);
+                    } else {
+                        mGestureListener.onSwipeLeft(childView, position);
+                    }
                 }
             }
             return false;
