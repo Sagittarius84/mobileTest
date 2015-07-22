@@ -141,16 +141,16 @@ public class SelectableItemListAdapter extends ArrayAdapter<SelectableBaseItemLi
             mListEntry = _ListEntry;
         }
 
-        @Override
+      @Override
         public boolean onLongClick(View v) {
             PopupMenu actionMenu = new PopupMenu(getContext(), v);
             actionMenu.inflate(R.menu.menu_productrecipe_action_popup);
-            actionMenu.setOnMenuItemClickListener(new OnListEntryPopupMenuClickListener(mListEntry));
+            //actionMenu.setOnMenuItemClickListener(new OnListEntryPopupMenuClickListener(mListEntry));
             actionMenu.show();
             return true;
         }
     }
-
+/*
     private class OnListEntryPopupMenuClickListener implements PopupMenu.OnMenuItemClickListener {
 
         private IBaseListEntry mListEntry;
@@ -230,7 +230,7 @@ public class SelectableItemListAdapter extends ArrayAdapter<SelectableBaseItemLi
                         @Override
                         public void onClick(DialogInterface dialogInterface, int i) {
                             IRecipeController recipeController = ControllerFactory.getRecipeController();
-                            recipeController.removeRecipe((Recipe) mListEntry.getEntry().getObject());
+                            recipeController.removeRecipe((Recipe) mListEntry.getItem());
                             Toast.makeText(getContext(), R.string.removed_recipe, Toast.LENGTH_SHORT).
                                     show();
                         }
@@ -253,7 +253,7 @@ public class SelectableItemListAdapter extends ArrayAdapter<SelectableBaseItemLi
             }
         }
     }
-
+*/
     @Override
     public Filter getFilter() {
         final Filter filter = new Filter() {

@@ -1,6 +1,7 @@
 package org.noorganization.instalist.view.modelwrappers;
 
 /**
+ * The Interface for accessing Items for the Item overview.
  * Created by TS on 25.05.2015.
  */
 public interface IBaseListEntry {
@@ -8,12 +9,62 @@ public interface IBaseListEntry {
     enum eItemType{
         PRODUCT_LIST_ENTRY,
         RECIPE_LIST_ENTRY,
-        NAME_SEARCH, // no good art
+        NAME_SEARCH, // no good style
         EMPTY,
     }
 
+    /**
+     * Get the assigned name of the item.
+     * @return the name of the item.
+     */
     String getName();
+
+    /**
+     * Sets the name of the item.
+     * @param _Name the name of the item.
+     */
     void setName(String _Name);
-    BaseItemReturnType getEntry();
+
+    /**
+     * Get the type of this item.
+     * @return
+     */
     eItemType getType();
+
+    /**
+     * Check if item is checked.
+     * @return true if checked, false if not.
+     */
+    boolean isChecked();
+
+    /**
+     * Sets the checked field.
+     * @param _Checked true if should be checked, false not to be checked.
+     */
+    void setChecked(boolean _Checked);
+
+    /**
+     * Get the item inside.
+     * @return the according item.
+     */
+    Object getItem();
+
+    /**
+     * Get the Id of this item.
+     * @return the item of this item.
+     */
+    long getId();
+
+    /**
+     *
+     * @param o
+     * @return
+     */
+    boolean equals(Object o);
+
+    /**
+     *
+     * @return
+     */
+    int hashCode();
 }
