@@ -1,4 +1,4 @@
-package org.noorganization.instalist.view.sorting;
+package org.noorganization.instalist.view.sorting.shoppingList;
 
 import org.noorganization.instalist.model.ListEntry;
 import org.noorganization.instalist.view.modelwrappers.ListEntryItemWrapper;

@@ -21,8 +21,6 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.software.shell.fab.ActionButton;
-
 import org.noorganization.instalist.GlobalApplication;
 import org.noorganization.instalist.R;
 import org.noorganization.instalist.controller.IListController;
@@ -43,8 +41,8 @@ import org.noorganization.instalist.view.event.ToolbarChangeMessage;
 import org.noorganization.instalist.view.interfaces.IBaseActivity;
 import org.noorganization.instalist.view.interfaces.IFragment;
 import org.noorganization.instalist.view.listadapter.ShoppingItemListAdapter;
-import org.noorganization.instalist.view.sorting.AlphabeticalListEntryComparator;
-import org.noorganization.instalist.view.sorting.PriorityListEntryComparator;
+import org.noorganization.instalist.view.sorting.shoppingList.AlphabeticalListEntryComparator;
+import org.noorganization.instalist.view.sorting.shoppingList.PriorityListEntryComparator;
 import org.noorganization.instalist.view.utils.PreferencesManager;
 import org.noorganization.instalist.view.utils.ViewUtils;
 

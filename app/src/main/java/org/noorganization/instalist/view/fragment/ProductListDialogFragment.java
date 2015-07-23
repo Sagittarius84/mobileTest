@@ -26,7 +26,6 @@ import com.orm.SugarRecord;
 
 import org.noorganization.instalist.R;
 import org.noorganization.instalist.controller.IListController;
-import org.noorganization.instalist.controller.event.Change;
 import org.noorganization.instalist.controller.event.ProductChangedMessage;
 import org.noorganization.instalist.controller.event.RecipeChangedMessage;
 import org.noorganization.instalist.controller.implementation.ControllerFactory;
@@ -39,10 +38,11 @@ import org.noorganization.instalist.view.activity.RecipeChangeActivity;
 import org.noorganization.instalist.view.event.ProductSelectMessage;
 import org.noorganization.instalist.view.event.ToolbarChangeMessage;
 import org.noorganization.instalist.view.interfaces.IBaseActivity;
-import org.noorganization.instalist.view.listadapter.SelectableItemListAdapter2;
+import org.noorganization.instalist.view.listadapter.SelectableItemListAdapter;
 import org.noorganization.instalist.view.modelwrappers.IBaseListEntry;
 import org.noorganization.instalist.view.modelwrappers.ProductListEntry;
 import org.noorganization.instalist.view.modelwrappers.RecipeListEntry;
+import org.noorganization.instalist.view.sorting.selectableList.AlphabeticalIBaseListEntryComparator;
 import org.noorganization.instalist.view.utils.ViewUtils;
 
 import java.util.ArrayList;
@@ -77,7 +77,7 @@ public class ProductListDialogFragment extends Fragment {
 
     // create the abstract selectable list entries to show mixed entries
     private List<IBaseListEntry> mSelectableBaseItemListEntries = new ArrayList<>();
-    private SelectableItemListAdapter2 mListAdapter;
+    private SelectableItemListAdapter mListAdapter;
 
     private ListAddModeCompability mCompatibility;
 
@@ -203,7 +203,7 @@ public class ProductListDialogFragment extends Fragment {
 
         View view = _Inflater.inflate(R.layout.fragment_product_list_dialog, _Container, false);
 
-        mListAdapter = new SelectableItemListAdapter2(getActivity(), R.layout.list_selectable_product, mSelectableBaseItemListEntries);
+        mListAdapter = new SelectableItemListAdapter(getActivity(), R.layout.list_selectable_product, mSelectableBaseItemListEntries);
 
         mCreateProductButton = (Button) view.findViewById(R.id.fragment_product_list_dialog_add_new_product);
         mAddProductsButton = (Button) view.findViewById(R.id.fragment_product_list_dialog_add_products_to_list);
@@ -269,22 +269,43 @@ public class ProductListDialogFragment extends Fragment {
         super.onCreateOptionsMenu(_Menu, _Inflater);
     }
 
+    /**
+     * Handles events for recipe changes.
+     *
+     * @param _message
+     */
     public void onEventMainThread(RecipeChangedMessage _message) {
-        if (_message.mChange == Change.CREATED) {
-            mSelectableBaseItemListEntries.add(new RecipeListEntry(_message.mRecipe));
-            mListAdapter = new SelectableItemListAdapter2(getActivity(), R.layout.list_selectable_product,
-                    mSelectableBaseItemListEntries);
-            mMixedListView.setAdapter(mListAdapter);
+        RecipeListEntry recipeEntry = new RecipeListEntry(_message.mRecipe);
+        switch (_message.mChange) {
+            case CREATED:
+                mListAdapter.addItem(recipeEntry);
+                break;
+            case CHANGED:
+                mListAdapter.changeItem(recipeEntry);
+                break;
+            case DELETED:
+                mListAdapter.removeItem(recipeEntry);
+                break;
         }
-        // TODO add for other changes.
     }
 
+    /**
+     * Handles events for product changes.
+     *
+     * @param _message
+     */
     public void onEventMainThread(ProductChangedMessage _message) {
-        // TODO update list of products and recipes
+        ProductListEntry productEntry = new ProductListEntry(_message.mProduct);
         switch (_message.mChange) {
+            case CREATED:
+                mListAdapter.addItem(productEntry);
+                break;
             case CHANGED:
+                mListAdapter.changeItem(productEntry);
+                break;
             case DELETED:
-                Log.d("TODO", "Implement handler for Product " + _message.mChange.name());
+                mListAdapter.removeItem(productEntry);
+                break;
         }
     }
 
@@ -332,6 +353,7 @@ public class ProductListDialogFragment extends Fragment {
                 mListAdapter.getFilter().filter(FILTER_SHOW_ALL);
                 break;
             case R.id.menu_product_list_dialog_sort_by_name:
+                mListAdapter.setComparator(new AlphabeticalIBaseListEntryComparator());
                 break;
         }
 
@@ -426,6 +448,7 @@ public class ProductListDialogFragment extends Fragment {
         public void onClick(View v) {
             Iterator<IBaseListEntry> listEntryIterator = mListAdapter.getCheckedListEntries();
             Map<Product, Float> resultingProducts = new HashMap<>();
+
             while (listEntryIterator.hasNext()) {
                 IBaseListEntry listEntry = listEntryIterator.next();
 
@@ -437,10 +460,11 @@ public class ProductListDialogFragment extends Fragment {
                 switch (listEntry.getType()) {
                     case PRODUCT_LIST_ENTRY:
                         Product product = (Product) (listEntry.getItem());
+                        float amountToAdd = product.mDefaultAmount;
                         if (resultingProducts.containsKey(product)) {
-                            resultingProducts.put(product, resultingProducts.get(product) + 1.0f);
+                            resultingProducts.put(product, resultingProducts.get(product) + amountToAdd);
                         } else {
-                            resultingProducts.put(product, 1.0f);
+                            resultingProducts.put(product, product.mDefaultAmount + amountToAdd);
                         }
                         break;
                     case RECIPE_LIST_ENTRY:

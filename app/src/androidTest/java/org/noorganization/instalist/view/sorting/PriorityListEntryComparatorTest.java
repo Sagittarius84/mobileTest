@@ -6,6 +6,7 @@ import org.noorganization.instalist.model.ListEntry;
 import org.noorganization.instalist.model.Product;
 import org.noorganization.instalist.model.ShoppingList;
 import org.noorganization.instalist.view.modelwrappers.ListEntryItemWrapper;
+import org.noorganization.instalist.view.sorting.shoppingList.PriorityListEntryComparator;
 
 import java.util.Comparator;
 import java.util.Locale;

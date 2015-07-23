@@ -9,8 +9,9 @@ public interface IBaseListEntry {
     enum eItemType{
         PRODUCT_LIST_ENTRY,
         RECIPE_LIST_ENTRY,
+        ALL,
         NAME_SEARCH, // no good style
-        EMPTY,
+
     }
 
     /**

@@ -15,7 +15,7 @@ import org.noorganization.instalist.model.Unit;
 import org.noorganization.instalist.view.customview.AmountPicker;
 import org.noorganization.instalist.view.interfaces.IShoppingListEntryAction;
 import org.noorganization.instalist.view.modelwrappers.ListEntryItemWrapper;
-import org.noorganization.instalist.view.sorting.AlphabeticalListEntryComparator;
+import org.noorganization.instalist.view.sorting.shoppingList.AlphabeticalListEntryComparator;
 import org.noorganization.instalist.view.spinneradapter.UnitSpinnerAdapter;
 import org.noorganization.instalist.view.utils.ViewUtils;
 
