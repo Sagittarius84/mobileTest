@@ -9,6 +9,7 @@ import android.os.Message;
  * is modeled as fully abstract class.
  * Created by daMihe on 20.05.2015.
  */
+@Deprecated
 public abstract class IChangeHandler extends Handler {
 
     /**

@@ -45,8 +45,6 @@
     <string name="fragment_recipe_creation_add_recipe_title">Create new Recipe</string>
     <string name="fragment_recipe_creation_update_recipe_title">Edit Recipe</string>
     <string name="drawer_layout_custom_add_list_button">Add List</string>
-    <string name="drawer_layout_custom_new_addition_hint">New name</string>
-    <string name="drawer_layout_custom_no_input">Please insert at least a sign</string>
     <string name="list_exists">List already exists</string>
     <string name="menu_sort_by_priority">Priority</string>
     <string name="menu_sort_text">Sort</string>
@@ -83,12 +81,16 @@
     <string name="edit_category_name">Edit Category Name</string>
     <string name="edit_recipe">edit recipe</string>
     <string name="edit_shopping_list">Edit List</string>
+    <string name="error_no_input">please set something here</string>
+    <string name="error_unit_already_exists">Unit already exists</string>
     <string name="list_sort_mode">Shopping List Sort Mode</string>
     <string name="list_to_category_failed">Cannot move ShoppingList to Category.</string>
     <string name="menu_add_item">Add</string>
     <string name="menu_add_action">Add</string>
     <string name="menu_cancel_action">Cancel</string>
     <string name="move_category">Move to Category</string>
+    <string name="new_name">New name</string>
+    <string name="new_unit">Create new unit…</string>
     <string name="open_source_licenses">Open source licenses</string>
     <string name="prefs_privacy_policy_eula_terms">Privacy Policy, Eula and Terms</string>
     <string name="prefs_productlist_dialog">Productlist Dialog Preferences</string>
@@ -105,6 +107,7 @@
     <string name="shopping_list_action">Actions on Shopping List</string>
     <string name="shopping_list_not_found">Shopping list not found. (Internal Failure)</string>
     <string name="shopping_list_not_choosen">No Shopping List selected</string>
-    <string name="shopping_list_item_preferences">Shopping List Preferences</string>
+    <string name="general_preferences">Shopping List Preferences</string>
+    <string name="unit_editor">Unit Editor</string>
 
 </resources>

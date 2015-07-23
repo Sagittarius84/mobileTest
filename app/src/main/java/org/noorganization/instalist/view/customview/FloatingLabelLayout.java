@@ -15,8 +15,11 @@ import android.widget.TextView;
  * were not flexible enough (especially their layouts!), this needed to be implemented ourself.
  * This solution is quite near to following gist:
  * https://gist.github.com/chrisbanes/11247418
+ * Update 2015-07-22: Since we could apply the Android Support Design Library successfully this
+ * class is not more required.
  * Created by daMihe on 27.06.2015.
  */
+@Deprecated
 public class FloatingLabelLayout extends LinearLayout {
     private EditText mEditText;
     private TextView mLabel;

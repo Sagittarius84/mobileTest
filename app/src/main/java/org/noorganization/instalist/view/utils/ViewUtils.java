@@ -119,7 +119,7 @@ public class ViewUtils {
     public static String validateAndGetResultEditText(Context _Context, EditText _EditText){
         _EditText.setError(null);
         if (! ViewUtils.checkEditTextIsFilled(_EditText)) {
-            _EditText.setError(_Context.getString(R.string.drawer_layout_custom_no_input));
+            _EditText.setError(_Context.getString(R.string.error_no_input));
             return null;
         }
         return _EditText.getText().toString();

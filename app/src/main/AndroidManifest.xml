@@ -23,7 +23,15 @@
         <activity android:name=".view.activity.RecipeChangeActivity"
             android:label="@string/edit_recipe" />
         <activity android:name=".view.activity.SettingsActivity"
-                  android:label="@string/settings" />
+            android:label="@string/settings" />
+        <activity android:name=".view.activity.UnitEditorActivity"
+            android:label="@string/unit_editor">
+            <intent-filter>
+                <action android:name=".view.activity.UnitEditorActivity" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+
         <!-- SugarORM Settings -->
         <meta-data
             android:name="DATABASE"
