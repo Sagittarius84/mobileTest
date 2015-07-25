@@ -1,12 +1,28 @@
 package org.noorganization.instalist.view.listadapter;
 
+import android.app.Activity;
 import android.content.Context;
 import android.database.DataSetObserver;
+import android.support.v7.widget.RecyclerView;
+import android.util.Log;
+import android.view.ActionMode;
+import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.ListAdapter;
 import android.widget.TextView;
 
+import com.orm.SugarRecord;
+import com.orm.query.Condition;
+import com.orm.query.Select;
+
+import org.noorganization.instalist.R;
+import org.noorganization.instalist.controller.IUnitController;
+import org.noorganization.instalist.controller.implementation.ControllerFactory;
+import org.noorganization.instalist.controller.implementation.UnitController;
 import org.noorganization.instalist.model.Unit;
 import org.noorganization.instalist.view.sorting.AlphabeticalUnitComparator;
 
@@ -20,20 +36,26 @@ import java.util.List;
  * An Adapter that is based on a always alphabetically sorted List for Units.
  * Created by daMihe on 22.07.2015.
  */
-public class UnitEditorAdapter implements ListAdapter {
+public class UnitEditorAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
-    private Context               mContext;
-    private List<DataSetObserver> mObservers;
+    private static final int      TYPE_TEXTVIEW = 0;
+    private static final int      TYPE_EDITTEXT = 1;
+
+    private Activity              mActivity;
     private List<Unit>            mUnderLyingUnits;
+    private ActionMode.Callback   mEditingMode;
 
-    public UnitEditorAdapter(Context _context, List<Unit> _elements) {
-        mContext = _context;
+    private int                   mEditingPosition;
+
+    public UnitEditorAdapter(Activity _activity, List<Unit> _elements, ActionMode.Callback _editorCallback) {
+        mActivity = _activity;
         mUnderLyingUnits = new ArrayList<>();
         if (_elements != null) {
             mUnderLyingUnits.addAll(_elements);
             Collections.sort(mUnderLyingUnits, AlphabeticalUnitComparator.getInstance());
         }
-        mObservers = new LinkedList<>();
+        mEditingPosition = -1;
+        mEditingMode = _editorCallback;
     }
 
     public void add(Unit _unit) {
@@ -41,102 +63,157 @@ public class UnitEditorAdapter implements ListAdapter {
             return;
         }
 
-        int binaryMin = 0;
-        int binaryMax = mUnderLyingUnits.size();
         Comparator<Unit> comparator = AlphabeticalUnitComparator.getInstance();
-        while (binaryMin != binaryMax) {
-            int currentCenter = binaryMin + ((binaryMax - binaryMin) / 2);
-            int comparison = comparator.compare(_unit, mUnderLyingUnits.get(currentCenter));
-            if (comparison == 0) {
-                binaryMax = binaryMin = currentCenter;
-            } else if (comparison < 0) {
-                binaryMax = currentCenter;
-            } else {
-                binaryMin = currentCenter + 1;
+        int index = Collections.binarySearch(mUnderLyingUnits, _unit, comparator);
+        if (index < 0) {
+            index = -index - 1;
+        }
+        mUnderLyingUnits.add(index, _unit);
+
+        notifyItemInserted(index);
+    }
+
+    public Unit get(int _position) {
+        return mUnderLyingUnits.get(_position);
+    }
+
+    public int getIndexOf(Unit _unit) {
+        if (_unit == null) {
+            return -1;
+        }
+
+        int rtn = Collections.binarySearch(mUnderLyingUnits, _unit, AlphabeticalUnitComparator.
+                getInstance());
+        if (rtn < 0) {
+            rtn = -1;
+        }
+        return rtn;
+    }
+
+    public int getIndexOf(long _id) {
+        for (int position = 0; position < mUnderLyingUnits.size(); position++) {
+            if (mUnderLyingUnits.get(position).getId().compareTo(_id) == 0) {
+                return position;
             }
         }
-        mUnderLyingUnits.add(binaryMin, _unit);
+        return -1;
+    }
 
-        notifyObserversAboutChange();
+    public int getEditingPosition() {
+        return mEditingPosition;
     }
 
     @Override
-    public boolean areAllItemsEnabled() {
-        return true;
-    }
-
-    @Override
-    public int getCount() {
+    public int getItemCount() {
         return mUnderLyingUnits.size();
     }
 
     @Override
-    public Unit getItem(int _position) {
-        return mUnderLyingUnits.get(_position);
+    public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup _parent, int _viewType) {
+        LayoutInflater inflater = LayoutInflater.from(_parent.getContext());
+        View view;
+        switch (_viewType) {
+            case TYPE_TEXTVIEW:
+                view = inflater.inflate(android.R.layout.simple_list_item_1, _parent, false);
+                return new UnitTextHolder(view);
+            case TYPE_EDITTEXT:
+                view = inflater.inflate(R.layout.list_edittext, _parent, false);
+                return new UnitEditorHolder(view);
+        }
+        return null;
     }
 
     @Override
-    public long getItemId(int _position) {
-        return getItem(_position).getId();
+    public void onBindViewHolder(RecyclerView.ViewHolder _holder, final int _position) {
+        Unit unit = mUnderLyingUnits.get(_position);
+        if (_holder instanceof UnitEditorHolder) {
+            EditText editor = ((UnitEditorHolder) _holder).mEditor;
+            editor.setText(unit.mName);
+            editor.requestFocus();
+        } else if(_holder instanceof UnitTextHolder) {
+            TextView entry = ((UnitTextHolder) _holder).mTextView;
+            entry.setText(unit.mName);
+            entry.setTag(unit);
+            entry.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View _view) {
+                    if (mEditingMode != null) {
+                        mActivity.startActionMode(mEditingMode);
+                    }
+                    setEditorPosition(_position);
+                }
+            });
+        }
     }
 
     @Override
     public int getItemViewType(int _position) {
-        return 0;
-    }
-
-    @Override
-    public View getView(int _position, View _convertView, ViewGroup _parent) {
-        //LayoutInflater li = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        TextView justAView = new TextView(mContext);
-        justAView.setText(getItem(_position).mName);
-        return justAView;
-    }
-
-    @Override
-    public int getViewTypeCount() {
-        return 1;
-    }
-
-    @Override
-    public boolean hasStableIds() {
-        return true;
-    }
-
-    @Override
-    public boolean isEmpty() {
-        return mUnderLyingUnits.isEmpty();
-    }
-
-    @Override
-    public boolean isEnabled(int _position) {
-        return (_position >= 0 && _position < mUnderLyingUnits.size());
-    }
-
-    @Override
-    public void registerDataSetObserver(DataSetObserver _observer) {
-        mObservers.add(_observer);
+        return (_position == mEditingPosition ? 1 : 0);
     }
 
     public void remove(Unit _toRemove) {
-        mUnderLyingUnits.remove(_toRemove);
-        notifyObserversAboutChange();
-    }
-
-    @Override
-    public void unregisterDataSetObserver(DataSetObserver _observer) {
-        mObservers.remove(_observer);
-    }
-
-    private void notifyObserversAboutChange() {
-        for (DataSetObserver observer : mObservers) {
-            observer.onChanged();
+        int index = getIndexOf(_toRemove);
+        if (index > -1) {
+            mUnderLyingUnits.remove(index);
+            notifyItemRemoved(index);
         }
     }
 
-    private void notifyObserversAboutInvalidation() {
-        for (DataSetObserver observer : mObservers) {
-            observer.onInvalidated();
+    public void setEditorPosition(int _position) {
+        if (_position < -1 || _position >= mUnderLyingUnits.size()) {
+            return;
+        }
+
+        if (mEditingPosition != _position) {
+            int oldPosition = mEditingPosition;
+            mEditingPosition = _position;
+            if (_position != -1) {
+                notifyItemChanged(_position);
+            }
+            notifyItemChanged(oldPosition);
+        }
+    }
+
+    public void update(Unit _toUpdate) {
+        Comparator<Unit> comparator = AlphabeticalUnitComparator.getInstance();
+        int oldIndex = getIndexOf(_toUpdate.getId());
+        int newIndex = Collections.binarySearch(mUnderLyingUnits, _toUpdate, comparator);
+
+        if (oldIndex == newIndex) {
+            mUnderLyingUnits.set(oldIndex, _toUpdate);
+            notifyItemChanged(oldIndex);
+            return;
+        }
+        if (newIndex < 0) {
+            newIndex = -newIndex - 1;
+        }
+        if (newIndex == oldIndex + 1) {
+            mUnderLyingUnits.set(oldIndex, _toUpdate);
+            notifyItemChanged(oldIndex);
+            return;
+        }
+
+        mUnderLyingUnits.remove(oldIndex);
+        mUnderLyingUnits.add(newIndex, _toUpdate);
+        notifyItemChanged(oldIndex);
+        notifyItemMoved(oldIndex, newIndex);
+    }
+
+    private class UnitEditorHolder extends RecyclerView.ViewHolder {
+        public EditText mEditor;
+
+        public UnitEditorHolder(View itemView) {
+            super(itemView);
+            mEditor = (EditText) itemView.findViewById(R.id.edittext);
+        }
+    }
+
+    private class UnitTextHolder extends RecyclerView.ViewHolder {
+        public TextView mTextView;
+
+        public UnitTextHolder(View itemView) {
+            super(itemView);
+            mTextView = (TextView) itemView.findViewById(android.R.id.text1);
         }
     }
 }
