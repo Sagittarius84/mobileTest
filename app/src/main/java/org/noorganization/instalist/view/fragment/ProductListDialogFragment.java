@@ -63,26 +63,27 @@ public class ProductListDialogFragment extends Fragment {
     private static final String LOG_TAG = ProductListDialogFragment.class.getName();
 
     public static final String FILTER_BY_PRODUCT = "0";
-    public static final String FILTER_BY_RECIPE = "1";
-    public static final String FILTER_SHOW_ALL = "2";
+    public static final String FILTER_BY_RECIPE  = "1";
+    public static final String FILTER_SHOW_ALL   = "2";
+    public static final String SAVED_ITEM_LIST   = "SAVED_ITEM_LIST";
 
-    private Button mCreateProductButton;
-    private Button mAddProductsButton;
-    private Button mCreateRecipeButton;
+    private Button   mCreateProductButton;
+    private Button   mAddProductsButton;
+    private Button   mCreateRecipeButton;
     private ListView mMixedListView;
 
-    private static final String BUNDLE_KEY_LIST_ID = "listId";
-    private static final String BK_COMPABILITY = "comp";
+    private static final String BUNDLE_KEY_LIST_ID       = "listId";
+    private static final String BK_COMPABILITY           = "comp";
     private static final String BK_ALLOW_RECIPE_CREATION = "recipeCreation";
 
     // create the abstract selectable list entries to show mixed entries
-    private List<IBaseListEntry> mSelectableBaseItemListEntries = new ArrayList<>();
+    private ArrayList<IBaseListEntry> mSelectableBaseItemListEntries = new ArrayList<>();
     private SelectableItemListAdapter mListAdapter;
 
     private ListAddModeCompability mCompatibility;
 
     private IBaseActivity mBaseActivityInterface;
-    private Context mContext;
+    private Context       mContext;
 
 
     /**
@@ -119,7 +120,7 @@ public class ProductListDialogFragment extends Fragment {
      */
     public static ProductListDialogFragment newInstance(long _ListId) {
         ProductListDialogFragment fragment = new ProductListDialogFragment();
-        Bundle args = new Bundle();
+        Bundle                    args     = new Bundle();
         args.putBoolean(BK_COMPABILITY, true);
         args.putLong(BUNDLE_KEY_LIST_ID, _ListId);
         args.putBoolean(BK_ALLOW_RECIPE_CREATION, true);
@@ -129,7 +130,7 @@ public class ProductListDialogFragment extends Fragment {
 
     public static ProductListDialogFragment newInstance() {
         ProductListDialogFragment fragment = new ProductListDialogFragment();
-        Bundle args = new Bundle();
+        Bundle                    args     = new Bundle();
         args.putBoolean(BK_COMPABILITY, false);
         args.putBoolean(BK_ALLOW_RECIPE_CREATION, true);
         fragment.setArguments(args);
@@ -165,26 +166,31 @@ public class ProductListDialogFragment extends Fragment {
         }
 
 
-        List<Product> productList = Product.listAll(Product.class);
-        List<Recipe> recipeList = Recipe.listAll(Recipe.class);
-        //List<ListEntry> listEntries = mCurrentShoppingList.getEntries();
+        if (_savedInstanceState == null || ! _savedInstanceState.containsKey(SAVED_ITEM_LIST)) {
+            List<Product> productList = Product.listAll(Product.class);
+            List<Recipe> recipeList = Recipe.listAll(Recipe.class);
+            //List<ListEntry> listEntries = mCurrentShoppingList.getEntries();
 
-        // remove all inserted list entries
-        // TODO add a method for hiding products.
+            // remove all inserted list entries
+            // TODO add a method for hiding products.
         /*for(ListEntry listEntry : listEntries){
             productList.remove(listEntry.mProduct);
         }*/
 
-        for (Product product : productList) {
-            mSelectableBaseItemListEntries.add(new ProductListEntry(product));
-        }
+            for (Product product : productList) {
+                mSelectableBaseItemListEntries.add(new ProductListEntry(product));
+            }
 
-        for (Recipe recipe : recipeList) {
-            mSelectableBaseItemListEntries.add(new RecipeListEntry(recipe));
+            for (Recipe recipe : recipeList) {
+                mSelectableBaseItemListEntries.add(new RecipeListEntry(recipe));
+            }
+        } else {
+            mSelectableBaseItemListEntries = _savedInstanceState.getParcelableArrayList(SAVED_ITEM_LIST);
         }
 
         mAddProductsListener = new OnAddProductsListener();
         mCreateProductListener = new OnCreateProductListener();
+
         if (mCompatibility != null) {
             EventBus.getDefault().register(mCompatibility);
         }
@@ -213,7 +219,7 @@ public class ProductListDialogFragment extends Fragment {
 
         mMixedListView.setAdapter(mListAdapter);
 
-        if (!getArguments().getBoolean(BK_ALLOW_RECIPE_CREATION)) {
+        if (! getArguments().getBoolean(BK_ALLOW_RECIPE_CREATION)) {
             mCreateRecipeButton.setVisibility(View.GONE);
         }
 
@@ -232,7 +238,7 @@ public class ProductListDialogFragment extends Fragment {
         _Inflater.inflate(R.menu.menu_product_list_dialog, _Menu);
 
         // adds search ability to the toolbar
-        MenuItem searchItem = _Menu.findItem(R.id.menu_product_list_dialog_search);
+        MenuItem      searchItem    = _Menu.findItem(R.id.menu_product_list_dialog_search);
         SearchManager searchManager = (SearchManager) mContext.getSystemService(Context.SEARCH_SERVICE);
 
         SearchView searchView = null;
@@ -317,13 +323,13 @@ public class ProductListDialogFragment extends Fragment {
         if (_Menu == null) {
             return;
         }
-        MenuItem searchMenuItem = _Menu.findItem(R.id.menu_product_list_dialog_search);
-        SearchView searchView = (SearchView) searchMenuItem.getActionView();
+        MenuItem   searchMenuItem = _Menu.findItem(R.id.menu_product_list_dialog_search);
+        SearchView searchView     = (SearchView) searchMenuItem.getActionView();
         searchMenuItem.setIcon(R.drawable.ic_search_white_36dp);
 
 
-        int searchTextViewId = android.support.v7.appcompat.R.id.search_src_text;
-        AutoCompleteTextView searchTextView = (AutoCompleteTextView) searchView.findViewById(searchTextViewId);
+        int                  searchTextViewId = android.support.v7.appcompat.R.id.search_src_text;
+        AutoCompleteTextView searchTextView   = (AutoCompleteTextView) searchView.findViewById(searchTextViewId);
         searchTextView.setHintTextColor(getResources().getColor(R.color.white));
         searchTextView.setTextColor(getResources().getColor(android.R.color.white));
         searchTextView.setTextSize(16.0f);
@@ -332,7 +338,7 @@ public class ProductListDialogFragment extends Fragment {
         SpannableStringBuilder ssb = new SpannableStringBuilder("   "); // for the icon
         //ssb.append(hintText);
         Drawable searchIcon = getResources().getDrawable(R.drawable.ic_search_white_36dp);
-        int textSize = (int) (searchTextView.getTextSize() * 1.25);
+        int      textSize   = (int) (searchTextView.getTextSize() * 1.25);
         searchIcon.setBounds(0, 0, textSize, textSize);
         ssb.setSpan(new ImageSpan(searchIcon), 1, 2, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
         searchTextView.setHint(ssb);
@@ -385,6 +391,11 @@ public class ProductListDialogFragment extends Fragment {
         mAddProductsButton.setOnClickListener(null);
     }
 
+    @Override
+    public void onSaveInstanceState(Bundle _OutState) {
+        _OutState.putParcelableArrayList(SAVED_ITEM_LIST, mSelectableBaseItemListEntries);
+        super.onSaveInstanceState(_OutState);
+    }
 
     @Override
     public void onDestroy() {
@@ -447,13 +458,13 @@ public class ProductListDialogFragment extends Fragment {
         @Override
         public void onClick(View v) {
             Iterator<IBaseListEntry> listEntryIterator = mListAdapter.getCheckedListEntries();
-            Map<Product, Float> resultingProducts = new HashMap<>();
+            Map<Product, Float>      resultingProducts = new HashMap<>();
 
             while (listEntryIterator.hasNext()) {
                 IBaseListEntry listEntry = listEntryIterator.next();
 
                 // skip this entry when not selected/checked
-                if (!listEntry.isChecked()) {
+                if (! listEntry.isChecked()) {
                     continue;
                 }
 
