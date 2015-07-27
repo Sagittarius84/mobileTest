@@ -105,8 +105,6 @@ public class RecipeController implements IRecipeController {
         }
         toCreateOrChange.save();
 
-        mBus.post(new RecipeChangedMessage(Change.CHANGED, savedRecipe));
-
         return toCreateOrChange;
     }
 
@@ -135,8 +133,6 @@ public class RecipeController implements IRecipeController {
             return;
         }
         toRemove.delete();
-
-        mBus.post(new RecipeChangedMessage(Change.CHANGED, toRemove.mRecipe));
     }
 
     private RecipeController() {
