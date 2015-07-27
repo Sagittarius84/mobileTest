@@ -1,4 +1,4 @@
-package org.noorganization.instalist.touchlistener;
+package org.noorganization.instalist.view.touchlistener;
 
 import org.noorganization.instalist.model.ShoppingList;
 

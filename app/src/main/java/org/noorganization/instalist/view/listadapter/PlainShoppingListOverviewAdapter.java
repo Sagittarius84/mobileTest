@@ -1,6 +1,5 @@
 package org.noorganization.instalist.view.listadapter;
 
-import android.app.Activity;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -10,8 +9,8 @@ import android.widget.TextView;
 
 import org.noorganization.instalist.R;
 import org.noorganization.instalist.model.ShoppingList;
-import org.noorganization.instalist.touchlistener.IOnShoppingListClickListenerEvents;
-import org.noorganization.instalist.touchlistener.OnShoppingListClickListener;
+import org.noorganization.instalist.view.touchlistener.IOnShoppingListClickListenerEvents;
+import org.noorganization.instalist.view.touchlistener.OnShoppingListClickListener;
 import org.noorganization.instalist.view.interfaces.IShoppingListAdapter;
 
 import java.util.List;

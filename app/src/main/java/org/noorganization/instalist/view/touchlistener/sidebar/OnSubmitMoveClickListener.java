@@ -1,11 +1,9 @@
-package org.noorganization.instalist.touchlistener.sidebar;
+package org.noorganization.instalist.view.touchlistener.sidebar;
 
 import android.content.Context;
 import android.view.View;
-import android.widget.Adapter;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
-import android.widget.SpinnerAdapter;
 import android.widget.Toast;
 import android.widget.ViewSwitcher;
 

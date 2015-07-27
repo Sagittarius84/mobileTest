@@ -1,6 +1,5 @@
-package org.noorganization.instalist.touchlistener;
+package org.noorganization.instalist.view.touchlistener;
 
-import android.app.Activity;
 import android.view.View;
 
 import org.noorganization.instalist.model.ShoppingList;

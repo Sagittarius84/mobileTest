@@ -1,8 +1,6 @@
-package org.noorganization.instalist.touchlistener;
+package org.noorganization.instalist.view.touchlistener;
 
 import android.view.View;
-
-import org.noorganization.instalist.model.ListEntry;
 
 /**
  * Created by TS on 11.05.2015.

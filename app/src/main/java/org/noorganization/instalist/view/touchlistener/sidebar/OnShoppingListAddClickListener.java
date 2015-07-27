@@ -1,4 +1,4 @@
-package org.noorganization.instalist.touchlistener.sidebar;
+package org.noorganization.instalist.view.touchlistener.sidebar;
 
 import android.content.Context;
 import android.view.View;

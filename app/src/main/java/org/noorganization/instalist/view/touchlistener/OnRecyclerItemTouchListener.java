@@ -1,4 +1,4 @@
-package org.noorganization.instalist.touchlistener;
+package org.noorganization.instalist.view.touchlistener;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;

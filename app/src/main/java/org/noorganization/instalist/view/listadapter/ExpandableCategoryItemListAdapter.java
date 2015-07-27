@@ -1,7 +1,6 @@
 package org.noorganization.instalist.view.listadapter;
 
 import android.content.Context;
-import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,8 +13,8 @@ import org.noorganization.instalist.R;
 import org.noorganization.instalist.controller.implementation.ControllerFactory;
 import org.noorganization.instalist.model.Category;
 import org.noorganization.instalist.model.ShoppingList;
-import org.noorganization.instalist.touchlistener.IOnShoppingListClickListenerEvents;
-import org.noorganization.instalist.touchlistener.OnShoppingListClickListener;
+import org.noorganization.instalist.view.touchlistener.IOnShoppingListClickListenerEvents;
+import org.noorganization.instalist.view.touchlistener.OnShoppingListClickListener;
 import org.noorganization.instalist.view.interfaces.IBaseActivity;
 import org.noorganization.instalist.view.interfaces.ICategoryAdapter;
 

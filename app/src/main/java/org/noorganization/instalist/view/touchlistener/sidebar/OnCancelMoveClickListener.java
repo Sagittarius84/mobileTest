@@ -1,6 +1,5 @@
-package org.noorganization.instalist.touchlistener.sidebar;
+package org.noorganization.instalist.view.touchlistener.sidebar;
 
-import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.ViewSwitcher;

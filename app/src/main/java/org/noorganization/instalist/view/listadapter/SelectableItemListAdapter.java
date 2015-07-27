@@ -247,7 +247,7 @@ public class SelectableItemListAdapter extends ArrayAdapter<IBaseListEntry> impl
         }
 
         if (mFilterThreadActive) {
-            mAddedItems.add(_ListEntry);
+            mChangedItems.put(_ListEntry.hashCode(), _ListEntry);
         }
 
         Collections.sort(mFilteredListEntries, mComparator);
