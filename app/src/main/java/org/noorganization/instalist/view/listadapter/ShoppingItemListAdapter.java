@@ -115,8 +115,7 @@ public class ShoppingItemListAdapter extends RecyclerView.Adapter<RecyclerView.V
                 if (_SingleEntry.mProduct.mUnit != null && _SingleEntry.mProduct.mUnit.mName.length() > 0) {
                     mProductType.setText(_SingleEntry.mProduct.mUnit.mName);
                 } else {
-                    // TODO: find out if we can create a global xml file with specific signs for an actions using the string language component seems not to be a good solution.
-                    mProductType.setText("-");
+                    mProductType.setText("");
                 }
                 List<TextView> textViewsToStroke = new ArrayList<>();
                 textViewsToStroke.add(mProductAmount);
