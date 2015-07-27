@@ -193,10 +193,14 @@ public class UnitEditorAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
             return;
         }
 
-        mUnderLyingUnits.remove(oldIndex);
-        mUnderLyingUnits.add(newIndex, _toUpdate);
-        notifyItemChanged(oldIndex);
         notifyItemMoved(oldIndex, newIndex);
+        mUnderLyingUnits.remove(oldIndex);
+        if (newIndex > mUnderLyingUnits.size()) {
+            mUnderLyingUnits.add(_toUpdate);
+        } else {
+            mUnderLyingUnits.add(newIndex, _toUpdate);
+        }
+        notifyItemChanged(newIndex);
     }
 
     private class UnitEditorHolder extends RecyclerView.ViewHolder {

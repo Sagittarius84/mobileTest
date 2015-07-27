@@ -24,17 +24,18 @@
             android:layout_gravity="center_vertical"
             android:layout_weight="0"/>
 
-        <org.noorganization.instalist.view.customview.FloatingLabelLayout
-            android:layout_width="wrap_content"
+        <android.support.design.widget.TextInputLayout
+            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical">
+            android:layout_gravity="center_vertical"
+            android:layout_weight="1">
             <EditText
                 android:id="@+id/product_details_product_name"
                 android:hint="@string/product_details_product_name_hint"
                 style="@style/InstalistTheme1.base_edit_text_style"
-                android:layout_width="wrap_content"
+                android:layout_width="fill_parent"
                 android:layout_weight="1" />
-        </org.noorganization.instalist.view.customview.FloatingLabelLayout>
+        </android.support.design.widget.TextInputLayout>
 
     </LinearLayout>
 
@@ -51,23 +52,23 @@
         android:orientation="vertical"
         android:id="@+id/product_details_advanced_contents">
 
-        <org.noorganization.instalist.view.customview.FloatingLabelLayout
+        <android.support.design.widget.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
             <EditText
                 android:id="@+id/product_details_tag"
                 android:hint="@string/product_details_tags_hint"
                 style="@style/InstalistTheme1.base_edit_text_style" />
-        </org.noorganization.instalist.view.customview.FloatingLabelLayout>
+        </android.support.design.widget.TextInputLayout>
 
-        <org.noorganization.instalist.view.customview.FloatingLabelLayout
+        <android.support.design.widget.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
             <EditText
                 android:id="@+id/product_details_step"
                 android:hint="@string/product_details_step_hint"
                 style="@style/InstalistTheme1.base_edit_text_numeric_style" />
-        </org.noorganization.instalist.view.customview.FloatingLabelLayout>
+        </android.support.design.widget.TextInputLayout>
 
     </LinearLayout>
 
