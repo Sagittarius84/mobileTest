@@ -86,6 +86,17 @@ public class UnitEditorActivity extends AppCompatActivity {
     }
 
     @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                this.finish();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    @Override
     public void onPause() {
         super.onPause();
         mBus.unregister(this);
@@ -199,13 +210,36 @@ public class UnitEditorActivity extends AppCompatActivity {
         }
 
         @Override
-        public boolean onActionItemClicked(ActionMode _mode, MenuItem _menuItem) {
-            IUnitController controller = ControllerFactory.getUnitController();
-            Unit unit = mUnitAdapter.get(mUnitAdapter.getEditingPosition());
+        public boolean onActionItemClicked(final ActionMode _mode, MenuItem _menuItem) {
+            final IUnitController controller = ControllerFactory.getUnitController();
+            final Unit unit = mUnitAdapter.get(mUnitAdapter.getEditingPosition());
             switch (_menuItem.getItemId()) {
                 case R.id.menu_delete_action:
                     if(!controller.deleteUnit(unit, IUnitController.MODE_BREAK_DELETION)) {
-                        Log.i("TODO", "Ask how to delete.");
+                        AlertDialog.Builder builder = new AlertDialog.Builder(UnitEditorActivity.this);
+                        builder.setMessage(R.string.remove_unit_question);
+                        builder.setPositiveButton(R.string.unlink, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                controller.deleteUnit(unit, IUnitController.MODE_UNLINK_REFERENCES);
+                                _mode.finish();
+                            }
+                        });
+                        builder.setNeutralButton(R.string.remove, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                controller.deleteUnit(unit, IUnitController.MODE_DELETE_REFERENCES);
+                                _mode.finish();
+                            }
+                        });
+                        builder.setNegativeButton(android.R.string.cancel,
+                                new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                _mode.finish();
+                            }
+                        });
+                        builder.show();
                     } else {
                         _mode.finish();
                     }

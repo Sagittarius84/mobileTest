@@ -223,11 +223,6 @@ public class ProductListDialogFragment extends Fragment {
             mCreateRecipeButton.setVisibility(View.GONE);
         }
 
-        /* TODO add event for changing title.
-        if (mBaseActivityInterface != null) {
-            mBaseActivityInterface.setToolbarTitle(mContext.getResources().getString(R.string.product_list_dialog_title) + " " + mCurrentShoppingList.mName);
-        }*/
-
         return view;
     }
 
@@ -475,7 +470,7 @@ public class ProductListDialogFragment extends Fragment {
                         if (resultingProducts.containsKey(product)) {
                             resultingProducts.put(product, resultingProducts.get(product) + amountToAdd);
                         } else {
-                            resultingProducts.put(product, product.mDefaultAmount + amountToAdd);
+                            resultingProducts.put(product, product.mDefaultAmount);
                         }
                         break;
                     case RECIPE_LIST_ENTRY:
