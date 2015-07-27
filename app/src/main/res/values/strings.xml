@@ -95,10 +95,11 @@
     <string name="prefs_privacy_policy_eula_terms">Privacy Policy, Eula and Terms</string>
     <string name="prefs_productlist_dialog">Productlist Dialog Preferences</string>
     <string name="privacy_policy_eula_terms">Privacy Policy, EULA and TERMS</string>
-    <string name="remove">Remove</string>
+    <string name="remove">remove</string>
     <string name="remove_category">Remove Category</string>
     <string name="remove_product_question">Do you really wan\'t to remove the product named %1$s?</string>
     <string name="remove_product_question2">The product is still used as ingredient or listed somewhere. Still delete?</string>
+    <string name="remove_unit_question">The unit is still used for some products. Do you want to delete also the products or should the products use no unit (unlinked)?</string>
     <string name="remove_recipe_question">Do you really wan\'t to remove the recipe named %1$s?\nNote that it\'s ingredients won\'t be deleted from lists.</string>
     <string name="remove_shopping_list">Remove Shopping List</string>
     <string name="removed_product">removed product.</string>
@@ -109,5 +110,6 @@
     <string name="shopping_list_not_choosen">No Shopping List selected</string>
     <string name="general_preferences">Shopping List Preferences</string>
     <string name="unit_editor">Unit Editor</string>
+    <string name="unlink">unlink</string>
 
 </resources>

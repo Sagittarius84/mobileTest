@@ -1,5 +1,9 @@
 package org.noorganization.instalist.view.modelwrappers;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+import android.util.SparseBooleanArray;
+
 import org.noorganization.instalist.model.Recipe;
 
 /**
@@ -13,6 +17,11 @@ public class RecipeListEntry implements IBaseListEntry {
 
     public RecipeListEntry(Recipe _Recipe) {
         mRecipe = _Recipe;
+    }
+
+    private RecipeListEntry(Parcel _In) {
+        mRecipe = Recipe.findById(Recipe.class, _In.readLong());
+        mChecked = _In.readSparseBooleanArray().get(mRecipe.getId().intValue());
     }
 
     @Override
@@ -65,4 +74,27 @@ public class RecipeListEntry implements IBaseListEntry {
     public int hashCode() {
         return mRecipe.hashCode();
     }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel _Dest, int _Flags) {
+        SparseBooleanArray booleanArray = new SparseBooleanArray(1);
+        booleanArray.append(mRecipe.getId().intValue(), mChecked);
+        _Dest.writeSparseBooleanArray(booleanArray);
+        _Dest.writeLong(mRecipe.getId());
+    }
+
+    public static final Parcelable.Creator<RecipeListEntry> CREATOR = new Parcelable.Creator<RecipeListEntry>() {
+        public RecipeListEntry createFromParcel(Parcel _In) {
+            return new RecipeListEntry(_In);
+        }
+
+        public RecipeListEntry[] newArray(int _Size) {
+            return new RecipeListEntry[_Size];
+        }
+    };
 }

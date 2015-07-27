@@ -2,27 +2,37 @@ package org.noorganization.instalist.view.activity;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.support.annotation.IdRes;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TextInputLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.ActionMode;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 
 import com.orm.SugarRecord;
+import com.orm.query.Condition;
+import com.orm.query.Select;
 
 import org.noorganization.instalist.R;
 import org.noorganization.instalist.controller.IUnitController;
 import org.noorganization.instalist.controller.event.UnitChangedMessage;
 import org.noorganization.instalist.controller.implementation.ControllerFactory;
 import org.noorganization.instalist.model.Unit;
+import org.noorganization.instalist.view.decoration.DividerItemListDecoration;
 import org.noorganization.instalist.view.listadapter.UnitEditorAdapter;
 
 import de.greenrobot.event.EventBus;
@@ -36,8 +46,9 @@ public class UnitEditorActivity extends AppCompatActivity {
 
     private static final String LOG_TAG = UnitEditorActivity.class.getCanonicalName();
 
-    private UnitEditorAdapter mUnitAdapter;
-    private EventBus          mBus;
+    private UnitEditorAdapter   mUnitAdapter;
+    private LinearLayoutManager mUnitLayoutManager;
+    private EventBus            mBus;
 
     @Override
     public void onCreate(Bundle _savedInstanceState) {
@@ -66,11 +77,22 @@ public class UnitEditorActivity extends AppCompatActivity {
                 mUnitAdapter.add(_message.mUnit);
                 break;
             case CHANGED:
-                Log.d("Implementation missing", "@ UnitEditorActivity#onEventMainThread");
+                mUnitAdapter.update(_message.mUnit);
                 break;
             case DELETED:
                 mUnitAdapter.remove(_message.mUnit);
                 break;
+        }
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                this.finish();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
         }
     }
 
@@ -87,11 +109,16 @@ public class UnitEditorActivity extends AppCompatActivity {
     }
 
     private void initViews() {
-        ListView unitListView              = (ListView) findViewById(R.id.main_list);
+        RecyclerView unitRecyclerView      = (RecyclerView) findViewById(R.id.main_list);
         FloatingActionButton unitAddButton = (FloatingActionButton) findViewById(R.id.action_add_item);
 
-        mUnitAdapter = new UnitEditorAdapter(this, SugarRecord.listAll(Unit.class));
-        unitListView.setAdapter(mUnitAdapter);
+        unitRecyclerView.addItemDecoration(new DividerItemListDecoration(getResources().
+                getDrawable(R.drawable.list_divider)));
+        mUnitLayoutManager = new LinearLayoutManager(this);
+        mUnitLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
+        unitRecyclerView.setLayoutManager(mUnitLayoutManager);
+        mUnitAdapter = new UnitEditorAdapter(this, SugarRecord.listAll(Unit.class), new EditCallback());
+        unitRecyclerView.setAdapter(mUnitAdapter);
 
         unitAddButton.setOnClickListener(new onCreateUnitListener());
     }
@@ -166,6 +193,88 @@ public class UnitEditorActivity extends AppCompatActivity {
                 }
                 mDialog.dismiss();
             }
+        }
+    }
+
+    private class EditCallback implements ActionMode.Callback {
+        @Override
+        public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+            mode.getMenuInflater().inflate(R.menu.menu_contextual_actionmode_options, menu);
+            return true;
+        }
+
+        @Override
+        public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+            menu.removeItem(R.id.menu_cancel_action);
+            return true;
+        }
+
+        @Override
+        public boolean onActionItemClicked(final ActionMode _mode, MenuItem _menuItem) {
+            final IUnitController controller = ControllerFactory.getUnitController();
+            final Unit unit = mUnitAdapter.get(mUnitAdapter.getEditingPosition());
+            switch (_menuItem.getItemId()) {
+                case R.id.menu_delete_action:
+                    if(!controller.deleteUnit(unit, IUnitController.MODE_BREAK_DELETION)) {
+                        AlertDialog.Builder builder = new AlertDialog.Builder(UnitEditorActivity.this);
+                        builder.setMessage(R.string.remove_unit_question);
+                        builder.setPositiveButton(R.string.unlink, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                controller.deleteUnit(unit, IUnitController.MODE_UNLINK_REFERENCES);
+                                _mode.finish();
+                            }
+                        });
+                        builder.setNeutralButton(R.string.remove, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                controller.deleteUnit(unit, IUnitController.MODE_DELETE_REFERENCES);
+                                _mode.finish();
+                            }
+                        });
+                        builder.setNegativeButton(android.R.string.cancel,
+                                new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                _mode.finish();
+                            }
+                        });
+                        builder.show();
+                    } else {
+                        _mode.finish();
+                    }
+                    break;
+                case R.id.menu_add_action:
+                    EditText editor = (EditText) mUnitLayoutManager.
+                            findViewByPosition(mUnitAdapter.getEditingPosition()).
+                            findViewById(R.id.edittext);
+                    String newName = editor.getText().toString().trim();
+                    if (newName.equals(unit.mName)) {
+                        _mode.finish();
+                        break;
+                    }
+                    if (newName.length() == 0) {
+                        editor.setError(getString(R.string.error_no_input));
+                        break;
+                    }
+                    if (Select.from(Unit.class).where(Condition.prop(Unit.ATTR_NAME).eq(newName)).
+                            count() > 0) {
+                        editor.setError(getString(R.string.error_unit_already_exists));
+                        break;
+                    }
+                    controller.renameUnit(unit, newName);
+                    _mode.finish();
+
+                    break;
+                default:
+                    return false;
+            }
+            return true;
+        }
+
+        @Override
+        public void onDestroyActionMode(ActionMode mode) {
+            mUnitAdapter.setEditorPosition(-1);
         }
     }
 }

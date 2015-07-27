@@ -228,7 +228,7 @@ public class ProductChangeFragment extends DialogFragment {
                 mProductStep.setText(ViewUtils.formatFloat(currentProduct.mStepAmount));
                 mProductAmount.setStep(currentProduct.mStepAmount);
                 if (mProduct.mUnit != null) {
-                    mUnits.setSelection(mUnitList.indexOf(mProduct.mUnit) + 1);
+                    mUnits.setSelection(mUnitList.indexOf(mProduct.mUnit));
                 } else {
                     mUnits.setSelection(0);
                 }

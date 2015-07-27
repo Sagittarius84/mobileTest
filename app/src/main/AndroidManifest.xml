@@ -25,7 +25,8 @@
         <activity android:name=".view.activity.SettingsActivity"
             android:label="@string/settings" />
         <activity android:name=".view.activity.UnitEditorActivity"
-            android:label="@string/unit_editor">
+            android:label="@string/unit_editor"
+            android:windowSoftInputMode="adjustPan">
             <intent-filter>
                 <action android:name=".view.activity.UnitEditorActivity" />
                 <category android:name="android.intent.category.DEFAULT" />

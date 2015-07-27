@@ -1,10 +1,12 @@
 package org.noorganization.instalist.view.modelwrappers;
 
+import android.os.Parcelable;
+
 /**
  * The Interface for accessing Items for the Item overview.
  * Created by TS on 25.05.2015.
  */
-public interface IBaseListEntry {
+public interface IBaseListEntry extends Parcelable {
 
     enum eItemType{
         PRODUCT_LIST_ENTRY,

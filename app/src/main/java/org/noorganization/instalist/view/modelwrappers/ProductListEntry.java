@@ -1,6 +1,11 @@
 package org.noorganization.instalist.view.modelwrappers;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+import android.util.SparseBooleanArray;
+
 import org.noorganization.instalist.model.Product;
+import org.noorganization.instalist.model.Recipe;
 
 /**
  * Wrapper for Products.
@@ -13,6 +18,11 @@ public class ProductListEntry implements IBaseListEntry {
 
     public ProductListEntry(Product _Product) {
         mProduct = _Product;
+    }
+
+    private ProductListEntry(Parcel _In) {
+        mProduct = Product.findById(Product.class, _In.readLong());
+        mChecked = _In.readSparseBooleanArray().get(mProduct.getId().intValue());
     }
 
     @Override
@@ -65,4 +75,27 @@ public class ProductListEntry implements IBaseListEntry {
     public int hashCode() {
         return mProduct.hashCode();
     }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel _Dest, int _Flags) {
+        SparseBooleanArray booleanArray = new SparseBooleanArray(1);
+        booleanArray.append(mProduct.getId().intValue(), mChecked);
+        _Dest.writeSparseBooleanArray(booleanArray);
+        _Dest.writeLong(mProduct.getId());
+    }
+
+    public static final Parcelable.Creator<ProductListEntry> CREATOR = new Parcelable.Creator<ProductListEntry>() {
+        public ProductListEntry createFromParcel(Parcel _In) {
+            return new ProductListEntry(_In);
+        }
+
+        public ProductListEntry[] newArray(int _Size) {
+            return new ProductListEntry[_Size];
+        }
+    };
 }
