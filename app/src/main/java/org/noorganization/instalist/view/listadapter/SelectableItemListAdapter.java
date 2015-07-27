@@ -214,6 +214,9 @@ public class SelectableItemListAdapter extends ArrayAdapter<IBaseListEntry> impl
     //region Public Access
     @Override
     public void addItem(IBaseListEntry _ListEntry) {
+        if(mAllListEntries.indexOf(_ListEntry) == -1){
+            return;
+        }
 
         mAllListEntries.add(_ListEntry);
         if (mFilterThreadActive) {
