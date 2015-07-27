@@ -57,7 +57,7 @@ public class RecipeListEntry implements IBaseListEntry {
 
         RecipeListEntry that = (RecipeListEntry) o;
 
-        return mRecipe.equals(that.mRecipe);
+        return mRecipe.getId().equals(that.mRecipe.getId());
 
     }
 

@@ -57,7 +57,7 @@ public class ProductListEntry implements IBaseListEntry {
 
         ProductListEntry that = (ProductListEntry) o;
 
-        return mProduct.equals(that.mProduct);
+        return mProduct.getId().equals(that.mProduct.getId());
 
     }
 
