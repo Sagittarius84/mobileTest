@@ -66,9 +66,7 @@ public class ProductListEntry implements IBaseListEntry {
         if (!(o instanceof ProductListEntry)) return false;
 
         ProductListEntry that = (ProductListEntry) o;
-
-        return mProduct.getId().equals(that.mProduct.getId());
-
+        return mProduct.getId().equals(that.mProduct.getId()) && eItemType.PRODUCT_LIST_ENTRY == ((IBaseListEntry)o).getType();
     }
 
     @Override

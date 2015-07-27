@@ -217,6 +217,7 @@ public class ProductListDialogFragment extends Fragment {
 
         mMixedListView = (ListView) view.findViewById(R.id.fragment_product_list_dialog_product_list_view);
 
+        mListAdapter.getFilter().filter(FILTER_SHOW_ALL);
         mMixedListView.setAdapter(mListAdapter);
 
         if (! getArguments().getBoolean(BK_ALLOW_RECIPE_CREATION)) {

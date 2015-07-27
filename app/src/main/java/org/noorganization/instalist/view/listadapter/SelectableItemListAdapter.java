@@ -214,9 +214,6 @@ public class SelectableItemListAdapter extends ArrayAdapter<IBaseListEntry> impl
     //region Public Access
     @Override
     public void addItem(IBaseListEntry _ListEntry) {
-        if(mAllListEntries.indexOf(_ListEntry) == -1){
-            return;
-        }
 
         mAllListEntries.add(_ListEntry);
         if (mFilterThreadActive) {
@@ -259,7 +256,6 @@ public class SelectableItemListAdapter extends ArrayAdapter<IBaseListEntry> impl
 
     @Override
     public void removeItem(IBaseListEntry _ListEntry) {
-        // TODO: what happens if a Recipe entry has same id like a Product entry
         if (!mAllListEntries.remove(_ListEntry)) {
             Log.e(LOG_TAG, "Tried to remove entry, but failed.");
             return;
@@ -483,7 +479,7 @@ public class SelectableItemListAdapter extends ArrayAdapter<IBaseListEntry> impl
             List<IBaseListEntry> listEntries = new ArrayList<>(mAllListEntries);
 
             if (_Constraint == null || _Constraint.length() == 0) {
-                result.values = listEntries;
+                result.values = new ArrayList<>(listEntries);
                 result.count = listEntries.size();
                 return result;
             }
