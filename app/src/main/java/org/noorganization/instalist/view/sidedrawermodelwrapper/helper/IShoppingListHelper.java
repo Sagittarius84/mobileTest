@@ -1,10 +1,9 @@
-package org.noorganization.instalist.view.middleware.helper;
+package org.noorganization.instalist.view.sidedrawermodelwrapper.helper;
 
 import android.view.ContextMenu;
 import android.view.MenuItem;
 import android.view.View;
 
-import org.noorganization.instalist.model.ShoppingList;
 import org.noorganization.instalist.view.interfaces.ICategoryAdapter;
 import org.noorganization.instalist.view.interfaces.IShoppingListAdapter;
 

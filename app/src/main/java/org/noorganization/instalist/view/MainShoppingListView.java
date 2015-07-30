@@ -1,9 +1,7 @@
 package org.noorganization.instalist.view;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.Fragment;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Build;
@@ -42,7 +40,7 @@ import org.noorganization.instalist.view.interfaces.IBaseActivity;
 import org.noorganization.instalist.view.interfaces.IBaseActivityListEvent;
 import org.noorganization.instalist.view.interfaces.IFragment;
 import org.noorganization.instalist.view.interfaces.ISideDrawerListDataEvents;
-import org.noorganization.instalist.view.middleware.implementation.SideDrawerListManager;
+import org.noorganization.instalist.view.sidedrawermodelwrapper.implementation.SideDrawerListManager;
 import org.noorganization.instalist.view.utils.PreferencesManager;
 import org.noorganization.instalist.view.utils.ViewUtils;
 

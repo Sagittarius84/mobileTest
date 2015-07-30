@@ -1,4 +1,4 @@
-package org.noorganization.instalist.view.middleware.helper;
+package org.noorganization.instalist.view.sidedrawermodelwrapper.helper;
 
 import android.view.View;
 import android.widget.ViewSwitcher;

@@ -21,6 +21,8 @@ import java.text.NumberFormat;
 import java.util.List;
 
 /**
+ * Some utility-functions.
+ *
  * Created by tinos_000 on 18.05.2015.
  */
 public class ViewUtils {
@@ -72,15 +74,30 @@ public class ViewUtils {
         }
     }
 
+    /**
+     * Retrieve a KeyListener that accepts decimal numbers and dots as separator. Additionally the
+     * decimal separator of the current language is accepted.
+     * @return An instance of a DigitKeyListener with additional separator.
+     */
     public static KeyListener getNumberListener() {
         return DigitsKeyListener.getInstance(NUMBERS_AND_SEPARATOR);
     }
 
+    /**
+     * Converts a float to string with current locale.
+     * @param _toConvert The number to be converted.
+     * @return The converted number with at max 3 digits after separator.
+     */
     public static String formatFloat(float _toConvert) {
         NumberFormat formatter = new DecimalFormat("#.###");
         return formatter.format(_toConvert);
     }
 
+    /**
+     * Parses a float from a string. The languages separator will be also accepted.
+     * @param _toConvert The String to parse.
+     * @return Either the parsed number or {@code 0.0f} if the string could not be parsed.
+     */
     public static float parseFloatFromLocal(String _toConvert) {
         String toConvert = "0" + _toConvert.
                 replace('.', DecimalFormatSymbols.getInstance().getDecimalSeparator());
@@ -92,6 +109,12 @@ public class ViewUtils {
         }
     }
 
+    /**
+     * Replaces the current fragment and adds it to back-stack.
+     * @param _activity The activity where fragment should be attached. Must be capable of handling
+     *                  the FragmentManager.
+     * @param _newFragment The new fragment to hang in. Can also be a dialog fragment.
+     */
     public static void addFragment(Activity _activity, Fragment _newFragment) {
         FragmentManager fragmentManager = _activity.getFragmentManager();
         String canonicalName = _newFragment.getClass().getCanonicalName();
@@ -105,9 +128,16 @@ public class ViewUtils {
         }
     }
 
+    /**
+     * Removes a fragment from the activity, if attached.
+     * @param _activity The activity to remove the Fragment from.
+     * @param _oldFragment The Fragment to remove. Note: all Fragment on top on this will also be
+     *                     removed.
+     */
     public static void removeFragment(Activity _activity, Fragment _oldFragment) {
         FragmentManager fragmentManager = _activity.getFragmentManager();
-        fragmentManager.popBackStack(_oldFragment.getClass().getCanonicalName(), FragmentManager.POP_BACK_STACK_INCLUSIVE);
+        fragmentManager.popBackStack(_oldFragment.getClass().getCanonicalName(),
+                FragmentManager.POP_BACK_STACK_INCLUSIVE);
     }
 
     /**
@@ -125,6 +155,9 @@ public class ViewUtils {
         return _EditText.getText().toString();
     }
 
+    /**
+     * Hides the keyboard from screen.
+     */
     public static void removeSoftKeyBoard(Context _Context, EditText _EditText){
         InputMethodManager imm = (InputMethodManager) _Context.getSystemService(Context.INPUT_METHOD_SERVICE);
         imm.hideSoftInputFromWindow(_EditText.getWindowToken(), 0);

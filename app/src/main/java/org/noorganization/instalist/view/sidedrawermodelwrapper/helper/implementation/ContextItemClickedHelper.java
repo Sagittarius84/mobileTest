@@ -1,4 +1,4 @@
-package org.noorganization.instalist.view.middleware.helper.implementation;
+package org.noorganization.instalist.view.sidedrawermodelwrapper.helper.implementation;
 
 import android.content.Context;
 import android.view.View;
@@ -17,7 +17,7 @@ import org.noorganization.instalist.view.touchlistener.sidebar.OnCancelMoveClick
 import org.noorganization.instalist.view.touchlistener.sidebar.OnSubmitClickListenerWithChildData;
 import org.noorganization.instalist.view.touchlistener.sidebar.OnSubmitMoveClickListener;
 import org.noorganization.instalist.view.interfaces.IBaseActivity;
-import org.noorganization.instalist.view.middleware.helper.IContextItemClickedHelper;
+import org.noorganization.instalist.view.sidedrawermodelwrapper.helper.IContextItemClickedHelper;
 import org.noorganization.instalist.view.spinneradapter.CategorySpinnerAdapter;
 
 import java.util.List;

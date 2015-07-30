@@ -27,7 +27,7 @@ public class TagAdapter extends ArrayAdapter<Tag> {
         super(context, resource, textViewResourceId);
         mTags = _Tags;
         mContext = context;
-        mResourceId = R.layout.list_tag_enry;
+        mResourceId = R.layout.list_tag_entry;
     }
 
     @Override

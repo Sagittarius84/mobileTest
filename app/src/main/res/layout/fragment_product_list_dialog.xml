@@ -4,6 +4,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/for_background_color"
+    android:layout_alignParentBottom="true"
+    android:layout_alignParentTop="true"
     >
 
     <ListView
@@ -17,29 +19,30 @@
     <LinearLayout
         android:id="@+id/fragment_product_list_dialog_action_area"
         android:layout_width="match_parent"
-        android:layout_height="?listPreferredItemHeightSmall"
+        android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:layout_alignParentBottom="true"
         >
         <Button
             style="@style/InstalistTheme1.base_flatten_button"
+            android:layout_height="64dp"
             android:text="@string/product_list_dialog_add_new_product"
             android:id="@+id/fragment_product_list_dialog_add_new_product"
-            android:layout_weight="0.33"
+            android:layout_weight="0.4"
             />
         <Button
             style="@style/InstalistTheme1.base_flatten_button"
+            android:layout_height="wrap_content"
             android:text="@string/create_recipe"
             android:id="@+id/testRecipeButton"
-            android:layout_weight="0.33"
+            android:layout_weight="0.4"
             />
         <Button
             style="@style/InstalistTheme1.base_flatten_button"
-            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/product_list_dialog_add"
             android:id="@+id/fragment_product_list_dialog_add_products_to_list"
-            android:layout_weight="0.33"
+            android:layout_weight="0.2"
             />
     </LinearLayout>
 </RelativeLayout>

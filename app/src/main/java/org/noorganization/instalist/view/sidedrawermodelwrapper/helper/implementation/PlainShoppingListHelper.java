@@ -1,4 +1,4 @@
-package org.noorganization.instalist.view.middleware.helper.implementation;
+package org.noorganization.instalist.view.sidedrawermodelwrapper.helper.implementation;
 
 import android.content.Context;
 import android.view.ContextMenu;
@@ -13,9 +13,9 @@ import org.noorganization.instalist.model.Category;
 import org.noorganization.instalist.model.ShoppingList;
 import org.noorganization.instalist.view.interfaces.IBaseActivity;
 import org.noorganization.instalist.view.listadapter.PlainShoppingListOverviewAdapter;
-import org.noorganization.instalist.view.middleware.helper.IShoppingListHelper;
-import org.noorganization.instalist.view.middleware.MenuStates;
-import org.noorganization.instalist.view.middleware.helper.IContextItemClickedHelper;
+import org.noorganization.instalist.view.sidedrawermodelwrapper.helper.IShoppingListHelper;
+import org.noorganization.instalist.view.sidedrawermodelwrapper.MenuStates;
+import org.noorganization.instalist.view.sidedrawermodelwrapper.helper.IContextItemClickedHelper;
 
 /**
  * Helper for handdling the PlainShoppingList in the sidebar.
