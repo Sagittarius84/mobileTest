@@ -13,5 +13,5 @@ See app/build.gradle for an always up to date dependency-information.
 * EventBus by GreenRobot ([Source Code](https://github.com/greenrobot/EventBus), Apache2-license)
 * SugarORM by "Satyan" ([Website](https://satyan.github.io/sugar/index.html), [License](https://github.com/satyan/sugar/blob/master/LICENSE))
 * Android Support Library by Google ([Source Code](https://android.googlesource.com/platform/frameworks/support.git/), Apache2-license)
-** RecyclerView-library
-** Design-library
+    * RecyclerView-library
+    * Design-library
