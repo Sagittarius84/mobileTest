@@ -41,13 +41,15 @@
         android:id="@+id/drawer_layout_custom_list_name_view"
         style="@style/InstalistTheme1.linearlayout_card_style"
         android:layout_above="@+id/drawer_layout_custom_settings"
-        android:layout_below="@+id/container_edittext_new_name" />
+        android:layout_below="@+id/container_edittext_new_name"
+        android:descendantFocusability="afterDescendants" />
 
     <ListView
         android:id="@+id/drawer_layout_custom_plain_shopping_list_overview"
         style="@style/InstalistTheme1.linearlayout_card_style"
         android:layout_above="@+id/drawer_layout_custom_settings"
         android:layout_below="@+id/container_edittext_new_name"
+        android:descendantFocusability="afterDescendants"
         android:visibility="gone" />
 
     <Button
