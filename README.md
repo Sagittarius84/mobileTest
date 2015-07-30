@@ -3,7 +3,7 @@
 InstaList. ShoppingList for Android.
 
 ## Documentation##
-[Documentation](fhnoorg/einkaufsliste/wiki/Dokumentation)
+[Documentation](https://bitbucket.org/fhnoorg/einkaufsliste/wiki/Dokumentation)
 ## How to compile ##
 
 The repository contains a minimal Android Studio Project. Just clone and build the "app"-Module in Android Studio. The first build may need a internet connection as some libraries get downloaded by gradle.
