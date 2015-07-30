@@ -131,7 +131,7 @@
 
     <style name="InstalistTheme1.expandable_list_single_view_switcher" parent="InstalistTheme1.base_view_switcher">
         <item name="android:paddingLeft">26dp</item>
-        <!--additional 20dp for child-->
+         <!--additional 20dp for child-->
     </style>
 
     <style name="InstalistTheme1.weighted_edit_text_style_left" parent="InstalistTheme1.base_edit_text_style">
@@ -155,7 +155,7 @@
 
     <style name="InstalistTheme1.delete_image" parent="InstalistTheme1.base_edit_image">
         <item name="android:src">@mipmap/ic_close_black_36dp</item>
-        <item name="android:tint">@color/fab_material_red_500</item>
+        <item name="android:tint">@color/red_500</item>
     </style>
 
     <dimen name="base_padding_left">8dp</dimen>

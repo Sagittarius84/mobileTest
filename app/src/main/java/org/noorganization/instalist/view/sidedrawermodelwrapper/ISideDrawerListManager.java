@@ -1,4 +1,4 @@
-package org.noorganization.instalist.view.middleware;
+package org.noorganization.instalist.view.sidedrawermodelwrapper;
 
 import android.view.ContextMenu;
 import android.view.MenuItem;

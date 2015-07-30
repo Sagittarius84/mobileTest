@@ -1,4 +1,4 @@
-package org.noorganization.instalist.view.middleware.implementation;
+package org.noorganization.instalist.view.sidedrawermodelwrapper.implementation;
 
 import android.app.Activity;
 import android.content.Context;
@@ -8,16 +8,13 @@ import android.view.View;
 import android.widget.ExpandableListView;
 import android.widget.ListView;
 
-import org.noorganization.instalist.controller.implementation.ControllerFactory;
 import org.noorganization.instalist.model.Category;
 import org.noorganization.instalist.model.ShoppingList;
 import org.noorganization.instalist.view.interfaces.IBaseActivity;
-import org.noorganization.instalist.view.middleware.helper.implementation.ExpandableShoppingListHelper;
-import org.noorganization.instalist.view.middleware.helper.IShoppingListHelper;
-import org.noorganization.instalist.view.middleware.ISideDrawerListManager;
-import org.noorganization.instalist.view.middleware.helper.implementation.PlainShoppingListHelper;
-
-import java.util.List;
+import org.noorganization.instalist.view.sidedrawermodelwrapper.helper.implementation.ExpandableShoppingListHelper;
+import org.noorganization.instalist.view.sidedrawermodelwrapper.helper.IShoppingListHelper;
+import org.noorganization.instalist.view.sidedrawermodelwrapper.ISideDrawerListManager;
+import org.noorganization.instalist.view.sidedrawermodelwrapper.helper.implementation.PlainShoppingListHelper;
 
 /**
  * Manager that handles all the overhead to get the right List managed.

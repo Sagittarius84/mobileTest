@@ -1,4 +1,4 @@
-package org.noorganization.instalist.view.middleware;
+package org.noorganization.instalist.view.sidedrawermodelwrapper;
 
 /**
  * Created by tinos_000 on 25.06.2015.
