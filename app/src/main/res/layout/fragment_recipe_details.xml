@@ -13,9 +13,11 @@
             style="@style/InstalistTheme1.base_edit_text_style" />
     </android.support.design.widget.TextInputLayout>
 
+    <!-- Tag support is not ready yet. => Hide. !-->
     <android.support.design.widget.TextInputLayout
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:visibility="gone">
         <EditText
             android:id="@+id/fragment_recipe_details_tags"
             android:hint="@string/product_details_tags_hint"
