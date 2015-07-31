@@ -136,6 +136,7 @@ public class ShoppingListOverviewFragment extends Fragment implements IFragment 
 
         @Override
         public boolean onCreateActionMode(ActionMode _Mode, Menu _Menu) {
+            mAddButton.setVisibility(View.GONE);
             _Menu.clear();
             MenuInflater menuInflater = _Mode.getMenuInflater();
             menuInflater.inflate(R.menu.menu_contextual_actionmode_options, _Menu);
@@ -196,6 +197,7 @@ public class ShoppingListOverviewFragment extends Fragment implements IFragment 
             mShoppingItemListAdapter.resetEditModeView();
             mView.setSelected(false);
             mActionMode = null;
+            mAddButton.setVisibility(View.VISIBLE);
         }
 
         /**
