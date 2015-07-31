@@ -2,7 +2,6 @@ package org.noorganization.instalist.view.activity;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
-import android.content.res.Resources;
 import android.os.Bundle;
 import android.support.annotation.IdRes;
 import android.support.design.widget.FloatingActionButton;
@@ -17,11 +16,7 @@ import android.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.EditText;
-import android.widget.LinearLayout;
-import android.widget.ListView;
 
 import com.orm.SugarRecord;
 import com.orm.query.Condition;
@@ -39,16 +34,18 @@ import de.greenrobot.event.EventBus;
 
 /**
  * The editor for units. Since fragments are in this special case not useful (more overhead than
- * use), we use are seperate Activity.
+ * use), we use are separate Activity.
+ * Note 2015-07-31: this will be migrated to a fragment based activity for consistency.
  * Created by daMihe on 22.07.2015.
  */
 public class UnitEditorActivity extends AppCompatActivity {
 
     private static final String LOG_TAG = UnitEditorActivity.class.getCanonicalName();
 
-    private UnitEditorAdapter   mUnitAdapter;
-    private LinearLayoutManager mUnitLayoutManager;
-    private EventBus            mBus;
+    private FloatingActionButton mAddButton;
+    private UnitEditorAdapter    mUnitAdapter;
+    private LinearLayoutManager  mUnitLayoutManager;
+    private EventBus             mBus;
 
     @Override
     public void onCreate(Bundle _savedInstanceState) {
@@ -71,6 +68,7 @@ public class UnitEditorActivity extends AppCompatActivity {
         mBus = EventBus.getDefault();
     }
 
+    @SuppressWarnings("unused")
     public void onEventMainThread(UnitChangedMessage _message) {
         switch (_message.mChange) {
             case CREATED:
@@ -109,8 +107,8 @@ public class UnitEditorActivity extends AppCompatActivity {
     }
 
     private void initViews() {
-        RecyclerView unitRecyclerView      = (RecyclerView) findViewById(R.id.main_list);
-        FloatingActionButton unitAddButton = (FloatingActionButton) findViewById(R.id.action_add_item);
+        RecyclerView unitRecyclerView = (RecyclerView) findViewById(R.id.main_list);
+        mAddButton                    = (FloatingActionButton) findViewById(R.id.action_add_item);
 
         unitRecyclerView.addItemDecoration(new DividerItemListDecoration(getResources().
                 getDrawable(R.drawable.list_divider)));
@@ -120,7 +118,7 @@ public class UnitEditorActivity extends AppCompatActivity {
         mUnitAdapter = new UnitEditorAdapter(this, SugarRecord.listAll(Unit.class), new EditCallback());
         unitRecyclerView.setAdapter(mUnitAdapter);
 
-        unitAddButton.setOnClickListener(new onCreateUnitListener());
+        mAddButton.setOnClickListener(new onCreateUnitListener());
     }
 
     private class onCreateUnitListener implements View.OnClickListener {
@@ -155,7 +153,7 @@ public class UnitEditorActivity extends AppCompatActivity {
 
         private class OkayButtonAssignee implements DialogInterface.OnShowListener {
 
-            private AlertDialog mDialog;
+            private final AlertDialog mDialog;
 
             public OkayButtonAssignee(AlertDialog _dialog) {
                 super();
@@ -171,7 +169,7 @@ public class UnitEditorActivity extends AppCompatActivity {
 
         private class OnOkayClickListener implements View.OnClickListener {
 
-            private AlertDialog mDialog;
+            private final AlertDialog mDialog;
 
             public OnOkayClickListener(AlertDialog _dialog) {
                 super();
@@ -199,6 +197,7 @@ public class UnitEditorActivity extends AppCompatActivity {
     private class EditCallback implements ActionMode.Callback {
         @Override
         public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+            mAddButton.setVisibility(View.GONE);
             mode.getMenuInflater().inflate(R.menu.menu_contextual_actionmode_options, menu);
             return true;
         }
@@ -274,6 +273,7 @@ public class UnitEditorActivity extends AppCompatActivity {
 
         @Override
         public void onDestroyActionMode(ActionMode mode) {
+            mAddButton.setVisibility(View.VISIBLE);
             mUnitAdapter.setEditorPosition(-1);
         }
     }
