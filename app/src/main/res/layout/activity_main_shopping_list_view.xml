@@ -1,28 +1,28 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    style="@style/match_parent_width_height">
+    style="@style/match_parent">
 
     <include
         android:id="@+id/toolbar"
-        layout="@layout/toolbar_main" />
+        layout="@layout/toolbar" />
+
+    <android.support.v4.widget.DrawerLayout
+        android:id="@+id/main_drawer_layout_container"
+        style="@style/match_parent"
+        android:layout_below="@id/toolbar">
+
+        <FrameLayout
+            android:id="@+id/container"
+            style="@style/match_parent"
+            tools:context="org.noorganization.instalist.view.MainShoppingListView"
+            tools:ignore="MergeRootFrame" />
+
+        <include layout="@layout/drawer_layout_custom" />
+    </android.support.v4.widget.DrawerLayout>
 
     <View
         android:id="@+id/shadow"
         style="@style/InstalistTheme1.shadow"
-        android:layout_below="@id/toolbar"
         android:layout_width="match_parent"
-        />
-
-    <android.support.v4.widget.DrawerLayout
-        android:id="@+id/main_drawer_layout_container"
-        style="@style/match_parent_width_height"
-        android:layout_below="@id/shadow">
-
-        <FrameLayout
-            android:id="@+id/container"
-            style="@style/style_fragment_general"
-            tools:context="org.noorganization.instalist.view.MainShoppingListView"
-            tools:ignore="MergeRootFrame" />
-        <include layout="@layout/drawer_layout_custom" />
-    </android.support.v4.widget.DrawerLayout>
+        android:layout_below="@id/toolbar" />
 </RelativeLayout>

@@ -7,6 +7,8 @@
     android:gravity="center_vertical"
     android:paddingLeft="?android:attr/listPreferredItemPaddingLeft"
     android:paddingRight="?android:attr/listPreferredItemPaddingRight"
+    android:paddingStart="?android:attr/listPreferredItemPaddingStart"
+    android:paddingEnd="?android:attr/listPreferredItemPaddingEnd"
     android:minHeight="?android:attr/listPreferredItemHeightSmall" />
     <!-- paddingLeft and -Right is needed for API 16, since Start and End is buggy, Google
     recommends to remove it for API 16 apps !-->
