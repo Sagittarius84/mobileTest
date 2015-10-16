@@ -5,7 +5,7 @@
     android:layout_height="match_parent">
 
     <include
-        android:id="@+id/toolbar"
+        android:id="@+id/appBar"
         layout="@layout/toolbar" />
 
     <View
@@ -16,7 +16,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/main_list"
-        android:layout_below="@id/toolbar" />
+        android:layout_below="@id/appBar" />
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/action_add_item"
