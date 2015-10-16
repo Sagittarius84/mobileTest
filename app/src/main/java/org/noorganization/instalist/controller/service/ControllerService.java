@@ -10,14 +10,17 @@ import android.content.Intent;
  */
 public class ControllerService extends IntentService {
 
-    public ControllerService(String name) {
-        super(name);
+    /**
+     * Default constructor of {@link ControllerService}.
+     * @param _Name the name of the service.
+     */
+    public ControllerService(String _Name) {
+        super(_Name);
     }
 
     @Override
-    protected void onHandleIntent(Intent intent) {
+    protected void onHandleIntent(Intent _Intent) {
 
     }
-
 
 }

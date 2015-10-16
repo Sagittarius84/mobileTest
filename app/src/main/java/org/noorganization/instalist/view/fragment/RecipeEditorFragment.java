@@ -2,6 +2,7 @@ package org.noorganization.instalist.view.fragment;
 
 import android.app.Fragment;
 import android.os.Bundle;
+import android.support.v7.app.ActionBar;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -21,6 +22,7 @@ import org.noorganization.instalist.controller.implementation.ControllerFactory;
 import org.noorganization.instalist.model.Ingredient;
 import org.noorganization.instalist.model.Product;
 import org.noorganization.instalist.model.Recipe;
+import org.noorganization.instalist.view.activity.RecipeChangeActivity;
 import org.noorganization.instalist.view.event.ProductSelectMessage;
 import org.noorganization.instalist.view.listadapter.IngredientListAdapter;
 import org.noorganization.instalist.view.utils.ViewUtils;
@@ -38,20 +40,20 @@ import de.greenrobot.event.EventBus;
  */
 public class RecipeEditorFragment extends Fragment {
 
-    private static final String BK_EDITOR_MODE  = "editorMode";
-    private static final String BK_RECIPE_ID    = "recipeId";
+    private static final String BK_EDITOR_MODE = "editorMode";
+    private static final String BK_RECIPE_ID = "recipeId";
     private static final String BK_ADD_PRODUCTS = "productIds";
-    private static final String BK_ADD_AMOUNTS  = "productAmounts";
+    private static final String BK_ADD_AMOUNTS = "productAmounts";
 
-    private static final int    EDITOR_MODE_CREATE = 1;
-    private static final int    EDITOR_MODE_EDIT   = 2;
+    private static final int EDITOR_MODE_CREATE = 1;
+    private static final int EDITOR_MODE_EDIT = 2;
 
-    private Recipe     mRecipe;
+    private Recipe mRecipe;
 
     private ListView mIngredients;
     private EditText mRecipeName;
-    private Button   mAddIngredient;
-    private Button   mSave;
+    private Button mAddIngredient;
+    private Button mSave;
     private IngredientListAdapter mIngredientAdapter;
 
     /**
@@ -99,12 +101,22 @@ public class RecipeEditorFragment extends Fragment {
         super.onCreate(_savedInstanceState);
 
         Bundle parameters = getArguments();
+        ActionBar supportActionBar = ((RecipeChangeActivity) getActivity()).getSupportActionBar();
+
         if (parameters != null) {
+
+            String title = "";
+
             if (parameters.getInt(BK_EDITOR_MODE) == EDITOR_MODE_EDIT) {
                 mRecipe = SugarRecord.findById(Recipe.class, parameters.getLong(BK_RECIPE_ID));
+                title = getString(R.string.edit_recipe);
+            } else {
+                title = getString(R.string.create_recipe);
+            }
+            if (supportActionBar != null) {
+                supportActionBar.setTitle(title);
             }
         }
-
         EventBus.getDefault().register(this);
     }
 
@@ -117,8 +129,8 @@ public class RecipeEditorFragment extends Fragment {
         mIngredients.addFooterView(actions);
 
         mAddIngredient = (Button) actions.findViewById(R.id.fragment_recipe_details_add_ingredient);
-        mSave          = (Button) actions.findViewById(R.id.fragment_recipe_details_save);
-        mRecipeName    = (EditText) mainView.findViewById(R.id.fragment_recipe_details_name);
+        mSave = (Button) actions.findViewById(R.id.fragment_recipe_details_save);
+        mRecipeName = (EditText) mainView.findViewById(R.id.fragment_recipe_details_name);
 
         fillViews();
         addArgIngredients();
@@ -193,7 +205,7 @@ public class RecipeEditorFragment extends Fragment {
         super.onPause();
     }
 
-    private void addArgIngredients () {
+    private void addArgIngredients() {
         long productIds[] = getArguments().getLongArray(BK_ADD_PRODUCTS);
         float amounts[] = getArguments().getFloatArray(BK_ADD_AMOUNTS);
         if (productIds == null || amounts == null || productIds.length != amounts.length) {
