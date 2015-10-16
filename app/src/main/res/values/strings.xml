@@ -61,7 +61,7 @@
     <string name="product_saved_okay">Product was saved.</string>
     <string name="product_saved_fail">Product saving failed!</string>
 
-<!-- TODO: Remove or change this placeholder text -->
+    <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="add_ingredient">Add Ingredient</string>
     <string name="add_list">Add List</string>
@@ -110,5 +110,8 @@
     <string name="general_preferences">Shopping List Preferences</string>
     <string name="unit_editor">Unit Editor</string>
     <string name="unlink">Unlink</string>
+    <string name="no_ingredients">No ingredients added to recipe.</string>
+    <string name="name_exists">Recipe name exists already.</string>
+    <string name="error_recipe_creation">Something went wrong while creating recipe.</string>
 
 </resources>

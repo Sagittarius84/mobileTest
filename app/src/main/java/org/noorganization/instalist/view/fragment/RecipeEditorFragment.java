@@ -3,7 +3,6 @@ package org.noorganization.instalist.view.fragment;
 import android.app.Fragment;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -236,19 +235,29 @@ public class RecipeEditorFragment extends Fragment {
     private boolean validate() {
         boolean rtn = true;
         if (mIngredientAdapter.getIngredients().size() == 0) {
-            Toast.makeText(getActivity(), "Just a test.", Toast.LENGTH_LONG).show();
+            Toast.makeText(getActivity(), getString(R.string.no_ingredients), Toast.LENGTH_LONG).show();
             rtn = false;
         }
 
         String newName = mRecipeName.getText().toString();
-        List<Recipe> recipesToValidate = Select.from(Recipe.class).
-                where(Condition.prop(Recipe.ATTR_NAME).eq(newName)).list();
-        if (mRecipeName.getText().length() == 0 ||
-                (recipesToValidate.size() != 0 &&
-                        (mRecipe == null || !mRecipe.getId().equals(recipesToValidate.get(0).getId())))) {
-            mRecipeName.setError("Just a second test.");
+
+        // no title for recipe
+        if (newName.length() == 0) {
+            mRecipeName.setError(getString(R.string.error_no_input));
             rtn = false;
+        } else {
+            // title for recipe is set
+            List<Recipe> recipesToValidate = Select.from(Recipe.class).
+                    where(Condition.prop(Recipe.ATTR_NAME).eq(newName)).list();
+
+            if (recipesToValidate.size() != 0 && (mRecipe == null || !mRecipe.getId().equals(recipesToValidate.get(0).getId()))) {
+                // found elements that matches new name and recipe is new or recipe name is changed for another recipe
+                mRecipeName.setError(getString(R.string.name_exists));
+                rtn = false;
+            }
+
         }
+
         return rtn;
     }
 
@@ -275,7 +284,7 @@ public class RecipeEditorFragment extends Fragment {
                 }
 
                 if (mRecipe == null) {
-                    Toast.makeText(getActivity(), "Something went wrong while creating recipe.", Toast.LENGTH_LONG).show();
+                    Toast.makeText(getActivity(), getString(R.string.error_recipe_creation), Toast.LENGTH_LONG).show();
                     return;
                 }
 
@@ -287,7 +296,7 @@ public class RecipeEditorFragment extends Fragment {
                     controller.addOrChangeIngredient(mRecipe, toSave.mProduct, toSave.mAmount);
                 }
 
-                ViewUtils.removeFragment(getActivity(), RecipeEditorFragment.this);
+                // ViewUtils.removeFragment(getActivity(), RecipeEditorFragment.this); // to much
                 getActivity().finish();
             }
         }
