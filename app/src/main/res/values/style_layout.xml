@@ -29,7 +29,7 @@
     </style>
 
     <style name="InstalistTheme1.shadow">
-        <item name="android:layout_height">@dimen/appbar_elevation</item>
+        <item name="android:layout_height">@dimen/design_appbar_elevation</item>
         <item name="android:background">@drawable/toolbar_dropshadow</item>
     </style>
     <!-- -->
