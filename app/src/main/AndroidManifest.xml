@@ -3,6 +3,11 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="org.noorganization.instalist" >
 
+    <permission
+        android:name="org.noorganization.instalist.READWRITE_SHOPPING_LISTS"
+        android:description="@string/read_write_shoppinglists"
+        android:protectionLevel="normal" />
+
     <application
         android:name=".GlobalApplication"
         android:allowBackup="true"
@@ -34,6 +39,12 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
+
+        <provider
+            android:authorities="org.noorganization.instalist.provider"
+            android:name=".provider.InstalistProvider"
+            android:exported="true"
+            android:permission="org.noorganization.instalist.READWRITE_SHOPPING_LISTS" />
 
         <!-- SugarORM Settings -->
         <meta-data

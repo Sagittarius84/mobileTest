@@ -94,6 +94,7 @@
     <string name="prefs_privacy_policy_eula_terms">Privacy Policy, Eula and Terms</string>
     <string name="prefs_productlist_dialog">Productlist Dialog Preferences</string>
     <string name="privacy_policy_eula_terms">Privacy Policy, EULA and TERMS</string>
+    <string name="read_write_shoppinglists">Read and change shopping-lists</string>
     <string name="remove">Remove</string>
     <string name="remove_category">Remove Category</string>
     <string name="remove_product_question">Do you really wan\'t to remove the product named %1$s?</string>
