@@ -5,8 +5,8 @@
     android:orientation="vertical">
 
     <include
-        android:id="@+id/toolbar"
-        layout="@layout/toolbar_main" />
+        android:id="@+id/appBar"
+        layout="@layout/toolbar" />
 
     <View
         style="@style/InstalistTheme1.shadow"
@@ -14,7 +14,7 @@
 
     <FrameLayout
         android:id="@+id/container"
-        style="@style/style_fragment_general"
+        style="@style/match_parent"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent" />
 

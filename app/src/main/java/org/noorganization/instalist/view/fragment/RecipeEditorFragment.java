@@ -2,7 +2,7 @@ package org.noorganization.instalist.view.fragment;
 
 import android.app.Fragment;
 import android.os.Bundle;
-import android.util.Log;
+import android.support.v7.app.ActionBar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,6 +21,7 @@ import org.noorganization.instalist.controller.implementation.ControllerFactory;
 import org.noorganization.instalist.model.Ingredient;
 import org.noorganization.instalist.model.Product;
 import org.noorganization.instalist.model.Recipe;
+import org.noorganization.instalist.view.activity.RecipeChangeActivity;
 import org.noorganization.instalist.view.event.ProductSelectMessage;
 import org.noorganization.instalist.view.listadapter.IngredientListAdapter;
 import org.noorganization.instalist.view.utils.ViewUtils;
@@ -38,20 +39,20 @@ import de.greenrobot.event.EventBus;
  */
 public class RecipeEditorFragment extends Fragment {
 
-    private static final String BK_EDITOR_MODE  = "editorMode";
-    private static final String BK_RECIPE_ID    = "recipeId";
+    private static final String BK_EDITOR_MODE = "editorMode";
+    private static final String BK_RECIPE_ID = "recipeId";
     private static final String BK_ADD_PRODUCTS = "productIds";
-    private static final String BK_ADD_AMOUNTS  = "productAmounts";
+    private static final String BK_ADD_AMOUNTS = "productAmounts";
 
-    private static final int    EDITOR_MODE_CREATE = 1;
-    private static final int    EDITOR_MODE_EDIT   = 2;
+    private static final int EDITOR_MODE_CREATE = 1;
+    private static final int EDITOR_MODE_EDIT = 2;
 
-    private Recipe     mRecipe;
+    private Recipe mRecipe;
 
     private ListView mIngredients;
     private EditText mRecipeName;
-    private Button   mAddIngredient;
-    private Button   mSave;
+    private Button mAddIngredient;
+    private Button mSave;
     private IngredientListAdapter mIngredientAdapter;
 
     /**
@@ -99,12 +100,22 @@ public class RecipeEditorFragment extends Fragment {
         super.onCreate(_savedInstanceState);
 
         Bundle parameters = getArguments();
+        ActionBar supportActionBar = ((RecipeChangeActivity) getActivity()).getSupportActionBar();
+
         if (parameters != null) {
+
+            String title = "";
+
             if (parameters.getInt(BK_EDITOR_MODE) == EDITOR_MODE_EDIT) {
                 mRecipe = SugarRecord.findById(Recipe.class, parameters.getLong(BK_RECIPE_ID));
+                title = getString(R.string.edit_recipe);
+            } else {
+                title = getString(R.string.create_recipe);
+            }
+            if (supportActionBar != null) {
+                supportActionBar.setTitle(title);
             }
         }
-
         EventBus.getDefault().register(this);
     }
 
@@ -117,8 +128,8 @@ public class RecipeEditorFragment extends Fragment {
         mIngredients.addFooterView(actions);
 
         mAddIngredient = (Button) actions.findViewById(R.id.fragment_recipe_details_add_ingredient);
-        mSave          = (Button) actions.findViewById(R.id.fragment_recipe_details_save);
-        mRecipeName    = (EditText) mainView.findViewById(R.id.fragment_recipe_details_name);
+        mSave = (Button) actions.findViewById(R.id.fragment_recipe_details_save);
+        mRecipeName = (EditText) mainView.findViewById(R.id.fragment_recipe_details_name);
 
         fillViews();
         addArgIngredients();
@@ -193,7 +204,7 @@ public class RecipeEditorFragment extends Fragment {
         super.onPause();
     }
 
-    private void addArgIngredients () {
+    private void addArgIngredients() {
         long productIds[] = getArguments().getLongArray(BK_ADD_PRODUCTS);
         float amounts[] = getArguments().getFloatArray(BK_ADD_AMOUNTS);
         if (productIds == null || amounts == null || productIds.length != amounts.length) {
@@ -224,19 +235,29 @@ public class RecipeEditorFragment extends Fragment {
     private boolean validate() {
         boolean rtn = true;
         if (mIngredientAdapter.getIngredients().size() == 0) {
-            Toast.makeText(getActivity(), "Just a test.", Toast.LENGTH_LONG).show();
+            Toast.makeText(getActivity(), getString(R.string.no_ingredients), Toast.LENGTH_LONG).show();
             rtn = false;
         }
 
         String newName = mRecipeName.getText().toString();
-        List<Recipe> recipesToValidate = Select.from(Recipe.class).
-                where(Condition.prop(Recipe.ATTR_NAME).eq(newName)).list();
-        if (mRecipeName.getText().length() == 0 ||
-                (recipesToValidate.size() != 0 &&
-                        (mRecipe == null || !mRecipe.getId().equals(recipesToValidate.get(0).getId())))) {
-            mRecipeName.setError("Just a second test.");
+
+        // no title for recipe
+        if (newName.length() == 0) {
+            mRecipeName.setError(getString(R.string.error_no_input));
             rtn = false;
+        } else {
+            // title for recipe is set
+            List<Recipe> recipesToValidate = Select.from(Recipe.class).
+                    where(Condition.prop(Recipe.ATTR_NAME).eq(newName)).list();
+
+            if (recipesToValidate.size() != 0 && (mRecipe == null || !mRecipe.getId().equals(recipesToValidate.get(0).getId()))) {
+                // found elements that matches new name and recipe is new or recipe name is changed for another recipe
+                mRecipeName.setError(getString(R.string.name_exists));
+                rtn = false;
+            }
+
         }
+
         return rtn;
     }
 
@@ -263,7 +284,7 @@ public class RecipeEditorFragment extends Fragment {
                 }
 
                 if (mRecipe == null) {
-                    Toast.makeText(getActivity(), "Something went wrong while creating recipe.", Toast.LENGTH_LONG).show();
+                    Toast.makeText(getActivity(), getString(R.string.error_recipe_creation), Toast.LENGTH_LONG).show();
                     return;
                 }
 
@@ -275,7 +296,7 @@ public class RecipeEditorFragment extends Fragment {
                     controller.addOrChangeIngredient(mRecipe, toSave.mProduct, toSave.mAmount);
                 }
 
-                ViewUtils.removeFragment(getActivity(), RecipeEditorFragment.this);
+                // ViewUtils.removeFragment(getActivity(), RecipeEditorFragment.this); // to much
                 getActivity().finish();
             }
         }

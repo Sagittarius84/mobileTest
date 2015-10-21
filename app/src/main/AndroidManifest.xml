@@ -3,6 +3,11 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="org.noorganization.instalist" >
 
+    <permission
+        android:name="org.noorganization.instalist.READWRITE_SHOPPING_LISTS"
+        android:description="@string/read_write_shoppinglists"
+        android:protectionLevel="normal" />
+
     <application
         android:name=".GlobalApplication"
         android:allowBackup="true"
@@ -10,21 +15,23 @@
         android:label="@string/app_name"
         android:theme="@style/InstalistTheme1"
         tools:replace="android:icon" >
+
         <activity
             android:name=".view.MainShoppingListView"
             android:label="@string/title_activity_main" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
         <activity android:name=".view.activity.RecipeChangeActivity"
+            android:parentActivityName=".view.MainShoppingListView"
             android:label="@string/edit_recipe" />
         <activity android:name=".view.activity.SettingsActivity"
+            android:parentActivityName=".view.MainShoppingListView"
             android:label="@string/settings" />
         <activity android:name=".view.activity.UnitEditorActivity"
+            android:parentActivityName=".view.activity.SettingsActivity"
             android:label="@string/unit_editor"
             android:windowSoftInputMode="adjustPan">
             <intent-filter>
@@ -32,6 +39,12 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
+
+        <provider
+            android:authorities="org.noorganization.instalist.provider"
+            android:name=".provider.InstalistProvider"
+            android:exported="true"
+            android:permission="org.noorganization.instalist.READWRITE_SHOPPING_LISTS" />
 
         <!-- SugarORM Settings -->
         <meta-data
