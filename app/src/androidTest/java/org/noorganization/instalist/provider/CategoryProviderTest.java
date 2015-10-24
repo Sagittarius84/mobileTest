@@ -98,4 +98,94 @@ public class CategoryProviderTest extends AndroidTestCase {
         assertEquals("TestCategory2", twoCategories.getString(twoCategories.getColumnIndex("name")));
         assertEquals(ndCategory, twoCategories.getString(twoCategories.getColumnIndex("_id")));
     }
+
+    public void testQueryMultipleLists() {
+        Uri MULTIPLE_LISTS_NO_CATEGORY = Uri.parse("content://" + InstalistProvider.AUTHORITY +
+                "/category/-/list");
+        String categoryUUID = UUID.randomUUID().toString();
+        Uri MULTIPLE_LISTS_IN_CATEGORY = Uri.parse("content://" + InstalistProvider.AUTHORITY +
+                "/category/" + categoryUUID + "/list");
+
+        Cursor notExistentCategory = mCategoryProvider.query(MULTIPLE_LISTS_IN_CATEGORY, null, null,
+                null, null);
+        assertNotNull(notExistentCategory);
+        assertEquals(0, notExistentCategory.getCount());
+
+        String noCatListUUID = UUID.randomUUID().toString();
+        String inCatListUUID = UUID.randomUUID().toString();
+        mDatabase.execSQL("INSERT INTO category (_id, name) VALUES (?, ?)", new String[] {
+                categoryUUID, "a category"
+        });
+        mDatabase.execSQL("INSERT INTO list (_id, name, category) VALUES (?, ?, NULL), (?, ?, ?)",
+                new String[]{
+                        noCatListUUID, "test list without category",
+                        inCatListUUID, "test list with category", categoryUUID
+            });
+        Cursor listNoCategory = mCategoryProvider.query(MULTIPLE_LISTS_NO_CATEGORY, null, null,
+                null, null);
+        assertNotNull(listNoCategory);
+        assertEquals(1, listNoCategory.getCount());
+        listNoCategory.moveToFirst();
+        assertEquals(noCatListUUID, listNoCategory.getString(listNoCategory.getColumnIndex("_id")));
+        assertEquals("test list without category", listNoCategory.getString(listNoCategory.getColumnIndex("name")));
+        assertNull(listNoCategory.getString(listNoCategory.getColumnIndex("category")));
+
+        Cursor listInCategory = mCategoryProvider.query(MULTIPLE_LISTS_IN_CATEGORY, null, null,
+                null, null);
+        assertNotNull(listInCategory);
+        assertEquals(1, listInCategory.getCount());
+        listInCategory.moveToFirst();
+        assertEquals(inCatListUUID, listInCategory.getString(listInCategory.getColumnIndex("_id")));
+        assertEquals("test list with category", listInCategory.getString(listInCategory.getColumnIndex("name")));
+        assertEquals(categoryUUID, listInCategory.getString(listInCategory.getColumnIndex("category")));
+
+    }
+
+    public void testQuerySingleList() {
+        String SINGLE_LIST = "content://" + InstalistProvider.AUTHORITY + "/category/%s/list/%s";
+        Cursor noList = mCategoryProvider.query(Uri.parse(String.format(SINGLE_LIST,
+                UUID.randomUUID().toString(), UUID.randomUUID().toString())), null, null, null, null);
+        assertNotNull(noList);
+        assertEquals(0, noList.getCount());
+
+        String stList = UUID.randomUUID().toString();
+        String ndList = UUID.randomUUID().toString();
+        String categoryUUID = UUID.randomUUID().toString();
+        mDatabase.execSQL("INSERT INTO category VALUES (?,?)", new String[]{
+                categoryUUID,
+                "TestCategory1"
+        });
+        mDatabase.execSQL("INSERT INTO list (_id, name, category) VALUES (?, ?, null), (?, ?, ?)",
+                new String[]{
+                        stList, "listWOCategory",
+                        ndList, "listWCategory", categoryUUID
+                });
+        Cursor stListWOCategory = mCategoryProvider.query(Uri.parse(String.format(SINGLE_LIST,
+                "-", stList)), null, null, null, null);
+        assertNotNull(stListWOCategory);
+        assertEquals(1, stListWOCategory.getCount());
+        stListWOCategory.moveToFirst();
+        assertEquals("listWOCategory", stListWOCategory.getString(stListWOCategory.getColumnIndex("name")));
+        assertEquals(stList, stListWOCategory.getString(stListWOCategory.getColumnIndex("_id")));
+        assertNull(stListWOCategory.getString(stListWOCategory.getColumnIndex("category")));
+
+        Cursor ndListWCategory = mCategoryProvider.query(Uri.parse(String.format(SINGLE_LIST,
+                categoryUUID, ndList)), null, null, null, null);
+        assertNotNull(ndListWCategory);
+        assertEquals(1, ndListWCategory.getCount());
+        ndListWCategory.moveToFirst();
+        assertEquals("listWCategory", ndListWCategory.getString(ndListWCategory.getColumnIndex("name")));
+        assertEquals(ndList, ndListWCategory.getString(ndListWCategory.getColumnIndex("_id")));
+        assertEquals(categoryUUID, ndListWCategory.getString(ndListWCategory.getColumnIndex("category")));
+
+        Cursor stListWCategory = mCategoryProvider.query(Uri.parse(String.format(SINGLE_LIST,
+                categoryUUID, stList)), null, null, null, null);
+        assertNotNull(stListWCategory);
+        assertEquals(0, stListWCategory.getCount());
+
+        Cursor ndListWOCategory = mCategoryProvider.query(Uri.parse(String.format(SINGLE_LIST,
+                "-", ndList)), null, null, null, null);
+        assertNotNull(ndListWOCategory);
+        assertEquals(0, ndListWOCategory.getCount());
+    }
 }
