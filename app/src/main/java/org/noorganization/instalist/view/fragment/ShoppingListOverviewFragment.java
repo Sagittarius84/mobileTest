@@ -1,9 +1,12 @@
 package org.noorganization.instalist.view.fragment;
 
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.Fragment;
 import android.content.Context;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.PowerManager;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.widget.DrawerLayout;
@@ -22,7 +25,6 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 
-import org.noorganization.instalist.GlobalApplication;
 import org.noorganization.instalist.R;
 import org.noorganization.instalist.controller.IListController;
 import org.noorganization.instalist.controller.event.ListItemChangedMessage;
@@ -31,7 +33,6 @@ import org.noorganization.instalist.model.ListEntry;
 import org.noorganization.instalist.model.Product;
 import org.noorganization.instalist.model.ShoppingList;
 import org.noorganization.instalist.view.touchlistener.OnRecyclerItemTouchListener;
-import org.noorganization.instalist.view.ChangeHandler;
 import org.noorganization.instalist.view.MainShoppingListView;
 import org.noorganization.instalist.view.customview.AmountPicker;
 import org.noorganization.instalist.view.dataholder.SelectableBaseItemListEntryDataHolder;
@@ -57,12 +58,12 @@ import de.greenrobot.event.EventBus;
 /**
  * A ShoppingListOverviewFragment containing a list view.
  */
-public class ShoppingListOverviewFragment extends Fragment implements IFragment {
+public class ShoppingListOverviewFragment extends BaseFragment implements IFragment {
 
     private static final String LOG_TAG = ShoppingListOverviewFragment.class.toString();
 
     private ShoppingList mCurrentShoppingList;
-    private boolean      mHandlingProductSelectedMessages;
+    private boolean mHandlingProductSelectedMessages;
 
     private Context mContext;
 
@@ -71,7 +72,7 @@ public class ShoppingListOverviewFragment extends Fragment implements IFragment 
     private LinearLayoutManager mLayoutManager;
 
     private ShoppingItemListAdapter mShoppingItemListAdapter;
-    private RecyclerView            mRecyclerView;
+    private RecyclerView mRecyclerView;
 
     private IListController mListController;
 
@@ -88,7 +89,7 @@ public class ShoppingListOverviewFragment extends Fragment implements IFragment 
      */
     private Map<Integer, Comparator> mMapComperable;
 
-    private static Integer SORT_BY_NAME     = 0;
+    private static Integer SORT_BY_NAME = 0;
     private static Integer SORT_BY_PRIORITY = 1;
 
     /**
@@ -104,8 +105,12 @@ public class ShoppingListOverviewFragment extends Fragment implements IFragment 
     private class OnShoppingListItemActionModeListener implements ActionMode.Callback {
 
         private Context mContext;
-        private View    mView;
-        private long    mListEntryId;
+        private View mView;
+        private long mListEntryId;
+        /**
+         * The {@link android.os.PowerManager.WakeLock} to let the screen on when in shopping mode.
+         */
+        private PowerManager.WakeLock mWakeLock;
 
         /**
          * Constructor of OnShoppingListItemActionModeListener.
@@ -233,7 +238,7 @@ public class ShoppingListOverviewFragment extends Fragment implements IFragment 
     public static ShoppingListOverviewFragment newInstance(long _ListId) {
 
         ShoppingListOverviewFragment fragment = new ShoppingListOverviewFragment();
-        Bundle                       args     = new Bundle();
+        Bundle args = new Bundle();
         args.putLong(MainShoppingListView.KEY_LISTID, _ListId);
         fragment.setArguments(args);
         return fragment;
@@ -243,19 +248,17 @@ public class ShoppingListOverviewFragment extends Fragment implements IFragment 
 
 
     @Override
-    public void onAttach(Activity _Activity) {
-        super.onAttach(_Activity);
-        mContext = _Activity;
+    protected void onAttachToContext(Context _Context) {
+        mContext = _Context;
 
         try {
-            mBaseActivityInterface = (IBaseActivity) _Activity;
+            mBaseActivityInterface = (IBaseActivity) getActivity();
         } catch (ClassCastException e) {
-            throw new ClassCastException(_Activity.toString()
+            throw new ClassCastException(getActivity().toString()
                     + " has no IBaseActivity interface attached.");
         }
 
         mListController = ControllerFactory.getListController();
-        ((ChangeHandler) ((GlobalApplication) getActivity().getApplication()).getChangeHandler()).setCurrentFragment(this);
     }
 
     @Override
@@ -377,7 +380,6 @@ public class ShoppingListOverviewFragment extends Fragment implements IFragment 
     @Override
     public void onDetach() {
         super.onDetach();
-        ((ChangeHandler) ((GlobalApplication) getActivity().getApplication()).getChangeHandler()).setCurrentFragment(null);
         EventBus.getDefault().unregister(this);
     }
 

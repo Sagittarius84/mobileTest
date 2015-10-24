@@ -1,6 +1,7 @@
 package org.noorganization.instalist.view.fragment;
 
 import android.app.Fragment;
+import android.content.Context;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.view.LayoutInflater;
@@ -37,7 +38,7 @@ import de.greenrobot.event.EventBus;
  * list the recipe has to get added first.
  * Created by michi on 01.07.15.
  */
-public class RecipeEditorFragment extends Fragment {
+public class RecipeEditorFragment extends BaseFragment {
 
     private static final String BK_EDITOR_MODE = "editorMode";
     private static final String BK_RECIPE_ID = "recipeId";
@@ -117,6 +118,11 @@ public class RecipeEditorFragment extends Fragment {
             }
         }
         EventBus.getDefault().register(this);
+    }
+
+    @Override
+    protected void onAttachToContext(Context _Context) {
+
     }
 
     @Override

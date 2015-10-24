@@ -22,6 +22,11 @@ public class InstalistProvider extends ContentProvider {
 
     public final static String AUTHORITY = "org.noorganization.instalist.provider";
 
+    /**
+     * The base content uri. Build a uri with the table paths.
+     **/
+    public final static Uri BASE_CONTENT_URI = Uri.parse("content://" + AUTHORITY);
+
     // ACM_XXX = Authority Code Multiple Lines; ACS_XXX = Authority Code Single Line
     // as described in http://developer.android.com/guide/topics/providers/content-provider-creating.html
 //    private static final int ACM_CATEGORY = 1;

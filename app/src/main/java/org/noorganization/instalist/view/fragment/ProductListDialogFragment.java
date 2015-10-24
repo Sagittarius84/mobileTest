@@ -58,7 +58,7 @@ import de.greenrobot.event.EventBus;
  * Responsible to show a dialog with a list of selectable products to add them to an existing shopping
  * list.
  */
-public class ProductListDialogFragment extends Fragment {
+public class ProductListDialogFragment extends BaseFragment {
 
     private static final String LOG_TAG = ProductListDialogFragment.class.getName();
 
@@ -138,16 +138,8 @@ public class ProductListDialogFragment extends Fragment {
     }
 
     @Override
-    public void onAttach(Activity _Activity) {
-        super.onAttach(_Activity);
-        mContext = _Activity;
-        /* TODO remove if possible (because of events)
-        try {
-            mBaseActivityInterface = (IBaseActivity) _Activity;
-        } catch (ClassCastException e) {
-            throw new ClassCastException(_Activity.toString()
-                    + " has no IBaseActivity interface attached.");
-        }*/
+    protected void onAttachToContext(Context _Context) {
+        mContext = _Context;
     }
 
     @Override
