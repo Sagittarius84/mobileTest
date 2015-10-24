@@ -54,6 +54,7 @@ public interface IInternalProvider {
      * {@link ContentProvider#delete(Uri, String, String[])}. The Uri's got already filtered by
      * {@link InstalistProvider} (if request was asked through) so that the first path segment is
      * always the right.
+     * @return the number of affected rows.
      */
     int delete(@NonNull Uri _uri, String _selection, String[] _selectionArgs);
 
@@ -62,6 +63,7 @@ public interface IInternalProvider {
      * {@link ContentProvider#update(Uri, ContentValues, String, String[])}. The Uri's got already
      * filtered by {@link InstalistProvider} (if request was asked through) so that the first path
      * segment is always the right.
+     * @return the number of affected rows.
      */
     int update(@NonNull Uri _uri, ContentValues _values, String _selection, String[] _selectionArgs);
 

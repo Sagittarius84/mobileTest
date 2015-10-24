@@ -25,7 +25,7 @@ public class ProductProviderTest extends AndroidTestCase {
     @Override
     public void setUp() {
         mDatabase = new DBOpenHelper(getContext(), null).getWritableDatabase();
-        mProductProvider = new ProductProvider();
+        mProductProvider = new ProductProvider(getContext());
         mProductProvider.onCreate(mDatabase);
     }
 
@@ -159,5 +159,22 @@ public class ProductProviderTest extends AndroidTestCase {
         assertEquals(0.5f, cursor.getFloat(cursor.getColumnIndex(Product.COLUMN_STEP_AMOUNT)));
         assertEquals(null, cursor.getString(cursor.getColumnIndex(Product.COLUMN_UNIT_ID)));
         resetDb();
+    }
+
+
+    public void testDeleteSingleProduct() {
+// TODO: implement
+    }
+
+    public void testDeleteMultipleProducts() {
+// TODO: implement
+    }
+
+    public void testUpdateSingleProduct() {
+// TODO: implement
+    }
+
+    public void testUpdateMultipleProducts() {
+        // TODO: implement
     }
 }

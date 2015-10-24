@@ -2,6 +2,7 @@ package org.noorganization.instalist.provider.internal;
 
 import android.content.ContentResolver;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.UriMatcher;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -22,6 +23,8 @@ public class ProductProvider implements IInternalProvider {
     //region private attributes
     private SQLiteDatabase mDatabase;
     private UriMatcher mMatcher;
+    private Context mContext;
+
 
     private static final int SINGLE_PRODUCT = 1;
     private static final int MULTIPLE_PRODUCTS = 2;
@@ -38,6 +41,18 @@ public class ProductProvider implements IInternalProvider {
     public static final String PRODUCT_BASE_TYPE = "vnd.noorganization.product";
     //endregion public attributes
 
+    //region constructors
+
+    /**
+     * Constructor of {@link ProductProvider}
+     *
+     * @param _context the context of the parent provider. (Needed to notify listener for changes)
+     */
+    public ProductProvider(Context _context) {
+        mContext = _context;
+    }
+    //endregion constructors
+
     //region public overriden methods
     @Override
     public void onCreate(SQLiteDatabase _db) {
@@ -46,24 +61,31 @@ public class ProductProvider implements IInternalProvider {
 
         mMatcher.addURI(InstalistProvider.AUTHORITY, SINGLE_PRODUCT_STRING, SINGLE_PRODUCT);
         mMatcher.addURI(InstalistProvider.AUTHORITY, MULTIPLE_PRODUCTS_STRING, MULTIPLE_PRODUCTS);
-
     }
 
     @Override
     public Cursor query(@NonNull Uri _uri, String[] _projection, String _selection, String[] _selectionArgs, String _sortOrder) {
+        Cursor cursor = null;
         switch (mMatcher.match(_uri)) {
 
             case SINGLE_PRODUCT:
                 String selection = ProviderUtils.getSelectionWithIdQuery(Product.COLUMN_ID, _selection);
                 String[] selectionArgs = ProviderUtils.getSelectionArgsWithId(_selectionArgs, _uri.getLastPathSegment());
-                return mDatabase.query(Product.TABLE_NAME, _projection, selection, selectionArgs, null, null, _sortOrder);
-
+                cursor = mDatabase.query(Product.TABLE_NAME, _projection, selection, selectionArgs, null, null, _sortOrder);
+                break;
             case MULTIPLE_PRODUCTS:
-                return mDatabase.query(Product.TABLE_NAME, _projection, _selection, _selectionArgs, null, null, _sortOrder);
-
+                cursor = mDatabase.query(Product.TABLE_NAME, _projection, _selection, _selectionArgs, null, null, _sortOrder);
+                break;
             default:
-                return null;
+                throw new IllegalArgumentException("The given Uri is not supported: " + _uri);
         }
+
+        if (cursor != null) {
+            // notify all possibles listener
+            cursor.setNotificationUri(mContext.getContentResolver(), _uri);
+        }
+
+        return cursor;
     }
 
     @Override
@@ -80,37 +102,76 @@ public class ProductProvider implements IInternalProvider {
 
     @Override
     public Uri insert(@NonNull Uri _uri, ContentValues _values) {
+        Uri newUri = null;
         switch (mMatcher.match(_uri)) {
             case SINGLE_PRODUCT:
                 long rowId = mDatabase.insert(Product.TABLE_NAME, null, _values);
+                // insertion went wrong
                 if (rowId == -1) {
                     throw new SQLiteException("Failed to add a record into " + _uri);
                 }
                 Cursor cursor = mDatabase.query(Product.TABLE_NAME, new String[]{Product.COLUMN_ID},
                         SQLiteUtils.COLUMN_ROW_ID + "=?", new String[]{String.valueOf(rowId)},
                         null, null, null, null);
-
                 cursor.moveToFirst();
-                return Uri.parse(SINGLE_PRODUCT_CONTENT_URI.replace("*",
+                newUri = Uri.parse(SINGLE_PRODUCT_CONTENT_URI.replace("*",
                         cursor.getString(cursor.getColumnIndex(Product.COLUMN_ID))));
-
+                break;
             case MULTIPLE_PRODUCTS:
                 // TODO: implement!
-                return Uri.parse(MULTIPLE_PRODUCT_CONTENT_URI);
+                newUri = null; //Uri.parse(MULTIPLE_PRODUCT_CONTENT_URI);
+                break;
             default:
-                return null;
+                throw new IllegalArgumentException("The given Uri is not supported: " + _uri);
         }
+
+        if (newUri != null) {
+            mContext.getContentResolver().notifyChange(_uri, null);
+        }
+        return newUri;
     }
 
-    // TODO: implement delete
     @Override
     public int delete(@NonNull Uri _uri, String _selection, String[] _selectionArgs) {
-        return 0;
+        int affectedRows = 0;
+
+        switch (mMatcher.match(_uri)) {
+            case SINGLE_PRODUCT:
+                String selection = ProviderUtils.getSelectionWithIdQuery(Product.COLUMN_ID, null);
+                String[] selectionArgs = ProviderUtils.getSelectionArgsWithId(null, _uri.getLastPathSegment());
+                affectedRows = mDatabase.delete(Product.TABLE_NAME, selection, selectionArgs);
+                break;
+            case MULTIPLE_PRODUCTS:
+                affectedRows = mDatabase.delete(Product.TABLE_NAME, _selection, _selectionArgs);
+                break;
+            default:
+                throw new IllegalArgumentException("The given Uri is not supported: " + _uri);
+        }
+        if (affectedRows > 0) {
+            mContext.getContentResolver().notifyChange(_uri, null);
+        }
+        return affectedRows;
     }
 
     @Override
     public int update(@NonNull Uri _uri, ContentValues _values, String _selection, String[] _selectionArgs) {
-        return 0;
+        int affectedRows = 0;
+        switch (mMatcher.match(_uri)) {
+            case SINGLE_PRODUCT:
+                String selection = ProviderUtils.getSelectionWithIdQuery(Product.COLUMN_ID, null);
+                String[] selectionArgs = ProviderUtils.getSelectionArgsWithId(null, _uri.getLastPathSegment());
+                affectedRows = mDatabase.update(Product.TABLE_NAME, _values, selection, selectionArgs);
+                break;
+            case MULTIPLE_PRODUCTS:
+                affectedRows = mDatabase.update(Product.TABLE_NAME, _values, _selection, _selectionArgs);
+                break;
+            default:
+                throw new IllegalArgumentException("The given Uri is not supported: " + _uri);
+        }
+        if (affectedRows > 0) {
+            mContext.getContentResolver().notifyChange(_uri, null);
+        }
+        return affectedRows;
     }
 
     //endregion overwritten methods

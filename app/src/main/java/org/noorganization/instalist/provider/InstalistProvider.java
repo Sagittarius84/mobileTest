@@ -2,7 +2,6 @@ package org.noorganization.instalist.provider;
 
 import android.content.ContentProvider;
 import android.content.ContentValues;
-import android.content.UriMatcher;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
@@ -51,7 +50,7 @@ public class InstalistProvider extends ContentProvider {
 
 //    private UriMatcher mMatcher;
 
-    private SQLiteDatabase                     mDatabase;
+    private SQLiteDatabase mDatabase;
     private HashMap<String, IInternalProvider> mInternalProviders;
 
     @Override
@@ -82,7 +81,7 @@ public class InstalistProvider extends ContentProvider {
         mDatabase = new DBOpenHelper(getContext(), ":memory:").getWritableDatabase();
 
         IInternalProvider categoryProvider = new CategoryProvider();
-        IInternalProvider productProvider = new ProductProvider();
+        IInternalProvider productProvider = new ProductProvider(getContext());
         categoryProvider.onCreate(mDatabase);
         productProvider.onCreate(mDatabase);
 
@@ -115,6 +114,7 @@ public class InstalistProvider extends ContentProvider {
 
     /**
      * Returns the right provider for the given uri. The decision is made by the first path segment.
+     *
      * @param _uri The uri to provide content for.
      * @return Either the internal provider or null if uri is not okay or it's the wrong authority.
      */
