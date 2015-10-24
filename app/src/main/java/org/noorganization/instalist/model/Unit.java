@@ -1,7 +1,5 @@
 package org.noorganization.instalist.model;
 
-import android.content.Context;
-
 import com.orm.SugarRecord;
 
 /**
@@ -10,7 +8,18 @@ import com.orm.SugarRecord;
  */
 public class Unit extends SugarRecord<Unit> {
 
+    public final static String TABLE_NAME = "unit";
+
+    public static String COLUMN_ID = "_id";
+    public static String COLUMN_NAME = "name";
+
     public static String ATTR_NAME = "m_name";
+
+    public final static String DATABASE_CREATE = "CREATE TABLE " + TABLE_NAME
+            + "("
+            + COLUMN_ID + " TEXT PRIMARY KEY, "
+            + COLUMN_NAME + " TEXT"
+            + ");";
 
     public String mName;
 
