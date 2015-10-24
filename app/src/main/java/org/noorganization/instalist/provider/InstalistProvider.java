@@ -88,18 +88,9 @@ public class InstalistProvider extends ContentProvider {
     @Override
     public Cursor query(@NonNull Uri _uri, String[] _projection, String _selection,
                         String[] _selectionArgs, String _sortOrder) {
-        if (!AUTHORITY.equals(_uri.getAuthority())) {
-            return null;
-        }
-
-        List<String> pathSegments = _uri.getPathSegments();
-        if (pathSegments.size() == 0) {
-            return null;
-        }
-        String firstPart = pathSegments.get(0);
-        if (mInternalProviders.containsKey(firstPart)) {
-            return mInternalProviders.get(firstPart).query(_uri, _projection, _selection,
-                    _selectionArgs, _sortOrder);
+        IInternalProvider provider = getInternalProvider(_uri);
+        if (provider != null) {
+            return provider.query(_uri, _projection, _selection, _selectionArgs, _sortOrder);
         }
         return null;
     }
@@ -107,6 +98,19 @@ public class InstalistProvider extends ContentProvider {
     @Nullable
     @Override
     public String getType(@NonNull Uri _uri) {
+        IInternalProvider provider = getInternalProvider(_uri);
+        if (provider != null) {
+            return provider.getType(_uri);
+        }
+        return null;
+    }
+
+    /**
+     * Returns the right provider for the given uri. The decision is made by the first path segment.
+     * @param _uri The uri to provide content for.
+     * @return Either the internal provider or null if uri is not okay or it's the wrong authority.
+     */
+    private IInternalProvider getInternalProvider(@NonNull Uri _uri) {
         if (!AUTHORITY.equals(_uri.getAuthority())) {
             return null;
         }
@@ -115,9 +119,10 @@ public class InstalistProvider extends ContentProvider {
         if (pathSegments.size() == 0) {
             return null;
         }
+
         String firstPart = pathSegments.get(0);
         if (mInternalProviders.containsKey(firstPart)) {
-            return mInternalProviders.get(firstPart).getType(_uri);
+            return mInternalProviders.get(firstPart);
         }
         return null;
     }
@@ -125,34 +130,18 @@ public class InstalistProvider extends ContentProvider {
     @Nullable
     @Override
     public Uri insert(@NonNull Uri _uri, ContentValues _values) {
-        if (!AUTHORITY.equals(_uri.getAuthority())) {
-            return null;
-        }
-
-        List<String> pathSegments = _uri.getPathSegments();
-        if (pathSegments.size() == 0) {
-            return null;
-        }
-        String firstPart = pathSegments.get(0);
-        if (mInternalProviders.containsKey(firstPart)) {
-            return mInternalProviders.get(firstPart).insert(_uri, _values);
+        IInternalProvider provider = getInternalProvider(_uri);
+        if (provider != null) {
+            return provider.insert(_uri, _values);
         }
         return null;
     }
 
     @Override
     public int delete(@NonNull Uri _uri, String _selection, String[] _selectionArgs) {
-        if (!AUTHORITY.equals(_uri.getAuthority())) {
-            return 0;
-        }
-
-        List<String> pathSegments = _uri.getPathSegments();
-        if (pathSegments.size() == 0) {
-            return 0;
-        }
-        String firstPart = pathSegments.get(0);
-        if (mInternalProviders.containsKey(firstPart)) {
-            return mInternalProviders.get(firstPart).delete(_uri, _selection, _selectionArgs);
+        IInternalProvider provider = getInternalProvider(_uri);
+        if (provider != null) {
+            return provider.delete(_uri, _selection, _selectionArgs);
         }
         return 0;
     }
@@ -160,17 +149,9 @@ public class InstalistProvider extends ContentProvider {
     @Override
     public int update(@NonNull Uri _uri, ContentValues _values, String _selection,
                       String[] _selectionArgs) {
-        if (!AUTHORITY.equals(_uri.getAuthority())) {
-            return 0;
-        }
-
-        List<String> pathSegments = _uri.getPathSegments();
-        if (pathSegments.size() == 0) {
-            return 0;
-        }
-        String firstPart = pathSegments.get(0);
-        if (mInternalProviders.containsKey(firstPart)) {
-            return mInternalProviders.get(firstPart).update(_uri, _values, _selection, _selectionArgs);
+        IInternalProvider provider = getInternalProvider(_uri);
+        if (provider != null) {
+            return provider.update(_uri, _values, _selection, _selectionArgs);
         }
         return 0;
     }

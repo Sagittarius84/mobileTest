@@ -19,6 +19,18 @@ public class DBOpenHelper extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase _db) {
         // TODO: Create tables.
+        _db.execSQL("CREATE TABLE category (_id TEXT PRIMARY KEY NOT NULL, name TEXT NOT NULL)");
+        _db.execSQL("CREATE TABLE list (_id TEXT PRIMARY KEY NOT NULL, name TEXT NOT NULL, " +
+                "category TEXT, FOREIGN KEY (category) REFERENCES category (_id) ON UPDATE CASCADE " +
+                "ON DELETE CASCADE)");
+    }
+
+    @Override
+    public void onOpen(SQLiteDatabase _db) {
+        super.onOpen(_db);
+        if (!_db.isReadOnly()) {
+            _db.execSQL("PRAGMA foreign_key = ON");
+        }
     }
 
     @Override
