@@ -163,15 +163,95 @@ public class ProductProviderTest extends AndroidTestCase {
 
 
     public void testDeleteSingleProduct() {
-// TODO: implement
+
+        ContentValues contentValues = new ContentValues();
+        String uuid = UUID.randomUUID().toString();
+
+        contentValues.put(Product.COLUMN_ID, uuid);
+        contentValues.put(Product.COLUMN_NAME, "TestProduct");
+        contentValues.put(Product.COLUMN_DEFAULT_AMOUNT, 0.5f);
+        contentValues.put(Product.COLUMN_STEP_AMOUNT, 0.5f);
+        contentValues.put(Product.COLUMN_UNIT_ID, (String) null);
+
+        Uri uri = mProductProvider.insert(Uri.parse(ProductProvider.SINGLE_PRODUCT_CONTENT_URI.replace("*", uuid)), contentValues);
+
+        int affectedRows = mProductProvider.delete(uri, null, null);
+        assertEquals(1, affectedRows);
+        Cursor cursor = mProductProvider.query(uri, Product.ALL_COLUMNS, null, null, null);
+        assertNotNull(cursor);
+        assertEquals(0, cursor.getCount());
     }
 
     public void testDeleteMultipleProducts() {
-// TODO: implement
+        ContentValues contentValues = new ContentValues();
+        String uuid = UUID.randomUUID().toString();
+
+        contentValues.put(Product.COLUMN_ID, uuid);
+        contentValues.put(Product.COLUMN_NAME, "TestProduct1");
+        contentValues.put(Product.COLUMN_DEFAULT_AMOUNT, 0.5f);
+        contentValues.put(Product.COLUMN_STEP_AMOUNT, 0.5f);
+        contentValues.put(Product.COLUMN_UNIT_ID, (String) null);
+
+        mProductProvider.insert(Uri.parse(ProductProvider.SINGLE_PRODUCT_CONTENT_URI.replace("*", uuid)), contentValues);
+
+        String uuid2 = UUID.randomUUID().toString();
+
+        contentValues.put(Product.COLUMN_ID, uuid2);
+        contentValues.put(Product.COLUMN_NAME, "TestProduct2");
+        contentValues.put(Product.COLUMN_DEFAULT_AMOUNT, 0.5f);
+        contentValues.put(Product.COLUMN_STEP_AMOUNT, 0.5f);
+        contentValues.put(Product.COLUMN_UNIT_ID, (String) null);
+
+        mProductProvider.insert(Uri.parse(ProductProvider.SINGLE_PRODUCT_CONTENT_URI.replace("*", uuid2)), contentValues);
+
+        int affectedRows = mProductProvider.delete(Uri.parse(ProductProvider.MULTIPLE_PRODUCT_CONTENT_URI), Product.COLUMN_NAME + " LIKE ?", new String[]{"%TestProduct%"});
+
+        assertEquals(2, affectedRows);
+
+
+        contentValues.put(Product.COLUMN_ID, uuid);
+        contentValues.put(Product.COLUMN_NAME, "TestProduct1");
+        contentValues.put(Product.COLUMN_DEFAULT_AMOUNT, 0.5f);
+        contentValues.put(Product.COLUMN_STEP_AMOUNT, 0.5f);
+        contentValues.put(Product.COLUMN_UNIT_ID, (String) null);
+
+        mProductProvider.insert(Uri.parse(ProductProvider.SINGLE_PRODUCT_CONTENT_URI.replace("*", uuid)), contentValues);
+
+        contentValues.put(Product.COLUMN_ID, uuid2);
+        contentValues.put(Product.COLUMN_NAME, "TestProduct2");
+        contentValues.put(Product.COLUMN_DEFAULT_AMOUNT, 0.5f);
+        contentValues.put(Product.COLUMN_STEP_AMOUNT, 0.5f);
+        contentValues.put(Product.COLUMN_UNIT_ID, (String) null);
+
+        mProductProvider.insert(Uri.parse(ProductProvider.SINGLE_PRODUCT_CONTENT_URI.replace("*", uuid2)), contentValues);
+
+        affectedRows = mProductProvider.delete(Uri.parse(ProductProvider.MULTIPLE_PRODUCT_CONTENT_URI), Product.COLUMN_NAME + " LIKE ?", new String[]{"%TestProduct1%"});
+
+        assertEquals(1, affectedRows);
     }
 
     public void testUpdateSingleProduct() {
-// TODO: implement
+        ContentValues contentValues = new ContentValues();
+        String uuid = UUID.randomUUID().toString();
+
+        contentValues.put(Product.COLUMN_ID, uuid);
+        contentValues.put(Product.COLUMN_NAME, "TestProduct1");
+        contentValues.put(Product.COLUMN_DEFAULT_AMOUNT, 0.5f);
+        contentValues.put(Product.COLUMN_STEP_AMOUNT, 0.5f);
+        contentValues.put(Product.COLUMN_UNIT_ID, (String) null);
+
+        Uri uri = mProductProvider.insert(Uri.parse(ProductProvider.SINGLE_PRODUCT_CONTENT_URI.replace("*", uuid)), contentValues);
+
+        contentValues.put(Product.COLUMN_DEFAULT_AMOUNT, 1.0f);
+        int affectedRows = mProductProvider.update(uri, contentValues, null, null);
+
+        assertEquals(1, affectedRows);
+
+        Cursor cursor = mProductProvider.query(uri, Product.ALL_COLUMNS, null, null, null);
+        assertEquals(1, cursor.getCount());
+        cursor.moveToFirst();
+
+        assertEquals(1.0f, cursor.getFloat(cursor.getColumnIndex(Product.COLUMN_DEFAULT_AMOUNT)), 0.001f);
     }
 
     public void testUpdateMultipleProducts() {

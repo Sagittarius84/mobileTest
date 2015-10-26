@@ -97,7 +97,7 @@
     <string name="read_write_shoppinglists">Read and change shopping-lists</string>
     <string name="remove">Remove</string>
     <string name="remove_category">Remove Category</string>
-    <string name="remove_product_question">Do you really wan\'t to remove the product named %1$s?</string>
+    <string name="remove_product_question">Do you really want to remove the product named %1$s?</string>
     <string name="remove_product_question2">The product is still used as ingredient or listed somewhere. Still delete?</string>
     <string name="remove_unit_question">The unit is still used for some products. Do you want to delete also the products or should the products use no unit (unlinked)?</string>
     <string name="remove_recipe_question">Do you really wan\'t to remove the recipe named %1$s?\nNote that it\'s ingredients won\'t be deleted from lists.</string>

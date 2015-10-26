@@ -11,6 +11,7 @@ import android.support.annotation.Nullable;
 import org.noorganization.instalist.provider.internal.CategoryProvider;
 import org.noorganization.instalist.provider.internal.IInternalProvider;
 import org.noorganization.instalist.provider.internal.ProductProvider;
+import org.noorganization.instalist.provider.internal.UnitProvider;
 
 import java.util.HashMap;
 import java.util.List;
@@ -22,6 +23,7 @@ public class InstalistProvider extends ContentProvider {
 
     public final static String AUTHORITY = "org.noorganization.instalist.provider";
 
+    public final static String BASE_VENDOR = "vnd.noorganization.";
     /**
      * The base content uri. Build a uri with the table paths.
      **/
@@ -82,12 +84,16 @@ public class InstalistProvider extends ContentProvider {
 
         IInternalProvider categoryProvider = new CategoryProvider();
         IInternalProvider productProvider = new ProductProvider(getContext());
+        IInternalProvider unitProvider = new UnitProvider(getContext());
+
         categoryProvider.onCreate(mDatabase);
         productProvider.onCreate(mDatabase);
+        unitProvider.onCreate(mDatabase);
 
         mInternalProviders = new HashMap<>();
         mInternalProviders.put("category", categoryProvider);
         mInternalProviders.put("prodcut", productProvider);
+        mInternalProviders.put("unit", unitProvider);
         return true;
     }
 

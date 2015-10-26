@@ -10,9 +10,13 @@ public class Unit extends SugarRecord<Unit> {
 
     public final static String TABLE_NAME = "unit";
 
-    public static String COLUMN_ID = "_id";
-    public static String COLUMN_NAME = "name";
+    public final static String COLUMN_ID = "_id";
+    public final static String COLUMN_NAME = "name";
 
+    public final static String[] ALL_COLUMNS = {COLUMN_ID, COLUMN_NAME};
+    /**
+     * @deprecated  do not use anymore instead use {@link Unit#COLUMN_NAME}
+     */
     public static String ATTR_NAME = "m_name";
 
     public final static String DATABASE_CREATE = "CREATE TABLE " + TABLE_NAME
