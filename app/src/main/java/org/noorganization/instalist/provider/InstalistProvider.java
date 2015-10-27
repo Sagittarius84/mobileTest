@@ -11,6 +11,7 @@ import android.support.annotation.Nullable;
 import org.noorganization.instalist.provider.internal.CategoryProvider;
 import org.noorganization.instalist.provider.internal.IInternalProvider;
 import org.noorganization.instalist.provider.internal.ProductProvider;
+import org.noorganization.instalist.provider.internal.TagProvider;
 import org.noorganization.instalist.provider.internal.UnitProvider;
 
 import java.util.HashMap;
@@ -85,15 +86,18 @@ public class InstalistProvider extends ContentProvider {
         IInternalProvider categoryProvider = new CategoryProvider();
         IInternalProvider productProvider = new ProductProvider(getContext());
         IInternalProvider unitProvider = new UnitProvider(getContext());
+        IInternalProvider tagProvider = new TagProvider(getContext());
 
         categoryProvider.onCreate(mDatabase);
         productProvider.onCreate(mDatabase);
         unitProvider.onCreate(mDatabase);
+        tagProvider.onCreate(mDatabase);
 
         mInternalProviders = new HashMap<>();
         mInternalProviders.put("category", categoryProvider);
         mInternalProviders.put("prodcut", productProvider);
         mInternalProviders.put("unit", unitProvider);
+        mInternalProviders.put("tag", tagProvider);
         return true;
     }
 

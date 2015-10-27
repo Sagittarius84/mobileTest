@@ -12,7 +12,23 @@ import java.util.List;
  * Created by michi on 14.04.15.
  */
 public class Recipe extends SugarRecord<Recipe> {
+
+    /**
+     * @deprecated use instead {@link Recipe#COLUMN_NAME}
+     */
     public final static String ATTR_NAME = StringUtil.toSQLName("mName");
+
+    public final static String TABLE_NAME = "recipe";
+
+    public final static String COLUMN_ID = "_id";
+
+    public final static String COLUMN_NAME = "name";
+
+    public final static String DATABASE_CREATE = "CREATE TABLE " + TABLE_NAME
+            + "("
+            + COLUMN_ID + " TEXT PRIMARY KEY,"
+            + COLUMN_NAME + " TEXT"
+            + ")";
 
     public String mName;
 

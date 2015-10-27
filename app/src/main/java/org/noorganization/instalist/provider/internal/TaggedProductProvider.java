@@ -77,8 +77,8 @@ public class TaggedProductProvider implements IInternalProvider {
         switch (mMatcher.match(_uri)) {
 
             case SINGLE_TAGGED_PRODUCT:
-                String selection = ProviderUtils.getSelectionWithIdQuery(TaggedProduct.COLUMN_ID, _selection);
-                String[] selectionArgs = ProviderUtils.getSelectionArgsWithId(_selectionArgs, _uri.getLastPathSegment());
+                String selection = ProviderUtils.prependIdToQuery(TaggedProduct.COLUMN_ID, _selection);
+                String[] selectionArgs = ProviderUtils.prependSelectionArgs(_selectionArgs, _uri.getLastPathSegment());
                 cursor = mDatabase.query(TaggedProduct.TABLE_NAME, _projection, selection, selectionArgs, null, null, _sortOrder);
                 break;
             case MULTIPLE_TAGGED_PRODUCTS:
@@ -148,8 +148,8 @@ public class TaggedProductProvider implements IInternalProvider {
 
         switch (mMatcher.match(_uri)) {
             case SINGLE_TAGGED_PRODUCT:
-                String selection = ProviderUtils.getSelectionWithIdQuery(TaggedProduct.COLUMN_ID, null);
-                String[] selectionArgs = ProviderUtils.getSelectionArgsWithId(null, _uri.getLastPathSegment());
+                String selection = ProviderUtils.prependIdToQuery(TaggedProduct.COLUMN_ID, null);
+                String[] selectionArgs = ProviderUtils.prependSelectionArgs(null, _uri.getLastPathSegment());
                 affectedRows = mDatabase.delete(TaggedProduct.TABLE_NAME, selection, selectionArgs);
                 break;
             case MULTIPLE_TAGGED_PRODUCTS:
@@ -170,8 +170,8 @@ public class TaggedProductProvider implements IInternalProvider {
         int affectedRows = 0;
         switch (mMatcher.match(_uri)) {
             case SINGLE_TAGGED_PRODUCT:
-                String selection = ProviderUtils.getSelectionWithIdQuery(TaggedProduct.COLUMN_ID, null);
-                String[] selectionArgs = ProviderUtils.getSelectionArgsWithId(null, _uri.getLastPathSegment());
+                String selection = ProviderUtils.prependIdToQuery(TaggedProduct.COLUMN_ID, null);
+                String[] selectionArgs = ProviderUtils.prependSelectionArgs(null, _uri.getLastPathSegment());
                 affectedRows = mDatabase.update(TaggedProduct.TABLE_NAME, _values, selection, selectionArgs);
                 break;
             case MULTIPLE_TAGGED_PRODUCTS:

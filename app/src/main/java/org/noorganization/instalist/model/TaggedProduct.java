@@ -29,14 +29,15 @@ public class TaggedProduct extends SugarRecord<TaggedProduct> {
     public final static String COLUMN_TAG_ID = "tag_id";
     public final static String COLUMN_PRODUCT_ID = "product_id";
 
-    public final static String CREATE_DATABASE  = "TCREATE TABLE " + TABLE_NAME
+    public final static String DATABASE_CREATE = "CREATE TABLE " + TABLE_NAME
             + "("
-            + COLUMN_ID + " TEXT PRIMARY KEY"
-            + COLUMN_TAG_ID + " TEXT"
-            + COLUMN_PRODUCT_ID + "TEXT"
-           // + "FOREIGN KEY " + COLUMN_TAG_ID + " REFERENCES " + Tag.TABLE_NAME + " ON(" + Tag.COLUMN_ID + ")"
-            + "FOREIGN KEY " + COLUMN_PRODUCT_ID + " REFERENCES " + Product.TABLE_NAME + " ON(" + Product.COLUMN_ID + ")"
-            + "ONUPDATE ONDELETE CASCADE" // TODO look what to do in this case
+            + COLUMN_ID + " TEXT PRIMARY KEY,"
+            + COLUMN_TAG_ID + " TEXT,"
+            + COLUMN_PRODUCT_ID + " TEXT,"
+            + "FOREIGN KEY (" + COLUMN_PRODUCT_ID + ") REFERENCES " + Product.TABLE_NAME + " (" + Product.COLUMN_ID + ") "
+            + "ON UPDATE CASCADE ON DELETE CASCADE,"
+            + "FOREIGN KEY (" + COLUMN_TAG_ID + ") REFERENCES " + Tag.TABLE_NAME + " (" + Tag.COLUMN_ID + ") "
+            + "ON UPDATE CASCADE ON DELETE CASCADE"
             + ")";
 
     public Tag     mTag;

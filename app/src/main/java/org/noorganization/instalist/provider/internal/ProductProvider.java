@@ -6,7 +6,6 @@ import android.content.Context;
 import android.content.UriMatcher;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteException;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 
@@ -79,8 +78,8 @@ public class ProductProvider implements IInternalProvider {
         switch (mMatcher.match(_uri)) {
 
             case SINGLE_PRODUCT:
-                String selection = ProviderUtils.getSelectionWithIdQuery(Product.COLUMN_ID, _selection);
-                String[] selectionArgs = ProviderUtils.getSelectionArgsWithId(_selectionArgs, _uri.getLastPathSegment());
+                String selection = ProviderUtils.prependIdToQuery(Product.COLUMN_ID, _selection);
+                String[] selectionArgs = ProviderUtils.prependSelectionArgs(_selectionArgs, _uri.getLastPathSegment());
                 cursor = mDatabase.query(Product.TABLE_NAME, _projection, selection, selectionArgs, null, null, _sortOrder);
                 break;
             case MULTIPLE_PRODUCTS:
@@ -149,8 +148,8 @@ public class ProductProvider implements IInternalProvider {
 
         switch (mMatcher.match(_uri)) {
             case SINGLE_PRODUCT:
-                String selection = ProviderUtils.getSelectionWithIdQuery(Product.COLUMN_ID, null);
-                String[] selectionArgs = ProviderUtils.getSelectionArgsWithId(null, _uri.getLastPathSegment());
+                String selection = ProviderUtils.prependIdToQuery(Product.COLUMN_ID, null);
+                String[] selectionArgs = ProviderUtils.prependSelectionArgs(null, _uri.getLastPathSegment());
                 affectedRows = mDatabase.delete(Product.TABLE_NAME, selection, selectionArgs);
                 break;
             case MULTIPLE_PRODUCTS:
@@ -170,8 +169,8 @@ public class ProductProvider implements IInternalProvider {
         int affectedRows = 0;
         switch (mMatcher.match(_uri)) {
             case SINGLE_PRODUCT:
-                String selection = ProviderUtils.getSelectionWithIdQuery(Product.COLUMN_ID, null);
-                String[] selectionArgs = ProviderUtils.getSelectionArgsWithId(null, _uri.getLastPathSegment());
+                String selection = ProviderUtils.prependIdToQuery(Product.COLUMN_ID, null);
+                String[] selectionArgs = ProviderUtils.prependSelectionArgs(null, _uri.getLastPathSegment());
                 affectedRows = mDatabase.update(Product.TABLE_NAME, _values, selection, selectionArgs);
                 break;
             case MULTIPLE_PRODUCTS:

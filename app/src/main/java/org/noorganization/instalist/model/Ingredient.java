@@ -9,24 +9,52 @@ import com.orm.SugarRecord;
  */
 public class Ingredient extends SugarRecord<Ingredient> {
 
+    public final static String TABLE_NAME = "ingredient";
+
+    public final static String COLUMN_ID = "_id";
+    public final static String COLUMN_PRODUCT_ID = "product_id";
+    public final static String COLUMN_RECIPE_ID = "recipe_id";
+    public final static String COLUMN_AMOUNT = "amount";
+
+
+    public final static String DATABASE_CREATE = "CREATE TABLE " + TABLE_NAME
+            + "("
+            + COLUMN_ID + " TEXT PRIMARY KEY,"
+            + COLUMN_PRODUCT_ID + " TEXT,"
+            + COLUMN_RECIPE_ID + " TEXT,"
+            + COLUMN_AMOUNT + " REAL,"
+            + "FOREIGN KEY (" + COLUMN_PRODUCT_ID + ") REFERENCES " +  Product.TABLE_NAME + "( " + Product.COLUMN_ID  + " )"
+            + "ON UPDATE CASCADE ON DELETE CASCADE,"
+            + "FOREIGN KEY (" + COLUMN_RECIPE_ID + ") REFERENCES " +  Recipe.TABLE_NAME + "( " + Recipe.COLUMN_ID  + " )"
+            + "ON UPDATE CASCADE ON DELETE CASCADE"
+            + ")";
+    /**
+     * @deprecated use {@link Ingredient#COLUMN_ID}
+     */
     public final static String ATTR_PRODUCT = StringUtil.toSQLName("mProduct");
-    public final static String ATTR_AMOUNT  = StringUtil.toSQLName("mAmount");
-    public final static String ATTR_RECIPE  = StringUtil.toSQLName("mRecipe");
+    /**
+     * @deprecated use {@link Ingredient#COLUMN_AMOUNT}
+     */
+    public final static String ATTR_AMOUNT = StringUtil.toSQLName("mAmount");
+    /**
+     * @deprecated use {@link Ingredient#COLUMN_RECIPE_ID}
+     */
+    public final static String ATTR_RECIPE = StringUtil.toSQLName("mRecipe");
 
     public Product mProduct;
-    public Recipe  mRecipe;
-    public float   mAmount;
+    public Recipe mRecipe;
+    public float mAmount;
 
     public Ingredient() {
         mProduct = null;
-        mRecipe  = null;
-        mAmount  = 1.0f;
+        mRecipe = null;
+        mAmount = 1.0f;
     }
 
     public Ingredient(Product _product, Recipe _recipe, float _amount) {
         mProduct = _product;
-        mRecipe  = _recipe;
-        mAmount  = _amount;
+        mRecipe = _recipe;
+        mAmount = _amount;
     }
 
     @Override

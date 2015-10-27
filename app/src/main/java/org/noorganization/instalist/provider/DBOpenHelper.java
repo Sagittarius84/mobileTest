@@ -4,7 +4,11 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
+import org.noorganization.instalist.model.Ingredient;
 import org.noorganization.instalist.model.Product;
+import org.noorganization.instalist.model.Recipe;
+import org.noorganization.instalist.model.Tag;
+import org.noorganization.instalist.model.TaggedProduct;
 import org.noorganization.instalist.model.Unit;
 
 /**
@@ -28,6 +32,10 @@ public class DBOpenHelper extends SQLiteOpenHelper {
                 "ON DELETE CASCADE)");
         _db.execSQL(Unit.DATABASE_CREATE);
         _db.execSQL(Product.DATABASE_CREATE);
+        _db.execSQL(Tag.DATABASE_CREATE);
+        _db.execSQL(TaggedProduct.DATABASE_CREATE);
+        _db.execSQL(Ingredient.DATABASE_CREATE);
+        _db.execSQL(Recipe.DATABASE_CREATE);
     }
 
     @Override

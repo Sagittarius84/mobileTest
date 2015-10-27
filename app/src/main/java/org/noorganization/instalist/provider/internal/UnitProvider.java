@@ -76,8 +76,8 @@ public class UnitProvider implements IInternalProvider {
         switch (mMatcher.match(_uri)) {
 
             case SINGLE_UNIT:
-                String selection = ProviderUtils.getSelectionWithIdQuery(Unit.COLUMN_ID, _selection);
-                String[] selectionArgs = ProviderUtils.getSelectionArgsWithId(_selectionArgs, _uri.getLastPathSegment());
+                String selection = ProviderUtils.prependIdToQuery(Unit.COLUMN_ID, _selection);
+                String[] selectionArgs = ProviderUtils.prependSelectionArgs(_selectionArgs, _uri.getLastPathSegment());
                 cursor = mDatabase.query(Unit.TABLE_NAME, _projection, selection, selectionArgs, null, null, _sortOrder);
                 break;
             case MULTIPLE_UNITS:
@@ -147,8 +147,8 @@ public class UnitProvider implements IInternalProvider {
 
         switch (mMatcher.match(_uri)) {
             case SINGLE_UNIT:
-                String selection = ProviderUtils.getSelectionWithIdQuery(Unit.COLUMN_ID, null);
-                String[] selectionArgs = ProviderUtils.getSelectionArgsWithId(null, _uri.getLastPathSegment());
+                String selection = ProviderUtils.prependIdToQuery(Unit.COLUMN_ID, null);
+                String[] selectionArgs = ProviderUtils.prependSelectionArgs(null, _uri.getLastPathSegment());
                 affectedRows = mDatabase.delete(Unit.TABLE_NAME, selection, selectionArgs);
                 break;
             case MULTIPLE_UNITS:
@@ -169,8 +169,8 @@ public class UnitProvider implements IInternalProvider {
         int affectedRows = 0;
         switch (mMatcher.match(_uri)) {
             case SINGLE_UNIT:
-                String selection = ProviderUtils.getSelectionWithIdQuery(Unit.COLUMN_ID, null);
-                String[] selectionArgs = ProviderUtils.getSelectionArgsWithId(null, _uri.getLastPathSegment());
+                String selection = ProviderUtils.prependIdToQuery(Unit.COLUMN_ID, null);
+                String[] selectionArgs = ProviderUtils.prependSelectionArgs(null, _uri.getLastPathSegment());
                 affectedRows = mDatabase.update(Unit.TABLE_NAME, _values, selection, selectionArgs);
                 break;
             case MULTIPLE_UNITS:
