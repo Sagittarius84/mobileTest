@@ -27,7 +27,7 @@ import java.util.List;
  * The IngredientCreationFragment handles the creation and editing of an ingredient.
  * Created by TS on 24.05.2015.
  */
-public class IngredientCreationFragment extends Fragment {
+public class IngredientCreationFragment extends BaseFragment {
 
     private static final String ARGS_INGREDIENT_ID = "ingredient_id";
     private static final String ARGS_INGREDIENT_LIST_INDEX = "ingredient_list_index";
@@ -103,13 +103,12 @@ public class IngredientCreationFragment extends Fragment {
     }
 
     @Override
-    public void onAttach(Activity _Activity) {
-        super.onAttach(_Activity);
-        mContext = _Activity;
+    protected void onAttachToContext(Context _Context) {
+        mContext = _Context;
         try {
-            mBaseActivityInterface = (IBaseActivity) _Activity;
+            mBaseActivityInterface = (IBaseActivity) getActivity();
         } catch (ClassCastException e) {
-            throw new ClassCastException(_Activity.toString()
+            throw new ClassCastException(getActivity().toString()
                     + " has no IBaseActivity interface attached.");
         }
     }

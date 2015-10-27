@@ -246,7 +246,6 @@ public class MainShoppingListView extends AppCompatActivity implements IBaseActi
     @Override
     protected void onResume() {
         super.onResume();
-        ((ChangeHandler) GlobalApplication.getChangeHandler()).setCurrentBaseActivity(this);
         mAddListButton.setOnClickListener(new OnShoppingListAddClickListener(mDefaultCategoryId, mNewNameEditText));
 
         mAddCategoryButton.setOnClickListener(new View.OnClickListener() {
@@ -314,7 +313,6 @@ public class MainShoppingListView extends AppCompatActivity implements IBaseActi
     @Override
     protected void onPause() {
         super.onPause();
-        ((ChangeHandler) GlobalApplication.getChangeHandler()).setCurrentBaseActivity(null);
         mAddListButton.setOnClickListener(null);
         mNewNameEditText.setOnKeyListener(null);
         mSettingsButton.setOnClickListener(null);

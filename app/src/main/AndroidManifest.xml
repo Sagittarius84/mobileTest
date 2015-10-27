@@ -3,6 +3,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="org.noorganization.instalist" >
 
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+
     <permission
         android:name="org.noorganization.instalist.READWRITE_SHOPPING_LISTS"
         android:description="@string/read_write_shoppinglists"

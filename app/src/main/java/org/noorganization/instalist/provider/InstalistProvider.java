@@ -2,7 +2,6 @@ package org.noorganization.instalist.provider;
 
 import android.content.ContentProvider;
 import android.content.ContentValues;
-import android.content.UriMatcher;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
@@ -11,6 +10,8 @@ import android.support.annotation.Nullable;
 
 import org.noorganization.instalist.provider.internal.CategoryProvider;
 import org.noorganization.instalist.provider.internal.IInternalProvider;
+import org.noorganization.instalist.provider.internal.ProductProvider;
+import org.noorganization.instalist.provider.internal.UnitProvider;
 
 import java.util.HashMap;
 import java.util.List;
@@ -21,6 +22,12 @@ import java.util.List;
 public class InstalistProvider extends ContentProvider {
 
     public final static String AUTHORITY = "org.noorganization.instalist.provider";
+
+    public final static String BASE_VENDOR = "vnd.noorganization.";
+    /**
+     * The base content uri. Build a uri with the table paths.
+     **/
+    public final static Uri BASE_CONTENT_URI = Uri.parse("content://" + AUTHORITY);
 
     // ACM_XXX = Authority Code Multiple Lines; ACS_XXX = Authority Code Single Line
     // as described in http://developer.android.com/guide/topics/providers/content-provider-creating.html
@@ -45,7 +52,7 @@ public class InstalistProvider extends ContentProvider {
 
 //    private UriMatcher mMatcher;
 
-    private SQLiteDatabase                     mDatabase;
+    private SQLiteDatabase mDatabase;
     private HashMap<String, IInternalProvider> mInternalProviders;
 
     @Override
@@ -76,11 +83,17 @@ public class InstalistProvider extends ContentProvider {
         mDatabase = new DBOpenHelper(getContext(), ":memory:").getWritableDatabase();
 
         IInternalProvider categoryProvider = new CategoryProvider();
+        IInternalProvider productProvider = new ProductProvider(getContext());
+        IInternalProvider unitProvider = new UnitProvider(getContext());
+
         categoryProvider.onCreate(mDatabase);
+        productProvider.onCreate(mDatabase);
+        unitProvider.onCreate(mDatabase);
 
         mInternalProviders = new HashMap<>();
         mInternalProviders.put("category", categoryProvider);
-
+        mInternalProviders.put("prodcut", productProvider);
+        mInternalProviders.put("unit", unitProvider);
         return true;
     }
 
@@ -88,18 +101,9 @@ public class InstalistProvider extends ContentProvider {
     @Override
     public Cursor query(@NonNull Uri _uri, String[] _projection, String _selection,
                         String[] _selectionArgs, String _sortOrder) {
-        if (!AUTHORITY.equals(_uri.getAuthority())) {
-            return null;
-        }
-
-        List<String> pathSegments = _uri.getPathSegments();
-        if (pathSegments.size() == 0) {
-            return null;
-        }
-        String firstPart = pathSegments.get(0);
-        if (mInternalProviders.containsKey(firstPart)) {
-            return mInternalProviders.get(firstPart).query(_uri, _projection, _selection,
-                    _selectionArgs, _sortOrder);
+        IInternalProvider provider = getInternalProvider(_uri);
+        if (provider != null) {
+            return provider.query(_uri, _projection, _selection, _selectionArgs, _sortOrder);
         }
         return null;
     }
@@ -107,6 +111,20 @@ public class InstalistProvider extends ContentProvider {
     @Nullable
     @Override
     public String getType(@NonNull Uri _uri) {
+        IInternalProvider provider = getInternalProvider(_uri);
+        if (provider != null) {
+            return provider.getType(_uri);
+        }
+        return null;
+    }
+
+    /**
+     * Returns the right provider for the given uri. The decision is made by the first path segment.
+     *
+     * @param _uri The uri to provide content for.
+     * @return Either the internal provider or null if uri is not okay or it's the wrong authority.
+     */
+    private IInternalProvider getInternalProvider(@NonNull Uri _uri) {
         if (!AUTHORITY.equals(_uri.getAuthority())) {
             return null;
         }
@@ -115,9 +133,10 @@ public class InstalistProvider extends ContentProvider {
         if (pathSegments.size() == 0) {
             return null;
         }
+
         String firstPart = pathSegments.get(0);
         if (mInternalProviders.containsKey(firstPart)) {
-            return mInternalProviders.get(firstPart).getType(_uri);
+            return mInternalProviders.get(firstPart);
         }
         return null;
     }
@@ -125,34 +144,18 @@ public class InstalistProvider extends ContentProvider {
     @Nullable
     @Override
     public Uri insert(@NonNull Uri _uri, ContentValues _values) {
-        if (!AUTHORITY.equals(_uri.getAuthority())) {
-            return null;
-        }
-
-        List<String> pathSegments = _uri.getPathSegments();
-        if (pathSegments.size() == 0) {
-            return null;
-        }
-        String firstPart = pathSegments.get(0);
-        if (mInternalProviders.containsKey(firstPart)) {
-            return mInternalProviders.get(firstPart).insert(_uri, _values);
+        IInternalProvider provider = getInternalProvider(_uri);
+        if (provider != null) {
+            return provider.insert(_uri, _values);
         }
         return null;
     }
 
     @Override
     public int delete(@NonNull Uri _uri, String _selection, String[] _selectionArgs) {
-        if (!AUTHORITY.equals(_uri.getAuthority())) {
-            return 0;
-        }
-
-        List<String> pathSegments = _uri.getPathSegments();
-        if (pathSegments.size() == 0) {
-            return 0;
-        }
-        String firstPart = pathSegments.get(0);
-        if (mInternalProviders.containsKey(firstPart)) {
-            return mInternalProviders.get(firstPart).delete(_uri, _selection, _selectionArgs);
+        IInternalProvider provider = getInternalProvider(_uri);
+        if (provider != null) {
+            return provider.delete(_uri, _selection, _selectionArgs);
         }
         return 0;
     }
@@ -160,17 +163,9 @@ public class InstalistProvider extends ContentProvider {
     @Override
     public int update(@NonNull Uri _uri, ContentValues _values, String _selection,
                       String[] _selectionArgs) {
-        if (!AUTHORITY.equals(_uri.getAuthority())) {
-            return 0;
-        }
-
-        List<String> pathSegments = _uri.getPathSegments();
-        if (pathSegments.size() == 0) {
-            return 0;
-        }
-        String firstPart = pathSegments.get(0);
-        if (mInternalProviders.containsKey(firstPart)) {
-            return mInternalProviders.get(firstPart).update(_uri, _values, _selection, _selectionArgs);
+        IInternalProvider provider = getInternalProvider(_uri);
+        if (provider != null) {
+            return provider.update(_uri, _values, _selection, _selectionArgs);
         }
         return 0;
     }

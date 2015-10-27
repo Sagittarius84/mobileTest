@@ -4,6 +4,9 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
+import org.noorganization.instalist.model.Product;
+import org.noorganization.instalist.model.Unit;
+
 /**
  * Helps to open database in the provider.
  * Created by damihe on 21.10.15.
@@ -19,6 +22,20 @@ public class DBOpenHelper extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase _db) {
         // TODO: Create tables.
+        _db.execSQL("CREATE TABLE category (_id TEXT PRIMARY KEY NOT NULL, name TEXT NOT NULL)");
+        _db.execSQL("CREATE TABLE list (_id TEXT PRIMARY KEY NOT NULL, name TEXT NOT NULL, " +
+                "category TEXT, FOREIGN KEY (category) REFERENCES category (_id) ON UPDATE CASCADE " +
+                "ON DELETE CASCADE)");
+        _db.execSQL(Unit.DATABASE_CREATE);
+        _db.execSQL(Product.DATABASE_CREATE);
+    }
+
+    @Override
+    public void onOpen(SQLiteDatabase _db) {
+        super.onOpen(_db);
+        if (!_db.isReadOnly()) {
+            _db.execSQL("PRAGMA foreign_key = ON");
+        }
     }
 
     @Override

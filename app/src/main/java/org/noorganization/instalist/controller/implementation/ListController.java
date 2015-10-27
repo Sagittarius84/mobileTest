@@ -1,12 +1,9 @@
 package org.noorganization.instalist.controller.implementation;
 
-import android.os.Message;
-
 import com.orm.SugarRecord;
 import com.orm.query.Condition;
 import com.orm.query.Select;
 
-import org.noorganization.instalist.GlobalApplication;
 import org.noorganization.instalist.controller.IListController;
 import org.noorganization.instalist.controller.event.Change;
 import org.noorganization.instalist.controller.event.ListChangedMessage;
@@ -15,8 +12,6 @@ import org.noorganization.instalist.model.Category;
 import org.noorganization.instalist.model.ListEntry;
 import org.noorganization.instalist.model.Product;
 import org.noorganization.instalist.model.ShoppingList;
-import org.noorganization.instalist.view.ChangeHandler;
-import org.noorganization.instalist.view.IChangeHandler;
 
 import java.util.List;
 
