@@ -24,6 +24,8 @@ public class Recipe extends SugarRecord<Recipe> {
 
     public final static String COLUMN_NAME = "name";
 
+    public final static String[] ALL_COLUMNS = {COLUMN_ID, COLUMN_NAME};
+
     public final static String DATABASE_CREATE = "CREATE TABLE " + TABLE_NAME
             + "("
             + COLUMN_ID + " TEXT PRIMARY KEY,"

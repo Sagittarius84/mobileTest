@@ -31,13 +31,12 @@ public class RecipeProvider implements IInternalProvider {
 
     private static final int SINGLE_RECIPE = 1;
     private static final int MULTIPLE_RECIPES = 2;
-
     private static final int SINGLE_RECIPE_INGREDIENT = 3;
     private static final int MULTIPLE_RECIPE_INGREDIENT = 4;
 
+
     private static final String SINGLE_RECIPE_STRING = "recipe/*";
     private static final String MULTIPLE_RECIPE_STRING = "recipe";
-
     private static final String SINGLE_RECIPE_INGREDIENT_STRING = "recipe/*/ingredient/*";
     private static final String MULTIPLE_RECIPE_INGREDIENT_STRING = "recipe/*/ingredient";
 
@@ -93,10 +92,11 @@ public class RecipeProvider implements IInternalProvider {
         mDatabase = _db;
         mMatcher = new UriMatcher(UriMatcher.NO_MATCH);
 
+        mMatcher.addURI(InstalistProvider.AUTHORITY, SINGLE_RECIPE_INGREDIENT_STRING, SINGLE_RECIPE_INGREDIENT);
+        mMatcher.addURI(InstalistProvider.AUTHORITY, MULTIPLE_RECIPE_INGREDIENT_STRING, MULTIPLE_RECIPE_INGREDIENT);
         mMatcher.addURI(InstalistProvider.AUTHORITY, SINGLE_RECIPE_STRING, SINGLE_RECIPE);
         mMatcher.addURI(InstalistProvider.AUTHORITY, MULTIPLE_RECIPE_STRING, MULTIPLE_RECIPES);
-        mMatcher.addURI(InstalistProvider.AUTHORITY, SINGLE_RECIPE_INGREDIENT_CONTENT_URI, SINGLE_RECIPE_INGREDIENT);
-        mMatcher.addURI(InstalistProvider.AUTHORITY, MULTIPLE_RECIPE_INGREDIENT_CONTENT_URI, MULTIPLE_RECIPE_INGREDIENT);
+
     }
 
     @Override
@@ -177,12 +177,12 @@ public class RecipeProvider implements IInternalProvider {
                 if (rowId == -1) {
                     return null;
                 }
-                cursor = mDatabase.query(Ingredient.TABLE_NAME, new String[]{Ingredient.COLUMN_ID},
-                        SQLiteUtils.COLUMN_ROW_ID + "=?", new String[]{String.valueOf(rowId)},
+                cursor = mDatabase.query(Ingredient.TABLE_NAME, Ingredient.ALL_COLUMNS,
+                        SQLiteUtils.COLUMN_ROW_ID + " = ?", new String[]{String.valueOf(rowId)},
                         null, null, null, null);
                 cursor.moveToFirst();
-                String contentUri = SINGLE_RECIPE_INGREDIENT_CONTENT_URI.replaceFirst("/*/", cursor.getString(cursor.getColumnIndex(Ingredient.COLUMN_RECIPE_ID)));
-                contentUri.replaceFirst("/*/", cursor.getString(cursor.getColumnIndex(Ingredient.COLUMN_ID)));
+                String contentUri = SINGLE_RECIPE_INGREDIENT_CONTENT_URI.replaceFirst("\\*", cursor.getString(cursor.getColumnIndex(Ingredient.COLUMN_RECIPE_ID)));
+                contentUri = contentUri.replaceFirst("\\*", cursor.getString(cursor.getColumnIndex(Ingredient.COLUMN_ID)));
                 newUri = Uri.parse(contentUri);
 
                 break;
@@ -213,8 +213,19 @@ public class RecipeProvider implements IInternalProvider {
                 affectedRows = mDatabase.delete(Recipe.TABLE_NAME, _selection, _selectionArgs);
                 break;
             case SINGLE_RECIPE_INGREDIENT:
+                selection = ProviderUtils.prependIdToQuery(Ingredient.COLUMN_ID, _selection);
+                selection = ProviderUtils.prependIdToQuery(Ingredient.COLUMN_RECIPE_ID, selection);
+
+                selectionArgs = ProviderUtils.prependSelectionArgs(_selectionArgs, _uri.getLastPathSegment());
+                selectionArgs = ProviderUtils.prependSelectionArgs(selectionArgs, _uri.getPathSegments().get(1));
+
+                affectedRows = mDatabase.delete(Ingredient.TABLE_NAME, selection, selectionArgs);
                 break;
             case MULTIPLE_RECIPE_INGREDIENT:
+                selection = ProviderUtils.prependIdToQuery(Ingredient.COLUMN_RECIPE_ID, _selection);
+                selectionArgs = ProviderUtils.prependSelectionArgs(_selectionArgs, _uri.getPathSegments().get(1));
+                affectedRows = mDatabase.delete(Ingredient.TABLE_NAME, selection, selectionArgs);
+                // in this case all recipe ingredients
                 break;
             default:
                 throw new IllegalArgumentException("The given Uri is not supported: " + _uri);
@@ -235,15 +246,21 @@ public class RecipeProvider implements IInternalProvider {
                 String[] selectionArgs = ProviderUtils.prependSelectionArgs(null, _uri.getLastPathSegment());
                 affectedRows = mDatabase.update(Recipe.TABLE_NAME, _values, selection, selectionArgs);
                 break;
-            case MULTIPLE_RECIPES:
-                // TODO for later purposes maybe
-                // affectedRows = mDatabase.update(Recipe.TABLE_NAME, _values, _selection, _selectionArgs);
-                affectedRows = mDatabase.update(Recipe.TABLE_NAME, _values, _selection, _selectionArgs);
-                //break;
+
             case SINGLE_RECIPE_INGREDIENT:
+                selection = ProviderUtils.prependIdToQuery(Ingredient.COLUMN_ID, _selection);
+                selection = ProviderUtils.prependIdToQuery(Ingredient.COLUMN_RECIPE_ID, selection);
+
+                selectionArgs = ProviderUtils.prependSelectionArgs(_selectionArgs, _uri.getLastPathSegment());
+                selectionArgs = ProviderUtils.prependSelectionArgs(selectionArgs, _uri.getPathSegments().get(1));
+
+                affectedRows = mDatabase.update(Ingredient.TABLE_NAME, _values, selection, selectionArgs);
                 break;
+            case MULTIPLE_RECIPES:
+                // affectedRows = mDatabase.update(Recipe.TABLE_NAME, _values, _selection, _selectionArgs);
+                //affectedRows = mDatabase.update(Recipe.TABLE_NAME, _values, _selection, _selectionArgs);
+                //break;
             case MULTIPLE_RECIPE_INGREDIENT:
-                break;
             default:
                 throw new IllegalArgumentException("The given Uri is not supported: " + _uri);
         }

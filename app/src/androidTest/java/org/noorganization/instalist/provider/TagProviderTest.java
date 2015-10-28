@@ -219,7 +219,4 @@ public class TagProviderTest extends AndroidTestCase {
         assertEquals("TestTag2", cursor.getString(cursor.getColumnIndex(Tag.COLUMN_NAME)));
     }
 
-    public void testUpdateMultipleTags() {
-        // TODO: implement
-    }
 }

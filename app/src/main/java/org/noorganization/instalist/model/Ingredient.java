@@ -16,6 +16,7 @@ public class Ingredient extends SugarRecord<Ingredient> {
     public final static String COLUMN_RECIPE_ID = "recipe_id";
     public final static String COLUMN_AMOUNT = "amount";
 
+    public final static String[] ALL_COLUMNS = {COLUMN_ID, COLUMN_PRODUCT_ID, COLUMN_RECIPE_ID, COLUMN_AMOUNT};
 
     public final static String DATABASE_CREATE = "CREATE TABLE " + TABLE_NAME
             + "("
