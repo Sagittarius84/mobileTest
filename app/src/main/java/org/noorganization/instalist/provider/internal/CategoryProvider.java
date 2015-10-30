@@ -4,11 +4,13 @@ import android.content.ContentValues;
 import android.content.UriMatcher;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
 import org.noorganization.instalist.provider.InstalistProvider;
+import org.noorganization.instalist.utils.SQLiteUtils;
 
 /**
  * TODO: implement and describe.
@@ -23,6 +25,8 @@ public class CategoryProvider implements IInternalProvider {
     private static final int SINGLE_CATEGORY = 2;
     private static final int MULTIPLE_LISTS = 3;
     private static final int SINGLE_LIST = 4;
+    private static final int MULTIPLE_ENTRIES = 5;
+    private static final int SINGLE_ENTRY = 6;
 
     @Override
     public void onCreate(SQLiteDatabase _db) {
@@ -32,6 +36,8 @@ public class CategoryProvider implements IInternalProvider {
         mMatcher.addURI(InstalistProvider.AUTHORITY, "category/*", SINGLE_CATEGORY);
         mMatcher.addURI(InstalistProvider.AUTHORITY, "category/*/list", MULTIPLE_LISTS);
         mMatcher.addURI(InstalistProvider.AUTHORITY, "category/*/list/*", SINGLE_LIST);
+        mMatcher.addURI(InstalistProvider.AUTHORITY, "category/*/list/*/entry", MULTIPLE_ENTRIES);
+        mMatcher.addURI(InstalistProvider.AUTHORITY, "category/*/list/*/entry/*", SINGLE_ENTRY);
     }
 
     @Override
@@ -39,41 +45,100 @@ public class CategoryProvider implements IInternalProvider {
         switch (mMatcher.match(_uri)) {
             case MULTIPLE_CATEGORIES:
                 return mDatabase.query("category", _projection, _selection, _selectionArgs, null, null, _sortOrder);
-            case SINGLE_CATEGORY:
-            {
-                String selection = prependSelection("_id = ?", _selection);
-                String[] selectionArgs = prependArgs(new String[] {_uri.getLastPathSegment()},
+            case SINGLE_CATEGORY: {
+                String selection = SQLiteUtils.prependSelection("_id = ?", _selection);
+                String[] selectionArgs = SQLiteUtils.prependSelectionArgs(_uri.getLastPathSegment(),
                         _selectionArgs);
                 return mDatabase.query("category", _projection, selection, selectionArgs, null, null, _sortOrder);
             }
-            case MULTIPLE_LISTS:
-            {
+            case MULTIPLE_LISTS: {
                 String category = _uri.getPathSegments().get(1);
                 if (category.equals("-")) {
-                    String selection = prependSelection("category IS NULL", _selection);
+                    String selection = SQLiteUtils.prependSelection("category IS NULL", _selection);
                     return mDatabase.query("list", _projection, selection,_selectionArgs, null,
                             null, _sortOrder);
                 } else {
-                    String selection = prependSelection("category = ?", _selection);
-                    String[] selectionArgs = prependArgs(new String[]{ category }, _selectionArgs);
+                    String selection = SQLiteUtils.prependSelection("category = ?", _selection);
+                    String[] selectionArgs = SQLiteUtils.prependSelectionArgs(category,
+                            _selectionArgs);
                     return mDatabase.query("list", _projection, selection, selectionArgs, null, null,
                             _sortOrder);
                 }
             }
-            case SINGLE_LIST:
-            {
+            case SINGLE_LIST: {
                 String category = _uri.getPathSegments().get(1);
                 if (category.equals("-")) {
-                    String selection = prependSelection("category IS NULL AND _id = ?", _selection);
-                    String[] selectionArgs = prependArgs(new String[]{_uri.getLastPathSegment()},
+                    String selection = SQLiteUtils.prependSelection("category IS NULL AND _id = ?",
+                            _selection);
+                    String[] selectionArgs = SQLiteUtils.prependSelectionArgs(
+                            _uri.getLastPathSegment(),
                             _selectionArgs);
                     return mDatabase.query("list", _projection, selection, selectionArgs, null,
                             null, _sortOrder);
                 } else {
-                    String selection = prependSelection("category = ? AND _id = ?", _selection);
-                    String[] selectionArgs = prependArgs(new String[]{ category,
-                            _uri.getLastPathSegment() }, _selectionArgs);
+                    String selection = SQLiteUtils.prependSelection("category = ? AND _id = ?",
+                            _selection);
+                    String[] selectionArgs = SQLiteUtils.prependSelectionArgs(
+                            new String[]{category, _uri.getLastPathSegment()},
+                            _selectionArgs);
                     return mDatabase.query("list", _projection, selection, selectionArgs, null, null,
+                            _sortOrder);
+                }
+            }
+            case MULTIPLE_ENTRIES: {
+                String category = _uri.getPathSegments().get(1);
+                String list = _uri.getPathSegments().get(3);
+                SQLiteQueryBuilder queryBuilder = new SQLiteQueryBuilder();
+                queryBuilder.setTables("(listentry INNER JOIN list ON (list._id = listentry.list)) " +
+                        "INNER JOIN product ON (product._id = listentry.product)");
+                queryBuilder.setProjectionMap(SQLiteUtils.generateProjectionMap("listentry",
+                        "_id", "amount", "priority", "product", "list", "struck"));
+                if (category.equals("-")) {
+                    String selection = SQLiteUtils.prependSelection(
+                            "list.category IS NULL AND list = ?",
+                            _selection);
+                    String[] args = SQLiteUtils.prependSelectionArgs(list, _selectionArgs);
+                    return queryBuilder.query(mDatabase, _projection, selection, args, null, null,
+                            _sortOrder);
+                } else {
+                    String selection = SQLiteUtils.prependSelection("list.category = ? AND list = ?",
+                            _selection);
+                    String[] args = SQLiteUtils.prependSelectionArgs(new String[]{category, list},
+                            _selectionArgs);
+                    return queryBuilder.query(mDatabase, _projection, selection, args, null, null,
+                            _sortOrder);
+                }
+            }
+            case SINGLE_ENTRY: {
+                String category = _uri.getPathSegments().get(1);
+                String list = _uri.getPathSegments().get(3);
+                String entry = _uri.getLastPathSegment();
+                SQLiteQueryBuilder queryBuilder = new SQLiteQueryBuilder();
+                queryBuilder.setTables("(listentry INNER JOIN list ON (list._id = listentry.list)) " +
+                        "INNER JOIN product ON (product._id = listentry.product)");
+                queryBuilder.setProjectionMap(SQLiteUtils.generateProjectionMap("listentry",
+                        "_id", "amount", "priority", "product", "list", "struck"));
+                if (category.equals("-")) {
+                    String selection = SQLiteUtils.prependSelection(
+                            "list.category IS NULL AND list = ? AND listentry._id = ?",
+                            _selection);
+                    String[] args = SQLiteUtils.prependSelectionArgs(new String[] {
+                            list,
+                            entry
+                    }, _selectionArgs);
+                    return queryBuilder.query(mDatabase, _projection, selection, args, null, null,
+                            _sortOrder);
+                } else {
+                    String selection = SQLiteUtils.prependSelection("list.category = ? AND " +
+                                    "list = ? AND listentry._id = ?",
+                            _selection);
+                    String[] args = SQLiteUtils.prependSelectionArgs(new String[]{
+                                    category,
+                                    list,
+                                    entry
+                            },
+                            _selectionArgs);
+                    return queryBuilder.query(mDatabase, _projection, selection, args, null, null,
                             _sortOrder);
                 }
             }
@@ -100,18 +165,5 @@ public class CategoryProvider implements IInternalProvider {
     @Override
     public int update(@NonNull Uri _uri, ContentValues _values, String _selection, String[] _selectionArgs) {
         return 0;
-    }
-
-    private static String prependSelection(String _prependedSelection, String _originalSelection) {
-        return _prependedSelection + (_originalSelection == null ? "" : " AND (" + _originalSelection + ")");
-    }
-
-    private static String[] prependArgs(@NonNull String[] _prependedArgs, String[] _originalArgs) {
-        String[] args = new String[_prependedArgs.length + (_originalArgs == null ? 0 : _originalArgs.length)];
-        System.arraycopy(_prependedArgs, 0, args, 0, _prependedArgs.length);
-        if (_originalArgs != null) {
-            System.arraycopy(_originalArgs, 0, args, _prependedArgs.length, _originalArgs.length);
-        }
-        return args;
     }
 }

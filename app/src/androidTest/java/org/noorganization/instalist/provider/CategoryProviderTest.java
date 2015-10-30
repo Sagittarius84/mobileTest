@@ -5,6 +5,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.test.AndroidTestCase;
+import android.util.Log;
 
 import org.noorganization.instalist.provider.internal.CategoryProvider;
 import org.noorganization.instalist.provider.internal.IInternalProvider;
@@ -17,7 +18,7 @@ import java.util.UUID;
 public class CategoryProviderTest extends AndroidTestCase {
 
     IInternalProvider mCategoryProvider;
-    SQLiteDatabase    mDatabase;
+    SQLiteDatabase mDatabase;
 
     @Override
     public void setUp() {
@@ -113,14 +114,14 @@ public class CategoryProviderTest extends AndroidTestCase {
 
         String noCatListUUID = UUID.randomUUID().toString();
         String inCatListUUID = UUID.randomUUID().toString();
-        mDatabase.execSQL("INSERT INTO category (_id, name) VALUES (?, ?)", new String[] {
+        mDatabase.execSQL("INSERT INTO category (_id, name) VALUES (?, ?)", new String[]{
                 categoryUUID, "a category"
         });
         mDatabase.execSQL("INSERT INTO list (_id, name, category) VALUES (?, ?, NULL), (?, ?, ?)",
                 new String[]{
                         noCatListUUID, "test list without category",
                         inCatListUUID, "test list with category", categoryUUID
-            });
+                });
         Cursor listNoCategory = mCategoryProvider.query(MULTIPLE_LISTS_NO_CATEGORY, null, null,
                 null, null);
         assertNotNull(listNoCategory);
@@ -188,4 +189,140 @@ public class CategoryProviderTest extends AndroidTestCase {
         assertNotNull(ndListWOCategory);
         assertEquals(0, ndListWOCategory.getCount());
     }
+
+    public void testQueryMultipleListEntries() {
+        String categoryUUID = UUID.randomUUID().toString();
+        String listUUID = UUID.randomUUID().toString();
+        Uri MULTIPLE_LIST_ELEMENTS = Uri.parse("content://" + InstalistProvider.AUTHORITY +
+                "/category/" + categoryUUID + "/list/" + listUUID + "/entry");
+        Uri MULTIPLE_LIST_ELEMENTS_WO_CAT = Uri.parse("content://" + InstalistProvider.AUTHORITY +
+                "/category/-/list/" + listUUID + "/entry");
+
+        mDatabase.execSQL("INSERT INTO category (_id, name) VALUES (?, ?)", new String[]{
+                categoryUUID,
+                "category"
+        });
+        mDatabase.execSQL("INSERT INTO list (_id, name, category) VALUES (?, ?, ?)", new String[]{
+                listUUID,
+                "list",
+                categoryUUID
+        });
+
+        Cursor noEntries1 = mCategoryProvider.query(MULTIPLE_LIST_ELEMENTS, null, null, null, null);
+        assertNotNull(noEntries1);
+        assertEquals(0, noEntries1.getCount());
+
+        String entry1stUUID = UUID.randomUUID().toString();
+        String product1stUUID = UUID.randomUUID().toString();
+        String product2ndUUID = UUID.randomUUID().toString();
+        Log.i("TEST", "category: " + categoryUUID + " list: " + listUUID + " product: " + product1stUUID + " entry: " + entry1stUUID);
+        mDatabase.execSQL("INSERT INTO product (_id, name) VALUES (?, ?), (?, ?)", new String[]{
+                product1stUUID,
+                "product1",
+                product2ndUUID,
+                "product2"
+        });
+        mDatabase.execSQL("INSERT INTO listentry (_id, product, list) " +
+                "VALUES (?, ?, ?)", new String[]{entry1stUUID, product1stUUID, listUUID});
+
+        Cursor noEntries2 = mCategoryProvider.query(MULTIPLE_LIST_ELEMENTS_WO_CAT, null, null, null,
+                null);
+        assertNotNull(noEntries2);
+        assertEquals(0, noEntries2.getCount());
+
+        Cursor oneEntry = mCategoryProvider.query(MULTIPLE_LIST_ELEMENTS, null, null, null, null);
+        assertNotNull(oneEntry);
+        assertEquals(1, oneEntry.getCount());
+        oneEntry.moveToFirst();
+        assertEquals(entry1stUUID, oneEntry.getString(oneEntry.getColumnIndex("_id")));
+        assertEquals(product1stUUID, oneEntry.getString(oneEntry.getColumnIndex("product")));
+        assertEquals(listUUID, oneEntry.getString(oneEntry.getColumnIndex("list")));
+
+        String entry2ndUUID = UUID.randomUUID().toString();
+        mDatabase.execSQL("INSERT INTO listentry (_id, product, list) VALUES (?, ?, ?)", new String[]{
+                entry2ndUUID,
+                product2ndUUID,
+                listUUID
+        });
+        Cursor twoEntries = mCategoryProvider.query(MULTIPLE_LIST_ELEMENTS, null, null, null,
+                "product.name ASC");
+        assertNotNull(twoEntries);
+        assertEquals(2, twoEntries.getCount());
+        twoEntries.moveToFirst();
+        assertEquals(entry1stUUID, twoEntries.getString(twoEntries.getColumnIndex("_id")));
+        assertEquals(product1stUUID, twoEntries.getString(twoEntries.getColumnIndex("product")));
+        assertEquals(listUUID, twoEntries.getString(twoEntries.getColumnIndex("list")));
+        twoEntries.moveToNext();
+        assertEquals(entry2ndUUID, twoEntries.getString(twoEntries.getColumnIndex("_id")));
+        assertEquals(product2ndUUID, twoEntries.getString(twoEntries.getColumnIndex("product")));
+        assertEquals(listUUID, twoEntries.getString(twoEntries.getColumnIndex("list")));
+    }
+
+    public void testQuerySingleListEntries() {
+        String categoryUUID = UUID.randomUUID().toString();
+        String listUUID = UUID.randomUUID().toString();
+        String entry1stUUID = UUID.randomUUID().toString();
+        String entry2ndUUID = UUID.randomUUID().toString();
+        String product1stUUID = UUID.randomUUID().toString();
+        String product2ndUUID = UUID.randomUUID().toString();
+
+        Uri SINGLE_LIST_ELEMENT1 = Uri.parse("content://" + InstalistProvider.AUTHORITY +
+                "/category/" + categoryUUID + "/list/" + listUUID + "/entry/" + entry1stUUID);
+        Uri SINGLE_LIST_ELEMENT2 = Uri.parse("content://" + InstalistProvider.AUTHORITY +
+                "/category/" + categoryUUID + "/list/" + listUUID + "/entry/" + entry2ndUUID);
+        Uri SINGLE_LIST_ELEMENT_WO_CAT = Uri.parse("content://" + InstalistProvider.AUTHORITY +
+                "/category/-/list/" + listUUID + "/entry/" + entry1stUUID);
+
+        mDatabase.execSQL("INSERT INTO category (_id, name) VALUES (?, ?)", new String[]{
+                categoryUUID,
+                "category"
+        });
+        mDatabase.execSQL("INSERT INTO list (_id, name, category) VALUES (?, ?, ?)", new String[]{
+                listUUID,
+                "list",
+                categoryUUID
+        });
+
+        Cursor noEntry1 = mCategoryProvider.query(SINGLE_LIST_ELEMENT1, null, null, null, null);
+        assertNotNull(noEntry1);
+        assertEquals(0, noEntry1.getCount());
+
+        mDatabase.execSQL("INSERT INTO product (_id, name) VALUES (?, ?), (?, ?)", new String[]{
+                product1stUUID,
+                "product1",
+                product2ndUUID,
+                "product2"
+        });
+        mDatabase.execSQL("INSERT INTO listentry (_id, product, list) " +
+                "VALUES (?, ?, ?), (?, ?, ?)", new String[]{
+                entry1stUUID,
+                product1stUUID,
+                listUUID,
+                entry2ndUUID,
+                product2ndUUID,
+                listUUID
+        });
+
+        Cursor noEntry2 = mCategoryProvider.query(SINGLE_LIST_ELEMENT_WO_CAT, null, null, null,
+                null);
+        assertNotNull(noEntry2);
+        assertEquals(0, noEntry2.getCount());
+
+        Cursor oneEntry1 = mCategoryProvider.query(SINGLE_LIST_ELEMENT1, null, null, null, null);
+        assertNotNull(oneEntry1);
+        assertEquals(1, oneEntry1.getCount());
+        oneEntry1.moveToFirst();
+        assertEquals(entry1stUUID, oneEntry1.getString(oneEntry1.getColumnIndex("_id")));
+        assertEquals(product1stUUID, oneEntry1.getString(oneEntry1.getColumnIndex("product")));
+        assertEquals(listUUID, oneEntry1.getString(oneEntry1.getColumnIndex("list")));
+
+        Cursor oneEntry2 = mCategoryProvider.query(SINGLE_LIST_ELEMENT2, null, null, null, null);
+        assertNotNull(oneEntry2);
+        assertEquals(1, oneEntry2.getCount());
+        oneEntry2.moveToFirst();
+        assertEquals(entry2ndUUID, oneEntry2.getString(oneEntry2.getColumnIndex("_id")));
+        assertEquals(product2ndUUID, oneEntry2.getString(oneEntry2.getColumnIndex("product")));
+        assertEquals(listUUID, oneEntry2.getString(oneEntry2.getColumnIndex("list")));
+    }
+
 }

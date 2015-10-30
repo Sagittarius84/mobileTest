@@ -32,6 +32,15 @@ public class DBOpenHelper extends SQLiteOpenHelper {
                 "ON DELETE CASCADE)");
         _db.execSQL(Unit.DATABASE_CREATE);
         _db.execSQL(Product.DATABASE_CREATE);
+        _db.execSQL("CREATE TABLE listentry (" +
+                "_id TEXT PRIMARY KEY NOT NULL, " +
+                "amount REAL NOT NULL DEFAULT 1, " +
+                "priority INTEGER NOT NULL DEFAULT 0, " +
+                "product TEXT NOT NULL, " +
+                "list TEXT NOT NULL, " +
+                "struck INTEGER NOT NULL DEFAULT 0, " +
+                "FOREIGN KEY (product) REFERENCES product (_id) ON UPDATE CASCADE ON DELETE CASCADE, " +
+                "FOREIGN KEY (list) REFERENCES list (_id) ON UPDATE CASCADE ON DELETE CASCADE)");
         _db.execSQL(Tag.DATABASE_CREATE);
         _db.execSQL(TaggedProduct.DATABASE_CREATE);
         _db.execSQL(Ingredient.DATABASE_CREATE);
