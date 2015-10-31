@@ -1,6 +1,7 @@
 package org.noorganization.instalist.provider;
 
 import android.content.ContentProvider;
+import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
@@ -325,4 +326,24 @@ public class CategoryProviderTest extends AndroidTestCase {
         assertEquals(listUUID, oneEntry2.getString(oneEntry2.getColumnIndex("list")));
     }
 
+    public void testInsertCategory() {
+        Uri categoryUri = Uri.parse("content://" + InstalistProvider.AUTHORITY + "/category");
+
+        ContentValues category1CV = new ContentValues(1);
+        category1CV.put("name", "category1");
+        Uri rtndCat1Uri = mCategoryProvider.insert(categoryUri, category1CV);
+        assertNotNull(rtndCat1Uri);
+        Cursor createdCategory1 = mDatabase.rawQuery("SELECT _id, name FROM category", null);
+        assertNotNull(createdCategory1);
+        assertEquals(1, createdCategory1.getCount());
+        createdCategory1.moveToFirst();
+        assertEquals("category1", createdCategory1.getString(createdCategory1.getColumnIndex("name")));
+        assertEquals(rtndCat1Uri.getLastPathSegment(), createdCategory1.getString(
+                createdCategory1.getColumnIndex("_id")));
+        createdCategory1.close();
+
+        ContentValues category2CV = new ContentValues(0);
+        Uri rtndCat2Uri = mCategoryProvider.insert(categoryUri, category2CV);
+        assertNull(rtndCat2Uri);
+    }
 }

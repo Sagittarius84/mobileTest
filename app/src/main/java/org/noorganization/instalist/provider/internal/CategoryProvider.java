@@ -28,11 +28,13 @@ public class CategoryProvider implements IInternalProvider {
     private static final int MULTIPLE_ENTRIES = 5;
     private static final int SINGLE_ENTRY = 6;
 
+    private static final String URI_MULTIPLE_CATEGORIES = "category";
+
     @Override
     public void onCreate(SQLiteDatabase _db) {
         mDatabase = _db;
         mMatcher = new UriMatcher(UriMatcher.NO_MATCH);
-        mMatcher.addURI(InstalistProvider.AUTHORITY, "category", MULTIPLE_CATEGORIES);
+        mMatcher.addURI(InstalistProvider.AUTHORITY, URI_MULTIPLE_CATEGORIES, MULTIPLE_CATEGORIES);
         mMatcher.addURI(InstalistProvider.AUTHORITY, "category/*", SINGLE_CATEGORY);
         mMatcher.addURI(InstalistProvider.AUTHORITY, "category/*/list", MULTIPLE_LISTS);
         mMatcher.addURI(InstalistProvider.AUTHORITY, "category/*/list/*", SINGLE_LIST);
@@ -154,7 +156,29 @@ public class CategoryProvider implements IInternalProvider {
 
     @Override
     public Uri insert(@NonNull Uri _uri, ContentValues _values) {
-        return null;
+        if (_values == null) {
+            return null;
+        }
+        switch (mMatcher.match(_uri)) {
+            case MULTIPLE_CATEGORIES: {
+                String name = _values.getAsString("name");
+                if (name == null) {
+                    return null;
+                }
+                String newCatUUID = SQLiteUtils.generateId(mDatabase, "category").toString();
+                ContentValues toInsert = new ContentValues(2);
+                toInsert.put("_id", newCatUUID);
+                toInsert.put("name", name);
+                if (mDatabase.insert("category", null, toInsert) != -1) {
+                    return Uri.parse("content://" + InstalistProvider.AUTHORITY + "/" +
+                            URI_MULTIPLE_CATEGORIES + "/" + newCatUUID);
+                } else {
+                    return null;
+                }
+            }
+            default:
+                return null;
+        }
     }
 
     @Override

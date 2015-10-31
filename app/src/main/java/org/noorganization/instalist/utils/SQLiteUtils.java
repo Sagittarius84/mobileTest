@@ -1,9 +1,12 @@
 package org.noorganization.instalist.utils;
 
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.support.annotation.NonNull;
 import android.support.v4.util.ArrayMap;
 
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * Additional utils and helper functions for sqlite.
@@ -74,6 +77,20 @@ public class SQLiteUtils {
         Map<String, String> rtn = new ArrayMap<>(_column.length);
         for (String currentColumn : _column) {
             rtn.put(currentColumn, _table + "." + currentColumn);
+        }
+        return rtn;
+    }
+
+    public static UUID generateId(SQLiteDatabase _db, String _table) {
+        UUID rtn = null;
+        while (rtn == null) {
+            rtn = UUID.randomUUID();
+            Cursor counter = _db.query(_table, new String[]{ "_id" },
+                    "_id = ?", new String[]{ rtn.toString() }, null, null, null);
+            if (counter.getCount() != 0) {
+                rtn = null;
+            }
+            counter.close();
         }
         return rtn;
     }
