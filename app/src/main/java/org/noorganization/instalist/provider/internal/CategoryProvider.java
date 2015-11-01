@@ -1,5 +1,6 @@
 package org.noorganization.instalist.provider.internal;
 
+import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.UriMatcher;
 import android.database.Cursor;
@@ -9,8 +10,13 @@ import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
+import org.noorganization.instalist.model.ListEntry;
 import org.noorganization.instalist.provider.InstalistProvider;
 import org.noorganization.instalist.utils.SQLiteUtils;
+
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * TODO: implement and describe.
@@ -151,7 +157,28 @@ public class CategoryProvider implements IInternalProvider {
 
     @Override
     public String getType(@NonNull Uri _uri) {
-        return null;
+        switch (mMatcher.match(_uri)) {
+            case MULTIPLE_CATEGORIES:
+                return ContentResolver.CURSOR_DIR_BASE_TYPE + "/" + InstalistProvider.BASE_VENDOR +
+                        "category";
+            case SINGLE_CATEGORY:
+                return ContentResolver.CURSOR_ITEM_BASE_TYPE + "/" + InstalistProvider.BASE_VENDOR +
+                        "category";
+            case MULTIPLE_LISTS:
+                return ContentResolver.CURSOR_DIR_BASE_TYPE + "/" + InstalistProvider.BASE_VENDOR +
+                        "list";
+            case SINGLE_LIST:
+                return ContentResolver.CURSOR_ITEM_BASE_TYPE + "/" + InstalistProvider.BASE_VENDOR +
+                        "list";
+            case MULTIPLE_ENTRIES:
+                return ContentResolver.CURSOR_DIR_BASE_TYPE + "/" + InstalistProvider.BASE_VENDOR +
+                        "entry";
+            case SINGLE_ENTRY:
+                return ContentResolver.CURSOR_ITEM_BASE_TYPE + "/" + InstalistProvider.BASE_VENDOR +
+                        "entry";
+            default:
+                return null;
+        }
     }
 
     @Override
@@ -172,6 +199,62 @@ public class CategoryProvider implements IInternalProvider {
                 if (mDatabase.insert("category", null, toInsert) != -1) {
                     return Uri.parse("content://" + InstalistProvider.AUTHORITY + "/" +
                             URI_MULTIPLE_CATEGORIES + "/" + newCatUUID);
+                } else {
+                    return null;
+                }
+            }
+            case MULTIPLE_LISTS: {
+                String name = _values.getAsString("name");
+                if (name == null) {
+                    return null;
+                }
+                String categoryId = _uri.getPathSegments().get(1);
+                String newListUUID = SQLiteUtils.generateId(mDatabase, "list").toString();
+                ContentValues toInsert = new ContentValues(3);
+                toInsert.put("_id", newListUUID);
+                toInsert.put("name", name);
+                if (!"-".equals(categoryId)) {
+                    toInsert.put("category", categoryId);
+                }
+                if (mDatabase.insert("list", null, toInsert) != -1) {
+                    return Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI, "category/" +
+                            categoryId + "/list/" + newListUUID);
+                } else {
+                    return null;
+                }
+            }
+            case MULTIPLE_ENTRIES: {
+                if (!_values.containsKey(ListEntry.COLUMN_PRODUCT)) {
+                    return null;
+                }
+                ContentValues toInsert = new ContentValues();
+                for (String cvKey : _values.keySet()) {
+                    switch (cvKey) {
+                        case ListEntry.COLUMN_AMOUNT:
+                        case ListEntry.COLUMN_PRIORITY:
+                            toInsert.put(cvKey, _values.getAsFloat(cvKey));
+                            break;
+                        case ListEntry.COLUMN_PRODUCT:
+                            toInsert.put(cvKey, _values.getAsString(cvKey));
+                            break;
+                        case ListEntry.COLUMN_STRUCK:
+                            Boolean struckValue = _values.getAsBoolean(cvKey);
+                            if (struckValue == null) {
+                                struckValue = (_values.getAsInteger(cvKey) != 0);
+                            }
+                            toInsert.put(cvKey, (struckValue ? 1 : 0));
+                            break;
+                    }
+                }
+
+                String listUUID = _uri.getPathSegments().get(3);
+                String newEntryUUID = SQLiteUtils.generateId(mDatabase, ListEntry.TABLE_NAME).toString();
+                toInsert.put(ListEntry.COLUMN_ID, newEntryUUID);
+                toInsert.put(ListEntry.COLUMN_LIST, listUUID);
+                if (mDatabase.insert(ListEntry.TABLE_NAME, null, toInsert) != -1) {
+                    return Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI, "category/" +
+                            _uri.getPathSegments().get(1) + "/list/" + listUUID + "/entry/" +
+                            newEntryUUID);
                 } else {
                     return null;
                 }

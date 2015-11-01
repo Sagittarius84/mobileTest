@@ -30,7 +30,7 @@ public class Product extends SugarRecord<Product> {
             + COLUMN_UNIT_ID + " TEXT,"
             + COLUMN_DEFAULT_AMOUNT + " REAL DEFAULT 1.0,"
             + COLUMN_STEP_AMOUNT + " REAL DEFAULT 0.5,"
-            + "FOREIGN KEY ( " + COLUMN_ID + ") REFERENCES " + Unit.TABLE_NAME + "(" + Unit.COLUMN_ID + ")"
+            + "FOREIGN KEY ( " + COLUMN_UNIT_ID + ") REFERENCES " + Unit.TABLE_NAME + "(" + Unit.COLUMN_ID + ")"
                 + "ON DELETE SET NULL ON UPDATE NO ACTION"
             + ");";
 

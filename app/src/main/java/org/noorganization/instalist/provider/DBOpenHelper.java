@@ -5,6 +5,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
 import org.noorganization.instalist.model.Ingredient;
+import org.noorganization.instalist.model.ListEntry;
 import org.noorganization.instalist.model.Product;
 import org.noorganization.instalist.model.Recipe;
 import org.noorganization.instalist.model.Tag;
@@ -27,20 +28,14 @@ public class DBOpenHelper extends SQLiteOpenHelper {
     public void onCreate(SQLiteDatabase _db) {
         // TODO: Create tables.
         _db.execSQL("CREATE TABLE category (_id TEXT PRIMARY KEY NOT NULL, name TEXT NOT NULL)");
-        _db.execSQL("CREATE TABLE list (_id TEXT PRIMARY KEY NOT NULL, name TEXT NOT NULL, " +
-                "category TEXT, FOREIGN KEY (category) REFERENCES category (_id) ON UPDATE CASCADE " +
-                "ON DELETE CASCADE)");
+        _db.execSQL("CREATE TABLE list (" +
+                "_id TEXT PRIMARY KEY NOT NULL, " +
+                "name TEXT NOT NULL, " +
+                "category TEXT, " +
+                "FOREIGN KEY (category) REFERENCES category (_id) ON UPDATE CASCADE ON DELETE CASCADE)");
         _db.execSQL(Unit.DATABASE_CREATE);
         _db.execSQL(Product.DATABASE_CREATE);
-        _db.execSQL("CREATE TABLE listentry (" +
-                "_id TEXT PRIMARY KEY NOT NULL, " +
-                "amount REAL NOT NULL DEFAULT 1, " +
-                "priority INTEGER NOT NULL DEFAULT 0, " +
-                "product TEXT NOT NULL, " +
-                "list TEXT NOT NULL, " +
-                "struck INTEGER NOT NULL DEFAULT 0, " +
-                "FOREIGN KEY (product) REFERENCES product (_id) ON UPDATE CASCADE ON DELETE CASCADE, " +
-                "FOREIGN KEY (list) REFERENCES list (_id) ON UPDATE CASCADE ON DELETE CASCADE)");
+        _db.execSQL(ListEntry.DB_CREATE);
         _db.execSQL(Tag.DATABASE_CREATE);
         _db.execSQL(TaggedProduct.DATABASE_CREATE);
         _db.execSQL(Ingredient.DATABASE_CREATE);
@@ -51,7 +46,7 @@ public class DBOpenHelper extends SQLiteOpenHelper {
     public void onOpen(SQLiteDatabase _db) {
         super.onOpen(_db);
         if (!_db.isReadOnly()) {
-            _db.execSQL("PRAGMA foreign_key = ON");
+            _db.execSQL("PRAGMA foreign_keys = ON");
         }
     }
 

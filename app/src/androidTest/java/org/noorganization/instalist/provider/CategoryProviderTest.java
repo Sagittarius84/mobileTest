@@ -1,6 +1,7 @@
 package org.noorganization.instalist.provider;
 
 import android.content.ContentProvider;
+import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -8,6 +9,8 @@ import android.net.Uri;
 import android.test.AndroidTestCase;
 import android.util.Log;
 
+import org.noorganization.instalist.model.ListEntry;
+import org.noorganization.instalist.model.Product;
 import org.noorganization.instalist.provider.internal.CategoryProvider;
 import org.noorganization.instalist.provider.internal.IInternalProvider;
 
@@ -217,7 +220,7 @@ public class CategoryProviderTest extends AndroidTestCase {
         String product1stUUID = UUID.randomUUID().toString();
         String product2ndUUID = UUID.randomUUID().toString();
         Log.i("TEST", "category: " + categoryUUID + " list: " + listUUID + " product: " + product1stUUID + " entry: " + entry1stUUID);
-        mDatabase.execSQL("INSERT INTO product (_id, name) VALUES (?, ?), (?, ?)", new String[]{
+        mDatabase.execSQL("INSERT INTO product (_id, name, unit_id) VALUES (?, ?, NULL), (?, ?, NULL)", new String[]{
                 product1stUUID,
                 "product1",
                 product2ndUUID,
@@ -326,6 +329,24 @@ public class CategoryProviderTest extends AndroidTestCase {
         assertEquals(listUUID, oneEntry2.getString(oneEntry2.getColumnIndex("list")));
     }
 
+    public void testGetType() {
+        String typeDirPrefix = ContentResolver.CURSOR_DIR_BASE_TYPE + "/" + InstalistProvider.BASE_VENDOR;
+        String typeItemPrefix = ContentResolver.CURSOR_ITEM_BASE_TYPE + "/" + InstalistProvider.BASE_VENDOR;
+
+        assertEquals(typeDirPrefix + "category",
+                mCategoryProvider.getType(Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI, "category")));
+        assertEquals(typeItemPrefix + "category",
+                mCategoryProvider.getType(Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI, "category/-")));
+        assertEquals(typeDirPrefix + "list",
+                mCategoryProvider.getType(Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI, "category/-/list")));
+        assertEquals(typeItemPrefix + "list",
+                mCategoryProvider.getType(Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI, "category/-/list/-")));
+        assertEquals(typeDirPrefix + "entry",
+                mCategoryProvider.getType(Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI, "category/-/list/-/entry")));
+        assertEquals(typeItemPrefix + "entry",
+                mCategoryProvider.getType(Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI, "category/-/list/-/entry/-")));
+    }
+
     public void testInsertCategory() {
         Uri categoryUri = Uri.parse("content://" + InstalistProvider.AUTHORITY + "/category");
 
@@ -345,5 +366,93 @@ public class CategoryProviderTest extends AndroidTestCase {
         ContentValues category2CV = new ContentValues(0);
         Uri rtndCat2Uri = mCategoryProvider.insert(categoryUri, category2CV);
         assertNull(rtndCat2Uri);
+    }
+
+    public void testInsertList() {
+        String categoryUUID = UUID.randomUUID().toString();
+        Uri woCategoryUri = Uri.parse("content://" + InstalistProvider.AUTHORITY + "/category/-/list");
+        Uri wCategoryUri = Uri.parse("content://" + InstalistProvider.AUTHORITY + "/category/" +
+                categoryUUID + "/list");
+
+        ContentValues listWOCatCV = new ContentValues(1);
+        listWOCatCV.put("name", "list w/o category");
+        Uri resultingLWOCURI = mCategoryProvider.insert(woCategoryUri, listWOCatCV);
+        assertNotNull(resultingLWOCURI);
+        String resultingLWOCUUID = resultingLWOCURI.getLastPathSegment();
+        Cursor testCursor = mDatabase.rawQuery("SELECT _id, name, category FROM list", null);
+        assertEquals(1, testCursor.getCount());
+        testCursor.moveToFirst();
+        assertEquals(resultingLWOCUUID, testCursor.getString(testCursor.getColumnIndex("_id")));
+        assertEquals("list w/o category", testCursor.getString(testCursor.getColumnIndex("name")));
+        assertNull(testCursor.getString(testCursor.getColumnIndex("category")));
+        testCursor.close();
+
+        ContentValues wrongListWCatCV = new ContentValues(1);
+        wrongListWCatCV.put("name", "wrong list w category");
+        assertNull(mCategoryProvider.insert(wCategoryUri, wrongListWCatCV));
+        testCursor = mDatabase.rawQuery("SELECT _id, name, category FROM list", null);
+        assertEquals(1, testCursor.getCount());
+        testCursor.close();
+
+        mDatabase.execSQL("INSERT INTO category (_id, name) VALUES (?, 'cat1')", new String[]{
+                categoryUUID
+        });
+        ContentValues listWCatCV = new ContentValues(1);
+        listWCatCV.put("name", "list w category");
+        Uri resultingLWCUri = mCategoryProvider.insert(wCategoryUri, listWCatCV);
+        assertNotNull(resultingLWCUri);
+        String resultingLWCUUID = resultingLWCUri.getLastPathSegment();
+        testCursor = mDatabase.rawQuery("SELECT name, category FROM list WHERE _id = ?",
+                new String[]{ resultingLWCUUID });
+        assertEquals(1, testCursor.getCount());
+        testCursor.moveToFirst();
+        assertEquals("list w category", testCursor.getString(testCursor.getColumnIndex("name")));
+        assertEquals(categoryUUID, testCursor.getString(testCursor.getColumnIndex("category")));
+        testCursor.close();
+    }
+
+    public void testInsertEntry() {
+        String listUUID = UUID.randomUUID().toString();
+        String productUUID = UUID.randomUUID().toString();
+        Uri entryUri = Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI,
+                "/category/-/list/" + listUUID + "/entry");
+
+        ContentValues negativeEntryWOList = new ContentValues(1);
+        negativeEntryWOList.put(ListEntry.COLUMN_PRODUCT, productUUID);
+        assertNull(mCategoryProvider.insert(entryUri, negativeEntryWOList));
+        Cursor testCursor = mDatabase.rawQuery("SELECT " + ListEntry.COLUMN_ID + " FROM " +
+                ListEntry.TABLE_NAME, null);
+        assertEquals(0, testCursor.getCount());
+        testCursor.close();
+
+        mDatabase.execSQL("INSERT INTO list (_id, name, category) VALUES (?, 'list w/o category', null)",
+                new String[]{listUUID});
+        ContentValues negativeEntryWOProduct = new ContentValues(1);
+        negativeEntryWOProduct.put(ListEntry.COLUMN_PRODUCT, productUUID);
+        assertNull(mCategoryProvider.insert(entryUri, negativeEntryWOProduct));
+        testCursor = mDatabase.rawQuery("SELECT " + ListEntry.COLUMN_ID + " FROM " +
+                ListEntry.TABLE_NAME, null);
+        assertEquals(0, testCursor.getCount());
+        testCursor.close();
+
+        mDatabase.execSQL("INSERT INTO " + Product.TABLE_NAME + " (" + Product.COLUMN_ID + ", " +
+                Product.COLUMN_NAME + ") VALUES (?, 'product 1')", new String[]{productUUID});
+
+        ContentValues entryMinimumCV = new ContentValues(1);
+        entryMinimumCV.put(ListEntry.COLUMN_PRODUCT, productUUID);
+        Uri resultingMinimumEntryURI = mCategoryProvider.insert(entryUri, entryMinimumCV);
+        assertNotNull(resultingMinimumEntryURI);
+        String resultingMinimumEntryUUID = resultingMinimumEntryURI.getLastPathSegment();
+        testCursor = mDatabase.rawQuery("SELECT " + ListEntry.COLUMN_ID + ", " +
+                ListEntry.COLUMN_PRODUCT + ", "+ ListEntry.COLUMN_LIST + " FROM " +
+                ListEntry.TABLE_NAME, null);
+        assertEquals(1, testCursor.getCount());
+        testCursor.moveToFirst();
+        assertEquals(resultingMinimumEntryUUID, testCursor.getString(testCursor.getColumnIndex(
+                ListEntry.COLUMN_ID)));
+        assertEquals(listUUID, testCursor.getString(testCursor.getColumnIndex(ListEntry.COLUMN_LIST)));
+        assertEquals(productUUID, testCursor.getString(testCursor.getColumnIndex(
+                ListEntry.COLUMN_PRODUCT)));
+        testCursor.close();
     }
 }

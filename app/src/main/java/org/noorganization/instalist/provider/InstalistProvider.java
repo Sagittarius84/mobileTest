@@ -26,7 +26,7 @@ public class InstalistProvider extends ContentProvider {
 
     public final static String AUTHORITY = "org.noorganization.instalist.provider";
 
-    public final static String BASE_VENDOR = "vnd.noorganization.";
+    public final static String BASE_VENDOR = "vnd.org.noorganization.instalist.";
     /**
      * The base content uri. Build a uri with the table paths.
      **/
