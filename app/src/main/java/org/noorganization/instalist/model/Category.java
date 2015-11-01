@@ -14,6 +14,15 @@ import java.util.List;
  */
 public class Category extends SugarRecord<Category> {
 
+    public static final String COLUMN_ID = "_id";
+    public static final String COLUMN_NAME = "name";
+
+    public static final String TABLE_NAME = "category";
+
+    public static final String DB_CREATE = "CREATE TABLE " + TABLE_NAME + " (" +
+            COLUMN_ID + " TEXT PRIMARY KEY NOT NULL, " +
+            COLUMN_NAME + " TEXT NOT NULL)";
+
     public static final String ATTR_NAME = StringUtil.toSQLName("mName");
 
     public String mName;

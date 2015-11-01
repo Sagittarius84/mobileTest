@@ -4,10 +4,12 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
+import org.noorganization.instalist.model.Category;
 import org.noorganization.instalist.model.Ingredient;
 import org.noorganization.instalist.model.ListEntry;
 import org.noorganization.instalist.model.Product;
 import org.noorganization.instalist.model.Recipe;
+import org.noorganization.instalist.model.ShoppingList;
 import org.noorganization.instalist.model.Tag;
 import org.noorganization.instalist.model.TaggedProduct;
 import org.noorganization.instalist.model.Unit;
@@ -27,12 +29,8 @@ public class DBOpenHelper extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase _db) {
         // TODO: Create tables.
-        _db.execSQL("CREATE TABLE category (_id TEXT PRIMARY KEY NOT NULL, name TEXT NOT NULL)");
-        _db.execSQL("CREATE TABLE list (" +
-                "_id TEXT PRIMARY KEY NOT NULL, " +
-                "name TEXT NOT NULL, " +
-                "category TEXT, " +
-                "FOREIGN KEY (category) REFERENCES category (_id) ON UPDATE CASCADE ON DELETE CASCADE)");
+        _db.execSQL(Category.DB_CREATE);
+        _db.execSQL(ShoppingList.DB_CREATE);
         _db.execSQL(Unit.DATABASE_CREATE);
         _db.execSQL(Product.DATABASE_CREATE);
         _db.execSQL(ListEntry.DB_CREATE);
