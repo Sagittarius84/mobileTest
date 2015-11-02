@@ -1,9 +1,12 @@
 package org.noorganization.instalist.model;
 
+import android.text.TextUtils;
+
 import com.orm.StringUtil;
 import com.orm.SugarRecord;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.locks.Condition;
 
@@ -25,18 +28,31 @@ public class TaggedProduct extends SugarRecord<TaggedProduct> {
 
     public final static String TABLE_NAME = "taggedProduct";
 
-    public final static String COLUMN_ID = "_id";
-    public final static String COLUMN_TAG_ID = "tag_id";
-    public final static String COLUMN_PRODUCT_ID = "product_id";
+    public final static String LOCALE_COLUMN_ID = "_id";
+    public final static String LOCALE_COLUMN_TAG_ID = "tag_id";
+    public final static String LOCALE_COLUMN_PRODUCT_ID = "product_id";
+
+    public final static String COLUMN_ID = TABLE_NAME.concat("." + LOCALE_COLUMN_ID);
+    public final static String COLUMN_TAG_ID = TABLE_NAME.concat("." + LOCALE_COLUMN_TAG_ID);
+    public final static String COLUMN_PRODUCT_ID = TABLE_NAME.concat("." + LOCALE_COLUMN_PRODUCT_ID);
+
+    /**
+     * Will return all columns of this TaggedProduct Table.
+     */
+    public final static String[] ALL_COLUMNS = {COLUMN_ID, COLUMN_TAG_ID, COLUMN_PRODUCT_ID};
+    public final static String[] ALL_COLUMNS_JOINED = {Tag.COLUMN_ID, Tag.COLUMN_NAME,
+            TaggedProduct.COLUMN_ID, TaggedProduct.COLUMN_TAG_ID, TaggedProduct.COLUMN_PRODUCT_ID,
+            Product.COLUMN_ID, Product.COLUMN_NAME, Product.COLUMN_DEFAULT_AMOUNT,
+            Product.COLUMN_STEP_AMOUNT, Product.COLUMN_UNIT_ID};
 
     public final static String DATABASE_CREATE = "CREATE TABLE " + TABLE_NAME
             + "("
-            + COLUMN_ID + " TEXT PRIMARY KEY,"
-            + COLUMN_TAG_ID + " TEXT,"
-            + COLUMN_PRODUCT_ID + " TEXT,"
-            + "FOREIGN KEY (" + COLUMN_PRODUCT_ID + ") REFERENCES " + Product.TABLE_NAME + " (" + Product.COLUMN_ID + ") "
+            + LOCALE_COLUMN_ID + " TEXT PRIMARY KEY,"
+            + LOCALE_COLUMN_TAG_ID + " TEXT,"
+            + LOCALE_COLUMN_PRODUCT_ID + " TEXT,"
+            + "FOREIGN KEY (" + LOCALE_COLUMN_PRODUCT_ID + ") REFERENCES " + Product.TABLE_NAME + " (" + Product.LOCAL_COLUMN_ID + ") "
             + "ON UPDATE CASCADE ON DELETE CASCADE,"
-            + "FOREIGN KEY (" + COLUMN_TAG_ID + ") REFERENCES " + Tag.TABLE_NAME + " (" + Tag.COLUMN_ID + ") "
+            + "FOREIGN KEY (" + LOCALE_COLUMN_TAG_ID + ") REFERENCES " + Tag.TABLE_NAME + " (" + Tag.LOCAL_COLUMN_ID + ") "
             + "ON UPDATE CASCADE ON DELETE CASCADE"
             + ")";
 

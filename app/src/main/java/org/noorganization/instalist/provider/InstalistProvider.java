@@ -12,6 +12,7 @@ import org.noorganization.instalist.provider.internal.CategoryProvider;
 import org.noorganization.instalist.provider.internal.IInternalProvider;
 import org.noorganization.instalist.provider.internal.ProductProvider;
 import org.noorganization.instalist.provider.internal.TagProvider;
+import org.noorganization.instalist.provider.internal.TaggedProductProvider;
 import org.noorganization.instalist.provider.internal.UnitProvider;
 
 import java.util.HashMap;
@@ -87,6 +88,8 @@ public class InstalistProvider extends ContentProvider {
         IInternalProvider productProvider = new ProductProvider(getContext());
         IInternalProvider unitProvider = new UnitProvider(getContext());
         IInternalProvider tagProvider = new TagProvider(getContext());
+        IInternalProvider taggedProductProvider = new TaggedProductProvider(getContext());
+
 
         categoryProvider.onCreate(mDatabase);
         productProvider.onCreate(mDatabase);
@@ -98,6 +101,7 @@ public class InstalistProvider extends ContentProvider {
         mInternalProviders.put("prodcut", productProvider);
         mInternalProviders.put("unit", unitProvider);
         mInternalProviders.put("tag", tagProvider);
+        mInternalProviders.put("taggedProduct", taggedProductProvider);
         return true;
     }
 

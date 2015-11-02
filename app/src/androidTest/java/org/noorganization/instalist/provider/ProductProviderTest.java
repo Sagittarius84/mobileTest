@@ -138,13 +138,8 @@ public class ProductProviderTest extends AndroidTestCase {
         ContentValues contentValues = new ContentValues();
         String uuid = UUID.randomUUID().toString();
 
-        contentValues.put(Product.COLUMN_ID, uuid);
-        contentValues.put(Product.COLUMN_NAME, "TestProduct");
-        contentValues.put(Product.COLUMN_DEFAULT_AMOUNT, 0.5f);
-        contentValues.put(Product.COLUMN_STEP_AMOUNT, 0.5f);
-        contentValues.put(Product.COLUMN_UNIT_ID, (String) null);
+        Uri uri = ProviderTestUtils.insertProduct(mProductProvider, uuid, "TestProduct", 0.5f, 0.5f, (String) null);
 
-        Uri uri = mProductProvider.insert(Uri.parse(ProductProvider.SINGLE_PRODUCT_CONTENT_URI.replace("*", uuid)), contentValues);
         String pseudoUri = ProductProvider.SINGLE_PRODUCT_CONTENT_URI.replace("*", uuid);
         assertNotNull(uri);
         assertEquals(pseudoUri, uri.toString());
@@ -155,10 +150,9 @@ public class ProductProviderTest extends AndroidTestCase {
         cursor.moveToFirst();
         assertEquals(uuid, cursor.getString(cursor.getColumnIndex(Product.COLUMN_ID)));
         assertEquals("TestProduct", cursor.getString(cursor.getColumnIndex(Product.COLUMN_NAME)));
-        assertEquals(0.5f, cursor.getFloat(cursor.getColumnIndex(Product.COLUMN_DEFAULT_AMOUNT)));
-        assertEquals(0.5f, cursor.getFloat(cursor.getColumnIndex(Product.COLUMN_STEP_AMOUNT)));
+        assertEquals(0.5f, cursor.getFloat(cursor.getColumnIndex(Product.COLUMN_STEP_AMOUNT)), 0.001f);
+        assertEquals(0.5f, cursor.getFloat(cursor.getColumnIndex(Product.COLUMN_DEFAULT_AMOUNT)), 0.001f);
         assertEquals(null, cursor.getString(cursor.getColumnIndex(Product.COLUMN_UNIT_ID)));
-        resetDb();
     }
 
 
@@ -167,13 +161,7 @@ public class ProductProviderTest extends AndroidTestCase {
         ContentValues contentValues = new ContentValues();
         String uuid = UUID.randomUUID().toString();
 
-        contentValues.put(Product.COLUMN_ID, uuid);
-        contentValues.put(Product.COLUMN_NAME, "TestProduct");
-        contentValues.put(Product.COLUMN_DEFAULT_AMOUNT, 0.5f);
-        contentValues.put(Product.COLUMN_STEP_AMOUNT, 0.5f);
-        contentValues.put(Product.COLUMN_UNIT_ID, (String) null);
-
-        Uri uri = mProductProvider.insert(Uri.parse(ProductProvider.SINGLE_PRODUCT_CONTENT_URI.replace("*", uuid)), contentValues);
+        Uri uri = ProviderTestUtils.insertProduct(mProductProvider, uuid, "TestProduct", 0.5f, 0.5f, (String) null);
 
         int affectedRows = mProductProvider.delete(uri, null, null);
         assertEquals(1, affectedRows);
@@ -186,21 +174,13 @@ public class ProductProviderTest extends AndroidTestCase {
         ContentValues contentValues = new ContentValues();
         String uuid = UUID.randomUUID().toString();
 
-        contentValues.put(Product.COLUMN_ID, uuid);
-        contentValues.put(Product.COLUMN_NAME, "TestProduct1");
-        contentValues.put(Product.COLUMN_DEFAULT_AMOUNT, 0.5f);
-        contentValues.put(Product.COLUMN_STEP_AMOUNT, 0.5f);
-        contentValues.put(Product.COLUMN_UNIT_ID, (String) null);
+        ProviderTestUtils.insertProduct(mProductProvider, uuid, "TestProduct1", 0.5f, 0.5f, (String) null);
 
         mProductProvider.insert(Uri.parse(ProductProvider.SINGLE_PRODUCT_CONTENT_URI.replace("*", uuid)), contentValues);
 
         String uuid2 = UUID.randomUUID().toString();
 
-        contentValues.put(Product.COLUMN_ID, uuid2);
-        contentValues.put(Product.COLUMN_NAME, "TestProduct2");
-        contentValues.put(Product.COLUMN_DEFAULT_AMOUNT, 0.5f);
-        contentValues.put(Product.COLUMN_STEP_AMOUNT, 0.5f);
-        contentValues.put(Product.COLUMN_UNIT_ID, (String) null);
+        ProviderTestUtils.insertProduct(mProductProvider, uuid2, "TestProduct2", 0.5f, 0.5f, (String) null);
 
         mProductProvider.insert(Uri.parse(ProductProvider.SINGLE_PRODUCT_CONTENT_URI.replace("*", uuid2)), contentValues);
 
@@ -208,22 +188,8 @@ public class ProductProviderTest extends AndroidTestCase {
 
         assertEquals(2, affectedRows);
 
-
-        contentValues.put(Product.COLUMN_ID, uuid);
-        contentValues.put(Product.COLUMN_NAME, "TestProduct1");
-        contentValues.put(Product.COLUMN_DEFAULT_AMOUNT, 0.5f);
-        contentValues.put(Product.COLUMN_STEP_AMOUNT, 0.5f);
-        contentValues.put(Product.COLUMN_UNIT_ID, (String) null);
-
-        mProductProvider.insert(Uri.parse(ProductProvider.SINGLE_PRODUCT_CONTENT_URI.replace("*", uuid)), contentValues);
-
-        contentValues.put(Product.COLUMN_ID, uuid2);
-        contentValues.put(Product.COLUMN_NAME, "TestProduct2");
-        contentValues.put(Product.COLUMN_DEFAULT_AMOUNT, 0.5f);
-        contentValues.put(Product.COLUMN_STEP_AMOUNT, 0.5f);
-        contentValues.put(Product.COLUMN_UNIT_ID, (String) null);
-
-        mProductProvider.insert(Uri.parse(ProductProvider.SINGLE_PRODUCT_CONTENT_URI.replace("*", uuid2)), contentValues);
+        ProviderTestUtils.insertProduct(mProductProvider, uuid, "TestProduct1", 0.5f, 0.5f, (String) null);
+        ProviderTestUtils.insertProduct(mProductProvider, uuid2, "TestProduct2", 0.5f, 0.5f, (String) null);
 
         affectedRows = mProductProvider.delete(Uri.parse(ProductProvider.MULTIPLE_PRODUCT_CONTENT_URI), Product.COLUMN_NAME + " LIKE ?", new String[]{"%TestProduct1%"});
 
@@ -234,15 +200,15 @@ public class ProductProviderTest extends AndroidTestCase {
         ContentValues contentValues = new ContentValues();
         String uuid = UUID.randomUUID().toString();
 
-        contentValues.put(Product.COLUMN_ID, uuid);
-        contentValues.put(Product.COLUMN_NAME, "TestProduct1");
-        contentValues.put(Product.COLUMN_DEFAULT_AMOUNT, 0.5f);
-        contentValues.put(Product.COLUMN_STEP_AMOUNT, 0.5f);
-        contentValues.put(Product.COLUMN_UNIT_ID, (String) null);
+        contentValues.put(Product.LOCAL_COLUMN_ID, uuid);
+        contentValues.put(Product.LOCAL_COLUMN_NAME, "TestProduct1");
+        contentValues.put(Product.LOCAL_COLUMN_DEFAULT_AMOUNT, 0.5f);
+        contentValues.put(Product.LOCAL_COLUMN_STEP_AMOUNT, 0.5f);
+        contentValues.put(Product.LOCAL_COLUMN_UNIT_ID, (String) null);
 
         Uri uri = mProductProvider.insert(Uri.parse(ProductProvider.SINGLE_PRODUCT_CONTENT_URI.replace("*", uuid)), contentValues);
 
-        contentValues.put(Product.COLUMN_DEFAULT_AMOUNT, 1.0f);
+        contentValues.put(Product.LOCAL_COLUMN_DEFAULT_AMOUNT, 1.0f);
         int affectedRows = mProductProvider.update(uri, contentValues, null, null);
 
         assertEquals(1, affectedRows);
@@ -254,7 +220,4 @@ public class ProductProviderTest extends AndroidTestCase {
         assertEquals(1.0f, cursor.getFloat(cursor.getColumnIndex(Product.COLUMN_DEFAULT_AMOUNT)), 0.001f);
     }
 
-    public void testUpdateMultipleProducts() {
-        // TODO: implement
-    }
 }

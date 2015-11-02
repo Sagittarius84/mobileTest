@@ -10,11 +10,17 @@ public class Product extends SugarRecord<Product> {
 
     public final static String TABLE_NAME = "product";
 
-    public final static String COLUMN_ID =  "_id";
-    public final static String COLUMN_NAME = "name";
-    public final static String COLUMN_UNIT_ID = "unit_id";
-    public final static String COLUMN_DEFAULT_AMOUNT = "default_amount";
-    public final static String COLUMN_STEP_AMOUNT = "step_amount";
+    public final static String LOCAL_COLUMN_ID = "_id";
+    public final static String LOCAL_COLUMN_NAME = "name";
+    public final static String LOCAL_COLUMN_UNIT_ID = "unit_id";
+    public final static String LOCAL_COLUMN_DEFAULT_AMOUNT = "default_amount";
+    public final static String LOCAL_COLUMN_STEP_AMOUNT = "step_amount";
+
+    public final static String COLUMN_ID = TABLE_NAME.concat("." + LOCAL_COLUMN_ID);
+    public final static String COLUMN_NAME = TABLE_NAME.concat("." + LOCAL_COLUMN_NAME);
+    public final static String COLUMN_UNIT_ID = TABLE_NAME.concat("." + LOCAL_COLUMN_UNIT_ID);
+    public final static String COLUMN_DEFAULT_AMOUNT = TABLE_NAME.concat("." + LOCAL_COLUMN_DEFAULT_AMOUNT);
+    public final static String COLUMN_STEP_AMOUNT = TABLE_NAME.concat("." + LOCAL_COLUMN_STEP_AMOUNT);
 
     public final static String[] ALL_COLUMNS = new String[]{
             COLUMN_ID,
@@ -25,45 +31,51 @@ public class Product extends SugarRecord<Product> {
     };
 
     public final static String DATABASE_CREATE = "CREATE TABLE " + TABLE_NAME
-            + "(" + COLUMN_ID + " TEXT PRIMARY KEY NOT NULL,"
-            + COLUMN_NAME + " TEXT NOT NULL,"
-            + COLUMN_UNIT_ID + " TEXT,"
-            + COLUMN_DEFAULT_AMOUNT + " REAL DEFAULT 1.0,"
-            + COLUMN_STEP_AMOUNT + " REAL DEFAULT 0.5,"
-            + "FOREIGN KEY ( " + COLUMN_ID + ") REFERENCES " + Unit.TABLE_NAME + "(" + Unit.COLUMN_ID + ")"
-                + "ON DELETE SET NULL ON UPDATE NO ACTION"
+            + "(" + LOCAL_COLUMN_ID + " TEXT PRIMARY KEY NOT NULL,"
+            + LOCAL_COLUMN_NAME + " TEXT NOT NULL,"
+            + LOCAL_COLUMN_UNIT_ID + " TEXT,"
+            + LOCAL_COLUMN_DEFAULT_AMOUNT + " REAL,"
+            + LOCAL_COLUMN_STEP_AMOUNT + " REAL,"
+            + "FOREIGN KEY ( " + LOCAL_COLUMN_ID + ") REFERENCES " + Unit.TABLE_NAME + "(" + Unit.COLUMN_ID + ")"
+            + "ON DELETE SET NULL ON UPDATE NO ACTION"
             + ");";
 
     public String id;
 
     public String mName;
-    /** The unit of the product. Can also be null if the products has no unit. */
-    public Unit   mUnit;
-    /** The default amount is usually 1.0f */
-    public float  mDefaultAmount;
-    /** The amount to increase or decrease over quick buttons. Usually 1.0f. */
-    public float  mStepAmount;
+    /**
+     * The unit of the product. Can also be null if the products has no unit.
+     */
+    public Unit mUnit;
+    /**
+     * The default amount is usually 1.0f
+     */
+    public float mDefaultAmount;
+    /**
+     * The amount to increase or decrease over quick buttons. Usually 1.0f.
+     */
+    public float mStepAmount;
 
     public Product() {
-        mUnit          = null;
-        mName          = "";
+        mUnit = null;
+        mName = "";
         mDefaultAmount = 1.0f;
-        mStepAmount    = 1.0f;
+        mStepAmount = 1.0f;
     }
 
 
     public Product(String _name, Unit _unit, float _defaultAmount, float _stepAmount) {
-        mUnit          = _unit;
-        mName          = _name;
+        mUnit = _unit;
+        mName = _name;
         mDefaultAmount = _defaultAmount;
-        mStepAmount    = _stepAmount;
+        mStepAmount = _stepAmount;
     }
 
     public Product(String _name, Unit _unit) {
-        mUnit          = _unit;
-        mName          = _name;
+        mUnit = _unit;
+        mName = _name;
         mDefaultAmount = 1.0f;
-        mStepAmount    = 1.0f;
+        mStepAmount = 1.0f;
     }
 
     @Override
@@ -103,7 +115,7 @@ public class Product extends SugarRecord<Product> {
     public String toString() {
         return "Product{" +
                 "mName='" + mName + '\'' +
-                ", mUnit=" + (mUnit == null ? "null" : "id:"+mUnit.getId()) +
+                ", mUnit=" + (mUnit == null ? "null" : "id:" + mUnit.getId()) +
                 ", mDefaultAmount=" + mDefaultAmount +
                 ", mStepAmount=" + mStepAmount +
                 '}';

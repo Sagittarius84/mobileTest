@@ -126,8 +126,8 @@ public class TagProviderTest extends AndroidTestCase {
         ContentValues contentValues = new ContentValues();
         String uuid = UUID.randomUUID().toString();
 
-        contentValues.put(Tag.COLUMN_ID, uuid);
-        contentValues.put(Tag.COLUMN_NAME, "TestTag");
+        contentValues.put(Tag.LOCAL_COLUMN_ID, uuid);
+        contentValues.put(Tag.LOCAL_COLUMN_NAME, "TestTag");
 
         Uri uri = mTagProvider.insert(Uri.parse(TagProvider.SINGLE_TAG_CONTENT_URI.replace("*", uuid)), contentValues);
         String pseudoUri = TagProvider.SINGLE_TAG_CONTENT_URI.replace("*", uuid);
@@ -149,8 +149,8 @@ public class TagProviderTest extends AndroidTestCase {
         ContentValues contentValues = new ContentValues();
         String uuid = UUID.randomUUID().toString();
 
-        contentValues.put(Tag.COLUMN_ID, uuid);
-        contentValues.put(Tag.COLUMN_NAME, "TestTag");
+        contentValues.put(Tag.LOCAL_COLUMN_ID, uuid);
+        contentValues.put(Tag.LOCAL_COLUMN_NAME, "TestTag");
 
 
         Uri uri = mTagProvider.insert(Uri.parse(TagProvider.SINGLE_TAG_CONTENT_URI.replace("*", uuid)), contentValues);
@@ -166,15 +166,15 @@ public class TagProviderTest extends AndroidTestCase {
         ContentValues contentValues = new ContentValues();
         String uuid = UUID.randomUUID().toString();
 
-        contentValues.put(Tag.COLUMN_ID, uuid);
-        contentValues.put(Tag.COLUMN_NAME, "TestTag1");
+        contentValues.put(Tag.LOCAL_COLUMN_ID, uuid);
+        contentValues.put(Tag.LOCAL_COLUMN_NAME, "TestTag1");
 
         mTagProvider.insert(Uri.parse(TagProvider.SINGLE_TAG_CONTENT_URI.replace("*", uuid)), contentValues);
 
         String uuid2 = UUID.randomUUID().toString();
 
-        contentValues.put(Tag.COLUMN_ID, uuid2);
-        contentValues.put(Tag.COLUMN_NAME, "TestTag2");
+        contentValues.put(Tag.LOCAL_COLUMN_ID, uuid2);
+        contentValues.put(Tag.LOCAL_COLUMN_NAME, "TestTag2");
 
         mTagProvider.insert(Uri.parse(TagProvider.SINGLE_TAG_CONTENT_URI.replace("*", uuid2)), contentValues);
 
@@ -183,13 +183,13 @@ public class TagProviderTest extends AndroidTestCase {
         assertEquals(2, affectedRows);
 
 
-        contentValues.put(Tag.COLUMN_ID, uuid);
-        contentValues.put(Tag.COLUMN_NAME, "TestTag1");
+        contentValues.put(Tag.LOCAL_COLUMN_ID, uuid);
+        contentValues.put(Tag.LOCAL_COLUMN_NAME, "TestTag1");
 
         mTagProvider.insert(Uri.parse(TagProvider.SINGLE_TAG_CONTENT_URI.replace("*", uuid)), contentValues);
 
-        contentValues.put(Tag.COLUMN_ID, uuid2);
-        contentValues.put(Tag.COLUMN_NAME, "TestTag2");
+        contentValues.put(Tag.LOCAL_COLUMN_ID, uuid2);
+        contentValues.put(Tag.LOCAL_COLUMN_NAME, "TestTag2");
 
         mTagProvider.insert(Uri.parse(TagProvider.SINGLE_TAG_CONTENT_URI.replace("*", uuid2)), contentValues);
 
@@ -202,12 +202,12 @@ public class TagProviderTest extends AndroidTestCase {
         ContentValues contentValues = new ContentValues();
         String uuid = UUID.randomUUID().toString();
 
-        contentValues.put(Tag.COLUMN_ID, uuid);
-        contentValues.put(Tag.COLUMN_NAME, "TestTag1");
+        contentValues.put(Tag.LOCAL_COLUMN_ID, uuid);
+        contentValues.put(Tag.LOCAL_COLUMN_NAME, "TestTag1");
 
         Uri uri = mTagProvider.insert(Uri.parse(TagProvider.SINGLE_TAG_CONTENT_URI.replace("*", uuid)), contentValues);
 
-        contentValues.put(Tag.COLUMN_NAME, "TestTag2");
+        contentValues.put(Tag.LOCAL_COLUMN_NAME, "TestTag2");
         int affectedRows = mTagProvider.update(uri, contentValues, null, null);
 
         assertEquals(1, affectedRows);

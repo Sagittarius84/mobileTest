@@ -15,15 +15,19 @@ import java.util.List;
 public class Tag extends SugarRecord<Tag> {
 
     public final static String TABLE_NAME = "tag";
-    public final static String COLUMN_ID = "_id";
-    public final static String COLUMN_NAME = "name";
 
-    public final static String[] ALL_COLUMNS = { COLUMN_ID, COLUMN_NAME};
+    public final static String LOCAL_COLUMN_ID = "_id";
+    public final static String LOCAL_COLUMN_NAME = "name";
+
+    public final static String COLUMN_ID = TABLE_NAME.concat("." + LOCAL_COLUMN_ID);
+    public final static String COLUMN_NAME = TABLE_NAME.concat("." + LOCAL_COLUMN_NAME);
+
+    public final static String[] ALL_COLUMNS = {COLUMN_ID, COLUMN_NAME};
 
     public final static String DATABASE_CREATE = "CREATE TABLE " + TABLE_NAME
             + "("
-            + COLUMN_ID + " TEXT PRIMARY KEY,"
-            + COLUMN_NAME + " TEXT"
+            + LOCAL_COLUMN_ID + " TEXT PRIMARY KEY,"
+            + LOCAL_COLUMN_NAME + " TEXT"
             + ");";
 
     public String mName;

@@ -128,8 +128,6 @@ public class ProductProvider implements IInternalProvider {
                         cursor.getString(cursor.getColumnIndex(Product.COLUMN_ID))));
                 break;
             case MULTIPLE_PRODUCTS:
-                // TODO: implement for later purposes
-                //newUri = null; //Uri.parse(MULTIPLE_PRODUCT_CONTENT_URI);
                 throw new IllegalArgumentException("The given Uri is not supported: " + _uri);
                 // break;
             default:

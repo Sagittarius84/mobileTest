@@ -285,7 +285,7 @@ public class RecipeProviderTest extends AndroidTestCase {
 
 
         // insert at begin a recipe
-        //Uri uri = mRecipeProvider.insert(Uri.parse(RecipeProvider.SINGLE_RECIPE_CONTENT_URI.replace("*", uuidRecipe)), contentValues);
+        //Uri uri = mTaggedProductProvider.insert(Uri.parse(RecipeProvider.SINGLE_RECIPE_CONTENT_URI.replace("*", uuidRecipe)), contentValues);
 
         ContentValues contentValuesProduct = new ContentValues();
         String uuidProduct = UUID.randomUUID().toString();
@@ -304,7 +304,7 @@ public class RecipeProviderTest extends AndroidTestCase {
 
         mDatabase.execSQL("INSERT INTO " + Ingredient.TABLE_NAME + " VALUES (?,?,?,?)", new String[]{uuid, uuidProduct, uuidRecipe, String.valueOf(1.0f)});
 
-        // Uri ingredientUri = mRecipeProvider.insert(uri,ingredientValues);
+        // Uri ingredientUri = mTaggedProductProvider.insert(uri,ingredientValues);
         Uri uri = Uri.parse(RecipeProvider.SINGLE_RECIPE_INGREDIENT_CONTENT_URI.replaceFirst("\\*", uuidRecipe).replaceFirst("\\*", uuid));
 
         // assertNotNull(ingredientUri);
