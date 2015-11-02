@@ -5,6 +5,7 @@ import android.content.ContentValues;
 import android.content.UriMatcher;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
 import android.support.annotation.NonNull;
@@ -287,11 +288,179 @@ public class CategoryProvider implements IInternalProvider {
 
     @Override
     public int delete(@NonNull Uri _uri, String _selection, String[] _selectionArgs) {
+        switch (mMatcher.match(_uri)) {
+            case CATEGORY_ITEM: {
+                String categoryId = _uri.getLastPathSegment();
+                if ("-".equals(categoryId)) {
+                    return 0;
+                }
+                String selection = SQLiteUtils.prependSelection(Category.COLUMN_ID + " = ?", _selection);
+                String[] args = SQLiteUtils.prependSelectionArgs(categoryId, _selectionArgs);
+                return mDatabase.delete(Category.TABLE_NAME, selection, args);
+            }
+            case LIST_ITEM: {
+                String categoryUUID = _uri.getPathSegments().get(1);
+                String listUUID = _uri.getLastPathSegment();
+                String selection;
+                String[] args;
+                if ("-".equals(categoryUUID)) {
+                    selection = SQLiteUtils.prependSelection(ShoppingList.COLUMN_ID + " = ? AND " +
+                            ShoppingList.COLUMN_CATEGORY + " IS NULL", _selection);
+                    args = SQLiteUtils.prependSelectionArgs(listUUID, _selectionArgs);
+                } else {
+                    selection = SQLiteUtils.prependSelection(ShoppingList.COLUMN_ID + " = ? AND " +
+                            ShoppingList.COLUMN_CATEGORY + " = ?", _selection);
+                    args = SQLiteUtils.prependSelectionArgs(new String[]{ listUUID, categoryUUID },
+                            _selectionArgs);
+                }
+                return mDatabase.delete(ShoppingList.TABLE_NAME, selection, args);
+            }
+            case ENTRY_ITEM: {
+                String categoryUUID = _uri.getPathSegments().get(1);
+                String listUUID = _uri.getPathSegments().get(3);
+                String entryUUID = _uri.getLastPathSegment();
+                mDatabase.beginTransaction();
+                Cursor catCheckCursor = null;
+                try {
+                    catCheckCursor = mDatabase.query(
+                            ShoppingList.TABLE_NAME,
+                            new String[]{ ShoppingList.COLUMN_CATEGORY },
+                            ShoppingList.COLUMN_ID + " = ?",
+                            new String[]{ listUUID },
+                            null, null, null);
+                    catCheckCursor.moveToFirst();
+                    String currentCat = catCheckCursor.getString(catCheckCursor.
+                            getColumnIndex(ShoppingList.COLUMN_CATEGORY));
+                    if (("-".equals(categoryUUID) && currentCat == null) ||
+                            categoryUUID.equals(currentCat)) {
+                        String selection = SQLiteUtils.prependSelection(ListEntry.COLUMN_ID +
+                                " = ? AND " + ListEntry.COLUMN_LIST + " = ?", _selection);
+                        String[] args = SQLiteUtils.prependSelectionArgs(
+                                new String[]{
+                                        entryUUID,
+                                        listUUID
+                                }, _selectionArgs);
+                        int changedLines = mDatabase.delete(ListEntry.TABLE_NAME, selection, args);
+                        if (changedLines != -1) {
+                            mDatabase.setTransactionSuccessful();
+                        }
+                        return changedLines;
+                    }
+                } catch (Exception exception) {
+                    exception.printStackTrace();
+                } finally {
+                    if (catCheckCursor != null) {
+                        catCheckCursor.close();
+                    }
+                    mDatabase.endTransaction();
+                }
+                return 0;
+            }
+        }
         return 0;
     }
 
     @Override
     public int update(@NonNull Uri _uri, ContentValues _values, String _selection, String[] _selectionArgs) {
-        return 0;
+        switch (mMatcher.match(_uri)) {
+            case CATEGORY_ITEM: {
+                String categoryUUID = _uri.getLastPathSegment();
+                ContentValues toUpdate = new ContentValues(1);
+                toUpdate.put(Category.COLUMN_NAME, _values.getAsString(Category.COLUMN_NAME));
+                String selection = SQLiteUtils.prependSelection(Category.COLUMN_ID + " = ?",
+                        _selection);
+                String[] args = SQLiteUtils.prependSelectionArgs(categoryUUID, _selectionArgs);
+                return mDatabase.update(Category.TABLE_NAME, toUpdate, selection, args);
+            }
+            case LIST_ITEM: {
+                String categoryUUID = _uri.getPathSegments().get(1);
+                ContentValues toUpdate = new ContentValues(2);
+                for (String cvKey : _values.keySet()) {
+                    switch (cvKey) {
+                        case ShoppingList.COLUMN_NAME:
+                        case ShoppingList.COLUMN_CATEGORY:
+                            toUpdate.put(cvKey, _values.getAsString(cvKey));
+                            break;
+                    }
+                }
+                String selection;
+                String[] args;
+                if ("-".equals(categoryUUID)) {
+                    selection = SQLiteUtils.prependSelection(ShoppingList.COLUMN_ID + " = ? AND " +
+                            ShoppingList.COLUMN_CATEGORY + " IS NULL", _selection);
+                    args = new String[] { _uri.getLastPathSegment() };
+                } else {
+                    selection = SQLiteUtils.prependSelection(ShoppingList.COLUMN_ID + " = ? AND " +
+                            ShoppingList.COLUMN_CATEGORY + " = ?", _selection);
+                    args = new String[] { _uri.getLastPathSegment(), categoryUUID };
+                }
+                return mDatabase.update(ShoppingList.TABLE_NAME, toUpdate, selection, args);
+            }
+            case ENTRY_ITEM: {
+                String categoryUUID = _uri.getPathSegments().get(1);
+                String listUUID = _uri.getPathSegments().get(3);
+                String entryUUID = _uri.getLastPathSegment();
+                ContentValues toUpdate = new ContentValues();
+                for (String cvKey : _values.keySet()) {
+                    switch (cvKey) {
+                        case ListEntry.COLUMN_LIST:
+                        case ListEntry.COLUMN_PRODUCT:
+                            toUpdate.put(cvKey, _values.getAsString(cvKey));
+                            break;
+                        case ListEntry.COLUMN_AMOUNT:
+                        case ListEntry.COLUMN_PRIORITY:
+                            toUpdate.put(cvKey, _values.getAsFloat(cvKey));
+                            break;
+                        case ListEntry.COLUMN_STRUCK: {
+                            Object struckObj = _values.get(cvKey);
+                            if (struckObj instanceof Boolean) {
+                                toUpdate.put(cvKey, ((Boolean) struckObj ? 1 : 0));
+                            } else {
+                                toUpdate.put(cvKey, (((Integer) struckObj) != 0 ? 1 : 0));
+                            }
+                            break;
+                        }
+                    }
+                }
+                mDatabase.beginTransaction();
+                try {
+                    Cursor checkCatCursor = mDatabase.query(
+                            ShoppingList.TABLE_NAME,
+                            new String[]{ShoppingList.COLUMN_CATEGORY},
+                            ShoppingList.COLUMN_ID + " = ?",
+                            new String[]{listUUID},
+                            null, null, null);
+                    if (checkCatCursor.getCount() == 0) {
+                        return 0;
+                    }
+                    checkCatCursor.moveToFirst();
+                    String currentCat = checkCatCursor.getString(checkCatCursor.getColumnIndex(
+                            ShoppingList.COLUMN_CATEGORY));
+
+                    if (("-".equals(categoryUUID) && currentCat == null) || categoryUUID.
+                            equals(currentCat)) {
+                        String selection = SQLiteUtils.prependSelection(ListEntry.COLUMN_ID +
+                                " = ? AND " + ListEntry.COLUMN_LIST + " = ?", _selection);
+                        String[] args = SQLiteUtils.prependSelectionArgs(new String[]{
+                                entryUUID,
+                                listUUID
+                        }, _selectionArgs);
+                        int changedRows = mDatabase.update(ListEntry.TABLE_NAME, toUpdate,
+                                selection, args);
+                        if (changedRows != -1) {
+                            mDatabase.setTransactionSuccessful();
+                            return changedRows;
+                        }
+                    }
+                } catch (SQLiteException _printed) {
+                    _printed.printStackTrace();
+                } finally {
+                    mDatabase.endTransaction();
+                }
+                return 0;
+            }
+            default:
+                return 0;
+        }
     }
 }

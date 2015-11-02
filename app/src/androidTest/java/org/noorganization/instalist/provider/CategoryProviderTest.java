@@ -1,16 +1,18 @@
 package org.noorganization.instalist.provider;
 
-import android.content.ContentProvider;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
+import android.support.annotation.ColorInt;
 import android.test.AndroidTestCase;
 import android.util.Log;
 
+import org.noorganization.instalist.model.Category;
 import org.noorganization.instalist.model.ListEntry;
 import org.noorganization.instalist.model.Product;
+import org.noorganization.instalist.model.ShoppingList;
 import org.noorganization.instalist.provider.internal.CategoryProvider;
 import org.noorganization.instalist.provider.internal.IInternalProvider;
 
@@ -453,6 +455,589 @@ public class CategoryProviderTest extends AndroidTestCase {
         assertEquals(listUUID, testCursor.getString(testCursor.getColumnIndex(ListEntry.COLUMN_LIST)));
         assertEquals(productUUID, testCursor.getString(testCursor.getColumnIndex(
                 ListEntry.COLUMN_PRODUCT)));
+        testCursor.close();
+    }
+
+    public void testUpdateCategory() {
+        String categoryUUID = UUID.randomUUID().toString();
+        ContentValues categoryInitialCV = new ContentValues(2);
+        categoryInitialCV.put(Category.COLUMN_ID, categoryUUID);
+        categoryInitialCV.put(Category.COLUMN_NAME, "category before renaming");
+        mDatabase.insert(Category.TABLE_NAME, null, categoryInitialCV);
+
+        ContentValues categoryUpdateCV = new ContentValues(1);
+        categoryUpdateCV.put(Category.COLUMN_NAME, "category after renaming");
+        assertEquals(0, mCategoryProvider.update(Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI,
+                "category/" + UUID.randomUUID().toString()), categoryUpdateCV, null, null));
+        Cursor testCursor = mDatabase.query(
+                Category.TABLE_NAME,
+                new String[]{
+                        Category.COLUMN_NAME
+                },
+                Category.COLUMN_ID + " = ?",
+                new String[] {
+                        categoryUUID
+                },
+                null, null, null);
+        testCursor.moveToFirst();
+        assertEquals("category before renaming", testCursor.getString(
+                testCursor.getColumnIndex(Category.COLUMN_NAME)));
+        testCursor.close();
+
+        assertEquals(1, mCategoryProvider.update(Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI,
+                "category/" + categoryUUID), categoryUpdateCV, null, null));
+        testCursor = mDatabase.query(
+                Category.TABLE_NAME,
+                new String[]{
+                        Category.COLUMN_NAME
+                },
+                Category.COLUMN_ID + " = ?",
+                new String[] {
+                        categoryUUID
+                },
+                null, null, null);
+        testCursor.moveToFirst();
+        assertEquals("category after renaming", testCursor.getString(
+                testCursor.getColumnIndex(Category.COLUMN_NAME)));
+        testCursor.close();
+    }
+
+    public void testUpdateList() {
+        String categoryUUID = UUID.randomUUID().toString();
+        ContentValues categoryCV = new ContentValues(2);
+        categoryCV.put(Category.COLUMN_ID, categoryUUID);
+        categoryCV.put(Category.COLUMN_NAME, "category one");
+        mDatabase.insert(Category.TABLE_NAME, null, categoryCV);
+        String listUUID = UUID.randomUUID().toString();
+        ContentValues listInitialCV = new ContentValues(2);
+        listInitialCV.put(ShoppingList.COLUMN_NAME, "list before rename");
+        listInitialCV.put(ShoppingList.COLUMN_ID, listUUID);
+        mDatabase.insert(ShoppingList.TABLE_NAME, null, listInitialCV);
+
+        ContentValues listUpdateCV = new ContentValues(2);
+        listUpdateCV.put(ShoppingList.COLUMN_NAME, "list after rename");
+        listUpdateCV.put(ShoppingList.COLUMN_CATEGORY, categoryUUID);
+        // negative: with wrong category
+        assertEquals(0, mCategoryProvider.update(Uri.withAppendedPath(
+                InstalistProvider.BASE_CONTENT_URI,
+                "category/" + categoryUUID + "/list/" + listUUID), listUpdateCV, null, null));
+        Cursor testCursor = mDatabase.query(
+                ShoppingList.TABLE_NAME,
+                new String[]{
+                        ShoppingList.COLUMN_NAME,
+                        ShoppingList.COLUMN_CATEGORY
+                },
+                ShoppingList.COLUMN_ID + " = ?",
+                new String[] {
+                        listUUID
+                },
+                null, null, null);
+        testCursor.moveToFirst();
+        assertEquals("list before rename", testCursor.getString(testCursor.getColumnIndex(
+                ShoppingList.COLUMN_NAME)));
+        assertNull(testCursor.getString(testCursor.getColumnIndex(ShoppingList.COLUMN_CATEGORY)));
+        testCursor.close();
+
+        // negative: with wrong list
+        assertEquals(0, mCategoryProvider.update(Uri.withAppendedPath(
+                InstalistProvider.BASE_CONTENT_URI,
+                "category/-/list/" + UUID.randomUUID().toString()), listUpdateCV, null, null));
+        testCursor = mDatabase.query(
+                ShoppingList.TABLE_NAME,
+                new String[]{
+                        ShoppingList.COLUMN_NAME,
+                        ShoppingList.COLUMN_CATEGORY
+                },
+                ShoppingList.COLUMN_ID + " = ?",
+                new String[] {
+                        listUUID
+                },
+                null, null, null);
+        testCursor.moveToFirst();
+        assertEquals("list before rename", testCursor.getString(testCursor.getColumnIndex(
+                ShoppingList.COLUMN_NAME)));
+        assertNull(testCursor.getString(testCursor.getColumnIndex(ShoppingList.COLUMN_CATEGORY)));
+        testCursor.close();
+
+        // positive: all right
+        assertEquals(1, mCategoryProvider.update(Uri.withAppendedPath(
+                InstalistProvider.BASE_CONTENT_URI,
+                "category/-/list/" + listUUID), listUpdateCV, null, null));
+        testCursor = mDatabase.query(
+                ShoppingList.TABLE_NAME,
+                new String[]{
+                        ShoppingList.COLUMN_NAME,
+                        ShoppingList.COLUMN_CATEGORY
+                },
+                ShoppingList.COLUMN_ID + " = ?",
+                new String[] {
+                        listUUID
+                },
+                null, null, null);
+        testCursor.moveToFirst();
+        assertEquals("list after rename", testCursor.getString(testCursor.getColumnIndex(
+                ShoppingList.COLUMN_NAME)));
+        assertEquals(categoryUUID, testCursor.getString(testCursor.getColumnIndex(
+                ShoppingList.COLUMN_CATEGORY)));
+        testCursor.close();
+
+    }
+
+    public void testUpdateEntry() {
+        String categoryUUID = UUID.randomUUID().toString();
+        ContentValues categoryCV = new ContentValues(2);
+        categoryCV.put(Category.COLUMN_ID, categoryUUID);
+        categoryCV.put(Category.COLUMN_NAME, "category one");
+        mDatabase.insert(Category.TABLE_NAME, null, categoryCV);
+        String listUUID = UUID.randomUUID().toString();
+        ContentValues listCV = new ContentValues(2);
+        listCV.put(ShoppingList.COLUMN_NAME, "list one");
+        listCV.put(ShoppingList.COLUMN_ID, listUUID);
+        listCV.put(ShoppingList.COLUMN_CATEGORY, categoryUUID);
+        mDatabase.insert(ShoppingList.TABLE_NAME, null, listCV);
+        String productUUID = UUID.randomUUID().toString();
+        ContentValues productCV = new ContentValues(2);
+        productCV.put(Product.COLUMN_ID, productUUID);
+        productCV.put(Product.COLUMN_NAME, "product one");
+        mDatabase.insert(Product.TABLE_NAME, null, productCV);
+        String entryUUID = UUID.randomUUID().toString();
+        ContentValues entryInitialCV = new ContentValues(6);
+        entryInitialCV.put(ListEntry.COLUMN_ID, entryUUID);
+        entryInitialCV.put(ListEntry.COLUMN_LIST, listUUID);
+        entryInitialCV.put(ListEntry.COLUMN_PRODUCT, productUUID);
+        entryInitialCV.put(ListEntry.COLUMN_AMOUNT, 1.0f);
+        entryInitialCV.put(ListEntry.COLUMN_PRIORITY, 1.0f);
+        entryInitialCV.put(ListEntry.COLUMN_STRUCK, false);
+        mDatabase.insert(ListEntry.TABLE_NAME, null, entryInitialCV);
+
+        ContentValues entryUpdateCV = new ContentValues(3);
+        entryUpdateCV.put(ListEntry.COLUMN_AMOUNT, 2.0f);
+        entryUpdateCV.put(ListEntry.COLUMN_PRIORITY, 2.0f);
+        entryUpdateCV.put(ListEntry.COLUMN_STRUCK, true);
+        // negative: with wrong category
+        assertEquals(0, mCategoryProvider.update(Uri.withAppendedPath(
+                InstalistProvider.BASE_CONTENT_URI,
+                "category/-/list/" + listUUID + "/entry/" + entryUUID), entryUpdateCV, null, null));
+        Cursor testCursor = mDatabase.query(
+                ListEntry.TABLE_NAME,
+                new String[]{
+                        ListEntry.COLUMN_AMOUNT,
+                        ListEntry.COLUMN_PRIORITY,
+                        ListEntry.COLUMN_STRUCK
+                },
+                ListEntry.COLUMN_ID + " = ?",
+                new String[] {
+                        entryUUID
+                },
+                null, null, null);
+        testCursor.moveToFirst();
+        assertEquals(1.0f, testCursor.getFloat(testCursor.getColumnIndex(
+                ListEntry.COLUMN_AMOUNT)), 0.001f);
+        assertEquals(1.0f, testCursor.getFloat(testCursor.getColumnIndex(
+                ListEntry.COLUMN_PRIORITY)), 0.001f);
+        assertEquals(0, testCursor.getInt(testCursor.getColumnIndex(
+                ListEntry.COLUMN_STRUCK)));
+        testCursor.close();
+
+        // negative: with wrong list
+        assertEquals(0, mCategoryProvider.update(Uri.withAppendedPath(
+                InstalistProvider.BASE_CONTENT_URI,
+                "category/" + categoryUUID + "/list/" + UUID.randomUUID().toString() + "/entry/" +
+                        entryUUID), entryUpdateCV, null, null));
+        testCursor = mDatabase.query(
+                ListEntry.TABLE_NAME,
+                new String[]{
+                        ListEntry.COLUMN_AMOUNT,
+                        ListEntry.COLUMN_PRIORITY,
+                        ListEntry.COLUMN_STRUCK
+                },
+                ListEntry.COLUMN_ID + " = ?",
+                new String[] {
+                        entryUUID
+                },
+                null, null, null);
+        testCursor.moveToFirst();
+        assertEquals(1.0f, testCursor.getFloat(testCursor.getColumnIndex(
+                ListEntry.COLUMN_AMOUNT)), 0.001f);
+        assertEquals(1.0f, testCursor.getFloat(testCursor.getColumnIndex(
+                ListEntry.COLUMN_PRIORITY)), 0.001f);
+        assertEquals(0, testCursor.getInt(testCursor.getColumnIndex(
+                ListEntry.COLUMN_STRUCK)));
+        testCursor.close();
+
+        // negative: with wrong entry
+        assertEquals(0, mCategoryProvider.update(Uri.withAppendedPath(
+                InstalistProvider.BASE_CONTENT_URI,
+                "category/" + categoryUUID + "/list/" + listUUID + "/entry/" +
+                        UUID.randomUUID().toString()), entryUpdateCV, null, null));
+        testCursor = mDatabase.query(
+                ListEntry.TABLE_NAME,
+                new String[]{
+                        ListEntry.COLUMN_AMOUNT,
+                        ListEntry.COLUMN_PRIORITY,
+                        ListEntry.COLUMN_STRUCK
+                },
+                ListEntry.COLUMN_ID + " = ?",
+                new String[] {
+                        entryUUID
+                },
+                null, null, null);
+        testCursor.moveToFirst();
+        assertEquals(1.0f, testCursor.getFloat(testCursor.getColumnIndex(
+                ListEntry.COLUMN_AMOUNT)), 0.001f);
+        assertEquals(1.0f, testCursor.getFloat(testCursor.getColumnIndex(
+                ListEntry.COLUMN_PRIORITY)), 0.001f);
+        assertEquals(0, testCursor.getInt(testCursor.getColumnIndex(
+                ListEntry.COLUMN_STRUCK)));
+        testCursor.close();
+
+        // positive: all right
+        assertEquals(1, mCategoryProvider.update(Uri.withAppendedPath(
+                InstalistProvider.BASE_CONTENT_URI,
+                "category/" + categoryUUID + "/list/" + listUUID + "/entry/" + entryUUID),
+                entryUpdateCV, null, null));
+        testCursor = mDatabase.query(
+                ListEntry.TABLE_NAME,
+                new String[]{
+                        ListEntry.COLUMN_AMOUNT,
+                        ListEntry.COLUMN_PRIORITY,
+                        ListEntry.COLUMN_STRUCK
+                },
+                ListEntry.COLUMN_ID + " = ?",
+                new String[] {
+                        entryUUID
+                },
+                null, null, null);
+        testCursor.moveToFirst();
+        assertEquals(2.0f, testCursor.getFloat(testCursor.getColumnIndex(
+                ListEntry.COLUMN_AMOUNT)), 0.001f);
+        assertEquals(2.0f, testCursor.getFloat(testCursor.getColumnIndex(
+                ListEntry.COLUMN_PRIORITY)), 0.001f);
+        assertEquals(1, testCursor.getInt(testCursor.getColumnIndex(
+                ListEntry.COLUMN_STRUCK)));
+        testCursor.close();
+
+        // negative: with wrong content values
+        ContentValues entryFalseUpdateCV = new ContentValues(2);
+        entryFalseUpdateCV.put(ListEntry.COLUMN_PRODUCT, UUID.randomUUID().toString());
+        entryFalseUpdateCV.put(ListEntry.COLUMN_LIST, UUID.randomUUID().toString());
+        assertEquals(0, mCategoryProvider.update(Uri.withAppendedPath(
+                InstalistProvider.BASE_CONTENT_URI,
+                "category/" + categoryUUID + "/list/" + listUUID + "/entry/" + entryUUID),
+                entryFalseUpdateCV, null, null));
+        testCursor = mDatabase.query(
+                ListEntry.TABLE_NAME,
+                new String[]{
+                        ListEntry.COLUMN_PRODUCT,
+                        ListEntry.COLUMN_LIST
+                },
+                ListEntry.COLUMN_ID + " = ?",
+                new String[] {
+                        entryUUID
+                },
+                null, null, null);
+        testCursor.moveToFirst();
+        assertEquals(productUUID, testCursor.getString(testCursor.getColumnIndex(
+                ListEntry.COLUMN_PRODUCT)));
+        assertEquals(listUUID, testCursor.getString(testCursor.getColumnIndex(
+                ListEntry.COLUMN_LIST)));
+        testCursor.close();
+    }
+
+    public void testDeleteCategory() {
+        String categoryUUID1 = UUID.randomUUID().toString();
+        ContentValues categoryCV1 = new ContentValues(2);
+        categoryCV1.put(Category.COLUMN_ID, categoryUUID1);
+        categoryCV1.put(Category.COLUMN_NAME, "category one");
+        mDatabase.insert(Category.TABLE_NAME, null, categoryCV1);
+        String categoryUUID2 = UUID.randomUUID().toString();
+        ContentValues categoryCV2 = new ContentValues(2);
+        categoryCV2.put(Category.COLUMN_ID, categoryUUID2);
+        categoryCV2.put(Category.COLUMN_NAME, "category two");
+        mDatabase.insert(Category.TABLE_NAME, null, categoryCV2);
+
+        // negative: wrong category
+        assertEquals(0, mCategoryProvider.delete(
+                Uri.withAppendedPath(
+                        InstalistProvider.BASE_CONTENT_URI,
+                        "category/" + UUID.randomUUID().toString()
+                ), null, null));
+        Cursor testCursor = mDatabase.query(Category.TABLE_NAME, null, null, null, null, null, null);
+        assertEquals(2, testCursor.getCount());
+        testCursor.moveToFirst();
+        boolean cat1Complete = false;
+        boolean cat2Complete = false;
+        while (!testCursor.isAfterLast()) {
+            if (categoryUUID1.equals(testCursor.getString(testCursor.getColumnIndex(
+                    Category.COLUMN_ID))) && "category one".equals(testCursor.getString
+                    (testCursor.getColumnIndex(Category.COLUMN_NAME)))) {
+                cat1Complete = true;
+            } else if (categoryUUID2.equals(testCursor.getString(testCursor.getColumnIndex(
+                    Category.COLUMN_ID))) && "category two".equals(testCursor.getString
+                    (testCursor.getColumnIndex(Category.COLUMN_NAME)))) {
+                cat2Complete = true;
+            }
+            testCursor.moveToNext();
+        }
+        assertTrue(cat1Complete);
+        assertTrue(cat2Complete);
+        testCursor.close();
+
+        // positive: all right
+        assertEquals(1, mCategoryProvider.delete(
+                Uri.withAppendedPath(
+                        InstalistProvider.BASE_CONTENT_URI,
+                        "category/" + categoryUUID1
+                ), null, null));
+        testCursor = mDatabase.query(Category.TABLE_NAME, null, null, null, null, null, null);
+        assertEquals(1, testCursor.getCount());
+        testCursor.moveToFirst();
+        assertEquals(categoryUUID2, testCursor.getString(
+                testCursor.getColumnIndex(Category.COLUMN_ID)));
+        assertEquals("category two", testCursor.getString(
+                testCursor.getColumnIndex(Category.COLUMN_NAME)));
+        testCursor.close();
+    }
+
+    public void testDeleteList() {
+        String categoryUUID = UUID.randomUUID().toString();
+        ContentValues categoryCV = new ContentValues(2);
+        categoryCV.put(Category.COLUMN_ID, categoryUUID);
+        categoryCV.put(Category.COLUMN_NAME, "category one");
+        mDatabase.insert(Category.TABLE_NAME, null, categoryCV);
+        String listUUID1 = UUID.randomUUID().toString();
+        ContentValues listCV1 = new ContentValues(3);
+        listCV1.put(ShoppingList.COLUMN_ID, listUUID1);
+        listCV1.put(ShoppingList.COLUMN_NAME, "list one");
+        listCV1.put(ShoppingList.COLUMN_CATEGORY, categoryUUID);
+        mDatabase.insert(ShoppingList.TABLE_NAME, null, listCV1);
+        String listUUID2 = UUID.randomUUID().toString();
+        ContentValues listCV2 = new ContentValues(3);
+        listCV2.put(ShoppingList.COLUMN_ID, listUUID2);
+        listCV2.put(ShoppingList.COLUMN_NAME, "list two");
+        listCV2.put(ShoppingList.COLUMN_CATEGORY, categoryUUID);
+        mDatabase.insert(ShoppingList.TABLE_NAME, null, listCV2);
+
+        // negative: wrong category
+        assertEquals(0, mCategoryProvider.delete(
+                Uri.withAppendedPath(
+                        InstalistProvider.BASE_CONTENT_URI,
+                        "category/-/list/" + listUUID1
+                ), null, null));
+        Cursor testCursor = mDatabase.query(ShoppingList.TABLE_NAME, null, null, null, null, null, null);
+        assertEquals(2, testCursor.getCount());
+        testCursor.moveToFirst();
+        boolean list1Complete = false;
+        boolean list2Complete = false;
+        while (!testCursor.isAfterLast()) {
+            if (listUUID1.equals(testCursor.getString(testCursor.getColumnIndex(
+                    ShoppingList.COLUMN_ID))) && "list one".equals(testCursor.getString
+                    (testCursor.getColumnIndex(ShoppingList.COLUMN_NAME))) && categoryUUID.
+                    equals(testCursor.getString(testCursor.getColumnIndex(
+                            ShoppingList.COLUMN_CATEGORY)))) {
+                list1Complete = true;
+            } else if (listUUID2.equals(testCursor.getString(testCursor.getColumnIndex(
+                    ShoppingList.COLUMN_ID))) && "list two".equals(testCursor.getString
+                    (testCursor.getColumnIndex(ShoppingList.COLUMN_NAME))) && categoryUUID.
+                    equals(testCursor.getString(testCursor.getColumnIndex(
+                            ShoppingList.COLUMN_CATEGORY)))) {
+                list2Complete = true;
+            }
+            testCursor.moveToNext();
+        }
+        assertTrue(list1Complete);
+        assertTrue(list2Complete);
+        testCursor.close();
+
+        // negative: wrong list
+        assertEquals(0, mCategoryProvider.delete(
+                Uri.withAppendedPath(
+                        InstalistProvider.BASE_CONTENT_URI,
+                        "category/" + categoryUUID + "/list/" + UUID.randomUUID().toString()
+                ), null, null));
+        testCursor = mDatabase.query(ShoppingList.TABLE_NAME, null, null, null, null, null, null);
+        assertEquals(2, testCursor.getCount());
+        testCursor.moveToFirst();
+        list1Complete = false;
+        list2Complete = false;
+        while (!testCursor.isAfterLast()) {
+            if (listUUID1.equals(testCursor.getString(testCursor.getColumnIndex(
+                    ShoppingList.COLUMN_ID))) && "list one".equals(testCursor.getString
+                    (testCursor.getColumnIndex(ShoppingList.COLUMN_NAME))) && categoryUUID.
+                    equals(testCursor.getString(testCursor.getColumnIndex(
+                            ShoppingList.COLUMN_CATEGORY)))) {
+                list1Complete = true;
+            } else if (listUUID2.equals(testCursor.getString(testCursor.getColumnIndex(
+                    ShoppingList.COLUMN_ID))) && "list two".equals(testCursor.getString
+                    (testCursor.getColumnIndex(ShoppingList.COLUMN_NAME))) && categoryUUID.
+                    equals(testCursor.getString(testCursor.getColumnIndex(
+                            ShoppingList.COLUMN_CATEGORY)))) {
+                list2Complete = true;
+            }
+            testCursor.moveToNext();
+        }
+        assertTrue(list1Complete);
+        assertTrue(list2Complete);
+        testCursor.close();
+
+        // positive: all right
+        assertEquals(1, mCategoryProvider.delete(
+                Uri.withAppendedPath(
+                        InstalistProvider.BASE_CONTENT_URI,
+                        "category/" + categoryUUID + "/list/" + listUUID1
+                ), null, null));
+        testCursor = mDatabase.query(ShoppingList.TABLE_NAME, null, null, null, null, null, null);
+        assertEquals(1, testCursor.getCount());
+        testCursor.moveToFirst();
+        assertEquals(listUUID2, testCursor.getString(
+                testCursor.getColumnIndex(ShoppingList.COLUMN_ID)));
+        assertEquals("list two", testCursor.getString(
+                testCursor.getColumnIndex(ShoppingList.COLUMN_NAME)));
+        testCursor.close();
+    }
+
+    public void testDeleteEntry() {
+        String categoryUUID = UUID.randomUUID().toString();
+        ContentValues categoryCV = new ContentValues(2);
+        categoryCV.put(Category.COLUMN_ID, categoryUUID);
+        categoryCV.put(Category.COLUMN_NAME, "category one");
+        mDatabase.insert(Category.TABLE_NAME, null, categoryCV);
+        String listUUID = UUID.randomUUID().toString();
+        ContentValues listCV = new ContentValues(3);
+        listCV.put(ShoppingList.COLUMN_ID, listUUID);
+        listCV.put(ShoppingList.COLUMN_NAME, "list one");
+        listCV.put(ShoppingList.COLUMN_CATEGORY, categoryUUID);
+        mDatabase.insert(ShoppingList.TABLE_NAME, null, listCV);
+        String productUUID = UUID.randomUUID().toString();
+        ContentValues productCV = new ContentValues(2);
+        productCV.put(Product.COLUMN_ID, productUUID);
+        productCV.put(Product.COLUMN_NAME, "product one");
+        mDatabase.insert(Product.TABLE_NAME, null, productCV);
+        String entryUUID1 = UUID.randomUUID().toString();
+        ContentValues entryCV1 = new ContentValues(3);
+        entryCV1.put(ListEntry.COLUMN_ID, entryUUID1);
+        entryCV1.put(ListEntry.COLUMN_LIST, listUUID);
+        entryCV1.put(ListEntry.COLUMN_PRODUCT, productUUID);
+        mDatabase.insert(ListEntry.TABLE_NAME, null, entryCV1);
+        // Normally a linked product should only be linked once per list. For test purposes we allow
+        // this also multiple times, since the test is enough hard to read.
+        String entryUUID2 = UUID.randomUUID().toString();
+        ContentValues entryCV2 = new ContentValues(3);
+        entryCV2.put(ListEntry.COLUMN_ID, entryUUID2);
+        entryCV2.put(ListEntry.COLUMN_LIST, listUUID);
+        entryCV2.put(ListEntry.COLUMN_PRODUCT, productUUID);
+        mDatabase.insert(ListEntry.TABLE_NAME, null, entryCV2);
+
+        // negative: wrong category
+        assertEquals(0, mCategoryProvider.delete(
+                Uri.withAppendedPath(
+                        InstalistProvider.BASE_CONTENT_URI,
+                        "category/-/list/" + listUUID + "/entry/" + entryUUID1
+                ), null, null));
+        Cursor testCursor = mDatabase.query(ListEntry.TABLE_NAME, null, null, null, null, null, null);
+        assertEquals(2, testCursor.getCount());
+        testCursor.moveToFirst();
+        boolean entry1Complete = false;
+        boolean entry2Complete = false;
+        while (!testCursor.isAfterLast()) {
+            if (entryUUID1.equals(testCursor.getString(testCursor.getColumnIndex(
+                    ListEntry.COLUMN_ID))) && listUUID.equals(testCursor.getString
+                    (testCursor.getColumnIndex(ListEntry.COLUMN_LIST))) && productUUID.
+                    equals(testCursor.getString(testCursor.getColumnIndex(
+                            ListEntry.COLUMN_PRODUCT)))) {
+                entry1Complete = true;
+            } else if (entryUUID2.equals(testCursor.getString(testCursor.getColumnIndex(
+                    ListEntry.COLUMN_ID))) && listUUID.equals(testCursor.getString
+                    (testCursor.getColumnIndex(ListEntry.COLUMN_LIST))) && productUUID.
+                    equals(testCursor.getString(testCursor.getColumnIndex(
+                            ListEntry.COLUMN_PRODUCT)))) {
+                entry2Complete = true;
+            }
+            testCursor.moveToNext();
+        }
+        assertTrue(entry1Complete);
+        assertTrue(entry2Complete);
+        testCursor.close();
+
+        // negative: wrong list
+        assertEquals(0, mCategoryProvider.delete(
+                Uri.withAppendedPath(
+                        InstalistProvider.BASE_CONTENT_URI,
+                        "category/" + categoryUUID + "/list/" + UUID.randomUUID().toString() +
+                                "/entry/" + entryUUID1
+                ), null, null));
+        testCursor = mDatabase.query(ListEntry.TABLE_NAME, null, null, null, null, null, null);
+        assertEquals(2, testCursor.getCount());
+        testCursor.moveToFirst();
+        entry1Complete = false;
+        entry2Complete = false;
+        while (!testCursor.isAfterLast()) {
+            if (entryUUID1.equals(testCursor.getString(testCursor.getColumnIndex(
+                    ListEntry.COLUMN_ID))) && listUUID.equals(testCursor.getString
+                    (testCursor.getColumnIndex(ListEntry.COLUMN_LIST))) && productUUID.
+                    equals(testCursor.getString(testCursor.getColumnIndex(
+                            ListEntry.COLUMN_PRODUCT)))) {
+                entry1Complete = true;
+            } else if (entryUUID2.equals(testCursor.getString(testCursor.getColumnIndex(
+                    ListEntry.COLUMN_ID))) && listUUID.equals(testCursor.getString
+                    (testCursor.getColumnIndex(ListEntry.COLUMN_LIST))) && productUUID.
+                    equals(testCursor.getString(testCursor.getColumnIndex(
+                            ListEntry.COLUMN_PRODUCT)))) {
+                entry2Complete = true;
+            }
+            testCursor.moveToNext();
+        }
+        assertTrue(entry1Complete);
+        assertTrue(entry2Complete);
+        testCursor.close();
+
+        // negative: wrong entry
+        assertEquals(0, mCategoryProvider.delete(
+                Uri.withAppendedPath(
+                        InstalistProvider.BASE_CONTENT_URI,
+                        "category/" + categoryUUID + "/list/" + listUUID + "/entry/" + UUID.
+                                randomUUID().toString()
+                ), null, null));
+        testCursor = mDatabase.query(ListEntry.TABLE_NAME, null, null, null, null, null, null);
+        assertEquals(2, testCursor.getCount());
+        testCursor.moveToFirst();
+        entry1Complete = false;
+        entry2Complete = false;
+        while (!testCursor.isAfterLast()) {
+            if (entryUUID1.equals(testCursor.getString(testCursor.getColumnIndex(
+                    ListEntry.COLUMN_ID))) && listUUID.equals(testCursor.getString
+                    (testCursor.getColumnIndex(ListEntry.COLUMN_LIST))) && productUUID.
+                    equals(testCursor.getString(testCursor.getColumnIndex(
+                            ListEntry.COLUMN_PRODUCT)))) {
+                entry1Complete = true;
+            } else if (entryUUID2.equals(testCursor.getString(testCursor.getColumnIndex(
+                    ListEntry.COLUMN_ID))) && listUUID.equals(testCursor.getString
+                    (testCursor.getColumnIndex(ListEntry.COLUMN_LIST))) && productUUID.
+                    equals(testCursor.getString(testCursor.getColumnIndex(
+                            ListEntry.COLUMN_PRODUCT)))) {
+                entry2Complete = true;
+            }
+            testCursor.moveToNext();
+        }
+        assertTrue(entry1Complete);
+        assertTrue(entry2Complete);
+        testCursor.close();
+
+        // positive: all right
+        assertEquals(1, mCategoryProvider.delete(
+                Uri.withAppendedPath(
+                        InstalistProvider.BASE_CONTENT_URI,
+                        "category/" + categoryUUID + "/list/" + listUUID + "/entry/" + entryUUID1
+                ), null, null));
+        testCursor = mDatabase.query(ListEntry.TABLE_NAME, null, null, null, null, null, null);
+        assertEquals(1, testCursor.getCount());
+        testCursor.moveToFirst();
+        assertEquals(entryUUID2, testCursor.getString(
+                testCursor.getColumnIndex(ListEntry.COLUMN_ID)));
+        assertEquals(productUUID, testCursor.getString(
+                testCursor.getColumnIndex(ListEntry.COLUMN_PRODUCT)));
+        assertEquals(listUUID, testCursor.getString(
+                testCursor.getColumnIndex(ListEntry.COLUMN_LIST)));
         testCursor.close();
     }
 }
