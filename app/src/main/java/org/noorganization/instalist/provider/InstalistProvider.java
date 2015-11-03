@@ -1,7 +1,9 @@
 package org.noorganization.instalist.provider;
 
 import android.content.ContentProvider;
+import android.content.ContentResolver;
 import android.content.ContentValues;
+import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
@@ -25,7 +27,7 @@ public class InstalistProvider extends ContentProvider {
 
     public final static String AUTHORITY = "org.noorganization.instalist.provider";
 
-    public final static String BASE_VENDOR = "vnd.noorganization.";
+    public final static String BASE_VENDOR = "vnd.org.noorganization.instalist.";
     /**
      * The base content uri. Build a uri with the table paths.
      **/
@@ -154,7 +156,14 @@ public class InstalistProvider extends ContentProvider {
     public Uri insert(@NonNull Uri _uri, ContentValues _values) {
         IInternalProvider provider = getInternalProvider(_uri);
         if (provider != null) {
-            return provider.insert(_uri, _values);
+            Uri rtnUri = provider.insert(_uri, _values);
+            if (rtnUri != null) {
+                Context context = getContext();
+                if (context != null) {
+                    context.getContentResolver().notifyChange(rtnUri, null);
+                }
+            }
+            return rtnUri;
         }
         return null;
     }

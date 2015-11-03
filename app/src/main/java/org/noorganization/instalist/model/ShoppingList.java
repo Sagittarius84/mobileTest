@@ -13,6 +13,20 @@ import java.util.List;
  * Created by michi on 14.04.15.
  */
 public class ShoppingList extends SugarRecord<ShoppingList> {
+
+    public static final String COLUMN_ID = "_id";
+    public static final String COLUMN_NAME = "name";
+    public static final String COLUMN_CATEGORY = "category";
+
+    public static final String TABLE_NAME = "list";
+
+    public static final String DB_CREATE = "CREATE TABLE " + TABLE_NAME + " (" +
+            COLUMN_ID + " TEXT PRIMARY KEY NOT NULL, " +
+            COLUMN_NAME + " TEXT NOT NULL, " +
+            COLUMN_CATEGORY + " TEXT, " +
+            "FOREIGN KEY (" + COLUMN_CATEGORY + ") REFERENCES " + Category.TABLE_NAME+
+            " (" + Category.COLUMN_ID + ") ON UPDATE CASCADE ON DELETE CASCADE)";
+
     public final static String ATTR_NAME = StringUtil.toSQLName("mName");
     public final static String ATTR_CATEGORY = StringUtil.toSQLName("mCategory");
 

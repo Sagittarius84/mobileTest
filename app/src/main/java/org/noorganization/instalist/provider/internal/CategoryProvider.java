@@ -1,14 +1,20 @@
 package org.noorganization.instalist.provider.internal;
 
+import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.UriMatcher;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
 import android.support.annotation.NonNull;
-import android.util.Log;
 
+import org.noorganization.instalist.model.Category;
+import org.noorganization.instalist.model.ListEntry;
+import org.noorganization.instalist.model.Product;
+import org.noorganization.instalist.model.ShoppingList;
 import org.noorganization.instalist.provider.InstalistProvider;
+import org.noorganization.instalist.utils.SQLiteUtils;
 
 /**
  * TODO: implement and describe.
@@ -19,61 +25,147 @@ public class CategoryProvider implements IInternalProvider {
     private SQLiteDatabase mDatabase;
     private UriMatcher     mMatcher;
 
-    private static final int MULTIPLE_CATEGORIES = 1;
-    private static final int SINGLE_CATEGORY = 2;
-    private static final int MULTIPLE_LISTS = 3;
-    private static final int SINGLE_LIST = 4;
+    private static final int CATEGORY_DIRECTORY = 1;
+    private static final int CATEGORY_ITEM = 2;
+    private static final int LIST_DIRECTORY = 3;
+    private static final int LIST_ITEM = 4;
+    private static final int ENTRY_DIRECTORY = 5;
+    private static final int ENTRY_ITEM = 6;
 
     @Override
     public void onCreate(SQLiteDatabase _db) {
         mDatabase = _db;
         mMatcher = new UriMatcher(UriMatcher.NO_MATCH);
-        mMatcher.addURI(InstalistProvider.AUTHORITY, "category", MULTIPLE_CATEGORIES);
-        mMatcher.addURI(InstalistProvider.AUTHORITY, "category/*", SINGLE_CATEGORY);
-        mMatcher.addURI(InstalistProvider.AUTHORITY, "category/*/list", MULTIPLE_LISTS);
-        mMatcher.addURI(InstalistProvider.AUTHORITY, "category/*/list/*", SINGLE_LIST);
+        mMatcher.addURI(InstalistProvider.AUTHORITY, "category", CATEGORY_DIRECTORY);
+        mMatcher.addURI(InstalistProvider.AUTHORITY, "category/*", CATEGORY_ITEM);
+        mMatcher.addURI(InstalistProvider.AUTHORITY, "category/*/list", LIST_DIRECTORY);
+        mMatcher.addURI(InstalistProvider.AUTHORITY, "category/*/list/*", LIST_ITEM);
+        mMatcher.addURI(InstalistProvider.AUTHORITY, "category/*/list/*/entry", ENTRY_DIRECTORY);
+        mMatcher.addURI(InstalistProvider.AUTHORITY, "category/*/list/*/entry/*", ENTRY_ITEM);
     }
 
     @Override
     public Cursor query(@NonNull Uri _uri, String[] _projection, String _selection, String[] _selectionArgs, String _sortOrder) {
         switch (mMatcher.match(_uri)) {
-            case MULTIPLE_CATEGORIES:
-                return mDatabase.query("category", _projection, _selection, _selectionArgs, null, null, _sortOrder);
-            case SINGLE_CATEGORY:
-            {
-                String selection = prependSelection("_id = ?", _selection);
-                String[] selectionArgs = prependArgs(new String[] {_uri.getLastPathSegment()},
+            case CATEGORY_DIRECTORY:
+                return mDatabase.query(Category.TABLE_NAME, _projection, _selection,
+                        _selectionArgs, null, null, _sortOrder);
+            case CATEGORY_ITEM: {
+                String selection = SQLiteUtils.prependSelection(Category.COLUMN_ID + " = ?",
+                        _selection);
+                String[] selectionArgs = SQLiteUtils.prependSelectionArgs(_uri.getLastPathSegment(),
                         _selectionArgs);
-                return mDatabase.query("category", _projection, selection, selectionArgs, null, null, _sortOrder);
+                return mDatabase.query(Category.TABLE_NAME, _projection, selection, selectionArgs,
+                        null, null, _sortOrder);
             }
-            case MULTIPLE_LISTS:
-            {
+            case LIST_DIRECTORY: {
                 String category = _uri.getPathSegments().get(1);
                 if (category.equals("-")) {
-                    String selection = prependSelection("category IS NULL", _selection);
-                    return mDatabase.query("list", _projection, selection,_selectionArgs, null,
-                            null, _sortOrder);
+                    String selection = SQLiteUtils.prependSelection(ShoppingList.COLUMN_CATEGORY +
+                            " IS NULL", _selection);
+                    return mDatabase.query(ShoppingList.TABLE_NAME, _projection, selection,
+                            _selectionArgs, null, null, _sortOrder);
                 } else {
-                    String selection = prependSelection("category = ?", _selection);
-                    String[] selectionArgs = prependArgs(new String[]{ category }, _selectionArgs);
-                    return mDatabase.query("list", _projection, selection, selectionArgs, null, null,
+                    String selection = SQLiteUtils.prependSelection(ShoppingList.COLUMN_CATEGORY +
+                            " = ?", _selection);
+                    String[] selectionArgs = SQLiteUtils.prependSelectionArgs(category,
+                            _selectionArgs);
+                    return mDatabase.query(ShoppingList.TABLE_NAME, _projection, selection,
+                            selectionArgs, null, null, _sortOrder);
+                }
+            }
+            case LIST_ITEM: {
+                String category = _uri.getPathSegments().get(1);
+                if (category.equals("-")) {
+                    String selection = SQLiteUtils.prependSelection(ShoppingList.COLUMN_CATEGORY +
+                            " IS NULL AND " + ShoppingList.COLUMN_ID + " = ?", _selection);
+                    String[] selectionArgs = SQLiteUtils.prependSelectionArgs(
+                            _uri.getLastPathSegment(),
+                            _selectionArgs);
+                    return mDatabase.query(ShoppingList.TABLE_NAME, _projection, selection,
+                            selectionArgs, null, null, _sortOrder);
+                } else {
+                    String selection = SQLiteUtils.prependSelection(ShoppingList.COLUMN_CATEGORY +
+                            " = ? AND " + ShoppingList.COLUMN_ID + " = ?",
+                            _selection);
+                    String[] selectionArgs = SQLiteUtils.prependSelectionArgs(
+                            new String[]{category, _uri.getLastPathSegment()},
+                            _selectionArgs);
+                    return mDatabase.query(ShoppingList.TABLE_NAME, _projection, selection,
+                            selectionArgs, null, null, _sortOrder);
+                }
+            }
+            case ENTRY_DIRECTORY: {
+                String category = _uri.getPathSegments().get(1);
+                String list = _uri.getPathSegments().get(3);
+                SQLiteQueryBuilder queryBuilder = new SQLiteQueryBuilder();
+                queryBuilder.setTables("(" + ListEntry.TABLE_NAME + " INNER JOIN " +
+                        ShoppingList.TABLE_NAME + " ON (" + ShoppingList.TABLE_NAME + "." +
+                        ShoppingList.COLUMN_ID + " = " + ListEntry.TABLE_NAME + "." +
+                        ListEntry.COLUMN_LIST + ")) INNER JOIN " + Product.TABLE_NAME + " ON (" +
+                        Product.TABLE_NAME + "." + Product.COLUMN_ID + " = " + ListEntry.TABLE_NAME
+                        + "." + ListEntry.COLUMN_PRODUCT + ")");
+                queryBuilder.setProjectionMap(SQLiteUtils.generateProjectionMap(ListEntry.TABLE_NAME,
+                        ListEntry.COLUMN_ID, ListEntry.COLUMN_AMOUNT, ListEntry.COLUMN_LIST,
+                        ListEntry.COLUMN_PRIORITY, ListEntry.COLUMN_PRODUCT, ListEntry.COLUMN_STRUCK));
+                if (category.equals("-")) {
+                    String selection = SQLiteUtils.prependSelection(
+                            "list.category IS NULL AND " + ListEntry.COLUMN_LIST + " = ?",
+                            _selection);
+                    String[] args = SQLiteUtils.prependSelectionArgs(list, _selectionArgs);
+                    return queryBuilder.query(mDatabase, _projection, selection, args, null, null,
+                            _sortOrder);
+                } else {
+                    String selection = SQLiteUtils.prependSelection("list.category = ? AND " +
+                                    ListEntry.COLUMN_LIST + " = ?",
+                            _selection);
+                    String[] args = SQLiteUtils.prependSelectionArgs(new String[]{category, list},
+                            _selectionArgs);
+                    return queryBuilder.query(mDatabase, _projection, selection, args, null, null,
                             _sortOrder);
                 }
             }
-            case SINGLE_LIST:
-            {
+            case ENTRY_ITEM: {
                 String category = _uri.getPathSegments().get(1);
+                String list = _uri.getPathSegments().get(3);
+                String entry = _uri.getLastPathSegment();
+                SQLiteQueryBuilder queryBuilder = new SQLiteQueryBuilder();
+                queryBuilder.setTables("(" + ListEntry.TABLE_NAME + " INNER JOIN " +
+                        ShoppingList.TABLE_NAME + " ON (" + ShoppingList.TABLE_NAME + "." +
+                        ShoppingList.COLUMN_ID + " = " + ListEntry.TABLE_NAME + "." +
+                        ListEntry.COLUMN_LIST + ")) INNER JOIN " + Product.TABLE_NAME + " ON (" +
+                        Product.TABLE_NAME + "." + Product.COLUMN_ID + " = " + ListEntry.TABLE_NAME
+                        + "." + ListEntry.COLUMN_PRODUCT + ")");
+                queryBuilder.setProjectionMap(SQLiteUtils.generateProjectionMap(ListEntry.TABLE_NAME,
+                        ListEntry.COLUMN_ID, ListEntry.COLUMN_AMOUNT, ListEntry.COLUMN_LIST,
+                        ListEntry.COLUMN_PRIORITY, ListEntry.COLUMN_PRODUCT, ListEntry.COLUMN_STRUCK));
                 if (category.equals("-")) {
-                    String selection = prependSelection("category IS NULL AND _id = ?", _selection);
-                    String[] selectionArgs = prependArgs(new String[]{_uri.getLastPathSegment()},
-                            _selectionArgs);
-                    return mDatabase.query("list", _projection, selection, selectionArgs, null,
-                            null, _sortOrder);
+                    String selection = SQLiteUtils.prependSelection(ShoppingList.TABLE_NAME + "." +
+                                    ShoppingList.COLUMN_CATEGORY + " IS NULL AND " +
+                                    ListEntry.TABLE_NAME + "." + ListEntry.COLUMN_LIST +
+                                    " = ? AND " + ListEntry.TABLE_NAME + "." +
+                                    ListEntry.COLUMN_ID + " = ?",
+                            _selection);
+                    String[] args = SQLiteUtils.prependSelectionArgs(new String[] {
+                            list,
+                            entry
+                    }, _selectionArgs);
+                    return queryBuilder.query(mDatabase, _projection, selection, args, null, null,
+                            _sortOrder);
                 } else {
-                    String selection = prependSelection("category = ? AND _id = ?", _selection);
-                    String[] selectionArgs = prependArgs(new String[]{ category,
-                            _uri.getLastPathSegment() }, _selectionArgs);
-                    return mDatabase.query("list", _projection, selection, selectionArgs, null, null,
+                    String selection = SQLiteUtils.prependSelection(ShoppingList.TABLE_NAME + "." +
+                                    ShoppingList.COLUMN_CATEGORY + " = ? AND " +
+                                    ListEntry.TABLE_NAME + "." + ListEntry.COLUMN_LIST +
+                                    " = ? AND " + ListEntry.TABLE_NAME + "." +
+                                    ListEntry.COLUMN_ID + " = ?",
+                            _selection);
+                    String[] args = SQLiteUtils.prependSelectionArgs(new String[]{
+                                    category,
+                                    list,
+                                    entry
+                            },
+                            _selectionArgs);
+                    return queryBuilder.query(mDatabase, _projection, selection, args, null, null,
                             _sortOrder);
                 }
             }
@@ -84,12 +176,113 @@ public class CategoryProvider implements IInternalProvider {
 
     @Override
     public String getType(@NonNull Uri _uri) {
-        return null;
+        switch (mMatcher.match(_uri)) {
+            case CATEGORY_DIRECTORY:
+                return ContentResolver.CURSOR_DIR_BASE_TYPE + "/" + InstalistProvider.BASE_VENDOR +
+                        "category";
+            case CATEGORY_ITEM:
+                return ContentResolver.CURSOR_ITEM_BASE_TYPE + "/" + InstalistProvider.BASE_VENDOR +
+                        "category";
+            case LIST_DIRECTORY:
+                return ContentResolver.CURSOR_DIR_BASE_TYPE + "/" + InstalistProvider.BASE_VENDOR +
+                        "list";
+            case LIST_ITEM:
+                return ContentResolver.CURSOR_ITEM_BASE_TYPE + "/" + InstalistProvider.BASE_VENDOR +
+                        "list";
+            case ENTRY_DIRECTORY:
+                return ContentResolver.CURSOR_DIR_BASE_TYPE + "/" + InstalistProvider.BASE_VENDOR +
+                        "entry";
+            case ENTRY_ITEM:
+                return ContentResolver.CURSOR_ITEM_BASE_TYPE + "/" + InstalistProvider.BASE_VENDOR +
+                        "entry";
+            default:
+                return null;
+        }
     }
 
     @Override
     public Uri insert(@NonNull Uri _uri, ContentValues _values) {
-        return null;
+        if (_values == null) {
+            return null;
+        }
+        switch (mMatcher.match(_uri)) {
+            case CATEGORY_DIRECTORY: {
+                String name = _values.getAsString(Category.COLUMN_NAME);
+                if (name == null) {
+                    return null;
+                }
+                String newCatUUID = SQLiteUtils.generateId(mDatabase, Category.TABLE_NAME).
+                        toString();
+                ContentValues toInsert = new ContentValues(2);
+                toInsert.put(Category.COLUMN_ID, newCatUUID);
+                toInsert.put(Category.COLUMN_NAME, name);
+                if (mDatabase.insert(Category.TABLE_NAME, null, toInsert) != -1) {
+                    return Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI,
+                            "category/" + newCatUUID);
+                } else {
+                    return null;
+                }
+            }
+            case LIST_DIRECTORY: {
+                String name = _values.getAsString(ShoppingList.COLUMN_NAME);
+                if (name == null) {
+                    return null;
+                }
+                String categoryId = _uri.getPathSegments().get(1);
+                String newListUUID = SQLiteUtils.generateId(mDatabase, ShoppingList.TABLE_NAME).
+                        toString();
+                ContentValues toInsert = new ContentValues(3);
+                toInsert.put(ShoppingList.COLUMN_ID, newListUUID);
+                toInsert.put(ShoppingList.COLUMN_NAME, name);
+                if (!"-".equals(categoryId)) {
+                    toInsert.put(ShoppingList.COLUMN_CATEGORY, categoryId);
+                }
+                if (mDatabase.insert(ShoppingList.TABLE_NAME, null, toInsert) != -1) {
+                    return Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI, "category/" +
+                            categoryId + "/list/" + newListUUID);
+                } else {
+                    return null;
+                }
+            }
+            case ENTRY_DIRECTORY: {
+                if (!_values.containsKey(ListEntry.COLUMN_PRODUCT)) {
+                    return null;
+                }
+                ContentValues toInsert = new ContentValues();
+                for (String cvKey : _values.keySet()) {
+                    switch (cvKey) {
+                        case ListEntry.COLUMN_AMOUNT:
+                        case ListEntry.COLUMN_PRIORITY:
+                            toInsert.put(cvKey, _values.getAsFloat(cvKey));
+                            break;
+                        case ListEntry.COLUMN_PRODUCT:
+                            toInsert.put(cvKey, _values.getAsString(cvKey));
+                            break;
+                        case ListEntry.COLUMN_STRUCK:
+                            Boolean struckValue = _values.getAsBoolean(cvKey);
+                            if (struckValue == null) {
+                                struckValue = (_values.getAsInteger(cvKey) != 0);
+                            }
+                            toInsert.put(cvKey, (struckValue ? 1 : 0));
+                            break;
+                    }
+                }
+
+                String listUUID = _uri.getPathSegments().get(3);
+                String newEntryUUID = SQLiteUtils.generateId(mDatabase, ListEntry.TABLE_NAME).toString();
+                toInsert.put(ListEntry.COLUMN_ID, newEntryUUID);
+                toInsert.put(ListEntry.COLUMN_LIST, listUUID);
+                if (mDatabase.insert(ListEntry.TABLE_NAME, null, toInsert) != -1) {
+                    return Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI, "category/" +
+                            _uri.getPathSegments().get(1) + "/list/" + listUUID + "/entry/" +
+                            newEntryUUID);
+                } else {
+                    return null;
+                }
+            }
+            default:
+                return null;
+        }
     }
 
     @Override
@@ -100,18 +293,5 @@ public class CategoryProvider implements IInternalProvider {
     @Override
     public int update(@NonNull Uri _uri, ContentValues _values, String _selection, String[] _selectionArgs) {
         return 0;
-    }
-
-    private static String prependSelection(String _prependedSelection, String _originalSelection) {
-        return _prependedSelection + (_originalSelection == null ? "" : " AND (" + _originalSelection + ")");
-    }
-
-    private static String[] prependArgs(@NonNull String[] _prependedArgs, String[] _originalArgs) {
-        String[] args = new String[_prependedArgs.length + (_originalArgs == null ? 0 : _originalArgs.length)];
-        System.arraycopy(_prependedArgs, 0, args, 0, _prependedArgs.length);
-        if (_originalArgs != null) {
-            System.arraycopy(_originalArgs, 0, args, _prependedArgs.length, _originalArgs.length);
-        }
-        return args;
     }
 }

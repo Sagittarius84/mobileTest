@@ -43,39 +43,33 @@ public class Product extends SugarRecord<Product> {
     public String id;
 
     public String mName;
-    /**
-     * The unit of the product. Can also be null if the products has no unit.
-     */
-    public Unit mUnit;
-    /**
-     * The default amount is usually 1.0f
-     */
-    public float mDefaultAmount;
-    /**
-     * The amount to increase or decrease over quick buttons. Usually 1.0f.
-     */
-    public float mStepAmount;
+    /** The unit of the product. Can also be null if the products has no unit. */
+    public Unit   mUnit;
+    /** The default amount is usually 1.0f */
+    public float  mDefaultAmount;
+    /** The amount to increase or decrease over quick buttons. Usually 1.0f. */
+    public float  mStepAmount;
 
     public Product() {
-        mUnit = null;
-        mName = "";
+        mUnit          = null;
+        mName          = "";
         mDefaultAmount = 1.0f;
-        mStepAmount = 1.0f;
+        mStepAmount    = 1.0f;
     }
 
 
     public Product(String _name, Unit _unit, float _defaultAmount, float _stepAmount) {
-        mUnit = _unit;
-        mName = _name;
+        mUnit          = _unit;
+        mName          = _name;
         mDefaultAmount = _defaultAmount;
-        mStepAmount = _stepAmount;
+        mStepAmount    = _stepAmount;
     }
 
     public Product(String _name, Unit _unit) {
-        mUnit = _unit;
-        mName = _name;
+        mUnit          = _unit;
+        mName          = _name;
         mDefaultAmount = 1.0f;
-        mStepAmount = 1.0f;
+        mStepAmount    = 1.0f;
     }
 
     @Override
@@ -115,7 +109,7 @@ public class Product extends SugarRecord<Product> {
     public String toString() {
         return "Product{" +
                 "mName='" + mName + '\'' +
-                ", mUnit=" + (mUnit == null ? "null" : "id:" + mUnit.getId()) +
+                ", mUnit=" + (mUnit == null ? "null" : "id:"+mUnit.getId()) +
                 ", mDefaultAmount=" + mDefaultAmount +
                 ", mStepAmount=" + mStepAmount +
                 '}';

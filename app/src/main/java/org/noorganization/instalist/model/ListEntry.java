@@ -9,6 +9,26 @@ import com.orm.SugarRecord;
  */
 public class ListEntry extends SugarRecord<ListEntry> {
 
+    public static final String COLUMN_AMOUNT = "amount";
+    public static final String COLUMN_ID = "_id";
+    public static final String COLUMN_LIST = "list";
+    public static final String COLUMN_PRIORITY = "priority";
+    public static final String COLUMN_PRODUCT = "product";
+    public static final String COLUMN_STRUCK = "struck";
+
+    public static final String TABLE_NAME = "listentry";
+
+    public static final String DB_CREATE = "CREATE TABLE " + TABLE_NAME + " (" +
+            COLUMN_ID + " TEXT PRIMARY KEY NOT NULL, " +
+            COLUMN_AMOUNT + " REAL NOT NULL DEFAULT 1, " +
+            COLUMN_PRIORITY + " INTEGER NOT NULL DEFAULT 0, " +
+            COLUMN_PRODUCT + " TEXT NOT NULL, " +
+            COLUMN_LIST + " TEXT NOT NULL, " +
+            COLUMN_STRUCK + " INTEGER NOT NULL DEFAULT 0, " +
+            "FOREIGN KEY (" + COLUMN_PRODUCT + ") REFERENCES " + Product.TABLE_NAME + " (" +
+                Product.COLUMN_ID + ") ON UPDATE CASCADE ON DELETE CASCADE, " +
+            "FOREIGN KEY (list) REFERENCES list (_id) ON UPDATE CASCADE ON DELETE CASCADE)";
+
     public final static String ATTR_LIST     = StringUtil.toSQLName("mList");
     public final static String ATTR_PRODUCT  = StringUtil.toSQLName("mProduct");
     public final static String ATTR_AMOUNT   = StringUtil.toSQLName("mAmount");
