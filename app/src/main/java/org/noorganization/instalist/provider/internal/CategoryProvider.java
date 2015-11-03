@@ -103,7 +103,7 @@ public class CategoryProvider implements IInternalProvider {
                         ShoppingList.TABLE_NAME + " ON (" + ShoppingList.TABLE_NAME + "." +
                         ShoppingList.COLUMN_ID + " = " + ListEntry.TABLE_NAME + "." +
                         ListEntry.COLUMN_LIST + ")) INNER JOIN " + Product.TABLE_NAME + " ON (" +
-                        Product.TABLE_NAME + "." + Product.COLUMN_ID + " = " + ListEntry.TABLE_NAME
+                        Product.COLUMN_ID + " = " + ListEntry.TABLE_NAME
                         + "." + ListEntry.COLUMN_PRODUCT + ")");
                 queryBuilder.setProjectionMap(SQLiteUtils.generateProjectionMap(ListEntry.TABLE_NAME,
                         ListEntry.COLUMN_ID, ListEntry.COLUMN_AMOUNT, ListEntry.COLUMN_LIST,
@@ -134,7 +134,7 @@ public class CategoryProvider implements IInternalProvider {
                         ShoppingList.TABLE_NAME + " ON (" + ShoppingList.TABLE_NAME + "." +
                         ShoppingList.COLUMN_ID + " = " + ListEntry.TABLE_NAME + "." +
                         ListEntry.COLUMN_LIST + ")) INNER JOIN " + Product.TABLE_NAME + " ON (" +
-                        Product.TABLE_NAME + "." + Product.COLUMN_ID + " = " + ListEntry.TABLE_NAME
+                        Product.COLUMN_ID + " = " + ListEntry.TABLE_NAME
                         + "." + ListEntry.COLUMN_PRODUCT + ")");
                 queryBuilder.setProjectionMap(SQLiteUtils.generateProjectionMap(ListEntry.TABLE_NAME,
                         ListEntry.COLUMN_ID, ListEntry.COLUMN_AMOUNT, ListEntry.COLUMN_LIST,

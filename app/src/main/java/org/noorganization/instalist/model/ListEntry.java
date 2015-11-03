@@ -26,7 +26,7 @@ public class ListEntry extends SugarRecord<ListEntry> {
             COLUMN_LIST + " TEXT NOT NULL, " +
             COLUMN_STRUCK + " INTEGER NOT NULL DEFAULT 0, " +
             "FOREIGN KEY (" + COLUMN_PRODUCT + ") REFERENCES " + Product.TABLE_NAME + " (" +
-                Product.COLUMN_ID + ") ON UPDATE CASCADE ON DELETE CASCADE, " +
+                Product.LOCAL_COLUMN_ID + ") ON UPDATE CASCADE ON DELETE CASCADE, " +
             "FOREIGN KEY (list) REFERENCES list (_id) ON UPDATE CASCADE ON DELETE CASCADE)";
 
     public final static String ATTR_LIST     = StringUtil.toSQLName("mList");

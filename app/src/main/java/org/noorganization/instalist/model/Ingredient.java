@@ -26,7 +26,7 @@ public class Ingredient extends SugarRecord<Ingredient> {
             + COLUMN_AMOUNT + " REAL,"
             + "FOREIGN KEY (" + COLUMN_PRODUCT_ID + ") REFERENCES " +  Product.TABLE_NAME + "( " + Product.LOCAL_COLUMN_ID  + " )"
             + "ON UPDATE CASCADE ON DELETE CASCADE,"
-            + "FOREIGN KEY (" + COLUMN_RECIPE_ID + ") REFERENCES " +  Recipe.TABLE_NAME + "( " + Recipe.COLUMN_ID  + " )"
+            + "FOREIGN KEY (" + COLUMN_RECIPE_ID + ") REFERENCES " +  Recipe.TABLE_NAME + "( " + Recipe.LOCAL_COLUMN_ID  + " )"
             + "ON UPDATE CASCADE ON DELETE CASCADE"
             + ")";
     /**

@@ -15,6 +15,9 @@ import org.noorganization.instalist.utils.SQLiteUtils;
 import org.noorganization.instalist.view.utils.ProviderUtils;
 
 /**
+ * Provider to handle all tag related database actions. It supports actions for single
+ * ({@link TagProvider#SINGLE_TAG_CONTENT_URI} and multiple
+ * ({@link TagProvider#MULTIPLE_TAG_CONTENT_URI}) tags.
  * Created by Tino on 26.10.2015.
  */
 public class TagProvider implements IInternalProvider {
@@ -34,12 +37,15 @@ public class TagProvider implements IInternalProvider {
     //endregion private attributes
 
     //region public attributes
+
     /**
      * The content uri for actions for a single unit.
      */
     public static final String SINGLE_TAG_CONTENT_URI = InstalistProvider.BASE_CONTENT_URI + "/" + SINGLE_TAG_STRING;
     /**
      * The content uri for actions with multiple unit.
+     * Supports not {@link android.content.ContentProvider#update(Uri, ContentValues, String, String[])}
+     * and {@link android.content.ContentProvider#insert(Uri, ContentValues)}
      */
     public static final String MULTIPLE_TAG_CONTENT_URI = InstalistProvider.BASE_CONTENT_URI + "/" + MULTIPLE_TAG_STRING;
 
@@ -67,8 +73,9 @@ public class TagProvider implements IInternalProvider {
         mDatabase = _db;
         mMatcher = new UriMatcher(UriMatcher.NO_MATCH);
 
-        mMatcher.addURI(InstalistProvider.AUTHORITY, SINGLE_TAG_STRING, SINGLE_TAG);
         mMatcher.addURI(InstalistProvider.AUTHORITY, MULTIPLE_TAG_STRING, MULTIPLE_TAGS);
+        mMatcher.addURI(InstalistProvider.AUTHORITY, SINGLE_TAG_STRING, SINGLE_TAG);
+
     }
 
     @Override
@@ -125,6 +132,7 @@ public class TagProvider implements IInternalProvider {
                 cursor.moveToFirst();
                 newUri = Uri.parse(SINGLE_TAG_CONTENT_URI.replace("*",
                         cursor.getString(cursor.getColumnIndex(Tag.COLUMN_ID))));
+                cursor.close();
                 break;
             case MULTIPLE_TAGS:
             default:
@@ -173,8 +181,6 @@ public class TagProvider implements IInternalProvider {
             case MULTIPLE_TAGS:
                 // TODO for later purposes maybe
                 // affectedRows = mDatabase.update(Tag.TABLE_NAME, _values, _selection, _selectionArgs);
-                throw new IllegalArgumentException("The given Uri is not supported: " + _uri);
-                //break;
             default:
                 throw new IllegalArgumentException("The given Uri is not supported: " + _uri);
         }

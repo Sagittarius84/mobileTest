@@ -16,6 +16,7 @@ import org.noorganization.instalist.utils.SQLiteUtils;
 import org.noorganization.instalist.view.utils.ProviderUtils;
 
 /**
+ * // TODO in train :)
  * Created by Tino on 26.10.2015.
  */
 public class RecipeProvider implements IInternalProvider {
@@ -23,11 +24,6 @@ public class RecipeProvider implements IInternalProvider {
     private SQLiteDatabase mDatabase;
     private UriMatcher mMatcher;
     private Context mContext;
-
-//        mMatcher.addURI(AUTHORITY, "recipe", ACM_RECIPE);
-//        mMatcher.addURI(AUTHORITY, "recipe/*", ACS_RECIPE);
-//        mMatcher.addURI(AUTHORITY, "recipe/*/ingredient", ACM_INGREDIENT);
-//        mMatcher.addURI(AUTHORITY, "recipe/*/ingredient/*", ACS_INGREDIENT);
 
     private static final int SINGLE_RECIPE = 1;
     private static final int MULTIPLE_RECIPES = 2;
@@ -91,11 +87,10 @@ public class RecipeProvider implements IInternalProvider {
     public void onCreate(SQLiteDatabase _db) {
         mDatabase = _db;
         mMatcher = new UriMatcher(UriMatcher.NO_MATCH);
-
-        mMatcher.addURI(InstalistProvider.AUTHORITY, SINGLE_RECIPE_INGREDIENT_STRING, SINGLE_RECIPE_INGREDIENT);
-        mMatcher.addURI(InstalistProvider.AUTHORITY, MULTIPLE_RECIPE_INGREDIENT_STRING, MULTIPLE_RECIPE_INGREDIENT);
-        mMatcher.addURI(InstalistProvider.AUTHORITY, SINGLE_RECIPE_STRING, SINGLE_RECIPE);
         mMatcher.addURI(InstalistProvider.AUTHORITY, MULTIPLE_RECIPE_STRING, MULTIPLE_RECIPES);
+        mMatcher.addURI(InstalistProvider.AUTHORITY, SINGLE_RECIPE_STRING, SINGLE_RECIPE);
+        mMatcher.addURI(InstalistProvider.AUTHORITY, MULTIPLE_RECIPE_INGREDIENT_STRING, MULTIPLE_RECIPE_INGREDIENT);
+        mMatcher.addURI(InstalistProvider.AUTHORITY, SINGLE_RECIPE_INGREDIENT_STRING, SINGLE_RECIPE_INGREDIENT);
 
     }
 
@@ -105,7 +100,7 @@ public class RecipeProvider implements IInternalProvider {
         switch (mMatcher.match(_uri)) {
 
             case SINGLE_RECIPE:
-                String selection = ProviderUtils.prependIdToQuery(Recipe.COLUMN_ID, _selection);
+                String selection = ProviderUtils.prependIdToQuery(Recipe.LOCAL_COLUMN_ID, _selection);
                 String[] selectionArgs = ProviderUtils.prependSelectionArgs(_selectionArgs, _uri.getLastPathSegment());
                 cursor = mDatabase.query(Recipe.TABLE_NAME, _projection, selection, selectionArgs, null, null, _sortOrder);
                 break;
@@ -170,6 +165,7 @@ public class RecipeProvider implements IInternalProvider {
                 cursor.moveToFirst();
                 newUri = Uri.parse(SINGLE_RECIPE_CONTENT_URI.replace("*",
                         cursor.getString(cursor.getColumnIndex(Recipe.COLUMN_ID))));
+                cursor.close();
                 break;
             case SINGLE_RECIPE_INGREDIENT:
                 rowId = mDatabase.insert(Ingredient.TABLE_NAME, null, _values);
@@ -184,7 +180,7 @@ public class RecipeProvider implements IInternalProvider {
                 String contentUri = SINGLE_RECIPE_INGREDIENT_CONTENT_URI.replaceFirst("\\*", cursor.getString(cursor.getColumnIndex(Ingredient.COLUMN_RECIPE_ID)));
                 contentUri = contentUri.replaceFirst("\\*", cursor.getString(cursor.getColumnIndex(Ingredient.COLUMN_ID)));
                 newUri = Uri.parse(contentUri);
-
+                cursor.close();
                 break;
             case MULTIPLE_RECIPES:
             case MULTIPLE_RECIPE_INGREDIENT:
@@ -242,7 +238,7 @@ public class RecipeProvider implements IInternalProvider {
         int affectedRows = 0;
         switch (mMatcher.match(_uri)) {
             case SINGLE_RECIPE:
-                String selection = ProviderUtils.prependIdToQuery(Recipe.COLUMN_ID, null);
+                String selection = ProviderUtils.prependIdToQuery(Recipe.LOCAL_COLUMN_ID, null);
                 String[] selectionArgs = ProviderUtils.prependSelectionArgs(null, _uri.getLastPathSegment());
                 affectedRows = mDatabase.update(Recipe.TABLE_NAME, _values, selection, selectionArgs);
                 break;

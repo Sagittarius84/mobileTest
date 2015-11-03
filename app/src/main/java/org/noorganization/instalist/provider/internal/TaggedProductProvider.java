@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.UriMatcher;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.text.TextUtils;
@@ -23,6 +24,7 @@ import java.util.List;
  * The TaggedProductProvider provides the interaction with products which are tagged. This means you
  * can add a tag to a product or simply query a list of products by a custom tag. It provides a
  * huge variety of dynamic.
+ *
  * Created by Tino on 26.10.2015.
  */
 public class TaggedProductProvider implements IInternalProvider {
@@ -51,13 +53,24 @@ public class TaggedProductProvider implements IInternalProvider {
      * The content uri for actions for a single {@link TaggedProduct}
      */
     public static final String SINGLE_TAGGED_PRODUCT_CONTENT_URI = InstalistProvider.BASE_CONTENT_URI + "/" + SINGLE_TAGGED_PRODUCT_STRING;
+
     /**
      * The content uri for actions with multiple {@link TaggedProduct}s.
+     * Supports not {@link android.content.ContentProvider#update(Uri, ContentValues, String, String[])}
+     * and {@link android.content.ContentProvider#insert(Uri, ContentValues)}
      */
     public static final String MULTIPLE_TAGGED_PRODUCT_CONTENT_URI = InstalistProvider.BASE_CONTENT_URI + "/" + MULTIPLE_TAGGED_PRODUCT_STRING;
 
-
+    /**
+     * The content uri for actions with single {@link TaggedProduct} especially for actions to tag a product.
+     */
     public static final String SINGLE_TAGGED_PRODUCT_BY_TAG_CONTENT_URI = InstalistProvider.BASE_CONTENT_URI + "/" + SINGLE_TAGGED_PRODUCT_BY_TAG_STRING;
+
+    /**
+     * The content uri for actions with multiple {@link TaggedProduct} especially for actions to query multiple products by a tag.
+     * Supports not {@link android.content.ContentProvider#update(Uri, ContentValues, String, String[])}
+     * and {@link android.content.ContentProvider#insert(Uri, ContentValues)}
+     */
     public static final String MULTIPLE_TAGGED_PRODUCT_BY_TAG_CONTENT_URI = InstalistProvider.BASE_CONTENT_URI + "/" + MULTIPLE_TAGGED_PRODUCT_BY_TAG_STRING;
 
     /**
@@ -92,6 +105,11 @@ public class TaggedProductProvider implements IInternalProvider {
     @Override
     public Cursor query(@NonNull Uri _uri, String[] _projection, String _selection, String[] _selectionArgs, String _sortOrder) {
         Cursor cursor = null;
+        // projection is null so there will be no data be fetched
+        if(_projection == null || _projection.length == 0){
+            return null;
+        }
+
         switch (mMatcher.match(_uri)) {
 
             case SINGLE_TAGGED_PRODUCT:
@@ -160,8 +178,10 @@ public class TaggedProductProvider implements IInternalProvider {
     public String getType(@NonNull Uri _uri) {
         switch (mMatcher.match(_uri)) {
             case SINGLE_TAGGED_PRODUCT:
+            case SINGLE_TAGGED_PRODUCT_BY_TAG:
                 return ContentResolver.CURSOR_ITEM_BASE_TYPE + "/" + TAGGED_PRODUCT_BASE_TYPE;
             case MULTIPLE_TAGGED_PRODUCTS:
+            case MULTIPLE_TAGGED_PRODUCT_BY_TAG:
                 return ContentResolver.CURSOR_DIR_BASE_TYPE + "/" + TAGGED_PRODUCT_BASE_TYPE;
             default:
                 return null;

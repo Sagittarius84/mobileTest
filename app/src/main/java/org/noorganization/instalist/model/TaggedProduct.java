@@ -1,14 +1,9 @@
 package org.noorganization.instalist.model;
 
-import android.text.TextUtils;
-
 import com.orm.StringUtil;
 import com.orm.SugarRecord;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.locks.Condition;
 
 /**
  * Represents a virtual category entry for a product. Since category usually make people think a
@@ -28,13 +23,13 @@ public class TaggedProduct extends SugarRecord<TaggedProduct> {
 
     public final static String TABLE_NAME = "taggedProduct";
 
-    public final static String LOCALE_COLUMN_ID = "_id";
-    public final static String LOCALE_COLUMN_TAG_ID = "tag_id";
-    public final static String LOCALE_COLUMN_PRODUCT_ID = "product_id";
+    public final static String LOCAL_COLUMN_ID = "_id";
+    public final static String LOCAL_COLUMN_TAG_ID = "tag_id";
+    public final static String LOCAL_COLUMN_PRODUCT_ID = "product_id";
 
-    public final static String COLUMN_ID = TABLE_NAME.concat("." + LOCALE_COLUMN_ID);
-    public final static String COLUMN_TAG_ID = TABLE_NAME.concat("." + LOCALE_COLUMN_TAG_ID);
-    public final static String COLUMN_PRODUCT_ID = TABLE_NAME.concat("." + LOCALE_COLUMN_PRODUCT_ID);
+    public final static String COLUMN_ID = TABLE_NAME.concat("." + LOCAL_COLUMN_ID);
+    public final static String COLUMN_TAG_ID = TABLE_NAME.concat("." + LOCAL_COLUMN_TAG_ID);
+    public final static String COLUMN_PRODUCT_ID = TABLE_NAME.concat("." + LOCAL_COLUMN_PRODUCT_ID);
 
     /**
      * Will return all columns of this TaggedProduct Table.
@@ -47,12 +42,12 @@ public class TaggedProduct extends SugarRecord<TaggedProduct> {
 
     public final static String DATABASE_CREATE = "CREATE TABLE " + TABLE_NAME
             + "("
-            + LOCALE_COLUMN_ID + " TEXT PRIMARY KEY,"
-            + LOCALE_COLUMN_TAG_ID + " TEXT,"
-            + LOCALE_COLUMN_PRODUCT_ID + " TEXT,"
-            + "FOREIGN KEY (" + LOCALE_COLUMN_PRODUCT_ID + ") REFERENCES " + Product.TABLE_NAME + " (" + Product.LOCAL_COLUMN_ID + ") "
+            + LOCAL_COLUMN_ID + " TEXT PRIMARY KEY,"
+            + LOCAL_COLUMN_TAG_ID + " TEXT,"
+            + LOCAL_COLUMN_PRODUCT_ID + " TEXT,"
+            + "FOREIGN KEY (" + LOCAL_COLUMN_PRODUCT_ID + ") REFERENCES " + Product.TABLE_NAME + " (" + Product.LOCAL_COLUMN_ID + ") "
             + "ON UPDATE CASCADE ON DELETE CASCADE,"
-            + "FOREIGN KEY (" + LOCALE_COLUMN_TAG_ID + ") REFERENCES " + Tag.TABLE_NAME + " (" + Tag.LOCAL_COLUMN_ID + ") "
+            + "FOREIGN KEY (" + LOCAL_COLUMN_TAG_ID + ") REFERENCES " + Tag.TABLE_NAME + " (" + Tag.LOCAL_COLUMN_ID + ") "
             + "ON UPDATE CASCADE ON DELETE CASCADE"
             + ")";
 

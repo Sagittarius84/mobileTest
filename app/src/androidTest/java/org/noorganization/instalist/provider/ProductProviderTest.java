@@ -135,7 +135,6 @@ public class ProductProviderTest extends AndroidTestCase {
     }
 
     public void testInsertSingleProduct() {
-        ContentValues contentValues = new ContentValues();
         String uuid = UUID.randomUUID().toString();
 
         Uri uri = ProviderTestUtils.insertProduct(mProductProvider, uuid, "TestProduct", 0.5f, 0.5f, (String) null);

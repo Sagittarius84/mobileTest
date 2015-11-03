@@ -4,9 +4,11 @@ import android.content.ContentValues;
 import android.net.Uri;
 
 import org.noorganization.instalist.model.Product;
+import org.noorganization.instalist.model.Recipe;
 import org.noorganization.instalist.model.Tag;
 import org.noorganization.instalist.provider.internal.IInternalProvider;
 import org.noorganization.instalist.provider.internal.ProductProvider;
+import org.noorganization.instalist.provider.internal.RecipeProvider;
 import org.noorganization.instalist.provider.internal.TagProvider;
 
 import java.util.UUID;
@@ -55,4 +57,20 @@ public class ProviderTestUtils {
 
         return _tagProvider.insert(Uri.parse(TagProvider.SINGLE_TAG_CONTENT_URI.replace("*", _uuid)), contentValues);
     }
+
+    /**
+     * Inserts a recipe to the database.
+     * @param mRecipeProvider the recipeprovider.
+     * @param uuidRecipe the uuid of the recipe.
+     * @param name the name of the recipe.
+     * @return the uri of the inserted recipe or null if failure happened.
+     */
+    public static Uri insertRecipe(IInternalProvider mRecipeProvider, String uuidRecipe, String name) {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(Recipe.LOCAL_COLUMN_ID, uuidRecipe);
+        contentValues.put(Recipe.LOCAL_COLUMN_NAME, name);
+        // insert at begin a recipe
+        return mRecipeProvider.insert(Uri.parse(RecipeProvider.SINGLE_RECIPE_CONTENT_URI.replace("*", uuidRecipe)), contentValues);
+    }
+
 }

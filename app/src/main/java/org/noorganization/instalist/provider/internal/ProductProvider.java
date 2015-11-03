@@ -17,6 +17,7 @@ import org.noorganization.instalist.view.utils.ProviderUtils;
 /**
  * Provider for the products used in the application. It provides the CRUD operations and makes usage of
  * the {@link IInternalProvider}.
+ * // TODO in train
  * Created by Tino on 24.10.2015.
  */
 public class ProductProvider implements IInternalProvider {
@@ -126,6 +127,7 @@ public class ProductProvider implements IInternalProvider {
                 cursor.moveToFirst();
                 newUri = Uri.parse(SINGLE_PRODUCT_CONTENT_URI.replace("*",
                         cursor.getString(cursor.getColumnIndex(Product.COLUMN_ID))));
+                cursor.close();
                 break;
             case MULTIPLE_PRODUCTS:
                 throw new IllegalArgumentException("The given Uri is not supported: " + _uri);

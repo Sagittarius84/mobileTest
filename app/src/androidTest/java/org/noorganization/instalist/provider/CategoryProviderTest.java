@@ -435,8 +435,8 @@ public class CategoryProviderTest extends AndroidTestCase {
         assertEquals(0, testCursor.getCount());
         testCursor.close();
 
-        mDatabase.execSQL("INSERT INTO " + Product.TABLE_NAME + " (" + Product.COLUMN_ID + ", " +
-                Product.COLUMN_NAME + ") VALUES (?, 'product 1')", new String[]{productUUID});
+        mDatabase.execSQL("INSERT INTO " + Product.TABLE_NAME + " (" + Product.LOCAL_COLUMN_ID + ", " +
+                Product.LOCAL_COLUMN_NAME + ") VALUES (?, 'product 1')", new String[]{productUUID});
 
         ContentValues entryMinimumCV = new ContentValues(1);
         entryMinimumCV.put(ListEntry.COLUMN_PRODUCT, productUUID);
