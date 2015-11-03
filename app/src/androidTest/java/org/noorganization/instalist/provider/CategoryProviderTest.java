@@ -597,8 +597,8 @@ public class CategoryProviderTest extends AndroidTestCase {
         mDatabase.insert(ShoppingList.TABLE_NAME, null, listCV);
         String productUUID = UUID.randomUUID().toString();
         ContentValues productCV = new ContentValues(2);
-        productCV.put(Product.COLUMN_ID, productUUID);
-        productCV.put(Product.COLUMN_NAME, "product one");
+        productCV.put(Product.LOCAL_COLUMN_ID, productUUID);
+        productCV.put(Product.LOCAL_COLUMN_NAME, "product one");
         mDatabase.insert(Product.TABLE_NAME, null, productCV);
         String entryUUID = UUID.randomUUID().toString();
         ContentValues entryInitialCV = new ContentValues(6);
@@ -910,8 +910,8 @@ public class CategoryProviderTest extends AndroidTestCase {
         mDatabase.insert(ShoppingList.TABLE_NAME, null, listCV);
         String productUUID = UUID.randomUUID().toString();
         ContentValues productCV = new ContentValues(2);
-        productCV.put(Product.COLUMN_ID, productUUID);
-        productCV.put(Product.COLUMN_NAME, "product one");
+        productCV.put(Product.LOCAL_COLUMN_ID, productUUID);
+        productCV.put(Product.LOCAL_COLUMN_NAME, "product one");
         mDatabase.insert(Product.TABLE_NAME, null, productCV);
         String entryUUID1 = UUID.randomUUID().toString();
         ContentValues entryCV1 = new ContentValues(3);
