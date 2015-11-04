@@ -84,7 +84,7 @@ public class TagProvider implements IInternalProvider {
         switch (mMatcher.match(_uri)) {
 
             case SINGLE_TAG:
-                String selection = ProviderUtils.prependIdToQuery(Tag.COLUMN_ID, _selection);
+                String selection = ProviderUtils.prependIdToQuery(Tag.COLUMN_TABLE_PREFIXED.COLUMN_ID, _selection);
                 String[] selectionArgs = ProviderUtils.prependSelectionArgs(_selectionArgs, _uri.getLastPathSegment());
                 cursor = mDatabase.query(Tag.TABLE_NAME, _projection, selection, selectionArgs, null, null, _sortOrder);
                 break;
@@ -126,12 +126,12 @@ public class TagProvider implements IInternalProvider {
                     return null;
                     //throw new SQLiteException("Failed to add a record into " + _uri);
                 }
-                Cursor cursor = mDatabase.query(Tag.TABLE_NAME, new String[]{Tag.COLUMN_ID},
+                Cursor cursor = mDatabase.query(Tag.TABLE_NAME, new String[]{Tag.COLUMN_TABLE_PREFIXED.COLUMN_ID},
                         SQLiteUtils.COLUMN_ROW_ID + "=?", new String[]{String.valueOf(rowId)},
                         null, null, null, null);
                 cursor.moveToFirst();
                 newUri = Uri.parse(SINGLE_TAG_CONTENT_URI.replace("*",
-                        cursor.getString(cursor.getColumnIndex(Tag.COLUMN_ID))));
+                        cursor.getString(cursor.getColumnIndex(Tag.COLUMN_TABLE_PREFIXED.COLUMN_ID))));
                 cursor.close();
                 break;
             case MULTIPLE_TAGS:
@@ -152,7 +152,7 @@ public class TagProvider implements IInternalProvider {
 
         switch (mMatcher.match(_uri)) {
             case SINGLE_TAG:
-                String selection = ProviderUtils.prependIdToQuery(Tag.COLUMN_ID, null);
+                String selection = ProviderUtils.prependIdToQuery(Tag.COLUMN_TABLE_PREFIXED.COLUMN_ID, null);
                 String[] selectionArgs = ProviderUtils.prependSelectionArgs(null, _uri.getLastPathSegment());
                 affectedRows = mDatabase.delete(Tag.TABLE_NAME, selection, selectionArgs);
                 break;
@@ -174,7 +174,7 @@ public class TagProvider implements IInternalProvider {
         int affectedRows = 0;
         switch (mMatcher.match(_uri)) {
             case SINGLE_TAG:
-                String selection = ProviderUtils.prependIdToQuery(Tag.COLUMN_ID, null);
+                String selection = ProviderUtils.prependIdToQuery(Tag.COLUMN_TABLE_PREFIXED.COLUMN_ID, null);
                 String[] selectionArgs = ProviderUtils.prependSelectionArgs(null, _uri.getLastPathSegment());
                 affectedRows = mDatabase.update(Tag.TABLE_NAME, _values, selection, selectionArgs);
                 break;

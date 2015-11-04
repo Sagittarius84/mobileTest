@@ -9,24 +9,48 @@ import com.orm.SugarRecord;
  */
 public class ListEntry extends SugarRecord<ListEntry> {
 
-    public static final String COLUMN_AMOUNT = "amount";
-    public static final String COLUMN_ID = "_id";
-    public static final String COLUMN_LIST = "list";
-    public static final String COLUMN_PRIORITY = "priority";
-    public static final String COLUMN_PRODUCT = "product";
-    public static final String COLUMN_STRUCK = "struck";
-
     public static final String TABLE_NAME = "listentry";
 
+
+    /**
+     * Column names that does not contain the table prefix.
+     */
+    public final static class COLUMN_NO_TABLE_PREFIXED {
+        public static final String COLUMN_ID = "_id";
+        public static final String COLUMN_AMOUNT = "amount";
+        public static final String COLUMN_LIST = "list";
+        public static final String COLUMN_PRIORITY = "priority";
+        public static final String COLUMN_PRODUCT = "product";
+        public static final String COLUMN_STRUCK = "struck";
+
+        public static final String ALL_COLUMNS[] = {COLUMN_ID, COLUMN_AMOUNT, COLUMN_LIST, COLUMN_PRIORITY, COLUMN_PRODUCT, COLUMN_STRUCK};
+    }
+
+    /**
+     * Column names that are prefixed with the table name. So like this TableName.ColumnName
+     */
+    public final static class COLUMN_TABLE_PREFIXED {
+        public static final String COLUMN_ID = TABLE_NAME.concat("." + COLUMN_NO_TABLE_PREFIXED.COLUMN_ID);
+        public static final String COLUMN_AMOUNT = TABLE_NAME.concat("." + COLUMN_NO_TABLE_PREFIXED.COLUMN_AMOUNT);
+        public static final String COLUMN_LIST = TABLE_NAME.concat("." + COLUMN_NO_TABLE_PREFIXED.COLUMN_LIST);
+        public static final String COLUMN_PRIORITY = TABLE_NAME.concat("." + COLUMN_NO_TABLE_PREFIXED.COLUMN_PRIORITY);
+        public static final String COLUMN_PRODUCT = TABLE_NAME.concat("." + COLUMN_NO_TABLE_PREFIXED.COLUMN_PRODUCT);
+        public static final String COLUMN_STRUCK = TABLE_NAME.concat("." + COLUMN_NO_TABLE_PREFIXED.COLUMN_STRUCK);
+
+        public static final String ALL_COLUMNS[] = {COLUMN_ID, COLUMN_AMOUNT, COLUMN_LIST, COLUMN_PRIORITY, COLUMN_PRODUCT, COLUMN_STRUCK};
+    }
+
+
+
     public static final String DB_CREATE = "CREATE TABLE " + TABLE_NAME + " (" +
-            COLUMN_ID + " TEXT PRIMARY KEY NOT NULL, " +
-            COLUMN_AMOUNT + " REAL NOT NULL DEFAULT 1, " +
-            COLUMN_PRIORITY + " INTEGER NOT NULL DEFAULT 0, " +
-            COLUMN_PRODUCT + " TEXT NOT NULL, " +
-            COLUMN_LIST + " TEXT NOT NULL, " +
-            COLUMN_STRUCK + " INTEGER NOT NULL DEFAULT 0, " +
-            "FOREIGN KEY (" + COLUMN_PRODUCT + ") REFERENCES " + Product.TABLE_NAME + " (" +
-                Product.LOCAL_COLUMN_ID + ") ON UPDATE CASCADE ON DELETE CASCADE, " +
+            COLUMN_NO_TABLE_PREFIXED.COLUMN_ID + " TEXT PRIMARY KEY NOT NULL, " +
+            COLUMN_NO_TABLE_PREFIXED.COLUMN_AMOUNT + " REAL NOT NULL DEFAULT 1, " +
+            COLUMN_NO_TABLE_PREFIXED.COLUMN_PRIORITY + " INTEGER NOT NULL DEFAULT 0, " +
+            COLUMN_NO_TABLE_PREFIXED.COLUMN_PRODUCT + " TEXT NOT NULL, " +
+            COLUMN_NO_TABLE_PREFIXED.COLUMN_LIST + " TEXT NOT NULL, " +
+            COLUMN_NO_TABLE_PREFIXED.COLUMN_STRUCK + " INTEGER NOT NULL DEFAULT 0, " +
+            "FOREIGN KEY (" + COLUMN_NO_TABLE_PREFIXED.COLUMN_PRODUCT + ") REFERENCES " + Product.TABLE_NAME + " (" +
+                Product.COLUMN_NO_TABLE_PREFIXED.COLUMN_ID + ") ON UPDATE CASCADE ON DELETE CASCADE, " +
             "FOREIGN KEY (list) REFERENCES list (_id) ON UPDATE CASCADE ON DELETE CASCADE)";
 
     public final static String ATTR_LIST     = StringUtil.toSQLName("mList");

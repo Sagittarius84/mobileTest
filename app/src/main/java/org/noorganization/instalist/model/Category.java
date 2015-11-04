@@ -2,7 +2,6 @@ package org.noorganization.instalist.model;
 
 import com.orm.StringUtil;
 import com.orm.SugarRecord;
-import com.orm.dsl.Ignore;
 import com.orm.query.Condition;
 import com.orm.query.Select;
 
@@ -14,14 +13,34 @@ import java.util.List;
  */
 public class Category extends SugarRecord<Category> {
 
-    public static final String COLUMN_ID = "_id";
-    public static final String COLUMN_NAME = "name";
-
     public static final String TABLE_NAME = "category";
 
+    /**
+     * Column names that does not contain the table prefix.
+     */
+    public final static class COLUMN_NO_TABLE_PREFIXED {
+        public static final String COLUMN_ID = "_id";
+        public static final String COLUMN_NAME = "name";
+
+        public static final String ALL_COLUMNS[] = {COLUMN_ID, COLUMN_NAME};
+    }
+
+    /**
+     * Column names that are prefixed with the table name. So like this TableName.ColumnName
+     */
+    public final static class COLUMN_TABLE_PREFIXED {
+        public static final String COLUMN_ID = TABLE_NAME.concat("." + COLUMN_NO_TABLE_PREFIXED.COLUMN_ID);
+        public static final String COLUMN_NAME = TABLE_NAME.concat("." + COLUMN_NO_TABLE_PREFIXED.COLUMN_NAME);
+
+        public static final String ALL_COLUMNS[] = {COLUMN_ID, COLUMN_NAME};
+    }
+
+
+
+
     public static final String DB_CREATE = "CREATE TABLE " + TABLE_NAME + " (" +
-            COLUMN_ID + " TEXT PRIMARY KEY NOT NULL, " +
-            COLUMN_NAME + " TEXT NOT NULL)";
+            COLUMN_NO_TABLE_PREFIXED.COLUMN_ID + " TEXT PRIMARY KEY NOT NULL, " +
+            COLUMN_NO_TABLE_PREFIXED.COLUMN_NAME + " TEXT NOT NULL)";
 
     public static final String ATTR_NAME = StringUtil.toSQLName("mName");
 

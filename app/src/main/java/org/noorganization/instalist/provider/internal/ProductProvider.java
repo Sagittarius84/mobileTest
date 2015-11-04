@@ -79,7 +79,7 @@ public class ProductProvider implements IInternalProvider {
         switch (mMatcher.match(_uri)) {
 
             case SINGLE_PRODUCT:
-                String selection = ProviderUtils.prependIdToQuery(Product.COLUMN_ID, _selection);
+                String selection = ProviderUtils.prependIdToQuery(Product.COLUMN_TABLE_PREFIXED.COLUMN_ID, _selection);
                 String[] selectionArgs = ProviderUtils.prependSelectionArgs(_selectionArgs, _uri.getLastPathSegment());
                 cursor = mDatabase.query(Product.TABLE_NAME, _projection, selection, selectionArgs, null, null, _sortOrder);
                 break;
@@ -121,12 +121,12 @@ public class ProductProvider implements IInternalProvider {
                     return null;
                     //throw new SQLiteException("Failed to add a record into " + _uri);
                 }
-                Cursor cursor = mDatabase.query(Product.TABLE_NAME, new String[]{Product.COLUMN_ID},
+                Cursor cursor = mDatabase.query(Product.TABLE_NAME, new String[]{Product.COLUMN_TABLE_PREFIXED.COLUMN_ID},
                         SQLiteUtils.COLUMN_ROW_ID + "=?", new String[]{String.valueOf(rowId)},
                         null, null, null, null);
                 cursor.moveToFirst();
                 newUri = Uri.parse(SINGLE_PRODUCT_CONTENT_URI.replace("*",
-                        cursor.getString(cursor.getColumnIndex(Product.COLUMN_ID))));
+                        cursor.getString(cursor.getColumnIndex(Product.COLUMN_TABLE_PREFIXED.COLUMN_ID))));
                 cursor.close();
                 break;
             case MULTIPLE_PRODUCTS:
@@ -148,7 +148,7 @@ public class ProductProvider implements IInternalProvider {
 
         switch (mMatcher.match(_uri)) {
             case SINGLE_PRODUCT:
-                String selection = ProviderUtils.prependIdToQuery(Product.COLUMN_ID, null);
+                String selection = ProviderUtils.prependIdToQuery(Product.COLUMN_TABLE_PREFIXED.COLUMN_ID, null);
                 String[] selectionArgs = ProviderUtils.prependSelectionArgs(null, _uri.getLastPathSegment());
                 affectedRows = mDatabase.delete(Product.TABLE_NAME, selection, selectionArgs);
                 break;
@@ -169,7 +169,7 @@ public class ProductProvider implements IInternalProvider {
         int affectedRows = 0;
         switch (mMatcher.match(_uri)) {
             case SINGLE_PRODUCT:
-                String selection = ProviderUtils.prependIdToQuery(Product.COLUMN_ID, null);
+                String selection = ProviderUtils.prependIdToQuery(Product.COLUMN_TABLE_PREFIXED.COLUMN_ID, null);
                 String[] selectionArgs = ProviderUtils.prependSelectionArgs(null, _uri.getLastPathSegment());
                 affectedRows = mDatabase.update(Product.TABLE_NAME, _values, selection, selectionArgs);
                 break;

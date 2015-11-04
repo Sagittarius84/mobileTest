@@ -24,7 +24,7 @@ import org.noorganization.instalist.utils.SQLiteUtils;
 public class CategoryProvider implements IInternalProvider {
 
     private SQLiteDatabase mDatabase;
-    private UriMatcher     mMatcher;
+    private UriMatcher mMatcher;
 
     private static final int CATEGORY_DIRECTORY = 1;
     private static final int CATEGORY_ITEM = 2;
@@ -52,7 +52,7 @@ public class CategoryProvider implements IInternalProvider {
                 return mDatabase.query(Category.TABLE_NAME, _projection, _selection,
                         _selectionArgs, null, null, _sortOrder);
             case CATEGORY_ITEM: {
-                String selection = SQLiteUtils.prependSelection(Category.COLUMN_ID + " = ?",
+                String selection = SQLiteUtils.prependSelection(Category.COLUMN_NO_TABLE_PREFIXED.COLUMN_ID + " = ?",
                         _selection);
                 String[] selectionArgs = SQLiteUtils.prependSelectionArgs(_uri.getLastPathSegment(),
                         _selectionArgs);
@@ -62,12 +62,12 @@ public class CategoryProvider implements IInternalProvider {
             case LIST_DIRECTORY: {
                 String category = _uri.getPathSegments().get(1);
                 if (category.equals("-")) {
-                    String selection = SQLiteUtils.prependSelection(ShoppingList.COLUMN_CATEGORY +
+                    String selection = SQLiteUtils.prependSelection(ShoppingList.COLUMN_NO_TABLE_PREFIXED.COLUMN_CATEGORY +
                             " IS NULL", _selection);
                     return mDatabase.query(ShoppingList.TABLE_NAME, _projection, selection,
                             _selectionArgs, null, null, _sortOrder);
                 } else {
-                    String selection = SQLiteUtils.prependSelection(ShoppingList.COLUMN_CATEGORY +
+                    String selection = SQLiteUtils.prependSelection(ShoppingList.COLUMN_NO_TABLE_PREFIXED.COLUMN_CATEGORY +
                             " = ?", _selection);
                     String[] selectionArgs = SQLiteUtils.prependSelectionArgs(category,
                             _selectionArgs);
@@ -78,16 +78,16 @@ public class CategoryProvider implements IInternalProvider {
             case LIST_ITEM: {
                 String category = _uri.getPathSegments().get(1);
                 if (category.equals("-")) {
-                    String selection = SQLiteUtils.prependSelection(ShoppingList.COLUMN_CATEGORY +
-                            " IS NULL AND " + ShoppingList.COLUMN_ID + " = ?", _selection);
+                    String selection = SQLiteUtils.prependSelection(ShoppingList.COLUMN_NO_TABLE_PREFIXED.COLUMN_CATEGORY +
+                            " IS NULL AND " + ShoppingList.COLUMN_NO_TABLE_PREFIXED.COLUMN_ID + " = ?", _selection);
                     String[] selectionArgs = SQLiteUtils.prependSelectionArgs(
                             _uri.getLastPathSegment(),
                             _selectionArgs);
                     return mDatabase.query(ShoppingList.TABLE_NAME, _projection, selection,
                             selectionArgs, null, null, _sortOrder);
                 } else {
-                    String selection = SQLiteUtils.prependSelection(ShoppingList.COLUMN_CATEGORY +
-                            " = ? AND " + ShoppingList.COLUMN_ID + " = ?",
+                    String selection = SQLiteUtils.prependSelection(ShoppingList.COLUMN_NO_TABLE_PREFIXED.COLUMN_CATEGORY +
+                                    " = ? AND " + ShoppingList.COLUMN_NO_TABLE_PREFIXED.COLUMN_ID + " = ?",
                             _selection);
                     String[] selectionArgs = SQLiteUtils.prependSelectionArgs(
                             new String[]{category, _uri.getLastPathSegment()},
@@ -102,23 +102,23 @@ public class CategoryProvider implements IInternalProvider {
                 SQLiteQueryBuilder queryBuilder = new SQLiteQueryBuilder();
                 queryBuilder.setTables("(" + ListEntry.TABLE_NAME + " INNER JOIN " +
                         ShoppingList.TABLE_NAME + " ON (" + ShoppingList.TABLE_NAME + "." +
-                        ShoppingList.COLUMN_ID + " = " + ListEntry.TABLE_NAME + "." +
-                        ListEntry.COLUMN_LIST + ")) INNER JOIN " + Product.TABLE_NAME + " ON (" +
-                        Product.COLUMN_ID + " = " + ListEntry.TABLE_NAME
-                        + "." + ListEntry.COLUMN_PRODUCT + ")");
+                        ShoppingList.COLUMN_NO_TABLE_PREFIXED.COLUMN_ID + " = " + ListEntry.TABLE_NAME + "." +
+                        ListEntry.COLUMN_NO_TABLE_PREFIXED.COLUMN_LIST + ")) INNER JOIN " + Product.TABLE_NAME + " ON (" +
+                        Product.COLUMN_TABLE_PREFIXED.COLUMN_ID + " = " + ListEntry.TABLE_NAME
+                        + "." + ListEntry.COLUMN_NO_TABLE_PREFIXED.COLUMN_PRODUCT + ")");
                 queryBuilder.setProjectionMap(SQLiteUtils.generateProjectionMap(ListEntry.TABLE_NAME,
-                        ListEntry.COLUMN_ID, ListEntry.COLUMN_AMOUNT, ListEntry.COLUMN_LIST,
-                        ListEntry.COLUMN_PRIORITY, ListEntry.COLUMN_PRODUCT, ListEntry.COLUMN_STRUCK));
+                        ListEntry.COLUMN_NO_TABLE_PREFIXED.COLUMN_ID, ListEntry.COLUMN_NO_TABLE_PREFIXED.COLUMN_AMOUNT, ListEntry.COLUMN_NO_TABLE_PREFIXED.COLUMN_LIST,
+                        ListEntry.COLUMN_NO_TABLE_PREFIXED.COLUMN_PRIORITY, ListEntry.COLUMN_NO_TABLE_PREFIXED.COLUMN_PRODUCT, ListEntry.COLUMN_NO_TABLE_PREFIXED.COLUMN_STRUCK));
                 if (category.equals("-")) {
                     String selection = SQLiteUtils.prependSelection(
-                            "list.category IS NULL AND " + ListEntry.COLUMN_LIST + " = ?",
+                            "list.category IS NULL AND " + ListEntry.COLUMN_NO_TABLE_PREFIXED.COLUMN_LIST + " = ?",
                             _selection);
                     String[] args = SQLiteUtils.prependSelectionArgs(list, _selectionArgs);
                     return queryBuilder.query(mDatabase, _projection, selection, args, null, null,
                             _sortOrder);
                 } else {
                     String selection = SQLiteUtils.prependSelection("list.category = ? AND " +
-                                    ListEntry.COLUMN_LIST + " = ?",
+                                    ListEntry.COLUMN_NO_TABLE_PREFIXED.COLUMN_LIST + " = ?",
                             _selection);
                     String[] args = SQLiteUtils.prependSelectionArgs(new String[]{category, list},
                             _selectionArgs);
@@ -133,21 +133,21 @@ public class CategoryProvider implements IInternalProvider {
                 SQLiteQueryBuilder queryBuilder = new SQLiteQueryBuilder();
                 queryBuilder.setTables("(" + ListEntry.TABLE_NAME + " INNER JOIN " +
                         ShoppingList.TABLE_NAME + " ON (" + ShoppingList.TABLE_NAME + "." +
-                        ShoppingList.COLUMN_ID + " = " + ListEntry.TABLE_NAME + "." +
-                        ListEntry.COLUMN_LIST + ")) INNER JOIN " + Product.TABLE_NAME + " ON (" +
-                        Product.COLUMN_ID + " = " + ListEntry.TABLE_NAME
-                        + "." + ListEntry.COLUMN_PRODUCT + ")");
+                        ShoppingList.COLUMN_NO_TABLE_PREFIXED.COLUMN_ID + " = " + ListEntry.TABLE_NAME + "." +
+                        ListEntry.COLUMN_NO_TABLE_PREFIXED.COLUMN_LIST + ")) INNER JOIN " + Product.TABLE_NAME + " ON (" +
+                        Product.COLUMN_TABLE_PREFIXED.COLUMN_ID + " = " + ListEntry.TABLE_NAME
+                        + "." + ListEntry.COLUMN_NO_TABLE_PREFIXED.COLUMN_PRODUCT + ")");
                 queryBuilder.setProjectionMap(SQLiteUtils.generateProjectionMap(ListEntry.TABLE_NAME,
-                        ListEntry.COLUMN_ID, ListEntry.COLUMN_AMOUNT, ListEntry.COLUMN_LIST,
-                        ListEntry.COLUMN_PRIORITY, ListEntry.COLUMN_PRODUCT, ListEntry.COLUMN_STRUCK));
+                        ListEntry.COLUMN_NO_TABLE_PREFIXED.COLUMN_ID, ListEntry.COLUMN_NO_TABLE_PREFIXED.COLUMN_AMOUNT, ListEntry.COLUMN_NO_TABLE_PREFIXED.COLUMN_LIST,
+                        ListEntry.COLUMN_NO_TABLE_PREFIXED.COLUMN_PRIORITY, ListEntry.COLUMN_NO_TABLE_PREFIXED.COLUMN_PRODUCT, ListEntry.COLUMN_NO_TABLE_PREFIXED.COLUMN_STRUCK));
                 if (category.equals("-")) {
                     String selection = SQLiteUtils.prependSelection(ShoppingList.TABLE_NAME + "." +
-                                    ShoppingList.COLUMN_CATEGORY + " IS NULL AND " +
-                                    ListEntry.TABLE_NAME + "." + ListEntry.COLUMN_LIST +
+                                    ShoppingList.COLUMN_NO_TABLE_PREFIXED.COLUMN_CATEGORY + " IS NULL AND " +
+                                    ListEntry.TABLE_NAME + "." + ListEntry.COLUMN_NO_TABLE_PREFIXED.COLUMN_LIST +
                                     " = ? AND " + ListEntry.TABLE_NAME + "." +
-                                    ListEntry.COLUMN_ID + " = ?",
+                                    ListEntry.COLUMN_NO_TABLE_PREFIXED.COLUMN_ID + " = ?",
                             _selection);
-                    String[] args = SQLiteUtils.prependSelectionArgs(new String[] {
+                    String[] args = SQLiteUtils.prependSelectionArgs(new String[]{
                             list,
                             entry
                     }, _selectionArgs);
@@ -155,10 +155,10 @@ public class CategoryProvider implements IInternalProvider {
                             _sortOrder);
                 } else {
                     String selection = SQLiteUtils.prependSelection(ShoppingList.TABLE_NAME + "." +
-                                    ShoppingList.COLUMN_CATEGORY + " = ? AND " +
-                                    ListEntry.TABLE_NAME + "." + ListEntry.COLUMN_LIST +
+                                    ShoppingList.COLUMN_NO_TABLE_PREFIXED.COLUMN_CATEGORY + " = ? AND " +
+                                    ListEntry.TABLE_NAME + "." + ListEntry.COLUMN_NO_TABLE_PREFIXED.COLUMN_LIST +
                                     " = ? AND " + ListEntry.TABLE_NAME + "." +
-                                    ListEntry.COLUMN_ID + " = ?",
+                                    ListEntry.COLUMN_NO_TABLE_PREFIXED.COLUMN_ID + " = ?",
                             _selection);
                     String[] args = SQLiteUtils.prependSelectionArgs(new String[]{
                                     category,
@@ -208,15 +208,15 @@ public class CategoryProvider implements IInternalProvider {
         }
         switch (mMatcher.match(_uri)) {
             case CATEGORY_DIRECTORY: {
-                String name = _values.getAsString(Category.COLUMN_NAME);
+                String name = _values.getAsString(Category.COLUMN_NO_TABLE_PREFIXED.COLUMN_NAME);
                 if (name == null) {
                     return null;
                 }
                 String newCatUUID = SQLiteUtils.generateId(mDatabase, Category.TABLE_NAME).
                         toString();
                 ContentValues toInsert = new ContentValues(2);
-                toInsert.put(Category.COLUMN_ID, newCatUUID);
-                toInsert.put(Category.COLUMN_NAME, name);
+                toInsert.put(Category.COLUMN_NO_TABLE_PREFIXED.COLUMN_ID, newCatUUID);
+                toInsert.put(Category.COLUMN_NO_TABLE_PREFIXED.COLUMN_NAME, name);
                 if (mDatabase.insert(Category.TABLE_NAME, null, toInsert) != -1) {
                     return Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI,
                             "category/" + newCatUUID);
@@ -225,7 +225,7 @@ public class CategoryProvider implements IInternalProvider {
                 }
             }
             case LIST_DIRECTORY: {
-                String name = _values.getAsString(ShoppingList.COLUMN_NAME);
+                String name = _values.getAsString(ShoppingList.COLUMN_NO_TABLE_PREFIXED.COLUMN_NAME);
                 if (name == null) {
                     return null;
                 }
@@ -233,10 +233,10 @@ public class CategoryProvider implements IInternalProvider {
                 String newListUUID = SQLiteUtils.generateId(mDatabase, ShoppingList.TABLE_NAME).
                         toString();
                 ContentValues toInsert = new ContentValues(3);
-                toInsert.put(ShoppingList.COLUMN_ID, newListUUID);
-                toInsert.put(ShoppingList.COLUMN_NAME, name);
+                toInsert.put(ShoppingList.COLUMN_NO_TABLE_PREFIXED.COLUMN_ID, newListUUID);
+                toInsert.put(ShoppingList.COLUMN_NO_TABLE_PREFIXED.COLUMN_NAME, name);
                 if (!"-".equals(categoryId)) {
-                    toInsert.put(ShoppingList.COLUMN_CATEGORY, categoryId);
+                    toInsert.put(ShoppingList.COLUMN_NO_TABLE_PREFIXED.COLUMN_CATEGORY, categoryId);
                 }
                 if (mDatabase.insert(ShoppingList.TABLE_NAME, null, toInsert) != -1) {
                     return Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI, "category/" +
@@ -246,20 +246,20 @@ public class CategoryProvider implements IInternalProvider {
                 }
             }
             case ENTRY_DIRECTORY: {
-                if (!_values.containsKey(ListEntry.COLUMN_PRODUCT)) {
+                if (!_values.containsKey(ListEntry.COLUMN_NO_TABLE_PREFIXED.COLUMN_PRODUCT)) {
                     return null;
                 }
                 ContentValues toInsert = new ContentValues();
                 for (String cvKey : _values.keySet()) {
                     switch (cvKey) {
-                        case ListEntry.COLUMN_AMOUNT:
-                        case ListEntry.COLUMN_PRIORITY:
+                        case ListEntry.COLUMN_NO_TABLE_PREFIXED.COLUMN_AMOUNT:
+                        case ListEntry.COLUMN_NO_TABLE_PREFIXED.COLUMN_PRIORITY:
                             toInsert.put(cvKey, _values.getAsFloat(cvKey));
                             break;
-                        case ListEntry.COLUMN_PRODUCT:
+                        case ListEntry.COLUMN_NO_TABLE_PREFIXED.COLUMN_PRODUCT:
                             toInsert.put(cvKey, _values.getAsString(cvKey));
                             break;
-                        case ListEntry.COLUMN_STRUCK:
+                        case ListEntry.COLUMN_NO_TABLE_PREFIXED.COLUMN_STRUCK:
                             Boolean struckValue = _values.getAsBoolean(cvKey);
                             if (struckValue == null) {
                                 struckValue = (_values.getAsInteger(cvKey) != 0);
@@ -271,8 +271,8 @@ public class CategoryProvider implements IInternalProvider {
 
                 String listUUID = _uri.getPathSegments().get(3);
                 String newEntryUUID = SQLiteUtils.generateId(mDatabase, ListEntry.TABLE_NAME).toString();
-                toInsert.put(ListEntry.COLUMN_ID, newEntryUUID);
-                toInsert.put(ListEntry.COLUMN_LIST, listUUID);
+                toInsert.put(ListEntry.COLUMN_NO_TABLE_PREFIXED.COLUMN_ID, newEntryUUID);
+                toInsert.put(ListEntry.COLUMN_NO_TABLE_PREFIXED.COLUMN_LIST, listUUID);
                 if (mDatabase.insert(ListEntry.TABLE_NAME, null, toInsert) != -1) {
                     return Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI, "category/" +
                             _uri.getPathSegments().get(1) + "/list/" + listUUID + "/entry/" +
@@ -294,7 +294,7 @@ public class CategoryProvider implements IInternalProvider {
                 if ("-".equals(categoryId)) {
                     return 0;
                 }
-                String selection = SQLiteUtils.prependSelection(Category.COLUMN_ID + " = ?", _selection);
+                String selection = SQLiteUtils.prependSelection(Category.COLUMN_NO_TABLE_PREFIXED.COLUMN_ID + " = ?", _selection);
                 String[] args = SQLiteUtils.prependSelectionArgs(categoryId, _selectionArgs);
                 return mDatabase.delete(Category.TABLE_NAME, selection, args);
             }
@@ -304,13 +304,13 @@ public class CategoryProvider implements IInternalProvider {
                 String selection;
                 String[] args;
                 if ("-".equals(categoryUUID)) {
-                    selection = SQLiteUtils.prependSelection(ShoppingList.COLUMN_ID + " = ? AND " +
-                            ShoppingList.COLUMN_CATEGORY + " IS NULL", _selection);
+                    selection = SQLiteUtils.prependSelection(ShoppingList.COLUMN_NO_TABLE_PREFIXED.COLUMN_ID + " = ? AND " +
+                            ShoppingList.COLUMN_NO_TABLE_PREFIXED.COLUMN_CATEGORY + " IS NULL", _selection);
                     args = SQLiteUtils.prependSelectionArgs(listUUID, _selectionArgs);
                 } else {
-                    selection = SQLiteUtils.prependSelection(ShoppingList.COLUMN_ID + " = ? AND " +
-                            ShoppingList.COLUMN_CATEGORY + " = ?", _selection);
-                    args = SQLiteUtils.prependSelectionArgs(new String[]{ listUUID, categoryUUID },
+                    selection = SQLiteUtils.prependSelection(ShoppingList.COLUMN_NO_TABLE_PREFIXED.COLUMN_ID + " = ? AND " +
+                            ShoppingList.COLUMN_NO_TABLE_PREFIXED.COLUMN_CATEGORY + " = ?", _selection);
+                    args = SQLiteUtils.prependSelectionArgs(new String[]{listUUID, categoryUUID},
                             _selectionArgs);
                 }
                 return mDatabase.delete(ShoppingList.TABLE_NAME, selection, args);
@@ -324,17 +324,17 @@ public class CategoryProvider implements IInternalProvider {
                 try {
                     catCheckCursor = mDatabase.query(
                             ShoppingList.TABLE_NAME,
-                            new String[]{ ShoppingList.COLUMN_CATEGORY },
-                            ShoppingList.COLUMN_ID + " = ?",
-                            new String[]{ listUUID },
+                            new String[]{ShoppingList.COLUMN_NO_TABLE_PREFIXED.COLUMN_CATEGORY},
+                            ShoppingList.COLUMN_NO_TABLE_PREFIXED.COLUMN_ID + " = ?",
+                            new String[]{listUUID},
                             null, null, null);
                     catCheckCursor.moveToFirst();
                     String currentCat = catCheckCursor.getString(catCheckCursor.
-                            getColumnIndex(ShoppingList.COLUMN_CATEGORY));
+                            getColumnIndex(ShoppingList.COLUMN_NO_TABLE_PREFIXED.COLUMN_CATEGORY));
                     if (("-".equals(categoryUUID) && currentCat == null) ||
                             categoryUUID.equals(currentCat)) {
-                        String selection = SQLiteUtils.prependSelection(ListEntry.COLUMN_ID +
-                                " = ? AND " + ListEntry.COLUMN_LIST + " = ?", _selection);
+                        String selection = SQLiteUtils.prependSelection(ListEntry.COLUMN_NO_TABLE_PREFIXED.COLUMN_ID +
+                                " = ? AND " + ListEntry.COLUMN_NO_TABLE_PREFIXED.COLUMN_LIST + " = ?", _selection);
                         String[] args = SQLiteUtils.prependSelectionArgs(
                                 new String[]{
                                         entryUUID,
@@ -366,8 +366,8 @@ public class CategoryProvider implements IInternalProvider {
             case CATEGORY_ITEM: {
                 String categoryUUID = _uri.getLastPathSegment();
                 ContentValues toUpdate = new ContentValues(1);
-                toUpdate.put(Category.COLUMN_NAME, _values.getAsString(Category.COLUMN_NAME));
-                String selection = SQLiteUtils.prependSelection(Category.COLUMN_ID + " = ?",
+                toUpdate.put(Category.COLUMN_NO_TABLE_PREFIXED.COLUMN_NAME, _values.getAsString(Category.COLUMN_NO_TABLE_PREFIXED.COLUMN_NAME));
+                String selection = SQLiteUtils.prependSelection(Category.COLUMN_NO_TABLE_PREFIXED.COLUMN_ID + " = ?",
                         _selection);
                 String[] args = SQLiteUtils.prependSelectionArgs(categoryUUID, _selectionArgs);
                 return mDatabase.update(Category.TABLE_NAME, toUpdate, selection, args);
@@ -377,8 +377,8 @@ public class CategoryProvider implements IInternalProvider {
                 ContentValues toUpdate = new ContentValues(2);
                 for (String cvKey : _values.keySet()) {
                     switch (cvKey) {
-                        case ShoppingList.COLUMN_NAME:
-                        case ShoppingList.COLUMN_CATEGORY:
+                        case ShoppingList.COLUMN_NO_TABLE_PREFIXED.COLUMN_NAME:
+                        case ShoppingList.COLUMN_NO_TABLE_PREFIXED.COLUMN_CATEGORY:
                             toUpdate.put(cvKey, _values.getAsString(cvKey));
                             break;
                     }
@@ -386,13 +386,13 @@ public class CategoryProvider implements IInternalProvider {
                 String selection;
                 String[] args;
                 if ("-".equals(categoryUUID)) {
-                    selection = SQLiteUtils.prependSelection(ShoppingList.COLUMN_ID + " = ? AND " +
-                            ShoppingList.COLUMN_CATEGORY + " IS NULL", _selection);
-                    args = new String[] { _uri.getLastPathSegment() };
+                    selection = SQLiteUtils.prependSelection(ShoppingList.COLUMN_NO_TABLE_PREFIXED.COLUMN_ID + " = ? AND " +
+                            ShoppingList.COLUMN_NO_TABLE_PREFIXED.COLUMN_CATEGORY + " IS NULL", _selection);
+                    args = new String[]{_uri.getLastPathSegment()};
                 } else {
-                    selection = SQLiteUtils.prependSelection(ShoppingList.COLUMN_ID + " = ? AND " +
-                            ShoppingList.COLUMN_CATEGORY + " = ?", _selection);
-                    args = new String[] { _uri.getLastPathSegment(), categoryUUID };
+                    selection = SQLiteUtils.prependSelection(ShoppingList.COLUMN_NO_TABLE_PREFIXED.COLUMN_ID + " = ? AND " +
+                            ShoppingList.COLUMN_NO_TABLE_PREFIXED.COLUMN_CATEGORY + " = ?", _selection);
+                    args = new String[]{_uri.getLastPathSegment(), categoryUUID};
                 }
                 return mDatabase.update(ShoppingList.TABLE_NAME, toUpdate, selection, args);
             }
@@ -403,15 +403,15 @@ public class CategoryProvider implements IInternalProvider {
                 ContentValues toUpdate = new ContentValues();
                 for (String cvKey : _values.keySet()) {
                     switch (cvKey) {
-                        case ListEntry.COLUMN_LIST:
-                        case ListEntry.COLUMN_PRODUCT:
+                        case ListEntry.COLUMN_NO_TABLE_PREFIXED.COLUMN_LIST:
+                        case ListEntry.COLUMN_NO_TABLE_PREFIXED.COLUMN_PRODUCT:
                             toUpdate.put(cvKey, _values.getAsString(cvKey));
                             break;
-                        case ListEntry.COLUMN_AMOUNT:
-                        case ListEntry.COLUMN_PRIORITY:
+                        case ListEntry.COLUMN_NO_TABLE_PREFIXED.COLUMN_AMOUNT:
+                        case ListEntry.COLUMN_NO_TABLE_PREFIXED.COLUMN_PRIORITY:
                             toUpdate.put(cvKey, _values.getAsFloat(cvKey));
                             break;
-                        case ListEntry.COLUMN_STRUCK: {
+                        case ListEntry.COLUMN_NO_TABLE_PREFIXED.COLUMN_STRUCK: {
                             Object struckObj = _values.get(cvKey);
                             if (struckObj instanceof Boolean) {
                                 toUpdate.put(cvKey, ((Boolean) struckObj ? 1 : 0));
@@ -426,8 +426,8 @@ public class CategoryProvider implements IInternalProvider {
                 try {
                     Cursor checkCatCursor = mDatabase.query(
                             ShoppingList.TABLE_NAME,
-                            new String[]{ShoppingList.COLUMN_CATEGORY},
-                            ShoppingList.COLUMN_ID + " = ?",
+                            new String[]{ShoppingList.COLUMN_NO_TABLE_PREFIXED.COLUMN_CATEGORY},
+                            ShoppingList.COLUMN_NO_TABLE_PREFIXED.COLUMN_ID + " = ?",
                             new String[]{listUUID},
                             null, null, null);
                     if (checkCatCursor.getCount() == 0) {
@@ -435,12 +435,12 @@ public class CategoryProvider implements IInternalProvider {
                     }
                     checkCatCursor.moveToFirst();
                     String currentCat = checkCatCursor.getString(checkCatCursor.getColumnIndex(
-                            ShoppingList.COLUMN_CATEGORY));
+                            ShoppingList.COLUMN_NO_TABLE_PREFIXED.COLUMN_CATEGORY));
 
                     if (("-".equals(categoryUUID) && currentCat == null) || categoryUUID.
                             equals(currentCat)) {
-                        String selection = SQLiteUtils.prependSelection(ListEntry.COLUMN_ID +
-                                " = ? AND " + ListEntry.COLUMN_LIST + " = ?", _selection);
+                        String selection = SQLiteUtils.prependSelection(ListEntry.COLUMN_NO_TABLE_PREFIXED.COLUMN_ID +
+                                " = ? AND " + ListEntry.COLUMN_NO_TABLE_PREFIXED.COLUMN_LIST + " = ?", _selection);
                         String[] args = SQLiteUtils.prependSelectionArgs(new String[]{
                                 entryUUID,
                                 listUUID

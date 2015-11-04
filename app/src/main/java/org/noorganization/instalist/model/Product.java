@@ -10,33 +10,52 @@ public class Product extends SugarRecord<Product> {
 
     public final static String TABLE_NAME = "product";
 
-    public final static String LOCAL_COLUMN_ID = "_id";
-    public final static String LOCAL_COLUMN_NAME = "name";
-    public final static String LOCAL_COLUMN_UNIT_ID = "unit_id";
-    public final static String LOCAL_COLUMN_DEFAULT_AMOUNT = "default_amount";
-    public final static String LOCAL_COLUMN_STEP_AMOUNT = "step_amount";
+    /**
+     * Column names that does not contain the table prefix.
+     */
+    public final static class COLUMN_NO_TABLE_PREFIXED {
 
-    public final static String COLUMN_ID = TABLE_NAME.concat("." + LOCAL_COLUMN_ID);
-    public final static String COLUMN_NAME = TABLE_NAME.concat("." + LOCAL_COLUMN_NAME);
-    public final static String COLUMN_UNIT_ID = TABLE_NAME.concat("." + LOCAL_COLUMN_UNIT_ID);
-    public final static String COLUMN_DEFAULT_AMOUNT = TABLE_NAME.concat("." + LOCAL_COLUMN_DEFAULT_AMOUNT);
-    public final static String COLUMN_STEP_AMOUNT = TABLE_NAME.concat("." + LOCAL_COLUMN_STEP_AMOUNT);
+        public final static String COLUMN_ID = "_id";
+        public final static String COLUMN_NAME = "name";
+        public final static String COLUMN_UNIT_ID = "unit_id";
+        public final static String COLUMN_DEFAULT_AMOUNT = "default_amount";
+        public final static String COLUMN_STEP_AMOUNT = "step_amount";
 
-    public final static String[] ALL_COLUMNS = new String[]{
-            COLUMN_ID,
-            COLUMN_NAME,
-            COLUMN_UNIT_ID,
-            COLUMN_DEFAULT_AMOUNT,
-            COLUMN_STEP_AMOUNT
-    };
+        public final static String[] ALL_COLUMNS = new String[]{
+                COLUMN_ID,
+                COLUMN_NAME,
+                COLUMN_UNIT_ID,
+                COLUMN_DEFAULT_AMOUNT,
+                COLUMN_STEP_AMOUNT
+        };
+    }
+
+    /**
+     * Column names that are prefixed with the table name. So like this TableName.ColumnName
+     */
+    public final static class COLUMN_TABLE_PREFIXED {
+        public final static String COLUMN_ID = TABLE_NAME.concat("." + COLUMN_NO_TABLE_PREFIXED.COLUMN_ID);
+        public final static String COLUMN_NAME = TABLE_NAME.concat("." + COLUMN_NO_TABLE_PREFIXED.COLUMN_NAME);
+        public final static String COLUMN_UNIT_ID = TABLE_NAME.concat("." + COLUMN_NO_TABLE_PREFIXED.COLUMN_UNIT_ID);
+        public final static String COLUMN_DEFAULT_AMOUNT = TABLE_NAME.concat("." + COLUMN_NO_TABLE_PREFIXED.COLUMN_DEFAULT_AMOUNT);
+        public final static String COLUMN_STEP_AMOUNT = TABLE_NAME.concat("." + COLUMN_NO_TABLE_PREFIXED.COLUMN_STEP_AMOUNT);
+
+        public final static String[] ALL_COLUMNS = new String[]{
+                COLUMN_ID,
+                COLUMN_NAME,
+                COLUMN_UNIT_ID,
+                COLUMN_DEFAULT_AMOUNT,
+                COLUMN_STEP_AMOUNT
+        };
+    }
 
     public final static String DATABASE_CREATE = "CREATE TABLE " + TABLE_NAME
-            + "(" + LOCAL_COLUMN_ID + " TEXT PRIMARY KEY NOT NULL,"
-            + LOCAL_COLUMN_NAME + " TEXT NOT NULL,"
-            + LOCAL_COLUMN_UNIT_ID + " TEXT,"
-            + LOCAL_COLUMN_DEFAULT_AMOUNT + " REAL,"
-            + LOCAL_COLUMN_STEP_AMOUNT + " REAL,"
-            + "FOREIGN KEY ( " + LOCAL_COLUMN_UNIT_ID + ") REFERENCES " + Unit.TABLE_NAME + "(" + Unit.COLUMN_ID + ")"
+            + "(" + COLUMN_NO_TABLE_PREFIXED.COLUMN_ID + " TEXT PRIMARY KEY NOT NULL,"
+            + COLUMN_NO_TABLE_PREFIXED.COLUMN_NAME + " TEXT NOT NULL,"
+            + COLUMN_NO_TABLE_PREFIXED.COLUMN_UNIT_ID + " TEXT,"
+            + COLUMN_NO_TABLE_PREFIXED.COLUMN_DEFAULT_AMOUNT + " REAL,"
+            + COLUMN_NO_TABLE_PREFIXED.COLUMN_STEP_AMOUNT + " REAL,"
+            + "FOREIGN KEY ( " + COLUMN_NO_TABLE_PREFIXED.COLUMN_UNIT_ID + ") REFERENCES " + Unit.TABLE_NAME + "(" + Unit.COLUMN_NO_TABLE_PREFIXED.COLUMN_ID + ")"
             + "ON DELETE SET NULL ON UPDATE NO ACTION"
             + ");";
 

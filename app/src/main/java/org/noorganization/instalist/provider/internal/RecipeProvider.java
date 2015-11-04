@@ -100,7 +100,7 @@ public class RecipeProvider implements IInternalProvider {
         switch (mMatcher.match(_uri)) {
 
             case SINGLE_RECIPE:
-                String selection = ProviderUtils.prependIdToQuery(Recipe.LOCAL_COLUMN_ID, _selection);
+                String selection = ProviderUtils.prependIdToQuery(Recipe.COLUMN_NO_TABLE_PREFIXED.COLUMN_ID, _selection);
                 String[] selectionArgs = ProviderUtils.prependSelectionArgs(_selectionArgs, _uri.getLastPathSegment());
                 cursor = mDatabase.query(Recipe.TABLE_NAME, _projection, selection, selectionArgs, null, null, _sortOrder);
                 break;
@@ -108,8 +108,8 @@ public class RecipeProvider implements IInternalProvider {
                 cursor = mDatabase.query(Recipe.TABLE_NAME, _projection, _selection, _selectionArgs, null, null, _sortOrder);
                 break;
             case SINGLE_RECIPE_INGREDIENT:
-                selection = ProviderUtils.prependIdToQuery(Ingredient.COLUMN_ID, _selection);
-                selection = ProviderUtils.prependIdToQuery(Ingredient.COLUMN_RECIPE_ID, selection);
+                selection = ProviderUtils.prependIdToQuery(Ingredient.COLUMN_NO_TABLE_PREFIXED.COLUMN_ID, _selection);
+                selection = ProviderUtils.prependIdToQuery(Ingredient.COLUMN_NO_TABLE_PREFIXED.COLUMN_RECIPE_ID, selection);
 
                 selectionArgs = ProviderUtils.prependSelectionArgs(_selectionArgs, _uri.getLastPathSegment());
                 selectionArgs = ProviderUtils.prependSelectionArgs(selectionArgs, _uri.getPathSegments().get(1));
@@ -117,7 +117,7 @@ public class RecipeProvider implements IInternalProvider {
                 cursor = mDatabase.query(Ingredient.TABLE_NAME, _projection, selection, selectionArgs, null, null, _sortOrder);
                 break;
             case MULTIPLE_RECIPE_INGREDIENT:
-                selection = ProviderUtils.prependIdToQuery(Ingredient.COLUMN_RECIPE_ID, _selection);
+                selection = ProviderUtils.prependIdToQuery(Ingredient.COLUMN_NO_TABLE_PREFIXED.COLUMN_RECIPE_ID, _selection);
                 selectionArgs = ProviderUtils.prependSelectionArgs(_selectionArgs, _uri.getPathSegments().get(1));
                 cursor = mDatabase.query(Ingredient.TABLE_NAME, _projection, selection, selectionArgs, null, null, _sortOrder);
                 break;
@@ -159,12 +159,12 @@ public class RecipeProvider implements IInternalProvider {
                 if (rowId == -1) {
                     return null;
                 }
-                Cursor cursor = mDatabase.query(Recipe.TABLE_NAME, new String[]{Recipe.COLUMN_ID},
+                Cursor cursor = mDatabase.query(Recipe.TABLE_NAME, new String[]{Recipe.COLUMN_TABLE_PREFIXED.COLUMN_ID},
                         SQLiteUtils.COLUMN_ROW_ID + "=?", new String[]{String.valueOf(rowId)},
                         null, null, null, null);
                 cursor.moveToFirst();
                 newUri = Uri.parse(SINGLE_RECIPE_CONTENT_URI.replace("*",
-                        cursor.getString(cursor.getColumnIndex(Recipe.COLUMN_ID))));
+                        cursor.getString(cursor.getColumnIndex(Recipe.COLUMN_TABLE_PREFIXED.COLUMN_ID))));
                 cursor.close();
                 break;
             case SINGLE_RECIPE_INGREDIENT:
@@ -173,12 +173,12 @@ public class RecipeProvider implements IInternalProvider {
                 if (rowId == -1) {
                     return null;
                 }
-                cursor = mDatabase.query(Ingredient.TABLE_NAME, Ingredient.ALL_COLUMNS,
+                cursor = mDatabase.query(Ingredient.TABLE_NAME, Ingredient.COLUMN_NO_TABLE_PREFIXED.ALL_COLUMNS,
                         SQLiteUtils.COLUMN_ROW_ID + " = ?", new String[]{String.valueOf(rowId)},
                         null, null, null, null);
                 cursor.moveToFirst();
-                String contentUri = SINGLE_RECIPE_INGREDIENT_CONTENT_URI.replaceFirst("\\*", cursor.getString(cursor.getColumnIndex(Ingredient.COLUMN_RECIPE_ID)));
-                contentUri = contentUri.replaceFirst("\\*", cursor.getString(cursor.getColumnIndex(Ingredient.COLUMN_ID)));
+                String contentUri = SINGLE_RECIPE_INGREDIENT_CONTENT_URI.replaceFirst("\\*", cursor.getString(cursor.getColumnIndex(Ingredient.COLUMN_NO_TABLE_PREFIXED.COLUMN_RECIPE_ID)));
+                contentUri = contentUri.replaceFirst("\\*", cursor.getString(cursor.getColumnIndex(Ingredient.COLUMN_NO_TABLE_PREFIXED.COLUMN_ID)));
                 newUri = Uri.parse(contentUri);
                 cursor.close();
                 break;
@@ -201,7 +201,7 @@ public class RecipeProvider implements IInternalProvider {
 
         switch (mMatcher.match(_uri)) {
             case SINGLE_RECIPE:
-                String selection = ProviderUtils.prependIdToQuery(Recipe.COLUMN_ID, null);
+                String selection = ProviderUtils.prependIdToQuery(Recipe.COLUMN_TABLE_PREFIXED.COLUMN_ID, null);
                 String[] selectionArgs = ProviderUtils.prependSelectionArgs(null, _uri.getLastPathSegment());
                 affectedRows = mDatabase.delete(Recipe.TABLE_NAME, selection, selectionArgs);
                 break;
@@ -209,8 +209,8 @@ public class RecipeProvider implements IInternalProvider {
                 affectedRows = mDatabase.delete(Recipe.TABLE_NAME, _selection, _selectionArgs);
                 break;
             case SINGLE_RECIPE_INGREDIENT:
-                selection = ProviderUtils.prependIdToQuery(Ingredient.COLUMN_ID, _selection);
-                selection = ProviderUtils.prependIdToQuery(Ingredient.COLUMN_RECIPE_ID, selection);
+                selection = ProviderUtils.prependIdToQuery(Ingredient.COLUMN_NO_TABLE_PREFIXED.COLUMN_ID, _selection);
+                selection = ProviderUtils.prependIdToQuery(Ingredient.COLUMN_NO_TABLE_PREFIXED.COLUMN_RECIPE_ID, selection);
 
                 selectionArgs = ProviderUtils.prependSelectionArgs(_selectionArgs, _uri.getLastPathSegment());
                 selectionArgs = ProviderUtils.prependSelectionArgs(selectionArgs, _uri.getPathSegments().get(1));
@@ -218,7 +218,7 @@ public class RecipeProvider implements IInternalProvider {
                 affectedRows = mDatabase.delete(Ingredient.TABLE_NAME, selection, selectionArgs);
                 break;
             case MULTIPLE_RECIPE_INGREDIENT:
-                selection = ProviderUtils.prependIdToQuery(Ingredient.COLUMN_RECIPE_ID, _selection);
+                selection = ProviderUtils.prependIdToQuery(Ingredient.COLUMN_NO_TABLE_PREFIXED.COLUMN_RECIPE_ID, _selection);
                 selectionArgs = ProviderUtils.prependSelectionArgs(_selectionArgs, _uri.getPathSegments().get(1));
                 affectedRows = mDatabase.delete(Ingredient.TABLE_NAME, selection, selectionArgs);
                 // in this case all recipe ingredients
@@ -238,14 +238,14 @@ public class RecipeProvider implements IInternalProvider {
         int affectedRows = 0;
         switch (mMatcher.match(_uri)) {
             case SINGLE_RECIPE:
-                String selection = ProviderUtils.prependIdToQuery(Recipe.LOCAL_COLUMN_ID, null);
+                String selection = ProviderUtils.prependIdToQuery(Recipe.COLUMN_NO_TABLE_PREFIXED.COLUMN_ID, null);
                 String[] selectionArgs = ProviderUtils.prependSelectionArgs(null, _uri.getLastPathSegment());
                 affectedRows = mDatabase.update(Recipe.TABLE_NAME, _values, selection, selectionArgs);
                 break;
 
             case SINGLE_RECIPE_INGREDIENT:
-                selection = ProviderUtils.prependIdToQuery(Ingredient.COLUMN_ID, _selection);
-                selection = ProviderUtils.prependIdToQuery(Ingredient.COLUMN_RECIPE_ID, selection);
+                selection = ProviderUtils.prependIdToQuery(Ingredient.COLUMN_NO_TABLE_PREFIXED.COLUMN_ID, _selection);
+                selection = ProviderUtils.prependIdToQuery(Ingredient.COLUMN_NO_TABLE_PREFIXED.COLUMN_RECIPE_ID, selection);
 
                 selectionArgs = ProviderUtils.prependSelectionArgs(_selectionArgs, _uri.getLastPathSegment());
                 selectionArgs = ProviderUtils.prependSelectionArgs(selectionArgs, _uri.getPathSegments().get(1));

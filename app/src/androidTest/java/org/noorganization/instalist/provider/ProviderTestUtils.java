@@ -11,8 +11,6 @@ import org.noorganization.instalist.provider.internal.ProductProvider;
 import org.noorganization.instalist.provider.internal.RecipeProvider;
 import org.noorganization.instalist.provider.internal.TagProvider;
 
-import java.util.UUID;
-
 /**
  * Created by Tino on 29.10.2015.
  */
@@ -33,11 +31,11 @@ public class ProviderTestUtils {
     public static Uri insertProduct(IInternalProvider _productProvider, String _uuid, String _name, float _defaultAmount, float _stepAmount, String _unit_ID) {
 
         ContentValues contentValues = new ContentValues();
-        contentValues.put(Product.LOCAL_COLUMN_ID, _uuid);
-        contentValues.put(Product.LOCAL_COLUMN_NAME, _name);
-        contentValues.put(Product.LOCAL_COLUMN_DEFAULT_AMOUNT, _defaultAmount);
-        contentValues.put(Product.LOCAL_COLUMN_STEP_AMOUNT, _stepAmount);
-        contentValues.put(Product.LOCAL_COLUMN_UNIT_ID, _unit_ID);
+        contentValues.put(Product.COLUMN_NO_TABLE_PREFIXED.COLUMN_ID, _uuid);
+        contentValues.put(Product.COLUMN_NO_TABLE_PREFIXED.COLUMN_NAME, _name);
+        contentValues.put(Product.COLUMN_NO_TABLE_PREFIXED.COLUMN_DEFAULT_AMOUNT, _defaultAmount);
+        contentValues.put(Product.COLUMN_NO_TABLE_PREFIXED.COLUMN_STEP_AMOUNT, _stepAmount);
+        contentValues.put(Product.COLUMN_NO_TABLE_PREFIXED.COLUMN_UNIT_ID, _unit_ID);
 
         return _productProvider.insert(Uri.parse(ProductProvider.SINGLE_PRODUCT_CONTENT_URI.replace("*", _uuid)), contentValues);
     }
@@ -52,8 +50,8 @@ public class ProviderTestUtils {
      */
     public static Uri insertTag(IInternalProvider _tagProvider, String _uuid, String tagName) {
         ContentValues contentValues = new ContentValues();
-        contentValues.put(Tag.LOCAL_COLUMN_ID, _uuid);
-        contentValues.put(Tag.LOCAL_COLUMN_NAME, tagName);
+        contentValues.put(Tag.COLUMN_NO_TABLE_PREFIXED.COLUMN_ID, _uuid);
+        contentValues.put(Tag.COLUMN_NO_TABLE_PREFIXED.COLUMN_NAME, tagName);
 
         return _tagProvider.insert(Uri.parse(TagProvider.SINGLE_TAG_CONTENT_URI.replace("*", _uuid)), contentValues);
     }
@@ -67,8 +65,8 @@ public class ProviderTestUtils {
      */
     public static Uri insertRecipe(IInternalProvider mRecipeProvider, String uuidRecipe, String name) {
         ContentValues contentValues = new ContentValues();
-        contentValues.put(Recipe.LOCAL_COLUMN_ID, uuidRecipe);
-        contentValues.put(Recipe.LOCAL_COLUMN_NAME, name);
+        contentValues.put(Recipe.COLUMN_NO_TABLE_PREFIXED.COLUMN_ID, uuidRecipe);
+        contentValues.put(Recipe.COLUMN_NO_TABLE_PREFIXED.COLUMN_NAME, name);
         // insert at begin a recipe
         return mRecipeProvider.insert(Uri.parse(RecipeProvider.SINGLE_RECIPE_CONTENT_URI.replace("*", uuidRecipe)), contentValues);
     }

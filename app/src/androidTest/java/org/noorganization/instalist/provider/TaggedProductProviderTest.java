@@ -66,15 +66,15 @@ public class TaggedProductProviderTest extends AndroidTestCase {
 
         Uri taggedProductUri = Uri.parse(TaggedProductProvider.SINGLE_TAGGED_PRODUCT_CONTENT_URI.replace("*", taggedProductUuid));
 
-        Cursor cursor = mTaggedProductProvider.query(taggedProductUri, TaggedProduct.ALL_COLUMNS, null, null, null);
+        Cursor cursor = mTaggedProductProvider.query(taggedProductUri, TaggedProduct.COLUMN_TABLE_PREFIXED.ALL_COLUMNS, null, null, null);
         assertNotNull(cursor);
         assertEquals(1, cursor.getCount());
 
         cursor.moveToFirst();
 
-        assertEquals(taggedProductUuid, cursor.getString(cursor.getColumnIndex(TaggedProduct.COLUMN_ID)));
-        assertEquals(tagUuid, cursor.getString(cursor.getColumnIndex(TaggedProduct.COLUMN_TAG_ID)));
-        assertEquals(productUuid, cursor.getString(cursor.getColumnIndex(TaggedProduct.COLUMN_PRODUCT_ID)));
+        assertEquals(taggedProductUuid, cursor.getString(cursor.getColumnIndex(TaggedProduct.COLUMN_TABLE_PREFIXED.COLUMN_ID)));
+        assertEquals(tagUuid, cursor.getString(cursor.getColumnIndex(TaggedProduct.COLUMN_TABLE_PREFIXED.COLUMN_TAG_ID)));
+        assertEquals(productUuid, cursor.getString(cursor.getColumnIndex(TaggedProduct.COLUMN_TABLE_PREFIXED.COLUMN_PRODUCT_ID)));
     }
 
     public void testQueryMultipleTaggedProduct() {
@@ -110,28 +110,28 @@ public class TaggedProductProviderTest extends AndroidTestCase {
 
         Uri taggedProductUri = Uri.parse(TaggedProductProvider.MULTIPLE_TAGGED_PRODUCT_CONTENT_URI);
 
-        Cursor cursor = mTaggedProductProvider.query(taggedProductUri, new String[]{TaggedProduct.COLUMN_ID, TaggedProduct.COLUMN_TAG_ID, TaggedProduct.COLUMN_PRODUCT_ID, Product.COLUMN_NAME}, null, null, Product.COLUMN_NAME + " ASC");
+        Cursor cursor = mTaggedProductProvider.query(taggedProductUri, new String[]{TaggedProduct.COLUMN_TABLE_PREFIXED.COLUMN_ID, TaggedProduct.COLUMN_TABLE_PREFIXED.COLUMN_TAG_ID, TaggedProduct.COLUMN_TABLE_PREFIXED.COLUMN_PRODUCT_ID, Product.COLUMN_TABLE_PREFIXED.COLUMN_NAME}, null, null, Product.COLUMN_TABLE_PREFIXED.COLUMN_NAME + " ASC");
         assertNotNull(cursor);
         assertEquals(3, cursor.getCount());
 
         cursor.moveToFirst();
-        assertEquals(taggedProductUuid, cursor.getString(cursor.getColumnIndex(TaggedProduct.COLUMN_ID)));
-        assertEquals("Product1", cursor.getString(cursor.getColumnIndex(Product.COLUMN_NAME)));
-        assertEquals(tagUuid, cursor.getString(cursor.getColumnIndex(TaggedProduct.COLUMN_TAG_ID)));
-        assertEquals(productUuid, cursor.getString(cursor.getColumnIndex(TaggedProduct.COLUMN_PRODUCT_ID)));
+        assertEquals(taggedProductUuid, cursor.getString(cursor.getColumnIndex(TaggedProduct.COLUMN_TABLE_PREFIXED.COLUMN_ID)));
+        assertEquals("Product1", cursor.getString(cursor.getColumnIndex(Product.COLUMN_TABLE_PREFIXED.COLUMN_NAME)));
+        assertEquals(tagUuid, cursor.getString(cursor.getColumnIndex(TaggedProduct.COLUMN_TABLE_PREFIXED.COLUMN_TAG_ID)));
+        assertEquals(productUuid, cursor.getString(cursor.getColumnIndex(TaggedProduct.COLUMN_TABLE_PREFIXED.COLUMN_PRODUCT_ID)));
 
         assertTrue(cursor.moveToNext());
 
-        assertEquals(taggedProductUuid2, cursor.getString(cursor.getColumnIndex(TaggedProduct.COLUMN_ID)));
-        assertEquals("Product2", cursor.getString(cursor.getColumnIndex(Product.COLUMN_NAME)));
-        assertEquals(tagUuid, cursor.getString(cursor.getColumnIndex(TaggedProduct.COLUMN_TAG_ID)));
-        assertEquals(productUuid2, cursor.getString(cursor.getColumnIndex(TaggedProduct.COLUMN_PRODUCT_ID)));
+        assertEquals(taggedProductUuid2, cursor.getString(cursor.getColumnIndex(TaggedProduct.COLUMN_TABLE_PREFIXED.COLUMN_ID)));
+        assertEquals("Product2", cursor.getString(cursor.getColumnIndex(Product.COLUMN_TABLE_PREFIXED.COLUMN_NAME)));
+        assertEquals(tagUuid, cursor.getString(cursor.getColumnIndex(TaggedProduct.COLUMN_TABLE_PREFIXED.COLUMN_TAG_ID)));
+        assertEquals(productUuid2, cursor.getString(cursor.getColumnIndex(TaggedProduct.COLUMN_TABLE_PREFIXED.COLUMN_PRODUCT_ID)));
 
         assertTrue(cursor.moveToNext());
-        assertEquals(taggedProductUuid3, cursor.getString(cursor.getColumnIndex(TaggedProduct.COLUMN_ID)));
-        assertEquals("Product3", cursor.getString(cursor.getColumnIndex(Product.COLUMN_NAME)));
-        assertEquals(tagUuid2, cursor.getString(cursor.getColumnIndex(TaggedProduct.COLUMN_TAG_ID)));
-        assertEquals(productUuid3, cursor.getString(cursor.getColumnIndex(TaggedProduct.COLUMN_PRODUCT_ID)));
+        assertEquals(taggedProductUuid3, cursor.getString(cursor.getColumnIndex(TaggedProduct.COLUMN_TABLE_PREFIXED.COLUMN_ID)));
+        assertEquals("Product3", cursor.getString(cursor.getColumnIndex(Product.COLUMN_TABLE_PREFIXED.COLUMN_NAME)));
+        assertEquals(tagUuid2, cursor.getString(cursor.getColumnIndex(TaggedProduct.COLUMN_TABLE_PREFIXED.COLUMN_TAG_ID)));
+        assertEquals(productUuid3, cursor.getString(cursor.getColumnIndex(TaggedProduct.COLUMN_TABLE_PREFIXED.COLUMN_PRODUCT_ID)));
     }
 
     public void testQueryMultipleTaggedProductByTag() {
@@ -166,14 +166,14 @@ public class TaggedProductProviderTest extends AndroidTestCase {
 
         Uri taggedProductUri = Uri.parse(TaggedProductProvider.MULTIPLE_TAGGED_PRODUCT_BY_TAG_CONTENT_URI.replace("*", tagUuid));
 
-        Cursor cursor = mTaggedProductProvider.query(taggedProductUri, TaggedProduct.ALL_COLUMNS_JOINED, null, null, Product.COLUMN_NAME + " ASC");
+        Cursor cursor = mTaggedProductProvider.query(taggedProductUri, TaggedProduct.ALL_COLUMNS_JOINED, null, null, Product.COLUMN_TABLE_PREFIXED.COLUMN_NAME + " ASC");
         assertNotNull(cursor);
         assertEquals(2, cursor.getCount());
 
         cursor.moveToFirst();
-        assertEquals("Product1", cursor.getString(cursor.getColumnIndex(Product.COLUMN_NAME)));
+        assertEquals("Product1", cursor.getString(cursor.getColumnIndex(Product.COLUMN_TABLE_PREFIXED.COLUMN_NAME)));
         assertTrue(cursor.moveToNext());
-        assertEquals("Product2", cursor.getString(cursor.getColumnIndex(Product.COLUMN_NAME)));
+        assertEquals("Product2", cursor.getString(cursor.getColumnIndex(Product.COLUMN_TABLE_PREFIXED.COLUMN_NAME)));
     }
 
 
@@ -205,9 +205,9 @@ public class TaggedProductProviderTest extends AndroidTestCase {
         assertNotNull(productUri3);
 
         ContentValues contentValues = new ContentValues();
-        contentValues.put(TaggedProduct.LOCAL_COLUMN_ID, taggedProductUuid);
-        contentValues.put(TaggedProduct.LOCAL_COLUMN_PRODUCT_ID, productUuid);
-        contentValues.put(TaggedProduct.LOCAL_COLUMN_TAG_ID, tagUuid);
+        contentValues.put(TaggedProduct.COLUMN_NO_TABLE_PREFIXED.COLUMN_ID, taggedProductUuid);
+        contentValues.put(TaggedProduct.COLUMN_NO_TABLE_PREFIXED.COLUMN_PRODUCT_ID, productUuid);
+        contentValues.put(TaggedProduct.COLUMN_NO_TABLE_PREFIXED.COLUMN_TAG_ID, tagUuid);
 
 
         Uri uri = Uri.parse(TaggedProductProvider.SINGLE_TAGGED_PRODUCT_CONTENT_URI.replace("*", taggedProductUuid));
@@ -217,15 +217,15 @@ public class TaggedProductProviderTest extends AndroidTestCase {
         assertEquals(TaggedProductProvider.SINGLE_TAGGED_PRODUCT_CONTENT_URI.replace("*", taggedProductUuid), uri.toString());
 
         Uri uri2 = Uri.parse(TaggedProductProvider.MULTIPLE_TAGGED_PRODUCT_CONTENT_URI);
-        Cursor cursor = mTaggedProductProvider.query(uri, new String[]{TaggedProduct.COLUMN_ID, TaggedProduct.COLUMN_TAG_ID, TaggedProduct.COLUMN_PRODUCT_ID, Product.COLUMN_NAME}, null, null, null);
+        Cursor cursor = mTaggedProductProvider.query(uri, new String[]{TaggedProduct.COLUMN_TABLE_PREFIXED.COLUMN_ID, TaggedProduct.COLUMN_TABLE_PREFIXED.COLUMN_TAG_ID, TaggedProduct.COLUMN_TABLE_PREFIXED.COLUMN_PRODUCT_ID, Product.COLUMN_TABLE_PREFIXED.COLUMN_NAME}, null, null, null);
 
         assertNotNull(cursor);
         assertEquals(1, cursor.getCount());
         cursor.moveToNext();
-        assertEquals(taggedProductUuid, cursor.getString(cursor.getColumnIndex(TaggedProduct.COLUMN_ID)));
-        assertEquals(tagUuid, cursor.getString(cursor.getColumnIndex(TaggedProduct.COLUMN_TAG_ID)));
-        assertEquals(productUuid, cursor.getString(cursor.getColumnIndex(TaggedProduct.COLUMN_PRODUCT_ID)));
-        assertEquals("Product1", cursor.getString(cursor.getColumnIndex(Product.COLUMN_NAME)));
+        assertEquals(taggedProductUuid, cursor.getString(cursor.getColumnIndex(TaggedProduct.COLUMN_TABLE_PREFIXED.COLUMN_ID)));
+        assertEquals(tagUuid, cursor.getString(cursor.getColumnIndex(TaggedProduct.COLUMN_TABLE_PREFIXED.COLUMN_TAG_ID)));
+        assertEquals(productUuid, cursor.getString(cursor.getColumnIndex(TaggedProduct.COLUMN_TABLE_PREFIXED.COLUMN_PRODUCT_ID)));
+        assertEquals("Product1", cursor.getString(cursor.getColumnIndex(Product.COLUMN_TABLE_PREFIXED.COLUMN_NAME)));
 
     }
 
@@ -256,9 +256,9 @@ public class TaggedProductProviderTest extends AndroidTestCase {
         assertNotNull(productUri3);
 
         ContentValues contentValues = new ContentValues();
-        contentValues.put(TaggedProduct.LOCAL_COLUMN_ID, taggedProductUuid);
-        contentValues.put(TaggedProduct.LOCAL_COLUMN_PRODUCT_ID, productUuid);
-        contentValues.put(TaggedProduct.LOCAL_COLUMN_TAG_ID, tagUuid);
+        contentValues.put(TaggedProduct.COLUMN_NO_TABLE_PREFIXED.COLUMN_ID, taggedProductUuid);
+        contentValues.put(TaggedProduct.COLUMN_NO_TABLE_PREFIXED.COLUMN_PRODUCT_ID, productUuid);
+        contentValues.put(TaggedProduct.COLUMN_NO_TABLE_PREFIXED.COLUMN_TAG_ID, tagUuid);
 
 
         Uri uri = Uri.parse(TaggedProductProvider.SINGLE_TAGGED_PRODUCT_CONTENT_URI.replace("*", taggedProductUuid));
@@ -266,21 +266,21 @@ public class TaggedProductProviderTest extends AndroidTestCase {
         assertNotNull(uri);
         uri = mTaggedProductProvider.insert(uri, contentValues);
 
-        contentValues.put(TaggedProduct.LOCAL_COLUMN_ID, taggedProductUuid2);
-        contentValues.put(TaggedProduct.LOCAL_COLUMN_PRODUCT_ID, productUuid2);
-        contentValues.put(TaggedProduct.LOCAL_COLUMN_TAG_ID, tagUuid2);
+        contentValues.put(TaggedProduct.COLUMN_NO_TABLE_PREFIXED.COLUMN_ID, taggedProductUuid2);
+        contentValues.put(TaggedProduct.COLUMN_NO_TABLE_PREFIXED.COLUMN_PRODUCT_ID, productUuid2);
+        contentValues.put(TaggedProduct.COLUMN_NO_TABLE_PREFIXED.COLUMN_TAG_ID, tagUuid2);
         uri2 = mTaggedProductProvider.insert(uri2, contentValues);
 
-        Cursor cursor  = mDatabase.query(TaggedProduct.TABLE_NAME, TaggedProduct.ALL_COLUMNS, null, null, null, null, null);
+        Cursor cursor  = mDatabase.query(TaggedProduct.TABLE_NAME, TaggedProduct.COLUMN_TABLE_PREFIXED.ALL_COLUMNS, null, null, null, null, null);
         assertEquals(2, cursor.getCount());
 
         int rowsAffected =  mTaggedProductProvider.delete(uri2, null, null);
-        cursor = mDatabase.query(TaggedProduct.TABLE_NAME, TaggedProduct.ALL_COLUMNS, null,null,null,null,null);
+        cursor = mDatabase.query(TaggedProduct.TABLE_NAME, TaggedProduct.COLUMN_TABLE_PREFIXED.ALL_COLUMNS, null,null,null,null,null);
         assertEquals(1, rowsAffected);
         assertEquals(1, cursor.getCount());
 
         cursor.moveToFirst();
-        assertEquals(taggedProductUuid, cursor.getString(cursor.getColumnIndex(TaggedProduct.COLUMN_ID)));
+        assertEquals(taggedProductUuid, cursor.getString(cursor.getColumnIndex(TaggedProduct.COLUMN_TABLE_PREFIXED.COLUMN_ID)));
     }
 
     public void testDeleteMultiple(){
@@ -309,9 +309,9 @@ public class TaggedProductProviderTest extends AndroidTestCase {
         assertNotNull(productUri3);
 
         ContentValues contentValues = new ContentValues();
-        contentValues.put(TaggedProduct.LOCAL_COLUMN_ID, taggedProductUuid);
-        contentValues.put(TaggedProduct.LOCAL_COLUMN_PRODUCT_ID, productUuid);
-        contentValues.put(TaggedProduct.LOCAL_COLUMN_TAG_ID, tagUuid);
+        contentValues.put(TaggedProduct.COLUMN_NO_TABLE_PREFIXED.COLUMN_ID, taggedProductUuid);
+        contentValues.put(TaggedProduct.COLUMN_NO_TABLE_PREFIXED.COLUMN_PRODUCT_ID, productUuid);
+        contentValues.put(TaggedProduct.COLUMN_NO_TABLE_PREFIXED.COLUMN_TAG_ID, tagUuid);
 
 
         Uri uri = Uri.parse(TaggedProductProvider.SINGLE_TAGGED_PRODUCT_CONTENT_URI.replace("*", taggedProductUuid));
@@ -319,16 +319,16 @@ public class TaggedProductProviderTest extends AndroidTestCase {
         assertNotNull(uri);
         uri = mTaggedProductProvider.insert(uri, contentValues);
 
-        contentValues.put(TaggedProduct.LOCAL_COLUMN_ID, taggedProductUuid2);
-        contentValues.put(TaggedProduct.LOCAL_COLUMN_PRODUCT_ID, productUuid2);
-        contentValues.put(TaggedProduct.LOCAL_COLUMN_TAG_ID, tagUuid2);
+        contentValues.put(TaggedProduct.COLUMN_NO_TABLE_PREFIXED.COLUMN_ID, taggedProductUuid2);
+        contentValues.put(TaggedProduct.COLUMN_NO_TABLE_PREFIXED.COLUMN_PRODUCT_ID, productUuid2);
+        contentValues.put(TaggedProduct.COLUMN_NO_TABLE_PREFIXED.COLUMN_TAG_ID, tagUuid2);
         uri2 = mTaggedProductProvider.insert(uri2, contentValues);
 
-        Cursor cursor  = mDatabase.query(TaggedProduct.TABLE_NAME, TaggedProduct.ALL_COLUMNS, null, null, null, null, null);
+        Cursor cursor  = mDatabase.query(TaggedProduct.TABLE_NAME, TaggedProduct.COLUMN_TABLE_PREFIXED.ALL_COLUMNS, null, null, null, null, null);
         assertEquals(2, cursor.getCount());
 
         int rowsAffected =  mTaggedProductProvider.delete(Uri.parse(TaggedProductProvider.MULTIPLE_TAGGED_PRODUCT_CONTENT_URI), null, null);
-        cursor = mDatabase.query(TaggedProduct.TABLE_NAME, TaggedProduct.ALL_COLUMNS, null,null,null,null,null);
+        cursor = mDatabase.query(TaggedProduct.TABLE_NAME, TaggedProduct.COLUMN_TABLE_PREFIXED.ALL_COLUMNS, null,null,null,null,null);
         assertEquals(2, rowsAffected);
         assertEquals(0, cursor.getCount());
 
@@ -360,9 +360,9 @@ public class TaggedProductProviderTest extends AndroidTestCase {
         assertNotNull(productUri3);
 
         ContentValues contentValues = new ContentValues();
-        contentValues.put(TaggedProduct.LOCAL_COLUMN_ID, taggedProductUuid);
-        contentValues.put(TaggedProduct.LOCAL_COLUMN_PRODUCT_ID, productUuid);
-        contentValues.put(TaggedProduct.LOCAL_COLUMN_TAG_ID, tagUuid);
+        contentValues.put(TaggedProduct.COLUMN_NO_TABLE_PREFIXED.COLUMN_ID, taggedProductUuid);
+        contentValues.put(TaggedProduct.COLUMN_NO_TABLE_PREFIXED.COLUMN_PRODUCT_ID, productUuid);
+        contentValues.put(TaggedProduct.COLUMN_NO_TABLE_PREFIXED.COLUMN_TAG_ID, tagUuid);
 
 
         Uri uri = Uri.parse(TaggedProductProvider.SINGLE_TAGGED_PRODUCT_CONTENT_URI.replace("*", taggedProductUuid));
@@ -370,20 +370,20 @@ public class TaggedProductProviderTest extends AndroidTestCase {
         assertNotNull(uri);
         uri = mTaggedProductProvider.insert(uri, contentValues);
 
-        contentValues.put(TaggedProduct.LOCAL_COLUMN_ID, taggedProductUuid2);
-        contentValues.put(TaggedProduct.LOCAL_COLUMN_PRODUCT_ID, productUuid2);
-        contentValues.put(TaggedProduct.LOCAL_COLUMN_TAG_ID, tagUuid2);
+        contentValues.put(TaggedProduct.COLUMN_NO_TABLE_PREFIXED.COLUMN_ID, taggedProductUuid2);
+        contentValues.put(TaggedProduct.COLUMN_NO_TABLE_PREFIXED.COLUMN_PRODUCT_ID, productUuid2);
+        contentValues.put(TaggedProduct.COLUMN_NO_TABLE_PREFIXED.COLUMN_TAG_ID, tagUuid2);
         uri2 = mTaggedProductProvider.insert(uri2, contentValues);
 
-        Cursor cursor  = mDatabase.query(TaggedProduct.TABLE_NAME, TaggedProduct.ALL_COLUMNS, null, null, null, null, null);
+        Cursor cursor  = mDatabase.query(TaggedProduct.TABLE_NAME, TaggedProduct.COLUMN_TABLE_PREFIXED.ALL_COLUMNS, null, null, null, null, null);
         assertEquals(2, cursor.getCount());
 
         int rowsAffected =  mTaggedProductProvider.delete(Uri.parse(TaggedProductProvider.MULTIPLE_TAGGED_PRODUCT_BY_TAG_CONTENT_URI.replace("*", tagUuid2)), null, null);
-        cursor = mDatabase.query(TaggedProduct.TABLE_NAME, TaggedProduct.ALL_COLUMNS, null,null,null,null,null);
+        cursor = mDatabase.query(TaggedProduct.TABLE_NAME, TaggedProduct.COLUMN_TABLE_PREFIXED.ALL_COLUMNS, null,null,null,null,null);
         assertEquals(1, rowsAffected);
         assertEquals(1, cursor.getCount());
         cursor.moveToFirst();
-        assertEquals(taggedProductUuid, cursor.getString(cursor.getColumnIndex(TaggedProduct.COLUMN_ID)));
+        assertEquals(taggedProductUuid, cursor.getString(cursor.getColumnIndex(TaggedProduct.COLUMN_TABLE_PREFIXED.COLUMN_ID)));
     }
 
 
@@ -413,9 +413,9 @@ public class TaggedProductProviderTest extends AndroidTestCase {
         assertNotNull(productUri3);
 
         ContentValues contentValues = new ContentValues();
-        contentValues.put(TaggedProduct.LOCAL_COLUMN_ID, taggedProductUuid);
-        contentValues.put(TaggedProduct.LOCAL_COLUMN_PRODUCT_ID, productUuid);
-        contentValues.put(TaggedProduct.LOCAL_COLUMN_TAG_ID, tagUuid);
+        contentValues.put(TaggedProduct.COLUMN_NO_TABLE_PREFIXED.COLUMN_ID, taggedProductUuid);
+        contentValues.put(TaggedProduct.COLUMN_NO_TABLE_PREFIXED.COLUMN_PRODUCT_ID, productUuid);
+        contentValues.put(TaggedProduct.COLUMN_NO_TABLE_PREFIXED.COLUMN_TAG_ID, tagUuid);
 
 
         Uri uri = Uri.parse(TaggedProductProvider.SINGLE_TAGGED_PRODUCT_CONTENT_URI.replace("*", taggedProductUuid));
@@ -423,22 +423,22 @@ public class TaggedProductProviderTest extends AndroidTestCase {
         assertNotNull(uri);
         uri = mTaggedProductProvider.insert(uri, contentValues);
 
-        contentValues.put(TaggedProduct.LOCAL_COLUMN_ID, taggedProductUuid2);
-        contentValues.put(TaggedProduct.LOCAL_COLUMN_PRODUCT_ID, productUuid2);
-        contentValues.put(TaggedProduct.LOCAL_COLUMN_TAG_ID, tagUuid2);
+        contentValues.put(TaggedProduct.COLUMN_NO_TABLE_PREFIXED.COLUMN_ID, taggedProductUuid2);
+        contentValues.put(TaggedProduct.COLUMN_NO_TABLE_PREFIXED.COLUMN_PRODUCT_ID, productUuid2);
+        contentValues.put(TaggedProduct.COLUMN_NO_TABLE_PREFIXED.COLUMN_TAG_ID, tagUuid2);
         uri2 = mTaggedProductProvider.insert(uri2, contentValues);
 
-        Cursor cursor  = mDatabase.query(TaggedProduct.TABLE_NAME, TaggedProduct.ALL_COLUMNS, null, null, null, null, null);
+        Cursor cursor  = mDatabase.query(TaggedProduct.TABLE_NAME, TaggedProduct.COLUMN_TABLE_PREFIXED.ALL_COLUMNS, null, null, null, null, null);
         assertEquals(2, cursor.getCount());
 
-        contentValues.put(TaggedProduct.LOCAL_COLUMN_TAG_ID, tagUuid);
+        contentValues.put(TaggedProduct.COLUMN_NO_TABLE_PREFIXED.COLUMN_TAG_ID, tagUuid);
         int rowsAffected =  mTaggedProductProvider.update(uri2, contentValues, null, null);
-        cursor = mTaggedProductProvider.query(Uri.parse(TaggedProductProvider.MULTIPLE_TAGGED_PRODUCT_CONTENT_URI),TaggedProduct.ALL_COLUMNS, null,null, Product.COLUMN_NAME + " ASC");
+        cursor = mTaggedProductProvider.query(Uri.parse(TaggedProductProvider.MULTIPLE_TAGGED_PRODUCT_CONTENT_URI), TaggedProduct.COLUMN_TABLE_PREFIXED.ALL_COLUMNS, null,null, Product.COLUMN_TABLE_PREFIXED.COLUMN_NAME + " ASC");
         assertEquals(1, rowsAffected);
         assertEquals(2, cursor.getCount());
         cursor.moveToFirst();
         cursor.moveToNext();
-        assertEquals(taggedProductUuid2, cursor.getString(cursor.getColumnIndex(TaggedProduct.COLUMN_ID)));
-        assertEquals(tagUuid, cursor.getString(cursor.getColumnIndex(TaggedProduct.COLUMN_TAG_ID)));
+        assertEquals(taggedProductUuid2, cursor.getString(cursor.getColumnIndex(TaggedProduct.COLUMN_TABLE_PREFIXED.COLUMN_ID)));
+        assertEquals(tagUuid, cursor.getString(cursor.getColumnIndex(TaggedProduct.COLUMN_TABLE_PREFIXED.COLUMN_TAG_ID)));
     }
 }

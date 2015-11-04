@@ -14,18 +14,36 @@ import java.util.List;
  */
 public class ShoppingList extends SugarRecord<ShoppingList> {
 
-    public static final String COLUMN_ID = "_id";
-    public static final String COLUMN_NAME = "name";
-    public static final String COLUMN_CATEGORY = "category";
-
     public static final String TABLE_NAME = "list";
 
+    /**
+     * Column names that does not contain the table prefix.
+     */
+    public final static class COLUMN_NO_TABLE_PREFIXED {
+        public static final String COLUMN_ID = "_id";
+        public static final String COLUMN_NAME = "name";
+        public static final String COLUMN_CATEGORY = "category";
+
+        public static final String ALL_COLUMNS[] = {COLUMN_ID, COLUMN_NAME, COLUMN_CATEGORY};
+    }
+
+    /**
+     * Column names that are prefixed with the table name. So like this TableName.ColumnName
+     */
+    public final static class COLUMN_TABLE_PREFIXED {
+        public static final String COLUMN_ID = TABLE_NAME.concat("." + COLUMN_NO_TABLE_PREFIXED.COLUMN_ID);
+        public static final String COLUMN_NAME = TABLE_NAME.concat("." + COLUMN_NO_TABLE_PREFIXED.COLUMN_NAME);
+        public static final String COLUMN_CATEGORY = TABLE_NAME.concat("." + COLUMN_NO_TABLE_PREFIXED.COLUMN_CATEGORY);
+        public static final String ALL_COLUMNS[] = {COLUMN_ID, COLUMN_NAME, COLUMN_CATEGORY};
+    }
+
+
     public static final String DB_CREATE = "CREATE TABLE " + TABLE_NAME + " (" +
-            COLUMN_ID + " TEXT PRIMARY KEY NOT NULL, " +
-            COLUMN_NAME + " TEXT NOT NULL, " +
-            COLUMN_CATEGORY + " TEXT, " +
-            "FOREIGN KEY (" + COLUMN_CATEGORY + ") REFERENCES " + Category.TABLE_NAME+
-            " (" + Category.COLUMN_ID + ") ON UPDATE CASCADE ON DELETE CASCADE)";
+            COLUMN_NO_TABLE_PREFIXED.COLUMN_ID + " TEXT PRIMARY KEY NOT NULL, " +
+            COLUMN_NO_TABLE_PREFIXED.COLUMN_NAME + " TEXT NOT NULL, " +
+            COLUMN_NO_TABLE_PREFIXED.COLUMN_CATEGORY + " TEXT, " +
+            "FOREIGN KEY (" + COLUMN_NO_TABLE_PREFIXED.COLUMN_CATEGORY + ") REFERENCES " + Category.TABLE_NAME+
+            " (" + Category.COLUMN_NO_TABLE_PREFIXED.COLUMN_ID + ") ON UPDATE CASCADE ON DELETE CASCADE)";
 
     public final static String ATTR_NAME = StringUtil.toSQLName("mName");
     public final static String ATTR_CATEGORY = StringUtil.toSQLName("mCategory");
