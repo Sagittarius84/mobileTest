@@ -1,17 +1,20 @@
 package org.noorganization.instalist.model;
 
+import android.content.ContentResolver;
+
 import com.orm.StringUtil;
 import com.orm.SugarRecord;
 import com.orm.query.Condition;
 import com.orm.query.Select;
 
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Representation of a category.
  * Created by daMihe on 25.05.2015.
  */
-public class Category extends SugarRecord<Category> {
+public class Category {
 
     public static final String TABLE_NAME = "category";
 
@@ -44,20 +47,28 @@ public class Category extends SugarRecord<Category> {
 
     public static final String ATTR_NAME = StringUtil.toSQLName("mName");
 
+    public UUID   mUUID;
     public String mName;
 
     public Category() {
     }
 
-    public Category(String _name) {
+    public Category(UUID _uuid, String _name) {
+        mUUID = _uuid;
         mName = _name;
     }
 
+    /**
+     * TODO: Migrate function to Controller.
+     */
     public List<ShoppingList> getLists() {
         return Select.from(ShoppingList.class).where(
-                Condition.prop(ShoppingList.ATTR_CATEGORY).eq(getId())).list();
+                Condition.prop(ShoppingList.ATTR_CATEGORY).eq(mUUID)).list();
     }
 
+    /**
+     * TODO: Migrate function to Controller.
+     */
     public static List<ShoppingList> getListsWithoutCategory(){
         // WTF?! 0 as null value?! This was not documented in SugarORM's doc and is really weird.
         return Select.from(ShoppingList.class).where(Condition.prop(ShoppingList.ATTR_CATEGORY).eq(0)).list();
@@ -74,11 +85,11 @@ public class Category extends SugarRecord<Category> {
 
         Category anotherCategory = (Category) _another;
 
-        return (getId().compareTo(anotherCategory.getId()) == 0 && mName.equals(anotherCategory.mName));
+        return (mUUID.equals(anotherCategory.mUUID) && mName.equals(anotherCategory.mName));
     }
 
     @Override
     public int hashCode() {
-        return getId().intValue();
+        return (int) mUUID.getLeastSignificantBits();
     }
 }

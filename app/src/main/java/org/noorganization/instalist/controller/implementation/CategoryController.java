@@ -1,5 +1,12 @@
 package org.noorganization.instalist.controller.implementation;
 
+import android.content.ContentValues;
+import android.content.Context;
+import android.database.Cursor;
+import android.net.Uri;
+import android.support.annotation.NonNull;
+import android.util.Log;
+
 import com.orm.SugarRecord;
 import com.orm.query.Condition;
 import com.orm.query.Select;
@@ -10,8 +17,11 @@ import org.noorganization.instalist.controller.event.Change;
 import org.noorganization.instalist.controller.event.ListChangedMessage;
 import org.noorganization.instalist.model.Category;
 import org.noorganization.instalist.model.ShoppingList;
+import org.noorganization.instalist.provider.InstalistProvider;
 
+import java.math.MathContext;
 import java.util.List;
+import java.util.UUID;
 
 import de.greenrobot.event.EventBus;
 
@@ -19,14 +29,16 @@ public class CategoryController implements ICategoryController {
     private static CategoryController mInstance;
 
     private EventBus mBus;
+    private Context  mContext;
 
-    private CategoryController() {
+    private CategoryController(@NonNull Context _context) {
+        mContext = _context;
         mBus = EventBus.getDefault();
     }
 
-    static CategoryController getInstance() {
+    static CategoryController getInstance(@NonNull Context _context) {
         if (mInstance == null) {
-            mInstance = new CategoryController();
+            mInstance = new CategoryController(_context);
         }
         return mInstance;
     }
@@ -37,11 +49,43 @@ public class CategoryController implements ICategoryController {
             return null;
         }
 
-        Category rtn = new Category(_name);
-        rtn.save();
+        ContentValues newCatCV = new ContentValues(1);
+        newCatCV.put(Category.COLUMN_NO_TABLE_PREFIXED.COLUMN_NAME, _name);
+        Uri newlyCreatedCat = mContext.getContentResolver().insert(
+                Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI, "category"),
+                newCatCV);
+        if (newlyCreatedCat == null) {
+            return null;
+        }
+
+        Category rtn = new Category(UUID.fromString(newlyCreatedCat.getLastPathSegment()), _name);
 
         mBus.post(new CategoryChangedMessage(Change.CREATED, rtn));
 
+        return rtn;
+    }
+
+    @Override
+    public Category getCategoryByUUID(@NonNull UUID _uuid) {
+        Cursor resultCursor = mContext.getContentResolver().query(
+                Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI, "category/"+_uuid.toString()),
+                new String[]{ Category.COLUMN_NO_TABLE_PREFIXED.COLUMN_NAME },
+                null, null, null);
+        if (resultCursor == null) {
+            Log.e(getClass().getCanonicalName(), "Query result was null. Returning no result.");
+            return null;
+        }
+        if (resultCursor.getCount() == 0) {
+            resultCursor.close();
+            return null;
+        }
+
+        resultCursor.moveToFirst();
+        Category rtn = new Category();
+        rtn.mUUID = _uuid;
+        rtn.mName = resultCursor.getString(resultCursor.getColumnIndex(
+                Category.COLUMN_NO_TABLE_PREFIXED.COLUMN_NAME));
+        resultCursor.close();
         return rtn;
     }
 
@@ -51,14 +95,20 @@ public class CategoryController implements ICategoryController {
             return null;
         }
 
-        Category rtn = SugarRecord.findById(Category.class, _toRename.getId());
+        Category rtn = getCategoryByUUID(_toRename.mUUID);
         if (rtn == null) {
             return null;
         }
 
-        if (_newName != null && _newName.length() > 0 && !nameUsed(_newName, rtn.getId())) {
-            rtn.mName = _newName;
-            rtn.save();
+        if (_newName != null && _newName.length() > 0 && !nameUsed(_newName, rtn.mUUID)) {
+            ContentValues updateCV = new ContentValues(1);
+            updateCV.put(Category.COLUMN_NO_TABLE_PREFIXED.COLUMN_NAME, _newName);
+            if (mContext.getContentResolver().update(
+                    Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI, "category/" + rtn.mUUID),
+                    updateCV,
+                    null, null) == 1) {
+                rtn.mName = _newName;
+            }
         }
 
         mBus.post(new CategoryChangedMessage(Change.CHANGED, rtn));
@@ -72,31 +122,50 @@ public class CategoryController implements ICategoryController {
             return;
         }
 
-        if (SugarRecord.findById(Category.class, _toRemove.getId()) != null) {
-            List<ShoppingList> listsToUnlink = Select.from(ShoppingList.class).
-                    where(Condition.prop(ShoppingList.ATTR_CATEGORY).eq(_toRemove.getId())).list();
-            for (ShoppingList currentList : listsToUnlink) {
-                currentList.mCategory = null;
-            }
-            SugarRecord.saveInTx(listsToUnlink);
+        if (getCategoryByUUID(_toRemove.mUUID) != null) {
+            // TODO Unlink or delete List previously.
 
-            _toRemove.delete();
+            if (mContext.getContentResolver().delete(
+                    Uri.withAppendedPath(
+                            InstalistProvider.BASE_CONTENT_URI,
+                            "category/"+_toRemove.mUUID.toString()),
+                    null,
+                    null) == 1) {
 
-            for (ShoppingList savedList : listsToUnlink) {
-                mBus.post(new ListChangedMessage(Change.CHANGED, savedList));
+                mBus.post(new CategoryChangedMessage(Change.DELETED, _toRemove));
             }
-            mBus.post(new CategoryChangedMessage(Change.DELETED, _toRemove));
         }
     }
 
-    private boolean nameUsed(String _search, Long _ignoreId) {
-        for (Category toCheck : Select.from(Category.class).
-                where(Condition.prop(Category.ATTR_NAME).eq(_search)).list()) {
-            if (_ignoreId == null || _ignoreId.compareTo(toCheck.getId()) != 0) {
-                return true;
-            }
+    private boolean nameUsed(String _search, UUID _ignoreId) {
+        Cursor catsToCheck;
+        if (_ignoreId != null) {
+            catsToCheck = mContext.getContentResolver().query(
+                    Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI, "category"),
+                    null,
+                    Category.COLUMN_NO_TABLE_PREFIXED.COLUMN_ID + " != ? AND " +
+                            Category.COLUMN_NO_TABLE_PREFIXED.COLUMN_NAME + " = ?",
+                    new String[]{
+                            _ignoreId.toString(),
+                            _search
+                    },
+                    null);
+        } else {
+            catsToCheck = mContext.getContentResolver().query(
+                    Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI, "category"),
+                    null,
+                    Category.COLUMN_NO_TABLE_PREFIXED.COLUMN_NAME + " = ?",
+                    new String[]{ _search },
+                    null);
         }
+        if (catsToCheck == null) {
+            Log.e(getClass().getCanonicalName(), "Query for searching name duplicates nulled. " +
+                    "Returning true (= there is a duplicate).");
+            return true;
+        }
+        int count = catsToCheck.getCount();
+        catsToCheck.close();
 
-        return false;
+        return (count != 0);
     }
 }
