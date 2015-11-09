@@ -3,7 +3,7 @@ package org.noorganization.instalist.controller;
 import org.noorganization.instalist.model.Unit;
 
 /**
- * The interface for modifying Units (created by software engineering). From view part, do only
+ * The interface for modifying Units (created by software engineering). From presenter part, do only
  * modify data over this interface for keeping integrity.
  * Created by michi on 03.05.2015.
  */

@@ -2,7 +2,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     style="@style/match_parent"
-    tools:context="org.noorganization.instalist.view.MainShoppingListView$PlaceholderFragment">
+    tools:context="org.noorganization.instalist.presenter.MainShoppingListView$PlaceholderFragment">
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/fragment_shopping_list"

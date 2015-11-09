@@ -4,7 +4,7 @@
     android:layout_height="fill_parent"
     android:orientation="horizontal">
     <!--style="@style/single_line_list_view"!-->
-    <org.noorganization.instalist.view.customview.AmountPicker
+    <org.noorganization.instalist.presenter.customview.AmountPicker
         android:id="@+id/entry_ingredient_amount"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

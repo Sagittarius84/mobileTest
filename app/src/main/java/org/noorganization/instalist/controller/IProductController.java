@@ -5,7 +5,7 @@ import org.noorganization.instalist.model.Tag;
 import org.noorganization.instalist.model.Unit;
 
 /**
- * The interface for modifying Products (created by software engineering). From view part, do only
+ * The interface for modifying Products (created by software engineering). From presenter part, do only
  * modify data over this interface for keeping integrity.
  * Created by michi on 27.04.2015.
  */

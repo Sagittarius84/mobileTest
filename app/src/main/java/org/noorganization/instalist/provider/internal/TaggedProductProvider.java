@@ -15,7 +15,7 @@ import org.noorganization.instalist.model.Tag;
 import org.noorganization.instalist.model.TaggedProduct;
 import org.noorganization.instalist.provider.InstalistProvider;
 import org.noorganization.instalist.utils.SQLiteUtils;
-import org.noorganization.instalist.view.utils.ProviderUtils;
+import org.noorganization.instalist.presenter.utils.ProviderUtils;
 
 import java.util.List;
 
