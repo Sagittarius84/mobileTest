@@ -110,26 +110,26 @@ public class TaggedProductProviderTest extends AndroidTestCase {
 
         Uri taggedProductUri = Uri.parse(TaggedProductProvider.MULTIPLE_TAGGED_PRODUCT_CONTENT_URI);
 
-        Cursor cursor = mTaggedProductProvider.query(taggedProductUri, new String[]{TaggedProduct.COLUMN_TABLE_PREFIXED.COLUMN_ID, TaggedProduct.COLUMN_TABLE_PREFIXED.COLUMN_TAG_ID, TaggedProduct.COLUMN_TABLE_PREFIXED.COLUMN_PRODUCT_ID, Product.COLUMN_TABLE_PREFIXED.COLUMN_NAME}, null, null, Product.COLUMN_TABLE_PREFIXED.COLUMN_NAME + " ASC");
+        Cursor cursor = mTaggedProductProvider.query(taggedProductUri, new String[]{TaggedProduct.COLUMN_TABLE_PREFIXED.COLUMN_ID, TaggedProduct.COLUMN_TABLE_PREFIXED.COLUMN_TAG_ID, TaggedProduct.COLUMN_TABLE_PREFIXED.COLUMN_PRODUCT_ID, Product.PREFIXED_COLUMN.NAME}, null, null, Product.PREFIXED_COLUMN.NAME + " ASC");
         assertNotNull(cursor);
         assertEquals(3, cursor.getCount());
 
         cursor.moveToFirst();
         assertEquals(taggedProductUuid, cursor.getString(cursor.getColumnIndex(TaggedProduct.COLUMN_TABLE_PREFIXED.COLUMN_ID)));
-        assertEquals("Product1", cursor.getString(cursor.getColumnIndex(Product.COLUMN_TABLE_PREFIXED.COLUMN_NAME)));
+        assertEquals("Product1", cursor.getString(cursor.getColumnIndex(Product.PREFIXED_COLUMN.NAME)));
         assertEquals(tagUuid, cursor.getString(cursor.getColumnIndex(TaggedProduct.COLUMN_TABLE_PREFIXED.COLUMN_TAG_ID)));
         assertEquals(productUuid, cursor.getString(cursor.getColumnIndex(TaggedProduct.COLUMN_TABLE_PREFIXED.COLUMN_PRODUCT_ID)));
 
         assertTrue(cursor.moveToNext());
 
         assertEquals(taggedProductUuid2, cursor.getString(cursor.getColumnIndex(TaggedProduct.COLUMN_TABLE_PREFIXED.COLUMN_ID)));
-        assertEquals("Product2", cursor.getString(cursor.getColumnIndex(Product.COLUMN_TABLE_PREFIXED.COLUMN_NAME)));
+        assertEquals("Product2", cursor.getString(cursor.getColumnIndex(Product.PREFIXED_COLUMN.NAME)));
         assertEquals(tagUuid, cursor.getString(cursor.getColumnIndex(TaggedProduct.COLUMN_TABLE_PREFIXED.COLUMN_TAG_ID)));
         assertEquals(productUuid2, cursor.getString(cursor.getColumnIndex(TaggedProduct.COLUMN_TABLE_PREFIXED.COLUMN_PRODUCT_ID)));
 
         assertTrue(cursor.moveToNext());
         assertEquals(taggedProductUuid3, cursor.getString(cursor.getColumnIndex(TaggedProduct.COLUMN_TABLE_PREFIXED.COLUMN_ID)));
-        assertEquals("Product3", cursor.getString(cursor.getColumnIndex(Product.COLUMN_TABLE_PREFIXED.COLUMN_NAME)));
+        assertEquals("Product3", cursor.getString(cursor.getColumnIndex(Product.PREFIXED_COLUMN.NAME)));
         assertEquals(tagUuid2, cursor.getString(cursor.getColumnIndex(TaggedProduct.COLUMN_TABLE_PREFIXED.COLUMN_TAG_ID)));
         assertEquals(productUuid3, cursor.getString(cursor.getColumnIndex(TaggedProduct.COLUMN_TABLE_PREFIXED.COLUMN_PRODUCT_ID)));
     }
@@ -166,14 +166,14 @@ public class TaggedProductProviderTest extends AndroidTestCase {
 
         Uri taggedProductUri = Uri.parse(TaggedProductProvider.MULTIPLE_TAGGED_PRODUCT_BY_TAG_CONTENT_URI.replace("*", tagUuid));
 
-        Cursor cursor = mTaggedProductProvider.query(taggedProductUri, TaggedProduct.ALL_COLUMNS_JOINED, null, null, Product.COLUMN_TABLE_PREFIXED.COLUMN_NAME + " ASC");
+        Cursor cursor = mTaggedProductProvider.query(taggedProductUri, TaggedProduct.ALL_COLUMNS_JOINED, null, null, Product.PREFIXED_COLUMN.NAME + " ASC");
         assertNotNull(cursor);
         assertEquals(2, cursor.getCount());
 
         cursor.moveToFirst();
-        assertEquals("Product1", cursor.getString(cursor.getColumnIndex(Product.COLUMN_TABLE_PREFIXED.COLUMN_NAME)));
+        assertEquals("Product1", cursor.getString(cursor.getColumnIndex(Product.PREFIXED_COLUMN.NAME)));
         assertTrue(cursor.moveToNext());
-        assertEquals("Product2", cursor.getString(cursor.getColumnIndex(Product.COLUMN_TABLE_PREFIXED.COLUMN_NAME)));
+        assertEquals("Product2", cursor.getString(cursor.getColumnIndex(Product.PREFIXED_COLUMN.NAME)));
     }
 
 
@@ -217,7 +217,7 @@ public class TaggedProductProviderTest extends AndroidTestCase {
         assertEquals(TaggedProductProvider.SINGLE_TAGGED_PRODUCT_CONTENT_URI.replace("*", taggedProductUuid), uri.toString());
 
         Uri uri2 = Uri.parse(TaggedProductProvider.MULTIPLE_TAGGED_PRODUCT_CONTENT_URI);
-        Cursor cursor = mTaggedProductProvider.query(uri, new String[]{TaggedProduct.COLUMN_TABLE_PREFIXED.COLUMN_ID, TaggedProduct.COLUMN_TABLE_PREFIXED.COLUMN_TAG_ID, TaggedProduct.COLUMN_TABLE_PREFIXED.COLUMN_PRODUCT_ID, Product.COLUMN_TABLE_PREFIXED.COLUMN_NAME}, null, null, null);
+        Cursor cursor = mTaggedProductProvider.query(uri, new String[]{TaggedProduct.COLUMN_TABLE_PREFIXED.COLUMN_ID, TaggedProduct.COLUMN_TABLE_PREFIXED.COLUMN_TAG_ID, TaggedProduct.COLUMN_TABLE_PREFIXED.COLUMN_PRODUCT_ID, Product.PREFIXED_COLUMN.NAME}, null, null, null);
 
         assertNotNull(cursor);
         assertEquals(1, cursor.getCount());
@@ -225,7 +225,7 @@ public class TaggedProductProviderTest extends AndroidTestCase {
         assertEquals(taggedProductUuid, cursor.getString(cursor.getColumnIndex(TaggedProduct.COLUMN_TABLE_PREFIXED.COLUMN_ID)));
         assertEquals(tagUuid, cursor.getString(cursor.getColumnIndex(TaggedProduct.COLUMN_TABLE_PREFIXED.COLUMN_TAG_ID)));
         assertEquals(productUuid, cursor.getString(cursor.getColumnIndex(TaggedProduct.COLUMN_TABLE_PREFIXED.COLUMN_PRODUCT_ID)));
-        assertEquals("Product1", cursor.getString(cursor.getColumnIndex(Product.COLUMN_TABLE_PREFIXED.COLUMN_NAME)));
+        assertEquals("Product1", cursor.getString(cursor.getColumnIndex(Product.PREFIXED_COLUMN.NAME)));
 
     }
 
@@ -433,7 +433,7 @@ public class TaggedProductProviderTest extends AndroidTestCase {
 
         contentValues.put(TaggedProduct.COLUMN_NO_TABLE_PREFIXED.COLUMN_TAG_ID, tagUuid);
         int rowsAffected =  mTaggedProductProvider.update(uri2, contentValues, null, null);
-        cursor = mTaggedProductProvider.query(Uri.parse(TaggedProductProvider.MULTIPLE_TAGGED_PRODUCT_CONTENT_URI), TaggedProduct.COLUMN_TABLE_PREFIXED.ALL_COLUMNS, null,null, Product.COLUMN_TABLE_PREFIXED.COLUMN_NAME + " ASC");
+        cursor = mTaggedProductProvider.query(Uri.parse(TaggedProductProvider.MULTIPLE_TAGGED_PRODUCT_CONTENT_URI), TaggedProduct.COLUMN_TABLE_PREFIXED.ALL_COLUMNS, null,null, Product.PREFIXED_COLUMN.NAME + " ASC");
         assertEquals(1, rowsAffected);
         assertEquals(2, cursor.getCount());
         cursor.moveToFirst();

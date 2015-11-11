@@ -31,11 +31,11 @@ public class ProviderTestUtils {
     public static Uri insertProduct(IInternalProvider _productProvider, String _uuid, String _name, float _defaultAmount, float _stepAmount, String _unit_ID) {
 
         ContentValues contentValues = new ContentValues();
-        contentValues.put(Product.COLUMN_NO_TABLE_PREFIXED.COLUMN_ID, _uuid);
-        contentValues.put(Product.COLUMN_NO_TABLE_PREFIXED.COLUMN_NAME, _name);
-        contentValues.put(Product.COLUMN_NO_TABLE_PREFIXED.COLUMN_DEFAULT_AMOUNT, _defaultAmount);
-        contentValues.put(Product.COLUMN_NO_TABLE_PREFIXED.COLUMN_STEP_AMOUNT, _stepAmount);
-        contentValues.put(Product.COLUMN_NO_TABLE_PREFIXED.COLUMN_UNIT_ID, _unit_ID);
+        contentValues.put(Product.COLUMN.ID, _uuid);
+        contentValues.put(Product.COLUMN.NAME, _name);
+        contentValues.put(Product.COLUMN.DEFAULT_AMOUNT, _defaultAmount);
+        contentValues.put(Product.COLUMN.STEP_AMOUNT, _stepAmount);
+        contentValues.put(Product.COLUMN.UNIT, _unit_ID);
 
         return _productProvider.insert(Uri.parse(ProductProvider.SINGLE_PRODUCT_CONTENT_URI.replace("*", _uuid)), contentValues);
     }

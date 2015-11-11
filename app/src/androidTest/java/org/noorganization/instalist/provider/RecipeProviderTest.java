@@ -226,11 +226,11 @@ public class RecipeProviderTest extends AndroidTestCase {
         ContentValues contentValuesProduct = new ContentValues();
         String uuidProduct = UUID.randomUUID().toString();
 
-        contentValuesProduct.put(Product.COLUMN_NO_TABLE_PREFIXED.COLUMN_ID, uuidProduct);
-        contentValuesProduct.put(Product.COLUMN_NO_TABLE_PREFIXED.COLUMN_NAME, "TestProduct");
-        contentValuesProduct.put(Product.COLUMN_NO_TABLE_PREFIXED.COLUMN_DEFAULT_AMOUNT, 0.5f);
-        contentValuesProduct.put(Product.COLUMN_NO_TABLE_PREFIXED.COLUMN_STEP_AMOUNT, 0.5f);
-        contentValuesProduct.put(Product.COLUMN_NO_TABLE_PREFIXED.COLUMN_UNIT_ID, (String) null);
+        contentValuesProduct.put(Product.COLUMN.ID, uuidProduct);
+        contentValuesProduct.put(Product.COLUMN.NAME, "TestProduct");
+        contentValuesProduct.put(Product.COLUMN.DEFAULT_AMOUNT, 0.5f);
+        contentValuesProduct.put(Product.COLUMN.STEP_AMOUNT, 0.5f);
+        contentValuesProduct.put(Product.COLUMN.UNIT, (String) null);
 
         Uri productUri = mProductProvider.insert(Uri.parse(ProductProvider.SINGLE_PRODUCT_CONTENT_URI.replace("*", uuidProduct)), contentValuesProduct);
         assertNotNull(productUri);

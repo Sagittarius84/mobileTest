@@ -1,5 +1,7 @@
 package org.noorganization.instalist.model;
 
+import android.net.Uri;
+
 import com.orm.StringUtil;
 import com.orm.SugarRecord;
 
@@ -50,7 +52,7 @@ public class ListEntry extends SugarRecord<ListEntry> {
             COLUMN_NO_TABLE_PREFIXED.COLUMN_LIST + " TEXT NOT NULL, " +
             COLUMN_NO_TABLE_PREFIXED.COLUMN_STRUCK + " INTEGER NOT NULL DEFAULT 0, " +
             "FOREIGN KEY (" + COLUMN_NO_TABLE_PREFIXED.COLUMN_PRODUCT + ") REFERENCES " + Product.TABLE_NAME + " (" +
-                Product.COLUMN_NO_TABLE_PREFIXED.COLUMN_ID + ") ON UPDATE CASCADE ON DELETE CASCADE, " +
+                Product.COLUMN.ID + ") ON UPDATE CASCADE ON DELETE CASCADE, " +
             "FOREIGN KEY (list) REFERENCES list (_id) ON UPDATE CASCADE ON DELETE CASCADE)";
 
     public final static String ATTR_LIST     = StringUtil.toSQLName("mList");
@@ -114,7 +116,7 @@ public class ListEntry extends SugarRecord<ListEntry> {
         if (!getId().equals(that.getId()) ||
                 Float.compare(that.mAmount, mAmount) != 0 ||
                 mStruck != that.mStruck ||
-                (mList == null && that.mList != null) || !mList.equals(that.mList) ||
+                (mList == null && that.mList != null) || (mList != null && !mList.equals(that.mList)) ||
                 !mProduct.equals(that.mProduct) ||
                 mPriority != that.mPriority) {
             return false;
@@ -134,8 +136,19 @@ public class ListEntry extends SugarRecord<ListEntry> {
 
     @Override
     public String toString() {
-        return "ListEntry { id = " + getId() + ", mList.id = " + (mList == null ? "none" : mList.getId()) +
+        return "ListEntry { id = " + getId() + ", mList.id = " + (mList == null ? "none" :
+                mList.mUUID.toString()) +
                 ", mProduct.id = " + (mProduct == null ? "none" : mProduct.getId()) +
                 ", mStruck = " + mStruck + ", mAmount" + mAmount + " }";
+    }
+
+    public Uri toUri(Uri _baseUri) {
+        if (mList == null || getId() == 0) {
+            return null;
+        }
+
+        return Uri.withAppendedPath(_baseUri, "category/" +
+                (mList.mCategory == null ? "-" : mList.mCategory.mUUID) + "/list/" +
+                mList.mUUID + "/entry/" + getId());
     }
 }

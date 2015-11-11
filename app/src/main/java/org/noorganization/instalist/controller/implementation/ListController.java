@@ -1,5 +1,9 @@
 package org.noorganization.instalist.controller.implementation;
 
+import android.content.Context;
+import android.database.Cursor;
+import android.net.Uri;
+
 import com.orm.SugarRecord;
 import com.orm.query.Condition;
 import com.orm.query.Select;
@@ -12,6 +16,7 @@ import org.noorganization.instalist.model.Category;
 import org.noorganization.instalist.model.ListEntry;
 import org.noorganization.instalist.model.Product;
 import org.noorganization.instalist.model.ShoppingList;
+import org.noorganization.instalist.provider.InstalistProvider;
 
 import java.util.List;
 
@@ -27,14 +32,16 @@ public class ListController implements IListController {
     private static ListController mInstance;
 
     private EventBus mBus;
+    private Context  mContext;
 
-    private ListController() {
+    private ListController(Context _context) {
         mBus = EventBus.getDefault();
+        mContext = _context;
     }
 
-    static ListController getInstance() {
+    static ListController getInstance(Context _context) {
         if (mInstance == null) {
-            mInstance = new ListController();
+            mInstance = new ListController(_context);
         }
 
         return mInstance;
@@ -46,12 +53,37 @@ public class ListController implements IListController {
             return null;
         }
 
-        ShoppingList savedList = SugarRecord.findById(ShoppingList.class, _list.getId());
-        Product savedProduct = SugarRecord.findById(Product.class, _product.getId());
-        if (savedList == null || savedProduct == null) {
+        //Cursor listCheck = mContext.getContentResolver().query()
+        Cursor listCheck = mContext.getContentResolver().query(
+                _list.toUri(InstalistProvider.BASE_CONTENT_URI),
+                new String[]{ ShoppingList.COLUMN.ID },
+                null, null, null);
+        if (listCheck == null) {
+            return null;
+        } else if (listCheck.getCount() != 1) {
+            listCheck.close();
             return null;
         }
+        listCheck.close();
+        Cursor productCheck = mContext.getContentResolver().query(
+                _product.toUri(InstalistProvider.BASE_CONTENT_URI),
+                new String[]{Product.COLUMN.ID},
+                null, null, null);
+        if (productCheck == null) {
+            return null;
+        } else if (productCheck.getCount() != 1) {
+            productCheck.close();
+            return null;
+        }
+        productCheck.close();
 
+        Uri listUri = _list.toUri(InstalistProvider.BASE_CONTENT_URI);
+        Cursor entryCheck = mContext.getContentResolver().query(
+                Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI, listUri.getPath() + "/entry"),
+                new String[] { ListEntry.COLUMN_NO_TABLE_PREFIXED.COLUMN_ID },
+                ListEntry.COLUMN_TABLE_PREFIXED.COLUMN_PRODUCT + " = ?",
+                new String[] { _product.id },
+                null);
         ListEntry item = Select.from(ListEntry.class).where(
                 Condition.prop("m_list").eq(savedList.getId()),
                 Condition.prop("m_product").eq(savedProduct.getId())).first();

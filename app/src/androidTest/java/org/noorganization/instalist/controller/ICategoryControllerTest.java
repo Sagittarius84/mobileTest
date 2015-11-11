@@ -1,37 +1,97 @@
 package org.noorganization.instalist.controller;
 
+import android.content.ContentResolver;
+import android.content.ContentValues;
+import android.database.Cursor;
+import android.net.Uri;
 import android.test.AndroidTestCase;
-
-import com.orm.SugarRecord;
 
 import org.noorganization.instalist.controller.implementation.ControllerFactory;
 import org.noorganization.instalist.model.Category;
 import org.noorganization.instalist.model.ShoppingList;
+import org.noorganization.instalist.provider.InstalistProvider;
+
+import java.util.UUID;
 
 public class ICategoryControllerTest extends AndroidTestCase {
 
     private ICategoryController mCategoryController;
     private Category mCategoryWork;
     private ShoppingList mListHardwareStore;
+    private ContentResolver mResolver;
 
     public void setUp() throws Exception {
         super.setUp();
 
-        mCategoryWork = new Category("_TEST_work");
-        mCategoryWork.save();
-        mListHardwareStore = new ShoppingList("_TEST_hardware store", mCategoryWork);
-        mListHardwareStore.save();
-        mCategoryWork.save();
+        mResolver = getContext().getContentResolver();
+        ContentValues testWorkCatCV = new ContentValues(1);
+        testWorkCatCV.put(Category.COLUMN.NAME, "_TEST_work");
+        Uri createdCat = mResolver.insert(
+                Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI, "category"),
+                testWorkCatCV);
+        mCategoryWork = new Category(UUID.fromString(createdCat.getLastPathSegment()), "_TEST_work");
+        ContentValues testHWStoreListCV = new ContentValues(2);
+        testHWStoreListCV.put(ShoppingList.COLUMN.NAME, "_TEST_hardware store");
+        testHWStoreListCV.put(ShoppingList.COLUMN.CATEGORY,
+                createdCat.getLastPathSegment());
+        Uri createdList = mResolver.insert(
+                Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI, "category/" +
+                        createdCat.getLastPathSegment() + "/list"),
+                testHWStoreListCV);
+        mListHardwareStore = new ShoppingList(UUID.fromString(createdList.getLastPathSegment()),
+                "_TEST_hardware store", mCategoryWork);
 
         mCategoryController = ControllerFactory.getCategoryController();
     }
 
     public void tearDown() throws Exception {
-        SugarRecord.deleteAll(ShoppingList.class, ShoppingList.ATTR_CATEGORY + " = ?",
-                mCategoryWork.getId() + "");
+        Cursor catsToDel = mResolver.query(
+                Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI, "category"),
+                new String[]{ Category.COLUMN.ID},
+                Category.COLUMN.NAME + " LIKE '_TEST_%'",
+                null,
+                null);
+        catsToDel.moveToFirst();
+        while (!catsToDel.isAfterLast()) {
+            String catUUIDStr = catsToDel.getString(catsToDel.getColumnIndex(
+                    Category.COLUMN.ID));
+            Cursor listsToDel = mResolver.query(
+                    Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI, "category/" +
+                            catUUIDStr + "/list"),
+                    new String[]{ ShoppingList.COLUMN.ID},
+                    ShoppingList.COLUMN.NAME + " LIKE '_TEST_%'",
+                    null,
+                    null);
+            listsToDel.moveToFirst();
+            while (!listsToDel.isAfterLast()) {
+                String listUUIDStr = listsToDel.getString(listsToDel.getColumnIndex(
+                        ShoppingList.COLUMN.ID));
+                mResolver.delete(Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI,
+                        "category/" + catUUIDStr + "/list/" + listUUIDStr), null, null);
+                listsToDel.moveToNext();
+            }
+            listsToDel.close();
+            mResolver.delete(Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI,
+                    "category/" + catUUIDStr), null, null);
+            catsToDel.moveToNext();
+        }
+        catsToDel.close();
 
-        SugarRecord.deleteAll(ShoppingList.class, ShoppingList.ATTR_NAME + " LIKE '_TEST_%'");
-        SugarRecord.deleteAll(Category.class, Category.ATTR_NAME + " LIKE '_TEST_%'");
+        Cursor listsToDel = mResolver.query(
+                Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI, "category/-/list"),
+                new String[]{ShoppingList.COLUMN.ID},
+                ShoppingList.COLUMN.NAME + " LIKE '_TEST_%'",
+                null,
+                null);
+        listsToDel.moveToFirst();
+        while (!listsToDel.isAfterLast()) {
+            String listUUIDStr = listsToDel.getString(listsToDel.getColumnIndex(
+                    ShoppingList.COLUMN.ID));
+            mResolver.delete(Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI,
+                    "category/-/list/" + listUUIDStr), null, null);
+            listsToDel.moveToNext();
+        }
+        listsToDel.close();
     }
 
     public void testCreateCategory() throws Exception {
@@ -42,32 +102,64 @@ public class ICategoryControllerTest extends AndroidTestCase {
         Category returnedCreatedCategory1 = mCategoryController.createCategory("_TEST_home");
         assertNotNull(returnedCreatedCategory1);
         assertEquals("_TEST_home", returnedCreatedCategory1.mName);
-        assertEquals(returnedCreatedCategory1,
-                SugarRecord.findById(Category.class, returnedCreatedCategory1.getId()));
+        assertNotNull(returnedCreatedCategory1.mUUID);
+        Cursor catCheck = mResolver.query(
+                Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI, "category/" +
+                        returnedCreatedCategory1.mUUID.toString()), null, null, null, null);
+        assertEquals(1, catCheck.getCount());
+        catCheck.moveToFirst();
+        assertEquals("_TEST_home", catCheck.getString(catCheck.getColumnIndex(
+                Category.COLUMN.NAME)));
+        catCheck.close();
+    }
+
+    public void testGetCategoryById() throws Exception {
+        assertNull(mCategoryController.getCategoryByUUID(null));
+        assertNull(mCategoryController.getCategoryByUUID(UUID.randomUUID()));
+
+        assertEquals(mCategoryWork, mCategoryController.getCategoryByUUID(mCategoryWork.mUUID));
     }
 
     public void testRenameCategory() throws Exception {
         assertNull(mCategoryController.renameCategory(null, ""));
-        Category notSavedCategory = new Category("_TEST_not saved category");
+        Category notSavedCategory = new Category(UUID.randomUUID(), "_TEST_not saved category");
         assertNull(mCategoryController.renameCategory(notSavedCategory, "_TEST_still not saved category"));
         assertEquals(mCategoryWork, mCategoryController.renameCategory(mCategoryWork, ""));
 
         Category returnedRenamedCategory1 = mCategoryController.renameCategory(mCategoryWork, "_TEST_home");
         assertNotNull(returnedRenamedCategory1);
         assertEquals("_TEST_home", returnedRenamedCategory1.mName);
-        assertEquals(returnedRenamedCategory1, SugarRecord.findById(Category.class, mCategoryWork.getId()));
+        Cursor catCheck = mResolver.query(
+                Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI, "category/" +
+                        returnedRenamedCategory1.mUUID.toString()), null, null, null, null);
+        assertEquals(1, catCheck.getCount());
+        catCheck.moveToFirst();
+        assertEquals("_TEST_home", catCheck.getString(catCheck.getColumnIndex(
+                Category.COLUMN.NAME)));
+        catCheck.close();
     }
 
     public void testRemoveCategory() throws Exception {
         // Nothing should happen if a wrong input is given.
         mCategoryController.removeCategory(null);
-        Category notSavedCategory = new Category("_TEST_not saved category");
+        Category notSavedCategory = new Category(UUID.randomUUID(), "_TEST_not saved category");
         mCategoryController.removeCategory(notSavedCategory);
 
         // If a category gets deleted, lists have to be unlinked.
-        long deletedId = mCategoryWork.getId();
+        UUID deletedId = mCategoryWork.mUUID;
         mCategoryController.removeCategory(mCategoryWork);
-        assertNull(SugarRecord.findById(Category.class, deletedId));
-        assertNull(SugarRecord.findById(ShoppingList.class, mListHardwareStore.getId()).mCategory);
+        Cursor catCheck = mResolver.query(
+                Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI, "category/" +
+                        deletedId.toString()), null, null, null, null);
+        assertEquals(0, catCheck.getCount());
+        catCheck.close();
+        Cursor listCheck = mResolver.query(Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI,
+                "category/-/list/" + mListHardwareStore.mUUID.toString()), null, null, null, null);
+        assertEquals(1, listCheck.getCount());
+        listCheck.moveToFirst();
+        assertNull(listCheck.getString(listCheck.getColumnIndex(
+                ShoppingList.COLUMN.CATEGORY)));
+        listCheck.close();
+
     }
 }

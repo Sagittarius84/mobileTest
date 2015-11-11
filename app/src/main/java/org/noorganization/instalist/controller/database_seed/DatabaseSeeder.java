@@ -122,7 +122,7 @@ public class DatabaseSeeder {
      * Delete all sample data from database.
      */
     public void tearDown(){
-        List<ShoppingList>  shoppingLists  = ShoppingList.listAll(ShoppingList.class);
+        /*List<ShoppingList>  shoppingLists  = ShoppingList.listAll(ShoppingList.class);
         List<ListEntry>     listEntries    = ListEntry.listAll(ListEntry.class);
         List<Product>       products        = Product.listAll(Product.class);
 
@@ -134,6 +134,6 @@ public class DatabaseSeeder {
         Recipe.deleteAll(Recipe.class);
         Tag.deleteAll(Tag.class);
         TaggedProduct.deleteAll(TaggedProduct.class);
-        Unit.deleteAll(Unit.class);
+        Unit.deleteAll(Unit.class);*/
     }
 }

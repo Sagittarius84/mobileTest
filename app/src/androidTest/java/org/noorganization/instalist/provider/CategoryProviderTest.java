@@ -436,8 +436,8 @@ public class CategoryProviderTest extends AndroidTestCase {
         assertEquals(0, testCursor.getCount());
         testCursor.close();
 
-        mDatabase.execSQL("INSERT INTO " + Product.TABLE_NAME + " (" + Product.COLUMN_NO_TABLE_PREFIXED.COLUMN_ID + ", " +
-                Product.COLUMN_NO_TABLE_PREFIXED.COLUMN_NAME + ") VALUES (?, 'product 1')", new String[]{productUUID});
+        mDatabase.execSQL("INSERT INTO " + Product.TABLE_NAME + " (" + Product.COLUMN.ID + ", " +
+                Product.COLUMN.NAME + ") VALUES (?, 'product 1')", new String[]{productUUID});
 
         ContentValues entryMinimumCV = new ContentValues(1);
         entryMinimumCV.put(ListEntry.COLUMN_NO_TABLE_PREFIXED.COLUMN_PRODUCT, productUUID);
@@ -460,27 +460,27 @@ public class CategoryProviderTest extends AndroidTestCase {
     public void testUpdateCategory() {
         String categoryUUID = UUID.randomUUID().toString();
         ContentValues categoryInitialCV = new ContentValues(2);
-        categoryInitialCV.put(Category.COLUMN_NO_TABLE_PREFIXED.COLUMN_ID, categoryUUID);
-        categoryInitialCV.put(Category.COLUMN_NO_TABLE_PREFIXED.COLUMN_NAME, "category before renaming");
+        categoryInitialCV.put(Category.COLUMN.ID, categoryUUID);
+        categoryInitialCV.put(Category.COLUMN.NAME, "category before renaming");
         mDatabase.insert(Category.TABLE_NAME, null, categoryInitialCV);
 
         ContentValues categoryUpdateCV = new ContentValues(1);
-        categoryUpdateCV.put(Category.COLUMN_NO_TABLE_PREFIXED.COLUMN_NAME, "category after renaming");
+        categoryUpdateCV.put(Category.COLUMN.NAME, "category after renaming");
         assertEquals(0, mCategoryProvider.update(Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI,
                 "category/" + UUID.randomUUID().toString()), categoryUpdateCV, null, null));
         Cursor testCursor = mDatabase.query(
                 Category.TABLE_NAME,
                 new String[]{
-                        Category.COLUMN_NO_TABLE_PREFIXED.COLUMN_NAME
+                        Category.COLUMN.NAME
                 },
-                Category.COLUMN_NO_TABLE_PREFIXED.COLUMN_ID + " = ?",
+                Category.COLUMN.ID + " = ?",
                 new String[] {
                         categoryUUID
                 },
                 null, null, null);
         testCursor.moveToFirst();
         assertEquals("category before renaming", testCursor.getString(
-                testCursor.getColumnIndex(Category.COLUMN_NO_TABLE_PREFIXED.COLUMN_NAME)));
+                testCursor.getColumnIndex(Category.COLUMN.NAME)));
         testCursor.close();
 
         assertEquals(1, mCategoryProvider.update(Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI,
@@ -488,34 +488,34 @@ public class CategoryProviderTest extends AndroidTestCase {
         testCursor = mDatabase.query(
                 Category.TABLE_NAME,
                 new String[]{
-                        Category.COLUMN_NO_TABLE_PREFIXED.COLUMN_NAME
+                        Category.COLUMN.NAME
                 },
-                Category.COLUMN_NO_TABLE_PREFIXED.COLUMN_ID + " = ?",
+                Category.COLUMN.ID + " = ?",
                 new String[] {
                         categoryUUID
                 },
                 null, null, null);
         testCursor.moveToFirst();
         assertEquals("category after renaming", testCursor.getString(
-                testCursor.getColumnIndex(Category.COLUMN_NO_TABLE_PREFIXED.COLUMN_NAME)));
+                testCursor.getColumnIndex(Category.COLUMN.NAME)));
         testCursor.close();
     }
 
     public void testUpdateList() {
         String categoryUUID = UUID.randomUUID().toString();
         ContentValues categoryCV = new ContentValues(2);
-        categoryCV.put(Category.COLUMN_NO_TABLE_PREFIXED.COLUMN_ID, categoryUUID);
-        categoryCV.put(Category.COLUMN_NO_TABLE_PREFIXED.COLUMN_NAME, "category one");
+        categoryCV.put(Category.COLUMN.ID, categoryUUID);
+        categoryCV.put(Category.COLUMN.NAME, "category one");
         mDatabase.insert(Category.TABLE_NAME, null, categoryCV);
         String listUUID = UUID.randomUUID().toString();
         ContentValues listInitialCV = new ContentValues(2);
-        listInitialCV.put(ShoppingList.COLUMN_NO_TABLE_PREFIXED.COLUMN_NAME, "list before rename");
-        listInitialCV.put(ShoppingList.COLUMN_NO_TABLE_PREFIXED.COLUMN_ID, listUUID);
+        listInitialCV.put(ShoppingList.COLUMN.NAME, "list before rename");
+        listInitialCV.put(ShoppingList.COLUMN.ID, listUUID);
         mDatabase.insert(ShoppingList.TABLE_NAME, null, listInitialCV);
 
         ContentValues listUpdateCV = new ContentValues(2);
-        listUpdateCV.put(ShoppingList.COLUMN_NO_TABLE_PREFIXED.COLUMN_NAME, "list after rename");
-        listUpdateCV.put(ShoppingList.COLUMN_NO_TABLE_PREFIXED.COLUMN_CATEGORY, categoryUUID);
+        listUpdateCV.put(ShoppingList.COLUMN.NAME, "list after rename");
+        listUpdateCV.put(ShoppingList.COLUMN.CATEGORY, categoryUUID);
         // negative: with wrong category
         assertEquals(0, mCategoryProvider.update(Uri.withAppendedPath(
                 InstalistProvider.BASE_CONTENT_URI,
@@ -523,18 +523,18 @@ public class CategoryProviderTest extends AndroidTestCase {
         Cursor testCursor = mDatabase.query(
                 ShoppingList.TABLE_NAME,
                 new String[]{
-                        ShoppingList.COLUMN_NO_TABLE_PREFIXED.COLUMN_NAME,
-                        ShoppingList.COLUMN_NO_TABLE_PREFIXED.COLUMN_CATEGORY
+                        ShoppingList.COLUMN.NAME,
+                        ShoppingList.COLUMN.CATEGORY
                 },
-                ShoppingList.COLUMN_NO_TABLE_PREFIXED.COLUMN_ID + " = ?",
+                ShoppingList.COLUMN.ID + " = ?",
                 new String[] {
                         listUUID
                 },
                 null, null, null);
         testCursor.moveToFirst();
         assertEquals("list before rename", testCursor.getString(testCursor.getColumnIndex(
-                ShoppingList.COLUMN_NO_TABLE_PREFIXED.COLUMN_NAME)));
-        assertNull(testCursor.getString(testCursor.getColumnIndex(ShoppingList.COLUMN_NO_TABLE_PREFIXED.COLUMN_CATEGORY)));
+                ShoppingList.COLUMN.NAME)));
+        assertNull(testCursor.getString(testCursor.getColumnIndex(ShoppingList.COLUMN.CATEGORY)));
         testCursor.close();
 
         // negative: with wrong list
@@ -544,18 +544,18 @@ public class CategoryProviderTest extends AndroidTestCase {
         testCursor = mDatabase.query(
                 ShoppingList.TABLE_NAME,
                 new String[]{
-                        ShoppingList.COLUMN_NO_TABLE_PREFIXED.COLUMN_NAME,
-                        ShoppingList.COLUMN_NO_TABLE_PREFIXED.COLUMN_CATEGORY
+                        ShoppingList.COLUMN.NAME,
+                        ShoppingList.COLUMN.CATEGORY
                 },
-                ShoppingList.COLUMN_NO_TABLE_PREFIXED.COLUMN_ID + " = ?",
+                ShoppingList.COLUMN.ID + " = ?",
                 new String[] {
                         listUUID
                 },
                 null, null, null);
         testCursor.moveToFirst();
         assertEquals("list before rename", testCursor.getString(testCursor.getColumnIndex(
-                ShoppingList.COLUMN_NO_TABLE_PREFIXED.COLUMN_NAME)));
-        assertNull(testCursor.getString(testCursor.getColumnIndex(ShoppingList.COLUMN_NO_TABLE_PREFIXED.COLUMN_CATEGORY)));
+                ShoppingList.COLUMN.NAME)));
+        assertNull(testCursor.getString(testCursor.getColumnIndex(ShoppingList.COLUMN.CATEGORY)));
         testCursor.close();
 
         // positive: all right
@@ -565,19 +565,19 @@ public class CategoryProviderTest extends AndroidTestCase {
         testCursor = mDatabase.query(
                 ShoppingList.TABLE_NAME,
                 new String[]{
-                        ShoppingList.COLUMN_NO_TABLE_PREFIXED.COLUMN_NAME,
-                        ShoppingList.COLUMN_NO_TABLE_PREFIXED.COLUMN_CATEGORY
+                        ShoppingList.COLUMN.NAME,
+                        ShoppingList.COLUMN.CATEGORY
                 },
-                ShoppingList.COLUMN_NO_TABLE_PREFIXED.COLUMN_ID + " = ?",
+                ShoppingList.COLUMN.ID + " = ?",
                 new String[] {
                         listUUID
                 },
                 null, null, null);
         testCursor.moveToFirst();
         assertEquals("list after rename", testCursor.getString(testCursor.getColumnIndex(
-                ShoppingList.COLUMN_NO_TABLE_PREFIXED.COLUMN_NAME)));
+                ShoppingList.COLUMN.NAME)));
         assertEquals(categoryUUID, testCursor.getString(testCursor.getColumnIndex(
-                ShoppingList.COLUMN_NO_TABLE_PREFIXED.COLUMN_CATEGORY)));
+                ShoppingList.COLUMN.CATEGORY)));
         testCursor.close();
 
     }
@@ -585,19 +585,19 @@ public class CategoryProviderTest extends AndroidTestCase {
     public void testUpdateEntry() {
         String categoryUUID = UUID.randomUUID().toString();
         ContentValues categoryCV = new ContentValues(2);
-        categoryCV.put(Category.COLUMN_NO_TABLE_PREFIXED.COLUMN_ID, categoryUUID);
-        categoryCV.put(Category.COLUMN_NO_TABLE_PREFIXED.COLUMN_NAME, "category one");
+        categoryCV.put(Category.COLUMN.ID, categoryUUID);
+        categoryCV.put(Category.COLUMN.NAME, "category one");
         mDatabase.insert(Category.TABLE_NAME, null, categoryCV);
         String listUUID = UUID.randomUUID().toString();
         ContentValues listCV = new ContentValues(2);
-        listCV.put(ShoppingList.COLUMN_NO_TABLE_PREFIXED.COLUMN_NAME, "list one");
-        listCV.put(ShoppingList.COLUMN_NO_TABLE_PREFIXED.COLUMN_ID, listUUID);
-        listCV.put(ShoppingList.COLUMN_NO_TABLE_PREFIXED.COLUMN_CATEGORY, categoryUUID);
+        listCV.put(ShoppingList.COLUMN.NAME, "list one");
+        listCV.put(ShoppingList.COLUMN.ID, listUUID);
+        listCV.put(ShoppingList.COLUMN.CATEGORY, categoryUUID);
         mDatabase.insert(ShoppingList.TABLE_NAME, null, listCV);
         String productUUID = UUID.randomUUID().toString();
         ContentValues productCV = new ContentValues(2);
-        productCV.put(Product.COLUMN_NO_TABLE_PREFIXED.COLUMN_ID, productUUID);
-        productCV.put(Product.COLUMN_NO_TABLE_PREFIXED.COLUMN_NAME, "product one");
+        productCV.put(Product.COLUMN.ID, productUUID);
+        productCV.put(Product.COLUMN.NAME, "product one");
         mDatabase.insert(Product.TABLE_NAME, null, productCV);
         String entryUUID = UUID.randomUUID().toString();
         ContentValues entryInitialCV = new ContentValues(6);
@@ -746,13 +746,13 @@ public class CategoryProviderTest extends AndroidTestCase {
     public void testDeleteCategory() {
         String categoryUUID1 = UUID.randomUUID().toString();
         ContentValues categoryCV1 = new ContentValues(2);
-        categoryCV1.put(Category.COLUMN_NO_TABLE_PREFIXED.COLUMN_ID, categoryUUID1);
-        categoryCV1.put(Category.COLUMN_NO_TABLE_PREFIXED.COLUMN_NAME, "category one");
+        categoryCV1.put(Category.COLUMN.ID, categoryUUID1);
+        categoryCV1.put(Category.COLUMN.NAME, "category one");
         mDatabase.insert(Category.TABLE_NAME, null, categoryCV1);
         String categoryUUID2 = UUID.randomUUID().toString();
         ContentValues categoryCV2 = new ContentValues(2);
-        categoryCV2.put(Category.COLUMN_NO_TABLE_PREFIXED.COLUMN_ID, categoryUUID2);
-        categoryCV2.put(Category.COLUMN_NO_TABLE_PREFIXED.COLUMN_NAME, "category two");
+        categoryCV2.put(Category.COLUMN.ID, categoryUUID2);
+        categoryCV2.put(Category.COLUMN.NAME, "category two");
         mDatabase.insert(Category.TABLE_NAME, null, categoryCV2);
 
         // negative: wrong category
@@ -768,12 +768,12 @@ public class CategoryProviderTest extends AndroidTestCase {
         boolean cat2Complete = false;
         while (!testCursor.isAfterLast()) {
             if (categoryUUID1.equals(testCursor.getString(testCursor.getColumnIndex(
-                    Category.COLUMN_NO_TABLE_PREFIXED.COLUMN_ID))) && "category one".equals(testCursor.getString
-                    (testCursor.getColumnIndex(Category.COLUMN_NO_TABLE_PREFIXED.COLUMN_NAME)))) {
+                    Category.COLUMN.ID))) && "category one".equals(testCursor.getString
+                    (testCursor.getColumnIndex(Category.COLUMN.NAME)))) {
                 cat1Complete = true;
             } else if (categoryUUID2.equals(testCursor.getString(testCursor.getColumnIndex(
-                    Category.COLUMN_NO_TABLE_PREFIXED.COLUMN_ID))) && "category two".equals(testCursor.getString
-                    (testCursor.getColumnIndex(Category.COLUMN_NO_TABLE_PREFIXED.COLUMN_NAME)))) {
+                    Category.COLUMN.ID))) && "category two".equals(testCursor.getString
+                    (testCursor.getColumnIndex(Category.COLUMN.NAME)))) {
                 cat2Complete = true;
             }
             testCursor.moveToNext();
@@ -792,29 +792,29 @@ public class CategoryProviderTest extends AndroidTestCase {
         assertEquals(1, testCursor.getCount());
         testCursor.moveToFirst();
         assertEquals(categoryUUID2, testCursor.getString(
-                testCursor.getColumnIndex(Category.COLUMN_NO_TABLE_PREFIXED.COLUMN_ID)));
+                testCursor.getColumnIndex(Category.COLUMN.ID)));
         assertEquals("category two", testCursor.getString(
-                testCursor.getColumnIndex(Category.COLUMN_NO_TABLE_PREFIXED.COLUMN_NAME)));
+                testCursor.getColumnIndex(Category.COLUMN.NAME)));
         testCursor.close();
     }
 
     public void testDeleteList() {
         String categoryUUID = UUID.randomUUID().toString();
         ContentValues categoryCV = new ContentValues(2);
-        categoryCV.put(Category.COLUMN_NO_TABLE_PREFIXED.COLUMN_ID, categoryUUID);
-        categoryCV.put(Category.COLUMN_NO_TABLE_PREFIXED.COLUMN_NAME, "category one");
+        categoryCV.put(Category.COLUMN.ID, categoryUUID);
+        categoryCV.put(Category.COLUMN.NAME, "category one");
         mDatabase.insert(Category.TABLE_NAME, null, categoryCV);
         String listUUID1 = UUID.randomUUID().toString();
         ContentValues listCV1 = new ContentValues(3);
-        listCV1.put(ShoppingList.COLUMN_NO_TABLE_PREFIXED.COLUMN_ID, listUUID1);
-        listCV1.put(ShoppingList.COLUMN_NO_TABLE_PREFIXED.COLUMN_NAME, "list one");
-        listCV1.put(ShoppingList.COLUMN_NO_TABLE_PREFIXED.COLUMN_CATEGORY, categoryUUID);
+        listCV1.put(ShoppingList.COLUMN.ID, listUUID1);
+        listCV1.put(ShoppingList.COLUMN.NAME, "list one");
+        listCV1.put(ShoppingList.COLUMN.CATEGORY, categoryUUID);
         mDatabase.insert(ShoppingList.TABLE_NAME, null, listCV1);
         String listUUID2 = UUID.randomUUID().toString();
         ContentValues listCV2 = new ContentValues(3);
-        listCV2.put(ShoppingList.COLUMN_NO_TABLE_PREFIXED.COLUMN_ID, listUUID2);
-        listCV2.put(ShoppingList.COLUMN_NO_TABLE_PREFIXED.COLUMN_NAME, "list two");
-        listCV2.put(ShoppingList.COLUMN_NO_TABLE_PREFIXED.COLUMN_CATEGORY, categoryUUID);
+        listCV2.put(ShoppingList.COLUMN.ID, listUUID2);
+        listCV2.put(ShoppingList.COLUMN.NAME, "list two");
+        listCV2.put(ShoppingList.COLUMN.CATEGORY, categoryUUID);
         mDatabase.insert(ShoppingList.TABLE_NAME, null, listCV2);
 
         // negative: wrong category
@@ -830,16 +830,16 @@ public class CategoryProviderTest extends AndroidTestCase {
         boolean list2Complete = false;
         while (!testCursor.isAfterLast()) {
             if (listUUID1.equals(testCursor.getString(testCursor.getColumnIndex(
-                    ShoppingList.COLUMN_NO_TABLE_PREFIXED.COLUMN_ID))) && "list one".equals(testCursor.getString
-                    (testCursor.getColumnIndex(ShoppingList.COLUMN_NO_TABLE_PREFIXED.COLUMN_NAME))) && categoryUUID.
+                    ShoppingList.COLUMN.ID))) && "list one".equals(testCursor.getString
+                    (testCursor.getColumnIndex(ShoppingList.COLUMN.NAME))) && categoryUUID.
                     equals(testCursor.getString(testCursor.getColumnIndex(
-                            ShoppingList.COLUMN_NO_TABLE_PREFIXED.COLUMN_CATEGORY)))) {
+                            ShoppingList.COLUMN.CATEGORY)))) {
                 list1Complete = true;
             } else if (listUUID2.equals(testCursor.getString(testCursor.getColumnIndex(
-                    ShoppingList.COLUMN_NO_TABLE_PREFIXED.COLUMN_ID))) && "list two".equals(testCursor.getString
-                    (testCursor.getColumnIndex(ShoppingList.COLUMN_NO_TABLE_PREFIXED.COLUMN_NAME))) && categoryUUID.
+                    ShoppingList.COLUMN.ID))) && "list two".equals(testCursor.getString
+                    (testCursor.getColumnIndex(ShoppingList.COLUMN.NAME))) && categoryUUID.
                     equals(testCursor.getString(testCursor.getColumnIndex(
-                            ShoppingList.COLUMN_NO_TABLE_PREFIXED.COLUMN_CATEGORY)))) {
+                            ShoppingList.COLUMN.CATEGORY)))) {
                 list2Complete = true;
             }
             testCursor.moveToNext();
@@ -861,16 +861,16 @@ public class CategoryProviderTest extends AndroidTestCase {
         list2Complete = false;
         while (!testCursor.isAfterLast()) {
             if (listUUID1.equals(testCursor.getString(testCursor.getColumnIndex(
-                    ShoppingList.COLUMN_NO_TABLE_PREFIXED.COLUMN_ID))) && "list one".equals(testCursor.getString
-                    (testCursor.getColumnIndex(ShoppingList.COLUMN_NO_TABLE_PREFIXED.COLUMN_NAME))) && categoryUUID.
+                    ShoppingList.COLUMN.ID))) && "list one".equals(testCursor.getString
+                    (testCursor.getColumnIndex(ShoppingList.COLUMN.NAME))) && categoryUUID.
                     equals(testCursor.getString(testCursor.getColumnIndex(
-                            ShoppingList.COLUMN_NO_TABLE_PREFIXED.COLUMN_CATEGORY)))) {
+                            ShoppingList.COLUMN.CATEGORY)))) {
                 list1Complete = true;
             } else if (listUUID2.equals(testCursor.getString(testCursor.getColumnIndex(
-                    ShoppingList.COLUMN_NO_TABLE_PREFIXED.COLUMN_ID))) && "list two".equals(testCursor.getString
-                    (testCursor.getColumnIndex(ShoppingList.COLUMN_NO_TABLE_PREFIXED.COLUMN_NAME))) && categoryUUID.
+                    ShoppingList.COLUMN.ID))) && "list two".equals(testCursor.getString
+                    (testCursor.getColumnIndex(ShoppingList.COLUMN.NAME))) && categoryUUID.
                     equals(testCursor.getString(testCursor.getColumnIndex(
-                            ShoppingList.COLUMN_NO_TABLE_PREFIXED.COLUMN_CATEGORY)))) {
+                            ShoppingList.COLUMN.CATEGORY)))) {
                 list2Complete = true;
             }
             testCursor.moveToNext();
@@ -889,28 +889,28 @@ public class CategoryProviderTest extends AndroidTestCase {
         assertEquals(1, testCursor.getCount());
         testCursor.moveToFirst();
         assertEquals(listUUID2, testCursor.getString(
-                testCursor.getColumnIndex(ShoppingList.COLUMN_NO_TABLE_PREFIXED.COLUMN_ID)));
+                testCursor.getColumnIndex(ShoppingList.COLUMN.ID)));
         assertEquals("list two", testCursor.getString(
-                testCursor.getColumnIndex(ShoppingList.COLUMN_NO_TABLE_PREFIXED.COLUMN_NAME)));
+                testCursor.getColumnIndex(ShoppingList.COLUMN.NAME)));
         testCursor.close();
     }
 
     public void testDeleteEntry() {
         String categoryUUID = UUID.randomUUID().toString();
         ContentValues categoryCV = new ContentValues(2);
-        categoryCV.put(Category.COLUMN_NO_TABLE_PREFIXED.COLUMN_ID, categoryUUID);
-        categoryCV.put(Category.COLUMN_NO_TABLE_PREFIXED.COLUMN_NAME, "category one");
+        categoryCV.put(Category.COLUMN.ID, categoryUUID);
+        categoryCV.put(Category.COLUMN.NAME, "category one");
         mDatabase.insert(Category.TABLE_NAME, null, categoryCV);
         String listUUID = UUID.randomUUID().toString();
         ContentValues listCV = new ContentValues(3);
-        listCV.put(ShoppingList.COLUMN_NO_TABLE_PREFIXED.COLUMN_ID, listUUID);
-        listCV.put(ShoppingList.COLUMN_NO_TABLE_PREFIXED.COLUMN_NAME, "list one");
-        listCV.put(ShoppingList.COLUMN_NO_TABLE_PREFIXED.COLUMN_CATEGORY, categoryUUID);
+        listCV.put(ShoppingList.COLUMN.ID, listUUID);
+        listCV.put(ShoppingList.COLUMN.NAME, "list one");
+        listCV.put(ShoppingList.COLUMN.CATEGORY, categoryUUID);
         mDatabase.insert(ShoppingList.TABLE_NAME, null, listCV);
         String productUUID = UUID.randomUUID().toString();
         ContentValues productCV = new ContentValues(2);
-        productCV.put(Product.COLUMN_NO_TABLE_PREFIXED.COLUMN_ID, productUUID);
-        productCV.put(Product.COLUMN_NO_TABLE_PREFIXED.COLUMN_NAME, "product one");
+        productCV.put(Product.COLUMN.ID, productUUID);
+        productCV.put(Product.COLUMN.NAME, "product one");
         mDatabase.insert(Product.TABLE_NAME, null, productCV);
         String entryUUID1 = UUID.randomUUID().toString();
         ContentValues entryCV1 = new ContentValues(3);

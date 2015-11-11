@@ -7,20 +7,12 @@ import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
-import com.orm.SugarRecord;
-import com.orm.query.Condition;
-import com.orm.query.Select;
-
 import org.noorganization.instalist.controller.ICategoryController;
 import org.noorganization.instalist.controller.event.CategoryChangedMessage;
 import org.noorganization.instalist.controller.event.Change;
-import org.noorganization.instalist.controller.event.ListChangedMessage;
 import org.noorganization.instalist.model.Category;
-import org.noorganization.instalist.model.ShoppingList;
 import org.noorganization.instalist.provider.InstalistProvider;
 
-import java.math.MathContext;
-import java.util.List;
 import java.util.UUID;
 
 import de.greenrobot.event.EventBus;
@@ -50,7 +42,7 @@ public class CategoryController implements ICategoryController {
         }
 
         ContentValues newCatCV = new ContentValues(1);
-        newCatCV.put(Category.COLUMN_NO_TABLE_PREFIXED.COLUMN_NAME, _name);
+        newCatCV.put(Category.COLUMN.NAME, _name);
         Uri newlyCreatedCat = mContext.getContentResolver().insert(
                 Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI, "category"),
                 newCatCV);
@@ -69,7 +61,7 @@ public class CategoryController implements ICategoryController {
     public Category getCategoryByUUID(@NonNull UUID _uuid) {
         Cursor resultCursor = mContext.getContentResolver().query(
                 Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI, "category/"+_uuid.toString()),
-                new String[]{ Category.COLUMN_NO_TABLE_PREFIXED.COLUMN_NAME },
+                new String[]{ Category.COLUMN.NAME},
                 null, null, null);
         if (resultCursor == null) {
             Log.e(getClass().getCanonicalName(), "Query result was null. Returning no result.");
@@ -84,7 +76,7 @@ public class CategoryController implements ICategoryController {
         Category rtn = new Category();
         rtn.mUUID = _uuid;
         rtn.mName = resultCursor.getString(resultCursor.getColumnIndex(
-                Category.COLUMN_NO_TABLE_PREFIXED.COLUMN_NAME));
+                Category.COLUMN.NAME));
         resultCursor.close();
         return rtn;
     }
@@ -102,7 +94,7 @@ public class CategoryController implements ICategoryController {
 
         if (_newName != null && _newName.length() > 0 && !nameUsed(_newName, rtn.mUUID)) {
             ContentValues updateCV = new ContentValues(1);
-            updateCV.put(Category.COLUMN_NO_TABLE_PREFIXED.COLUMN_NAME, _newName);
+            updateCV.put(Category.COLUMN.NAME, _newName);
             if (mContext.getContentResolver().update(
                     Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI, "category/" + rtn.mUUID),
                     updateCV,
@@ -143,8 +135,8 @@ public class CategoryController implements ICategoryController {
             catsToCheck = mContext.getContentResolver().query(
                     Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI, "category"),
                     null,
-                    Category.COLUMN_NO_TABLE_PREFIXED.COLUMN_ID + " != ? AND " +
-                            Category.COLUMN_NO_TABLE_PREFIXED.COLUMN_NAME + " = ?",
+                    Category.COLUMN.ID + " != ? AND " +
+                            Category.COLUMN.NAME + " = ?",
                     new String[]{
                             _ignoreId.toString(),
                             _search
@@ -154,7 +146,7 @@ public class CategoryController implements ICategoryController {
             catsToCheck = mContext.getContentResolver().query(
                     Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI, "category"),
                     null,
-                    Category.COLUMN_NO_TABLE_PREFIXED.COLUMN_NAME + " = ?",
+                    Category.COLUMN.NAME + " = ?",
                     new String[]{ _search },
                     null);
         }

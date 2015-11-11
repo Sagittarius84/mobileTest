@@ -1,12 +1,10 @@
 package org.noorganization.instalist.model;
 
-import android.content.ContentResolver;
+import android.net.Uri;
 
 import com.orm.StringUtil;
-import com.orm.SugarRecord;
-import com.orm.query.Condition;
-import com.orm.query.Select;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -21,39 +19,39 @@ public class Category {
     /**
      * Column names that does not contain the table prefix.
      */
-    public final static class COLUMN_NO_TABLE_PREFIXED {
-        public static final String COLUMN_ID = "_id";
-        public static final String COLUMN_NAME = "name";
+    public final static class COLUMN {
+        public static final String ID = "_id";
+        public static final String NAME = "name";
 
-        public static final String ALL_COLUMNS[] = {COLUMN_ID, COLUMN_NAME};
+        public static final String ALL_COLUMNS[] = {ID, NAME};
     }
 
     /**
      * Column names that are prefixed with the table name. So like this TableName.ColumnName
      */
-    public final static class COLUMN_TABLE_PREFIXED {
-        public static final String COLUMN_ID = TABLE_NAME.concat("." + COLUMN_NO_TABLE_PREFIXED.COLUMN_ID);
-        public static final String COLUMN_NAME = TABLE_NAME.concat("." + COLUMN_NO_TABLE_PREFIXED.COLUMN_NAME);
+    public final static class PREFIXED_COLUMN {
+        public static final String ID = TABLE_NAME.concat("." + COLUMN.ID);
+        public static final String NAME = TABLE_NAME.concat("." + COLUMN.NAME);
 
-        public static final String ALL_COLUMNS[] = {COLUMN_ID, COLUMN_NAME};
+        public static final String ALL_COLUMNS[] = {ID, NAME};
     }
 
 
 
 
     public static final String DB_CREATE = "CREATE TABLE " + TABLE_NAME + " (" +
-            COLUMN_NO_TABLE_PREFIXED.COLUMN_ID + " TEXT PRIMARY KEY NOT NULL, " +
-            COLUMN_NO_TABLE_PREFIXED.COLUMN_NAME + " TEXT NOT NULL)";
+            COLUMN.ID + " TEXT PRIMARY KEY NOT NULL, " +
+            COLUMN.NAME + " TEXT NOT NULL)";
 
     public static final String ATTR_NAME = StringUtil.toSQLName("mName");
 
-    public UUID   mUUID;
+    public String mUUID;
     public String mName;
 
     public Category() {
     }
 
-    public Category(UUID _uuid, String _name) {
+    public Category(String _uuid, String _name) {
         mUUID = _uuid;
         mName = _name;
     }
@@ -62,8 +60,7 @@ public class Category {
      * TODO: Migrate function to Controller.
      */
     public List<ShoppingList> getLists() {
-        return Select.from(ShoppingList.class).where(
-                Condition.prop(ShoppingList.ATTR_CATEGORY).eq(mUUID)).list();
+        return new ArrayList<>(0);
     }
 
     /**
@@ -71,7 +68,8 @@ public class Category {
      */
     public static List<ShoppingList> getListsWithoutCategory(){
         // WTF?! 0 as null value?! This was not documented in SugarORM's doc and is really weird.
-        return Select.from(ShoppingList.class).where(Condition.prop(ShoppingList.ATTR_CATEGORY).eq(0)).list();
+        //return Select.from(ShoppingList.class).where(Condition.prop(ShoppingList.ATTR_CATEGORY).eq(0)).list();
+        return new ArrayList<>(0);
     }
     @Override
     public boolean equals(Object _another) {
@@ -90,6 +88,14 @@ public class Category {
 
     @Override
     public int hashCode() {
-        return (int) mUUID.getLeastSignificantBits();
+        return (int) UUID.fromString(mUUID).getLeastSignificantBits();
+    }
+
+    public Uri toUri(Uri _baseUri) {
+        if (mUUID == null) {
+            return null;
+        }
+
+        return Uri.withAppendedPath(_baseUri, "category/" + mUUID);
     }
 }

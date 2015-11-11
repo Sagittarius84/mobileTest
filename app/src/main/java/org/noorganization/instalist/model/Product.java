@@ -1,5 +1,7 @@
 package org.noorganization.instalist.model;
 
+import android.net.Uri;
+
 import com.orm.SugarRecord;
 
 /**
@@ -13,49 +15,49 @@ public class Product extends SugarRecord<Product> {
     /**
      * Column names that does not contain the table prefix.
      */
-    public final static class COLUMN_NO_TABLE_PREFIXED {
+    public final static class COLUMN {
 
-        public final static String COLUMN_ID = "_id";
-        public final static String COLUMN_NAME = "name";
-        public final static String COLUMN_UNIT_ID = "unit_id";
-        public final static String COLUMN_DEFAULT_AMOUNT = "default_amount";
-        public final static String COLUMN_STEP_AMOUNT = "step_amount";
+        public final static String ID = "_id";
+        public final static String NAME = "name";
+        public final static String UNIT = "unit_id";
+        public final static String DEFAULT_AMOUNT = "default_amount";
+        public final static String STEP_AMOUNT = "step_amount";
 
         public final static String[] ALL_COLUMNS = new String[]{
-                COLUMN_ID,
-                COLUMN_NAME,
-                COLUMN_UNIT_ID,
-                COLUMN_DEFAULT_AMOUNT,
-                COLUMN_STEP_AMOUNT
+                ID,
+                NAME,
+                UNIT,
+                DEFAULT_AMOUNT,
+                STEP_AMOUNT
         };
     }
 
     /**
      * Column names that are prefixed with the table name. So like this TableName.ColumnName
      */
-    public final static class COLUMN_TABLE_PREFIXED {
-        public final static String COLUMN_ID = TABLE_NAME.concat("." + COLUMN_NO_TABLE_PREFIXED.COLUMN_ID);
-        public final static String COLUMN_NAME = TABLE_NAME.concat("." + COLUMN_NO_TABLE_PREFIXED.COLUMN_NAME);
-        public final static String COLUMN_UNIT_ID = TABLE_NAME.concat("." + COLUMN_NO_TABLE_PREFIXED.COLUMN_UNIT_ID);
-        public final static String COLUMN_DEFAULT_AMOUNT = TABLE_NAME.concat("." + COLUMN_NO_TABLE_PREFIXED.COLUMN_DEFAULT_AMOUNT);
-        public final static String COLUMN_STEP_AMOUNT = TABLE_NAME.concat("." + COLUMN_NO_TABLE_PREFIXED.COLUMN_STEP_AMOUNT);
+    public final static class PREFIXED_COLUMN {
+        public final static String ID = TABLE_NAME.concat("." + COLUMN.ID);
+        public final static String NAME = TABLE_NAME.concat("." + COLUMN.NAME);
+        public final static String UNIT = TABLE_NAME.concat("." + COLUMN.UNIT);
+        public final static String DEFAULT_AMOUNT = TABLE_NAME.concat("." + COLUMN.DEFAULT_AMOUNT);
+        public final static String STEP_AMOUNT = TABLE_NAME.concat("." + COLUMN.STEP_AMOUNT);
 
         public final static String[] ALL_COLUMNS = new String[]{
-                COLUMN_ID,
-                COLUMN_NAME,
-                COLUMN_UNIT_ID,
-                COLUMN_DEFAULT_AMOUNT,
-                COLUMN_STEP_AMOUNT
+                ID,
+                NAME,
+                UNIT,
+                DEFAULT_AMOUNT,
+                STEP_AMOUNT
         };
     }
 
     public final static String DATABASE_CREATE = "CREATE TABLE " + TABLE_NAME
-            + "(" + COLUMN_NO_TABLE_PREFIXED.COLUMN_ID + " TEXT PRIMARY KEY NOT NULL,"
-            + COLUMN_NO_TABLE_PREFIXED.COLUMN_NAME + " TEXT NOT NULL,"
-            + COLUMN_NO_TABLE_PREFIXED.COLUMN_UNIT_ID + " TEXT,"
-            + COLUMN_NO_TABLE_PREFIXED.COLUMN_DEFAULT_AMOUNT + " REAL,"
-            + COLUMN_NO_TABLE_PREFIXED.COLUMN_STEP_AMOUNT + " REAL,"
-            + "FOREIGN KEY ( " + COLUMN_NO_TABLE_PREFIXED.COLUMN_UNIT_ID + ") REFERENCES " + Unit.TABLE_NAME + "(" + Unit.COLUMN_NO_TABLE_PREFIXED.COLUMN_ID + ")"
+            + "(" + COLUMN.ID + " TEXT PRIMARY KEY NOT NULL,"
+            + COLUMN.NAME + " TEXT NOT NULL,"
+            + COLUMN.UNIT + " TEXT,"
+            + COLUMN.DEFAULT_AMOUNT + " REAL,"
+            + COLUMN.STEP_AMOUNT + " REAL,"
+            + "FOREIGN KEY ( " + COLUMN.UNIT + ") REFERENCES " + Unit.TABLE_NAME + "(" + Unit.COLUMN_NO_TABLE_PREFIXED.COLUMN_ID + ")"
             + "ON DELETE SET NULL ON UPDATE NO ACTION"
             + ");";
 
@@ -132,5 +134,13 @@ public class Product extends SugarRecord<Product> {
                 ", mDefaultAmount=" + mDefaultAmount +
                 ", mStepAmount=" + mStepAmount +
                 '}';
+    }
+
+    public Uri toUri(Uri _baseUri) {
+        if (id == null) {
+            return null;
+        }
+
+        return Uri.withAppendedPath(_baseUri, "product/" + id);
     }
 }

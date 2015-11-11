@@ -115,7 +115,7 @@ public class TaggedProductProvider implements IInternalProvider {
                 String sql = "SELECT " + TextUtils.join(",", _projection);
                 sql += " FROM " + TaggedProduct.TABLE_NAME + " INNER JOIN " + Tag.TABLE_NAME + " ON "
                         + TaggedProduct.COLUMN_TABLE_PREFIXED.COLUMN_TAG_ID + "=" + Tag.COLUMN_TABLE_PREFIXED.COLUMN_ID;
-                sql += " INNER JOIN " + Product.TABLE_NAME + " ON " + TaggedProduct.COLUMN_TABLE_PREFIXED.COLUMN_PRODUCT_ID + " = " + Product.COLUMN_TABLE_PREFIXED.COLUMN_ID;
+                sql += " INNER JOIN " + Product.TABLE_NAME + " ON " + TaggedProduct.COLUMN_TABLE_PREFIXED.COLUMN_PRODUCT_ID + " = " + Product.PREFIXED_COLUMN.ID;
                 sql += " WHERE " + TaggedProduct.COLUMN_TABLE_PREFIXED.COLUMN_ID + "=\"" + _uri.getLastPathSegment() + "\"";
                 if (_selection != null && _selection.length() > 0) {
                     sql += " AND ";
@@ -131,7 +131,7 @@ public class TaggedProductProvider implements IInternalProvider {
                 sql = "SELECT " + TextUtils.join(",", _projection);
                 sql += " FROM " + TaggedProduct.TABLE_NAME + " INNER JOIN " + Tag.TABLE_NAME + " ON "
                          + TaggedProduct.COLUMN_TABLE_PREFIXED.COLUMN_TAG_ID + "=" + Tag.COLUMN_TABLE_PREFIXED.COLUMN_ID;
-                sql += " INNER JOIN " + Product.TABLE_NAME + " ON " + TaggedProduct.COLUMN_TABLE_PREFIXED.COLUMN_PRODUCT_ID + " = " + Product.COLUMN_TABLE_PREFIXED.COLUMN_ID;
+                sql += " INNER JOIN " + Product.TABLE_NAME + " ON " + TaggedProduct.COLUMN_TABLE_PREFIXED.COLUMN_PRODUCT_ID + " = " + Product.PREFIXED_COLUMN.ID;
                 if (_selection != null && _selection.length() > 0) {
                     sql += " AND ";
                     sql += String.format(_selection, _selectionArgs);
@@ -147,7 +147,7 @@ public class TaggedProductProvider implements IInternalProvider {
                 sql = "SELECT " + TextUtils.join(",", _projection);
                 sql += " FROM " + TaggedProduct.TABLE_NAME + " INNER JOIN " + Tag.TABLE_NAME + " ON "
                         + TaggedProduct.COLUMN_TABLE_PREFIXED.COLUMN_TAG_ID + "=" + Tag.COLUMN_TABLE_PREFIXED.COLUMN_ID;
-                sql += " INNER JOIN " + Product.TABLE_NAME + " ON " + TaggedProduct.COLUMN_TABLE_PREFIXED.COLUMN_PRODUCT_ID + "=" + Product.COLUMN_TABLE_PREFIXED.COLUMN_ID;
+                sql += " INNER JOIN " + Product.TABLE_NAME + " ON " + TaggedProduct.COLUMN_TABLE_PREFIXED.COLUMN_PRODUCT_ID + "=" + Product.PREFIXED_COLUMN.ID;
                 sql += " WHERE " + TaggedProduct.COLUMN_TABLE_PREFIXED.COLUMN_TAG_ID + "=\"" + tagId + "\"";
                 if (_selection != null && _selection.length() > 0) {
                     sql += " AND ";
