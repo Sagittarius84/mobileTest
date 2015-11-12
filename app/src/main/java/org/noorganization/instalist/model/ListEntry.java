@@ -17,41 +17,41 @@ public class ListEntry extends SugarRecord<ListEntry> {
     /**
      * Column names that does not contain the table prefix.
      */
-    public final static class COLUMN_NO_TABLE_PREFIXED {
-        public static final String COLUMN_ID = "_id";
-        public static final String COLUMN_AMOUNT = "amount";
-        public static final String COLUMN_LIST = "list";
-        public static final String COLUMN_PRIORITY = "priority";
-        public static final String COLUMN_PRODUCT = "product";
-        public static final String COLUMN_STRUCK = "struck";
+    public final static class COLUMN {
+        public static final String ID = "_id";
+        public static final String AMOUNT = "amount";
+        public static final String LIST = "list";
+        public static final String PRIORITY = "priority";
+        public static final String PRODUCT = "product";
+        public static final String STRUCK = "struck";
 
-        public static final String ALL_COLUMNS[] = {COLUMN_ID, COLUMN_AMOUNT, COLUMN_LIST, COLUMN_PRIORITY, COLUMN_PRODUCT, COLUMN_STRUCK};
+        public static final String ALL_COLUMNS[] = {ID, AMOUNT, LIST, PRIORITY, PRODUCT, STRUCK};
     }
 
     /**
      * Column names that are prefixed with the table name. So like this TableName.ColumnName
      */
-    public final static class COLUMN_TABLE_PREFIXED {
-        public static final String COLUMN_ID = TABLE_NAME.concat("." + COLUMN_NO_TABLE_PREFIXED.COLUMN_ID);
-        public static final String COLUMN_AMOUNT = TABLE_NAME.concat("." + COLUMN_NO_TABLE_PREFIXED.COLUMN_AMOUNT);
-        public static final String COLUMN_LIST = TABLE_NAME.concat("." + COLUMN_NO_TABLE_PREFIXED.COLUMN_LIST);
-        public static final String COLUMN_PRIORITY = TABLE_NAME.concat("." + COLUMN_NO_TABLE_PREFIXED.COLUMN_PRIORITY);
-        public static final String COLUMN_PRODUCT = TABLE_NAME.concat("." + COLUMN_NO_TABLE_PREFIXED.COLUMN_PRODUCT);
-        public static final String COLUMN_STRUCK = TABLE_NAME.concat("." + COLUMN_NO_TABLE_PREFIXED.COLUMN_STRUCK);
+    public final static class PREFIXED_COLUMN {
+        public static final String ID = TABLE_NAME.concat("." + COLUMN.ID);
+        public static final String AMOUNT = TABLE_NAME.concat("." + COLUMN.AMOUNT);
+        public static final String LIST = TABLE_NAME.concat("." + COLUMN.LIST);
+        public static final String PRIORITY = TABLE_NAME.concat("." + COLUMN.PRIORITY);
+        public static final String PRODUCT = TABLE_NAME.concat("." + COLUMN.PRODUCT);
+        public static final String STRUCK = TABLE_NAME.concat("." + COLUMN.STRUCK);
 
-        public static final String ALL_COLUMNS[] = {COLUMN_ID, COLUMN_AMOUNT, COLUMN_LIST, COLUMN_PRIORITY, COLUMN_PRODUCT, COLUMN_STRUCK};
+        public static final String ALL_COLUMNS[] = {ID, AMOUNT, LIST, PRIORITY, PRODUCT, STRUCK};
     }
 
 
 
     public static final String DB_CREATE = "CREATE TABLE " + TABLE_NAME + " (" +
-            COLUMN_NO_TABLE_PREFIXED.COLUMN_ID + " TEXT PRIMARY KEY NOT NULL, " +
-            COLUMN_NO_TABLE_PREFIXED.COLUMN_AMOUNT + " REAL NOT NULL DEFAULT 1, " +
-            COLUMN_NO_TABLE_PREFIXED.COLUMN_PRIORITY + " INTEGER NOT NULL DEFAULT 0, " +
-            COLUMN_NO_TABLE_PREFIXED.COLUMN_PRODUCT + " TEXT NOT NULL, " +
-            COLUMN_NO_TABLE_PREFIXED.COLUMN_LIST + " TEXT NOT NULL, " +
-            COLUMN_NO_TABLE_PREFIXED.COLUMN_STRUCK + " INTEGER NOT NULL DEFAULT 0, " +
-            "FOREIGN KEY (" + COLUMN_NO_TABLE_PREFIXED.COLUMN_PRODUCT + ") REFERENCES " + Product.TABLE_NAME + " (" +
+            COLUMN.ID + " TEXT PRIMARY KEY NOT NULL, " +
+            COLUMN.AMOUNT + " REAL NOT NULL DEFAULT 1, " +
+            COLUMN.PRIORITY + " INTEGER NOT NULL DEFAULT 0, " +
+            COLUMN.PRODUCT + " TEXT NOT NULL, " +
+            COLUMN.LIST + " TEXT NOT NULL, " +
+            COLUMN.STRUCK + " INTEGER NOT NULL DEFAULT 0, " +
+            "FOREIGN KEY (" + COLUMN.PRODUCT + ") REFERENCES " + Product.TABLE_NAME + " (" +
                 Product.COLUMN.ID + ") ON UPDATE CASCADE ON DELETE CASCADE, " +
             "FOREIGN KEY (list) REFERENCES list (_id) ON UPDATE CASCADE ON DELETE CASCADE)";
 
@@ -61,6 +61,7 @@ public class ListEntry extends SugarRecord<ListEntry> {
     public final static String ATTR_STRUCK   = StringUtil.toSQLName("mStruck");
     public final static String ATTR_PRIORITY = StringUtil.toSQLName("mPriority");
 
+    public String       mUUID;
     public ShoppingList mList;
     public Product      mProduct;
     /** The amount of product that's listed */

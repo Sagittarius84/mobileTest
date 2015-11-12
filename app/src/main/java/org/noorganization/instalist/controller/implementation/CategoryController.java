@@ -50,7 +50,7 @@ public class CategoryController implements ICategoryController {
             return null;
         }
 
-        Category rtn = new Category(UUID.fromString(newlyCreatedCat.getLastPathSegment()), _name);
+        Category rtn = new Category(newlyCreatedCat.getLastPathSegment(), _name);
 
         mBus.post(new CategoryChangedMessage(Change.CREATED, rtn));
 
@@ -58,11 +58,13 @@ public class CategoryController implements ICategoryController {
     }
 
     @Override
-    public Category getCategoryByUUID(@NonNull UUID _uuid) {
+    public Category getCategoryByID(@NonNull String _uuid) {
         Cursor resultCursor = mContext.getContentResolver().query(
-                Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI, "category/"+_uuid.toString()),
+                Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI, "category"),
                 new String[]{ Category.COLUMN.NAME},
-                null, null, null);
+                Category.COLUMN.ID + " = ?",
+                new String[]{ _uuid },
+                null);
         if (resultCursor == null) {
             Log.e(getClass().getCanonicalName(), "Query result was null. Returning no result.");
             return null;
@@ -87,7 +89,7 @@ public class CategoryController implements ICategoryController {
             return null;
         }
 
-        Category rtn = getCategoryByUUID(_toRename.mUUID);
+        Category rtn = getCategoryByID(_toRename.mUUID);
         if (rtn == null) {
             return null;
         }
@@ -114,7 +116,7 @@ public class CategoryController implements ICategoryController {
             return;
         }
 
-        if (getCategoryByUUID(_toRemove.mUUID) != null) {
+        if (getCategoryByID(_toRemove.mUUID) != null) {
             // TODO Unlink or delete List previously.
 
             if (mContext.getContentResolver().delete(
@@ -129,7 +131,7 @@ public class CategoryController implements ICategoryController {
         }
     }
 
-    private boolean nameUsed(String _search, UUID _ignoreId) {
+    private boolean nameUsed(String _search, String _ignoreId) {
         Cursor catsToCheck;
         if (_ignoreId != null) {
             catsToCheck = mContext.getContentResolver().query(
@@ -138,7 +140,7 @@ public class CategoryController implements ICategoryController {
                     Category.COLUMN.ID + " != ? AND " +
                             Category.COLUMN.NAME + " = ?",
                     new String[]{
-                            _ignoreId.toString(),
+                            _ignoreId,
                             _search
                     },
                     null);

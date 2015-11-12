@@ -1,5 +1,7 @@
 package org.noorganization.instalist.controller;
 
+import android.support.annotation.NonNull;
+
 import org.noorganization.instalist.model.Unit;
 
 /**
@@ -19,6 +21,13 @@ public interface IUnitController {
      * exists.
      */
     Unit createUnit(String _name);
+
+    /**
+     * Searches a unit by UUID.
+     * @param _uuid
+     * @return
+     */
+    Unit getUnitByID(@NonNull String _uuid);
 
     /**
      * Rename the Unit, if possible.

@@ -132,7 +132,10 @@ public class ShoppingList {
 
     @Override
     public int hashCode() {
-        return (int) mUUID.getLeastSignificantBits();
+        if (mUUID == null) {
+            return 0;
+        }
+        return (int) UUID.fromString(mUUID).getLeastSignificantBits();
     }
 
     public Uri toUri(Uri _baseUri) {
@@ -141,7 +144,6 @@ public class ShoppingList {
         }
 
         return Uri.withAppendedPath(_baseUri, "category/" +
-                (mCategory == null ? "-" : mCategory.mUUID.toString()) + "/list/" +
-                mUUID.toString());
+                (mCategory == null ? "-" : mCategory.mUUID) + "/list/" + mUUID);
     }
 }

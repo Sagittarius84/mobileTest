@@ -1,10 +1,18 @@
 package org.noorganization.instalist.controller.implementation;
 
+import android.content.ContentResolver;
+import android.content.Context;
+import android.database.Cursor;
+import android.net.Uri;
+import android.support.annotation.NonNull;
+import android.util.Log;
+
 import com.orm.SugarRecord;
 import com.orm.query.Condition;
 import com.orm.query.Select;
 
 import org.noorganization.instalist.controller.IProductController;
+import org.noorganization.instalist.controller.IUnitController;
 import org.noorganization.instalist.controller.event.Change;
 import org.noorganization.instalist.controller.event.ListItemChangedMessage;
 import org.noorganization.instalist.controller.event.ProductChangedMessage;
@@ -15,6 +23,7 @@ import org.noorganization.instalist.model.Product;
 import org.noorganization.instalist.model.Tag;
 import org.noorganization.instalist.model.TaggedProduct;
 import org.noorganization.instalist.model.Unit;
+import org.noorganization.instalist.provider.InstalistProvider;
 
 import java.util.List;
 
@@ -25,11 +34,21 @@ public class ProductController implements IProductController {
 
     private static ProductController mInstance;
 
-    private EventBus mBus;
+    private EventBus        mBus;
+    private Context         mContext;
+    private ContentResolver mResolver;
+    private IUnitController mUnitController;
 
-    static ProductController getInstance() {
+    private ProductController(Context _context) {
+        mBus = EventBus.getDefault();
+        mContext = _context;
+        mResolver = mContext.getContentResolver();
+        mUnitController = ControllerFactory.getUnitController();
+    }
+
+    static ProductController getInstance(Context _context) {
         if (mInstance == null) {
-            mInstance = new ProductController();
+            mInstance = new ProductController(_context);
         }
         return mInstance;
     }
@@ -57,6 +76,36 @@ public class ProductController implements IProductController {
 
         mBus.post(new ProductChangedMessage(Change.CREATED, rtn));
 
+        return rtn;
+    }
+
+    @Override
+    public Product getProductById(@NonNull String _uuid) {
+        Cursor productCursor = mResolver.query(
+                Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI, "product"),
+                Product.COLUMN.ALL_COLUMNS,
+                Product.COLUMN.ID + " = ?",
+                new String[]{ _uuid },
+                null);
+        if (productCursor == null) {
+            Log.e(getClass().getCanonicalName(), "Searching for Product by UUID failed with null " +
+                    "instead of Cursor. Returning no Product.");
+            return null;
+        } else if (productCursor.getCount() == 0) {
+            productCursor.close();
+            return null;
+        }
+        productCursor.moveToFirst();
+        Product rtn = new Product();
+        rtn.id = _uuid;
+        rtn.mDefaultAmount = productCursor.getFloat(productCursor.getColumnIndex(
+                Product.COLUMN.DEFAULT_AMOUNT));
+        rtn.mName = productCursor.getString(productCursor.getColumnIndex(Product.COLUMN.NAME));
+        rtn.mStepAmount = productCursor.getFloat(productCursor.getColumnIndex(
+                Product.COLUMN.STEP_AMOUNT));
+        rtn.mUnit = mUnitController.getUnitByID(productCursor.getString(
+                productCursor.getColumnIndex(Product.COLUMN.UNIT)));
+        productCursor.close();
         return rtn;
     }
 
@@ -181,9 +230,5 @@ public class ProductController implements IProductController {
             }
             mBus.post(new ProductChangedMessage(Change.CHANGED, foundProduct));
         }
-    }
-
-    private ProductController() {
-        mBus = EventBus.getDefault();
     }
 }

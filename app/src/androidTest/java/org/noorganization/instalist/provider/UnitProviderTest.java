@@ -54,8 +54,8 @@ public class UnitProviderTest extends AndroidTestCase {
         assertNotNull(productCursor);
         assertEquals(1, productCursor.getCount());
         productCursor.moveToFirst();
-        assertEquals("TestUnit1", productCursor.getString(productCursor.getColumnIndex(Unit.COLUMN_NO_TABLE_PREFIXED.COLUMN_NAME)));
-        assertEquals(uuid, productCursor.getString(productCursor.getColumnIndex(Unit.COLUMN_NO_TABLE_PREFIXED.COLUMN_ID)));
+        assertEquals("TestUnit1", productCursor.getString(productCursor.getColumnIndex(Unit.COLUMN.NAME)));
+        assertEquals(uuid, productCursor.getString(productCursor.getColumnIndex(Unit.COLUMN.ID)));
 
         String uuid2 = UUID.randomUUID().toString();
         mDatabase.execSQL("INSERT INTO " + Unit.TABLE_NAME + " VALUES (?,?)", new String[]{
@@ -63,15 +63,15 @@ public class UnitProviderTest extends AndroidTestCase {
                 "TestUnit2"
         });
 
-        productCursor = mUnitProvider.query(multipleUnitsUri, null, null, null, Unit.COLUMN_NO_TABLE_PREFIXED.COLUMN_NAME + " ASC");
+        productCursor = mUnitProvider.query(multipleUnitsUri, null, null, null, Unit.COLUMN.NAME + " ASC");
         assertNotNull(productCursor);
         assertEquals(2, productCursor.getCount());
         productCursor.moveToFirst();
-        assertEquals("TestUnit1", productCursor.getString(productCursor.getColumnIndex(Unit.COLUMN_NO_TABLE_PREFIXED.COLUMN_NAME)));
-        assertEquals(uuid, productCursor.getString(productCursor.getColumnIndex(Unit.COLUMN_NO_TABLE_PREFIXED.COLUMN_ID)));
+        assertEquals("TestUnit1", productCursor.getString(productCursor.getColumnIndex(Unit.COLUMN.NAME)));
+        assertEquals(uuid, productCursor.getString(productCursor.getColumnIndex(Unit.COLUMN.ID)));
         productCursor.moveToNext();
-        assertEquals("TestUnit2", productCursor.getString(productCursor.getColumnIndex(Unit.COLUMN_NO_TABLE_PREFIXED.COLUMN_NAME)));
-        assertEquals(uuid2, productCursor.getString(productCursor.getColumnIndex(Unit.COLUMN_NO_TABLE_PREFIXED.COLUMN_ID)));
+        assertEquals("TestUnit2", productCursor.getString(productCursor.getColumnIndex(Unit.COLUMN.NAME)));
+        assertEquals(uuid2, productCursor.getString(productCursor.getColumnIndex(Unit.COLUMN.ID)));
         resetDb();
     }
 
@@ -93,8 +93,8 @@ public class UnitProviderTest extends AndroidTestCase {
         assertNotNull(productCursor);
         assertEquals(1, productCursor.getCount());
         productCursor.moveToFirst();
-        assertEquals("TestUnit1", productCursor.getString(productCursor.getColumnIndex(Unit.COLUMN_NO_TABLE_PREFIXED.COLUMN_NAME)));
-        assertEquals(uuid, productCursor.getString(productCursor.getColumnIndex(Unit.COLUMN_NO_TABLE_PREFIXED.COLUMN_ID)));
+        assertEquals("TestUnit1", productCursor.getString(productCursor.getColumnIndex(Unit.COLUMN.NAME)));
+        assertEquals(uuid, productCursor.getString(productCursor.getColumnIndex(Unit.COLUMN.ID)));
 
         String uuid2 = UUID.randomUUID().toString();
         mDatabase.execSQL("INSERT INTO " + Unit.TABLE_NAME + " VALUES (?,?)", new String[]{
@@ -107,8 +107,8 @@ public class UnitProviderTest extends AndroidTestCase {
         assertNotNull(productCursor);
         assertEquals(1, productCursor.getCount());
         productCursor.moveToFirst();
-        assertEquals("TestUnit2", productCursor.getString(productCursor.getColumnIndex(Unit.COLUMN_NO_TABLE_PREFIXED.COLUMN_NAME)));
-        assertEquals(uuid2, productCursor.getString(productCursor.getColumnIndex(Unit.COLUMN_NO_TABLE_PREFIXED.COLUMN_ID)));
+        assertEquals("TestUnit2", productCursor.getString(productCursor.getColumnIndex(Unit.COLUMN.NAME)));
+        assertEquals(uuid2, productCursor.getString(productCursor.getColumnIndex(Unit.COLUMN.ID)));
         resetDb();
     }
 
@@ -126,20 +126,20 @@ public class UnitProviderTest extends AndroidTestCase {
         ContentValues contentValues = new ContentValues();
         String uuid = UUID.randomUUID().toString();
 
-        contentValues.put(Unit.COLUMN_NO_TABLE_PREFIXED.COLUMN_ID, uuid);
-        contentValues.put(Unit.COLUMN_NO_TABLE_PREFIXED.COLUMN_NAME, "TestUnit");
+        contentValues.put(Unit.COLUMN.ID, uuid);
+        contentValues.put(Unit.COLUMN.NAME, "TestUnit");
 
         Uri uri = mUnitProvider.insert(Uri.parse(UnitProvider.SINGLE_UNIT_CONTENT_URI.replace("*", uuid)), contentValues);
         String pseudoUri = UnitProvider.SINGLE_UNIT_CONTENT_URI.replace("*", uuid);
         assertNotNull(uri);
         assertEquals(pseudoUri, uri.toString());
 
-        Cursor cursor = mUnitProvider.query(uri, Unit.COLUMN_TABLE_PREFIXED.ALL_COLUMNS, null, null, null);
+        Cursor cursor = mUnitProvider.query(uri, Unit.PREFIXED_COLUMN.ALL_COLUMNS, null, null, null);
         assertNotNull(cursor);
         assertEquals(1, cursor.getCount());
         cursor.moveToFirst();
-        assertEquals(uuid, cursor.getString(cursor.getColumnIndex(Unit.COLUMN_NO_TABLE_PREFIXED.COLUMN_ID)));
-        assertEquals("TestUnit", cursor.getString(cursor.getColumnIndex(Unit.COLUMN_NO_TABLE_PREFIXED.COLUMN_NAME)));
+        assertEquals(uuid, cursor.getString(cursor.getColumnIndex(Unit.COLUMN.ID)));
+        assertEquals("TestUnit", cursor.getString(cursor.getColumnIndex(Unit.COLUMN.NAME)));
         resetDb();
     }
 
@@ -149,15 +149,15 @@ public class UnitProviderTest extends AndroidTestCase {
         ContentValues contentValues = new ContentValues();
         String uuid = UUID.randomUUID().toString();
 
-        contentValues.put(Unit.COLUMN_NO_TABLE_PREFIXED.COLUMN_ID, uuid);
-        contentValues.put(Unit.COLUMN_NO_TABLE_PREFIXED.COLUMN_NAME, "TestUnit");
+        contentValues.put(Unit.COLUMN.ID, uuid);
+        contentValues.put(Unit.COLUMN.NAME, "TestUnit");
 
 
         Uri uri = mUnitProvider.insert(Uri.parse(UnitProvider.SINGLE_UNIT_CONTENT_URI.replace("*", uuid)), contentValues);
 
         int affectedRows = mUnitProvider.delete(uri, null, null);
         assertEquals(1, affectedRows);
-        Cursor cursor = mUnitProvider.query(uri, Unit.COLUMN_TABLE_PREFIXED.ALL_COLUMNS, null, null, null);
+        Cursor cursor = mUnitProvider.query(uri, Unit.PREFIXED_COLUMN.ALL_COLUMNS, null, null, null);
         assertNotNull(cursor);
         assertEquals(0, cursor.getCount());
     }
@@ -166,34 +166,34 @@ public class UnitProviderTest extends AndroidTestCase {
         ContentValues contentValues = new ContentValues();
         String uuid = UUID.randomUUID().toString();
 
-        contentValues.put(Unit.COLUMN_NO_TABLE_PREFIXED.COLUMN_ID, uuid);
-        contentValues.put(Unit.COLUMN_NO_TABLE_PREFIXED.COLUMN_NAME, "TestUnit1");
+        contentValues.put(Unit.COLUMN.ID, uuid);
+        contentValues.put(Unit.COLUMN.NAME, "TestUnit1");
 
         mUnitProvider.insert(Uri.parse(UnitProvider.SINGLE_UNIT_CONTENT_URI.replace("*", uuid)), contentValues);
 
         String uuid2 = UUID.randomUUID().toString();
 
-        contentValues.put(Unit.COLUMN_NO_TABLE_PREFIXED.COLUMN_ID, uuid2);
-        contentValues.put(Unit.COLUMN_NO_TABLE_PREFIXED.COLUMN_NAME, "TestUnit2");
+        contentValues.put(Unit.COLUMN.ID, uuid2);
+        contentValues.put(Unit.COLUMN.NAME, "TestUnit2");
 
         mUnitProvider.insert(Uri.parse(UnitProvider.SINGLE_UNIT_CONTENT_URI.replace("*", uuid2)), contentValues);
 
-        int affectedRows = mUnitProvider.delete(Uri.parse(UnitProvider.MULTIPLE_UNIT_CONTENT_URI), Unit.COLUMN_NO_TABLE_PREFIXED.COLUMN_NAME + " LIKE ?", new String[]{"%TestUnit%"});
+        int affectedRows = mUnitProvider.delete(Uri.parse(UnitProvider.MULTIPLE_UNIT_CONTENT_URI), Unit.COLUMN.NAME + " LIKE ?", new String[]{"%TestUnit%"});
 
         assertEquals(2, affectedRows);
 
 
-        contentValues.put(Unit.COLUMN_NO_TABLE_PREFIXED.COLUMN_ID, uuid);
-        contentValues.put(Unit.COLUMN_NO_TABLE_PREFIXED.COLUMN_NAME, "TestUnit1");
+        contentValues.put(Unit.COLUMN.ID, uuid);
+        contentValues.put(Unit.COLUMN.NAME, "TestUnit1");
 
         mUnitProvider.insert(Uri.parse(UnitProvider.SINGLE_UNIT_CONTENT_URI.replace("*", uuid)), contentValues);
 
-        contentValues.put(Unit.COLUMN_NO_TABLE_PREFIXED.COLUMN_ID, uuid2);
-        contentValues.put(Unit.COLUMN_NO_TABLE_PREFIXED.COLUMN_NAME, "TestUnit2");
+        contentValues.put(Unit.COLUMN.ID, uuid2);
+        contentValues.put(Unit.COLUMN.NAME, "TestUnit2");
 
         mUnitProvider.insert(Uri.parse(UnitProvider.SINGLE_UNIT_CONTENT_URI.replace("*", uuid2)), contentValues);
 
-        affectedRows = mUnitProvider.delete(Uri.parse(UnitProvider.MULTIPLE_UNIT_CONTENT_URI), Unit.COLUMN_NO_TABLE_PREFIXED.COLUMN_NAME + " LIKE ?", new String[]{"%TestUnit1%"});
+        affectedRows = mUnitProvider.delete(Uri.parse(UnitProvider.MULTIPLE_UNIT_CONTENT_URI), Unit.COLUMN.NAME + " LIKE ?", new String[]{"%TestUnit1%"});
 
         assertEquals(1, affectedRows);
     }
@@ -202,21 +202,21 @@ public class UnitProviderTest extends AndroidTestCase {
         ContentValues contentValues = new ContentValues();
         String uuid = UUID.randomUUID().toString();
 
-        contentValues.put(Unit.COLUMN_NO_TABLE_PREFIXED.COLUMN_ID, uuid);
-        contentValues.put(Unit.COLUMN_NO_TABLE_PREFIXED.COLUMN_NAME, "TestUnit1");
+        contentValues.put(Unit.COLUMN.ID, uuid);
+        contentValues.put(Unit.COLUMN.NAME, "TestUnit1");
 
         Uri uri = mUnitProvider.insert(Uri.parse(UnitProvider.SINGLE_UNIT_CONTENT_URI.replace("*", uuid)), contentValues);
 
-        contentValues.put(Unit.COLUMN_NO_TABLE_PREFIXED.COLUMN_NAME, "TestUnit2");
+        contentValues.put(Unit.COLUMN.NAME, "TestUnit2");
         int affectedRows = mUnitProvider.update(uri, contentValues, null, null);
 
         assertEquals(1, affectedRows);
 
-        Cursor cursor = mUnitProvider.query(uri, Unit.COLUMN_TABLE_PREFIXED.ALL_COLUMNS, null, null, null);
+        Cursor cursor = mUnitProvider.query(uri, Unit.PREFIXED_COLUMN.ALL_COLUMNS, null, null, null);
         assertEquals(1, cursor.getCount());
         cursor.moveToFirst();
 
-        assertEquals("TestUnit2", cursor.getString(cursor.getColumnIndex(Unit.COLUMN_NO_TABLE_PREFIXED.COLUMN_NAME)));
+        assertEquals("TestUnit2", cursor.getString(cursor.getColumnIndex(Unit.COLUMN.NAME)));
     }
 
     public void testUpdateMultipleUnits() {

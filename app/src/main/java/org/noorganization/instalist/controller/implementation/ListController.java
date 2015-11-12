@@ -1,14 +1,20 @@
 package org.noorganization.instalist.controller.implementation;
 
+import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
+import android.support.annotation.NonNull;
+import android.util.Log;
 
 import com.orm.SugarRecord;
 import com.orm.query.Condition;
 import com.orm.query.Select;
 
+import org.noorganization.instalist.controller.ICategoryController;
 import org.noorganization.instalist.controller.IListController;
+import org.noorganization.instalist.controller.IProductController;
 import org.noorganization.instalist.controller.event.Change;
 import org.noorganization.instalist.controller.event.ListChangedMessage;
 import org.noorganization.instalist.controller.event.ListItemChangedMessage;
@@ -31,12 +37,18 @@ public class ListController implements IListController {
 
     private static ListController mInstance;
 
-    private EventBus mBus;
-    private Context  mContext;
+    private EventBus            mBus;
+    private Context             mContext;
+    private IProductController  mProductController;
+    private ICategoryController mCategoryController;
+    private ContentResolver     mResolver;
 
     private ListController(Context _context) {
         mBus = EventBus.getDefault();
         mContext = _context;
+        mProductController = ControllerFactory.getProductController();
+        mCategoryController = ControllerFactory.getCategoryController();
+        mResolver = mContext.getContentResolver();
     }
 
     static ListController getInstance(Context _context) {
@@ -53,10 +65,9 @@ public class ListController implements IListController {
             return null;
         }
 
-        //Cursor listCheck = mContext.getContentResolver().query()
-        Cursor listCheck = mContext.getContentResolver().query(
+        Cursor listCheck = mResolver.query(
                 _list.toUri(InstalistProvider.BASE_CONTENT_URI),
-                new String[]{ ShoppingList.COLUMN.ID },
+                new String[]{ShoppingList.COLUMN.ID},
                 null, null, null);
         if (listCheck == null) {
             return null;
@@ -65,7 +76,7 @@ public class ListController implements IListController {
             return null;
         }
         listCheck.close();
-        Cursor productCheck = mContext.getContentResolver().query(
+        Cursor productCheck = mResolver.query(
                 _product.toUri(InstalistProvider.BASE_CONTENT_URI),
                 new String[]{Product.COLUMN.ID},
                 null, null, null);
@@ -78,11 +89,11 @@ public class ListController implements IListController {
         productCheck.close();
 
         Uri listUri = _list.toUri(InstalistProvider.BASE_CONTENT_URI);
-        Cursor entryCheck = mContext.getContentResolver().query(
+        Cursor entryCheck = mResolver.query(
                 Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI, listUri.getPath() + "/entry"),
-                new String[] { ListEntry.COLUMN_NO_TABLE_PREFIXED.COLUMN_ID },
-                ListEntry.COLUMN_TABLE_PREFIXED.COLUMN_PRODUCT + " = ?",
-                new String[] { _product.id },
+                new String[]{ListEntry.COLUMN.ID},
+                ListEntry.PREFIXED_COLUMN.PRODUCT + " = ?",
+                new String[]{_product.id},
                 null);
         ListEntry item = Select.from(ListEntry.class).where(
                 Condition.prop("m_list").eq(savedList.getId()),
@@ -136,44 +147,114 @@ public class ListController implements IListController {
     }
 
     @Override
+    public ListEntry getEntryById(@NonNull String _UUID) {
+        Cursor entryCursor = mResolver.query(
+                Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI, "entry"),
+                ListEntry.COLUMN.ALL_COLUMNS,
+                ListEntry.COLUMN.ID + " = ?",
+                new String[]{_UUID},
+                null);
+        if (entryCursor == null) {
+            Log.e(getClass().getCanonicalName(), "Searching ListEntry by UUID resulted null. " +
+                    "Returning no ListEntry.");
+            return null;
+        }
+        if (entryCursor.getCount() == 0) {
+            entryCursor.close();
+            return null;
+        }
+        entryCursor.moveToFirst();
+        ListEntry rtn = new ListEntry();
+        rtn.mUUID = entryCursor.getString(entryCursor.getColumnIndex(ListEntry.COLUMN.ID));
+        rtn.mList = getListById(entryCursor.getString(entryCursor.getColumnIndex(
+                ListEntry.COLUMN.LIST)));
+        rtn.mProduct = mProductController.getProductById(entryCursor.getString(
+                entryCursor.getColumnIndex(ListEntry.COLUMN.PRODUCT)));
+        rtn.mAmount = entryCursor.getFloat(entryCursor.getColumnIndex(ListEntry.COLUMN.AMOUNT));
+        rtn.mPriority = entryCursor.getInt(entryCursor.getColumnIndex(ListEntry.COLUMN.PRIORITY));
+        rtn.mStruck = (entryCursor.getInt(entryCursor.getColumnIndex(ListEntry.COLUMN.STRUCK)) != 0);
+        return rtn;
+    }
+
+    @Override
+    public ShoppingList getListById(@NonNull String _UUID) {
+        Cursor entryCursor = mContext.getContentResolver().query(
+                Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI, "list"),
+                ShoppingList.COLUMN.ALL_COLUMNS,
+                ShoppingList.COLUMN.ID + " = ?",
+                new String[] { _UUID },
+                null);
+        if (entryCursor == null) {
+            Log.e(getClass().getCanonicalName(), "Searching ListEntry by UUID resulted null. " +
+                    "Returning no ListEntry.");
+            return null;
+        }
+        if (entryCursor.getCount() == 0) {
+            entryCursor.close();
+            return null;
+        }
+        entryCursor.moveToFirst();
+        ShoppingList rtn = new ShoppingList();
+        rtn.mUUID = entryCursor.getString(entryCursor.getColumnIndex(ShoppingList.COLUMN.ID));
+        rtn.mName = entryCursor.getString(entryCursor.getColumnIndex(ShoppingList.COLUMN.NAME));
+        rtn.mCategory = mCategoryController.getCategoryByID(entryCursor.getString(
+                entryCursor.getColumnIndex(ShoppingList.COLUMN.CATEGORY)));
+        return rtn;
+    }
+
+    @Override
     public void strikeAllItems(ShoppingList _list) {
-        if (_list == null) {
+        if (_list == null || _list.mUUID == null) {
             return;
         }
-        ShoppingList toChange = SugarRecord.findById(ShoppingList.class, _list.getId());
-        if (toChange == null) {
-            return;
-        }
-
-        List<ListEntry> entries = toChange.getEntries();
-        for (ListEntry entry : entries) {
-            entry.mStruck = true;
-        }
-        SugarRecord.saveInTx(entries);
-
-        for (ListEntry entry : entries) {
-            mBus.post(new ListItemChangedMessage(Change.CHANGED, entry));
+        Cursor itemsToStrike = mResolver.query(
+                Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI,
+                        _list.toUri(InstalistProvider.BASE_CONTENT_URI).getPath() + "/entry"),
+                new String[]{ ListEntry.COLUMN.ID },
+                null, null, null);
+        if (itemsToStrike != null) {
+            itemsToStrike.moveToFirst();
+            ContentValues strikeCV = new ContentValues(1);
+            strikeCV.put(ListEntry.COLUMN.STRUCK, true);
+            String prefixPath = _list.toUri(InstalistProvider.BASE_CONTENT_URI).getPath() + "/entry/";
+            while (!itemsToStrike.isAfterLast()) {
+                String entryUUID = itemsToStrike.getString(itemsToStrike.getColumnIndex(
+                        ListEntry.COLUMN.ID));
+                if(mResolver.update(Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI,
+                        prefixPath + entryUUID), strikeCV, null, null) == 1) {
+                    mBus.post(new ListItemChangedMessage(Change.CHANGED, getEntryById(entryUUID)));
+                }
+                itemsToStrike.moveToNext();
+            }
+            itemsToStrike.close();
         }
     }
 
     @Override
     public void unstrikeAllItems(ShoppingList _list) {
-        if (_list == null) {
+        if (_list == null || _list.mUUID == null) {
             return;
         }
-        ShoppingList toChange = SugarRecord.findById(ShoppingList.class, _list.getId());
-        if (toChange == null) {
-            return;
-        }
-
-        List<ListEntry> entries = toChange.getEntries();
-        for (ListEntry entry : entries) {
-            entry.mStruck = false;
-        }
-        SugarRecord.saveInTx(entries);
-
-        for (ListEntry entry : entries) {
-            mBus.post(new ListItemChangedMessage(Change.CHANGED, entry));
+        Cursor itemsToStrike = mResolver.query(
+                Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI,
+                        _list.toUri(InstalistProvider.BASE_CONTENT_URI).getPath() + "/entry"),
+                new String[]{ListEntry.COLUMN.ID},
+                null, null, null);
+        if (itemsToStrike != null) {
+            itemsToStrike.moveToFirst();
+            ContentValues strikeCV = new ContentValues(1);
+            strikeCV.put(ListEntry.COLUMN.STRUCK, false);
+            String prefixPath = _list.toUri(InstalistProvider.BASE_CONTENT_URI).getPath() + "/entry/";
+            while (!itemsToStrike.isAfterLast()) {
+                String entryUUID = itemsToStrike.getString(itemsToStrike.getColumnIndex(
+                        ListEntry.COLUMN.ID));
+                if(mResolver.update(Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI,
+                        prefixPath + entryUUID), strikeCV, null, null) == 1) {
+                    mBus.post(new ListItemChangedMessage(Change.CHANGED, getEntryById(entryUUID)));
+                }
+                itemsToStrike.moveToNext();
+            }
+            itemsToStrike.close();
         }
     }
 

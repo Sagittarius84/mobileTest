@@ -1,5 +1,7 @@
 package org.noorganization.instalist.controller;
 
+import android.support.annotation.NonNull;
+
 import org.noorganization.instalist.model.Product;
 import org.noorganization.instalist.model.Tag;
 import org.noorganization.instalist.model.Unit;
@@ -24,6 +26,13 @@ public interface IProductController {
      * @return Either the created product, if something did not work.
      */
     Product createProduct(String _name, Unit _unit, float _defaultAmount, float _stepAmount);
+
+    /**
+     * Searches a product by UUID.
+     * @param _uuid The UUID to search for. Not Null.
+     * @return Either the found product or null if not found or something went wrong.
+     */
+    Product getProductById(@NonNull String _uuid);
 
     /**
      * Changes a product.

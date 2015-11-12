@@ -36,11 +36,11 @@ public class Product extends SugarRecord<Product> {
      * Column names that are prefixed with the table name. So like this TableName.ColumnName
      */
     public final static class PREFIXED_COLUMN {
-        public final static String ID = TABLE_NAME.concat("." + COLUMN.ID);
-        public final static String NAME = TABLE_NAME.concat("." + COLUMN.NAME);
-        public final static String UNIT = TABLE_NAME.concat("." + COLUMN.UNIT);
-        public final static String DEFAULT_AMOUNT = TABLE_NAME.concat("." + COLUMN.DEFAULT_AMOUNT);
-        public final static String STEP_AMOUNT = TABLE_NAME.concat("." + COLUMN.STEP_AMOUNT);
+        public final static String ID = TABLE_NAME.concat("." + Product.COLUMN.ID);
+        public final static String NAME = TABLE_NAME.concat("." + Product.COLUMN.NAME);
+        public final static String UNIT = TABLE_NAME.concat("." + Product.COLUMN.UNIT);
+        public final static String DEFAULT_AMOUNT = TABLE_NAME.concat("." + Product.COLUMN.DEFAULT_AMOUNT);
+        public final static String STEP_AMOUNT = TABLE_NAME.concat("." + Product.COLUMN.STEP_AMOUNT);
 
         public final static String[] ALL_COLUMNS = new String[]{
                 ID,
@@ -52,12 +52,12 @@ public class Product extends SugarRecord<Product> {
     }
 
     public final static String DATABASE_CREATE = "CREATE TABLE " + TABLE_NAME
-            + "(" + COLUMN.ID + " TEXT PRIMARY KEY NOT NULL,"
-            + COLUMN.NAME + " TEXT NOT NULL,"
-            + COLUMN.UNIT + " TEXT,"
-            + COLUMN.DEFAULT_AMOUNT + " REAL,"
-            + COLUMN.STEP_AMOUNT + " REAL,"
-            + "FOREIGN KEY ( " + COLUMN.UNIT + ") REFERENCES " + Unit.TABLE_NAME + "(" + Unit.COLUMN_NO_TABLE_PREFIXED.COLUMN_ID + ")"
+            + "(" + Product.COLUMN.ID + " TEXT PRIMARY KEY NOT NULL,"
+            + Product.COLUMN.NAME + " TEXT NOT NULL,"
+            + Product.COLUMN.UNIT + " TEXT,"
+            + Product.COLUMN.DEFAULT_AMOUNT + " REAL,"
+            + Product.COLUMN.STEP_AMOUNT + " REAL,"
+            + "FOREIGN KEY ( " + Product.COLUMN.UNIT + ") REFERENCES " + Unit.TABLE_NAME + "(" + Unit.COLUMN.ID + ")"
             + "ON DELETE SET NULL ON UPDATE NO ACTION"
             + ");";
 

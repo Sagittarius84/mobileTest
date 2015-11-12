@@ -1,5 +1,7 @@
 package org.noorganization.instalist.controller;
 
+import android.support.annotation.NonNull;
+
 import org.noorganization.instalist.model.Category;
 import org.noorganization.instalist.model.ListEntry;
 import org.noorganization.instalist.model.Product;
@@ -50,6 +52,20 @@ public interface IListController {
      */
     ListEntry addOrChangeItem(ShoppingList _list, Product _product, float _amount, int _prio,
                               boolean _addAmount);
+
+    /**
+     * Searches a ListEntry.
+     * @param _UUID The UUID identifying the entry.
+     * @return The found ListEntry or null if something went wrong or not found.
+     */
+    ListEntry getEntryById(@NonNull String _UUID);
+
+    /**
+     * Searches a ShoppingList.
+     * @param _UUID The UUID identifying the list.
+     * @return The found ShoppingList or null if something went wrong or not found.
+     */
+    ShoppingList getListById(@NonNull String _UUID);
 
     /**
      * Strikes all items on a list.

@@ -12,7 +12,9 @@ import android.support.annotation.Nullable;
 
 import org.noorganization.instalist.provider.internal.CategoryProvider;
 import org.noorganization.instalist.provider.internal.IInternalProvider;
+import org.noorganization.instalist.provider.internal.ListEntryProvider;
 import org.noorganization.instalist.provider.internal.ProductProvider;
+import org.noorganization.instalist.provider.internal.ShoppingListProvider;
 import org.noorganization.instalist.provider.internal.TagProvider;
 import org.noorganization.instalist.provider.internal.TaggedProductProvider;
 import org.noorganization.instalist.provider.internal.UnitProvider;
@@ -33,55 +35,11 @@ public class InstalistProvider extends ContentProvider {
      **/
     public final static Uri BASE_CONTENT_URI = Uri.parse("content://" + AUTHORITY);
 
-    // ACM_XXX = Authority Code Multiple Lines; ACS_XXX = Authority Code Single Line
-    // as described in http://developer.android.com/guide/topics/providers/content-provider-creating.html
-//    private static final int ACM_CATEGORY = 1;
-//    private static final int ACS_CATEGORY = 2;
-//    private static final int ACM_LIST = 3;
-//    private static final int ACS_LIST = 4;
-//    private static final int ACM_LISTENTRY = 5;
-//    private static final int ACS_LISTENTRY = 6;
-//    private static final int ACM_PRODUCT = 7;
-//    private static final int ACS_PRODUCT = 8;
-//    private static final int ACM_TAG = 9;
-//    private static final int ACS_TAG = 10;
-//    private static final int ACM_TAGGEDPRODUCT = 11;
-//    private static final int ACS_TAGGEDPRODUCT = 12;
-//    private static final int ACM_UNIT = 13;
-//    private static final int ACS_UNIT = 14;
-//    private static final int ACM_RECIPE = 15;
-//    private static final int ACS_RECIPE = 16;
-//    private static final int ACM_INGREDIENT = 17;
-//    private static final int ACS_INGREDIENT = 18;
-
-//    private UriMatcher mMatcher;
-
     private SQLiteDatabase mDatabase;
     private HashMap<String, IInternalProvider> mInternalProviders;
 
     @Override
     public boolean onCreate() {
-
-//        mMatcher = new UriMatcher(UriMatcher.NO_MATCH);
-//        mMatcher.addURI(AUTHORITY, "category", ACM_CATEGORY);
-//        mMatcher.addURI(AUTHORITY, "category/*", ACS_CATEGORY);
-//        mMatcher.addURI(AUTHORITY, "category/*/list", ACM_LIST);
-//        mMatcher.addURI(AUTHORITY, "category/*/list/*", ACS_LIST);
-//        mMatcher.addURI(AUTHORITY, "category/*/list/*/entry", ACM_LISTENTRY);
-//        mMatcher.addURI(AUTHORITY, "category/*/list/*/entry/*", ACM_LISTENTRY);
-//        mMatcher.addURI(AUTHORITY, "product", ACM_PRODUCT);
-//        mMatcher.addURI(AUTHORITY, "product/*", ACS_PRODUCT);
-//        mMatcher.addURI(AUTHORITY, "product/*/tag", ACM_TAGGEDPRODUCT);
-//        mMatcher.addURI(AUTHORITY, "product/*/tag/*", ACS_TAGGEDPRODUCT);
-//        mMatcher.addURI(AUTHORITY, "tag", ACM_TAG);
-//        mMatcher.addURI(AUTHORITY, "tag/*", ACM_TAG);
-//        mMatcher.addURI(AUTHORITY, "tag/*/product", ACM_TAG);
-//        mMatcher.addURI(AUTHORITY, "unit", ACM_UNIT);
-//        mMatcher.addURI(AUTHORITY, "unit/*", ACM_UNIT);
-//        mMatcher.addURI(AUTHORITY, "recipe", ACM_RECIPE);
-//        mMatcher.addURI(AUTHORITY, "recipe/*", ACS_RECIPE);
-//        mMatcher.addURI(AUTHORITY, "recipe/*/ingredient", ACM_INGREDIENT);
-//        mMatcher.addURI(AUTHORITY, "recipe/*/ingredient/*", ACS_INGREDIENT);
 
         // TODO: Use persistent db.
         mDatabase = new DBOpenHelper(getContext(), ":memory:").getWritableDatabase();
@@ -91,19 +49,25 @@ public class InstalistProvider extends ContentProvider {
         IInternalProvider unitProvider = new UnitProvider(getContext());
         IInternalProvider tagProvider = new TagProvider(getContext());
         IInternalProvider taggedProductProvider = new TaggedProductProvider(getContext());
-
+        IInternalProvider shoppingListProvider = new ShoppingListProvider(getContext());
+        IInternalProvider listEntryProvider = new ListEntryProvider(getContext());
 
         categoryProvider.onCreate(mDatabase);
         productProvider.onCreate(mDatabase);
         unitProvider.onCreate(mDatabase);
         tagProvider.onCreate(mDatabase);
+        taggedProductProvider.onCreate(mDatabase);
+        shoppingListProvider.onCreate(mDatabase);
+        listEntryProvider.onCreate(mDatabase);
 
         mInternalProviders = new HashMap<>();
         mInternalProviders.put("category", categoryProvider);
-        mInternalProviders.put("prodcut", productProvider);
+        mInternalProviders.put("product", productProvider);
         mInternalProviders.put("unit", unitProvider);
         mInternalProviders.put("tag", tagProvider);
         mInternalProviders.put("taggedProduct", taggedProductProvider);
+        mInternalProviders.put("list", shoppingListProvider);
+        mInternalProviders.put("entry", listEntryProvider);
         return true;
     }
 

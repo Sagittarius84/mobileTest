@@ -82,7 +82,7 @@ public class UnitProvider implements IInternalProvider {
         switch (mMatcher.match(_uri)) {
 
             case SINGLE_UNIT:
-                String selection = ProviderUtils.prependIdToQuery(Unit.COLUMN_NO_TABLE_PREFIXED.COLUMN_ID, _selection);
+                String selection = ProviderUtils.prependIdToQuery(Unit.COLUMN.ID, _selection);
                 String[] selectionArgs = ProviderUtils.prependSelectionArgs(_selectionArgs, _uri.getLastPathSegment());
                 cursor = mDatabase.query(Unit.TABLE_NAME, _projection, selection, selectionArgs, null, null, _sortOrder);
                 break;
@@ -124,12 +124,12 @@ public class UnitProvider implements IInternalProvider {
                     return null;
                     //throw new SQLiteException("Failed to add a record into " + _uri);
                 }
-                Cursor cursor = mDatabase.query(Unit.TABLE_NAME, new String[]{Unit.COLUMN_NO_TABLE_PREFIXED.COLUMN_ID},
+                Cursor cursor = mDatabase.query(Unit.TABLE_NAME, new String[]{Unit.COLUMN.ID},
                         SQLiteUtils.COLUMN_ROW_ID + "=?", new String[]{String.valueOf(rowId)},
                         null, null, null, null);
                 cursor.moveToFirst();
                 newUri = Uri.parse(SINGLE_UNIT_CONTENT_URI.replace("*",
-                        cursor.getString(cursor.getColumnIndex(Unit.COLUMN_NO_TABLE_PREFIXED.COLUMN_ID))));
+                        cursor.getString(cursor.getColumnIndex(Unit.COLUMN.ID))));
                 cursor.close();
                 break;
             case MULTIPLE_UNITS:
@@ -150,7 +150,7 @@ public class UnitProvider implements IInternalProvider {
 
         switch (mMatcher.match(_uri)) {
             case SINGLE_UNIT:
-                String selection = ProviderUtils.prependIdToQuery(Unit.COLUMN_NO_TABLE_PREFIXED.COLUMN_ID, null);
+                String selection = ProviderUtils.prependIdToQuery(Unit.COLUMN.ID, null);
                 String[] selectionArgs = ProviderUtils.prependSelectionArgs(null, _uri.getLastPathSegment());
                 affectedRows = mDatabase.delete(Unit.TABLE_NAME, selection, selectionArgs);
                 break;
@@ -172,7 +172,7 @@ public class UnitProvider implements IInternalProvider {
         int affectedRows = 0;
         switch (mMatcher.match(_uri)) {
             case SINGLE_UNIT:
-                String selection = ProviderUtils.prependIdToQuery(Unit.COLUMN_NO_TABLE_PREFIXED.COLUMN_ID, null);
+                String selection = ProviderUtils.prependIdToQuery(Unit.COLUMN.ID, null);
                 String[] selectionArgs = ProviderUtils.prependSelectionArgs(null, _uri.getLastPathSegment());
                 affectedRows = mDatabase.update(Unit.TABLE_NAME, _values, selection, selectionArgs);
                 break;

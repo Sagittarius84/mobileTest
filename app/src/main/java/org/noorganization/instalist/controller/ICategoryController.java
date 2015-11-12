@@ -25,7 +25,7 @@ public interface ICategoryController {
      * @param _uuid The categories UUID. Not null.
      * @return Either a found an d parsed Category or null, if not found.
      */
-    Category getCategoryByUUID(@NonNull UUID _uuid);
+    Category getCategoryByID(@NonNull String _uuid);
 
     /**
      * Renames a category.

@@ -1,5 +1,12 @@
 package org.noorganization.instalist.controller.implementation;
 
+import android.content.ContentResolver;
+import android.content.Context;
+import android.database.Cursor;
+import android.net.Uri;
+import android.support.annotation.NonNull;
+import android.util.Log;
+
 import com.orm.SugarRecord;
 import com.orm.query.Condition;
 import com.orm.query.Select;
@@ -10,6 +17,7 @@ import org.noorganization.instalist.controller.event.Change;
 import org.noorganization.instalist.controller.event.UnitChangedMessage;
 import org.noorganization.instalist.model.Product;
 import org.noorganization.instalist.model.Unit;
+import org.noorganization.instalist.provider.InstalistProvider;
 
 import de.greenrobot.event.EventBus;
 
@@ -17,11 +25,19 @@ public class UnitController implements IUnitController {
 
     private static UnitController mInstance;
 
-    private EventBus mBus;
+    private EventBus        mBus;
+    private Context         mContext;
+    private ContentResolver mResolver;
+
+    private UnitController(Context _context) {
+        mBus = EventBus.getDefault();
+        mContext = _context;
+        mResolver = mContext.getContentResolver();
+    }
 
     static UnitController getInstance() {
         if (mInstance == null) {
-            mInstance = new UnitController();
+            mInstance = new UnitController(Context _context);
         }
         return mInstance;
     }
@@ -39,6 +55,30 @@ public class UnitController implements IUnitController {
         mBus.post(new UnitChangedMessage(Change.CREATED, newUnit));
 
         return newUnit;
+    }
+
+    @Override
+    public Unit getUnitByID(@NonNull String _uuid) {
+        Cursor unitCursor = mResolver.query(
+                Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI, "unit"),
+                Unit.COLUMN.ALL_COLUMNS,
+                Unit.COLUMN.ID + " = ?",
+                new String[]{_uuid},
+                null);
+        if (unitCursor == null) {
+            Log.e(getClass().getCanonicalName(), "Searching for Product by UUID failed with null " +
+                    "instead of Cursor. Returning no Product.");
+            return null;
+        } else if (unitCursor.getCount() == 0) {
+            unitCursor.close();
+            return null;
+        }
+        unitCursor.moveToFirst();
+        Unit rtn = new Unit();
+        rtn.mUUID = _uuid;
+        rtn.mName = unitCursor.getString(unitCursor.getColumnIndex(Unit.COLUMN.NAME));
+        unitCursor.close();
+        return rtn;
     }
 
     @Override
@@ -102,9 +142,5 @@ public class UnitController implements IUnitController {
         mBus.post(new UnitChangedMessage(Change.DELETED, _unit));
 
         return true;
-    }
-
-    private UnitController() {
-        mBus = EventBus.getDefault();
     }
 }

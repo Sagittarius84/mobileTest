@@ -114,10 +114,10 @@ public class ICategoryControllerTest extends AndroidTestCase {
     }
 
     public void testGetCategoryById() throws Exception {
-        assertNull(mCategoryController.getCategoryByUUID(null));
-        assertNull(mCategoryController.getCategoryByUUID(UUID.randomUUID()));
+        assertNull(mCategoryController.getCategoryByID(null));
+        assertNull(mCategoryController.getCategoryByID(UUID.randomUUID()));
 
-        assertEquals(mCategoryWork, mCategoryController.getCategoryByUUID(mCategoryWork.mUUID));
+        assertEquals(mCategoryWork, mCategoryController.getCategoryByID(mCategoryWork.mUUID));
     }
 
     public void testRenameCategory() throws Exception {
