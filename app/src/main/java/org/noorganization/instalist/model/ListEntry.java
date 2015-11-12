@@ -42,15 +42,20 @@ public class ListEntry extends SugarRecord<ListEntry> {
         public static final String ALL_COLUMNS[] = {ID, AMOUNT, LIST, PRIORITY, PRODUCT, STRUCK};
     }
 
+    public static final class DEFAULTS {
+        public static final float AMOUNT = 1.0f;
+        public static final int PRIORITY = 0;
+        public static final int STRUCK = 0;
+    }
 
 
     public static final String DB_CREATE = "CREATE TABLE " + TABLE_NAME + " (" +
             COLUMN.ID + " TEXT PRIMARY KEY NOT NULL, " +
-            COLUMN.AMOUNT + " REAL NOT NULL DEFAULT 1, " +
-            COLUMN.PRIORITY + " INTEGER NOT NULL DEFAULT 0, " +
+            COLUMN.AMOUNT + " REAL NOT NULL DEFAULT " + DEFAULTS.AMOUNT + ", " +
+            COLUMN.PRIORITY + " INTEGER NOT NULL DEFAULT " + DEFAULTS.PRIORITY + ", " +
             COLUMN.PRODUCT + " TEXT NOT NULL, " +
             COLUMN.LIST + " TEXT NOT NULL, " +
-            COLUMN.STRUCK + " INTEGER NOT NULL DEFAULT 0, " +
+            COLUMN.STRUCK + " INTEGER NOT NULL DEFAULT " + DEFAULTS.STRUCK + ", " +
             "FOREIGN KEY (" + COLUMN.PRODUCT + ") REFERENCES " + Product.TABLE_NAME + " (" +
                 Product.COLUMN.ID + ") ON UPDATE CASCADE ON DELETE CASCADE, " +
             "FOREIGN KEY (list) REFERENCES list (_id) ON UPDATE CASCADE ON DELETE CASCADE)";

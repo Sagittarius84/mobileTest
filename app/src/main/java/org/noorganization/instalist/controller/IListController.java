@@ -61,6 +61,14 @@ public interface IListController {
     ListEntry getEntryById(@NonNull String _UUID);
 
     /**
+     * Searchess a ListEntry.
+     * @param _list The list as parameter for the search. Not null.
+     * @param _product The product as parameter for the search. Not null.
+     * @return Either the found entry or null if nothing found or something went wrong.
+     */
+    ListEntry getEntryByListAndProduct(@NonNull ShoppingList _list, @NonNull Product _product);
+
+    /**
      * Searches a ShoppingList.
      * @param _UUID The UUID identifying the list.
      * @return The found ShoppingList or null if something went wrong or not found.

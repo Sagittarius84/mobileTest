@@ -143,7 +143,14 @@ public class ShoppingList {
             return null;
         }
 
-        return Uri.withAppendedPath(_baseUri, "category/" +
-                (mCategory == null ? "-" : mCategory.mUUID) + "/list/" + mUUID);
+        return Uri.withAppendedPath(_baseUri, getUriPath());
+    }
+
+    public String getUriPath() {
+        if (mUUID == null) {
+            return null;
+        }
+
+        return "category/" +  (mCategory == null ? "-" : mCategory.mUUID) + "/list/" + mUUID;
     }
 }

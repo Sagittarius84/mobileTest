@@ -6,6 +6,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
 import android.support.annotation.NonNull;
+import android.support.v4.app.INotificationSideChannel;
 import android.util.Log;
 
 import com.orm.SugarRecord;
@@ -65,64 +66,72 @@ public class ListController implements IListController {
             return null;
         }
 
-        Cursor listCheck = mResolver.query(
-                _list.toUri(InstalistProvider.BASE_CONTENT_URI),
-                new String[]{ShoppingList.COLUMN.ID},
-                null, null, null);
-        if (listCheck == null) {
-            return null;
-        } else if (listCheck.getCount() != 1) {
-            listCheck.close();
+        ShoppingList savedList = getListById(_list.mUUID);
+        Product savedProduct = mProductController.getProductById(_product.id);
+        if (savedList == null || savedProduct == null) {
             return null;
         }
-        listCheck.close();
-        Cursor productCheck = mResolver.query(
-                _product.toUri(InstalistProvider.BASE_CONTENT_URI),
-                new String[]{Product.COLUMN.ID},
-                null, null, null);
-        if (productCheck == null) {
-            return null;
-        } else if (productCheck.getCount() != 1) {
-            productCheck.close();
-            return null;
-        }
-        productCheck.close();
 
-        Uri listUri = _list.toUri(InstalistProvider.BASE_CONTENT_URI);
+        Uri listUri = savedList.toUri(InstalistProvider.BASE_CONTENT_URI);
         Cursor entryCheck = mResolver.query(
                 Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI, listUri.getPath() + "/entry"),
-                new String[]{ListEntry.COLUMN.ID},
+                new String[]{ ListEntry.COLUMN.ID, ListEntry.COLUMN.AMOUNT },
                 ListEntry.PREFIXED_COLUMN.PRODUCT + " = ?",
-                new String[]{_product.id},
+                new String[]{ _product.id },
                 null);
-        ListEntry item = Select.from(ListEntry.class).where(
-                Condition.prop("m_list").eq(savedList.getId()),
-                Condition.prop("m_product").eq(savedProduct.getId())).first();
-        Change changeMade;
-        if (item == null) {
-            if (_amount < 0.001f) {
+        if (entryCheck == null) {
+            Log.e(getClass().getCanonicalName(), "Searching for existing ListEntry (to change it) " +
+                    "failed. Returning no ListEntry.");
+            return null;
+        }
+        ContentValues newEntryCV = new ContentValues(5);
+        newEntryCV.put(ListEntry.COLUMN.LIST, savedList.mUUID);
+        newEntryCV.put(ListEntry.COLUMN.PRODUCT, savedProduct.id);
+        if (_prioUsed) {
+            newEntryCV.put(ListEntry.COLUMN.PRIORITY, _prio);
+        }
+        ListEntry rtn;
+        if(entryCheck.getCount() == 0) {
+            newEntryCV.put(ListEntry.COLUMN.AMOUNT, _amount);
+            entryCheck.close();
+
+            Uri newEntryUri = mResolver.insert(
+                    Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI,
+                            savedList.getUriPath() + "/entry"),
+                    newEntryCV);
+            if (newEntryUri == null) {
                 return null;
             }
-            item = new ListEntry(savedList, savedProduct, _amount, false, (_prioUsed ? _prio : 0));
-            item.save();
+            rtn = new ListEntry();
+            rtn.mUUID = newEntryUri.getLastPathSegment();
+            rtn.mAmount = _amount;
+            rtn.mList = savedList;
+            rtn.mProduct = savedProduct;
+            rtn.mPriority = (_prioUsed ? _prio : ListEntry.DEFAULTS.PRIORITY);
+            rtn.mStruck = (ListEntry.DEFAULTS.STRUCK != 0);
 
-            changeMade = Change.CREATED;
+            mBus.post(new ListItemChangedMessage(Change.CREATED, rtn));
         } else {
-            if (_amount < 0.001f) {
-                return item;
+            entryCheck.moveToFirst();
+            if (_addAmount) {
+                newEntryCV.put(ListEntry.COLUMN.AMOUNT, _amount + entryCheck.getFloat(
+                        entryCheck.getColumnIndex(ListEntry.COLUMN.AMOUNT)));
+            } else {
+                newEntryCV.put(ListEntry.COLUMN.AMOUNT, _amount);
             }
-            item.mAmount = (_addAmount ? item.mAmount : 0.0f) + _amount;
-            if (_prioUsed) {
-                item.mPriority = _prio;
-            }
-            item.save();
 
-            changeMade = Change.CHANGED;
+            String entryUUID = entryCheck.getString(entryCheck.getColumnIndex(ListEntry.COLUMN.ID));
+            int updatedItems = mResolver.update(
+                    Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI,
+                            savedList.getUriPath() + "/entry/" + entryUUID),
+                    newEntryCV,
+                    null, null);
+            rtn = getEntryById(entryUUID);
+            if (updatedItems != 0) {
+                mBus.post(new ListItemChangedMessage(Change.CHANGED, rtn));
+            }
         }
-
-        mBus.post(new ListItemChangedMessage(changeMade, item));
-
-        return item;
+        return rtn;
     }
 
     @Override
@@ -177,12 +186,34 @@ public class ListController implements IListController {
     }
 
     @Override
+    public ListEntry getEntryByListAndProduct(@NonNull ShoppingList _list, @NonNull Product _product) {
+        Cursor entrySearch = mResolver.query(
+                Uri.withAppendedPath(
+                        InstalistProvider.BASE_CONTENT_URI,
+                        _list.getUriPath() + "/entry"),
+                new String[]{ListEntry.COLUMN.ID},
+                ListEntry.COLUMN.PRODUCT + " = ?",
+                new String[]{_product.id},
+                null);
+        if (entrySearch == null) {
+            Log.e(getClass().getCanonicalName(), "Search for ListEntry by product failed. " +
+                    "Returning no found entry.");
+            return null;
+        } else if (entrySearch.getCount() == 0) {
+            return null;
+        }
+        entrySearch.moveToFirst();
+        return getEntryById(entrySearch.getString(entrySearch.getColumnIndex(
+                ListEntry.COLUMN.ID)));
+    }
+
+    @Override
     public ShoppingList getListById(@NonNull String _UUID) {
         Cursor entryCursor = mContext.getContentResolver().query(
                 Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI, "list"),
                 ShoppingList.COLUMN.ALL_COLUMNS,
                 ShoppingList.COLUMN.ID + " = ?",
-                new String[] { _UUID },
+                new String[]{_UUID},
                 null);
         if (entryCursor == null) {
             Log.e(getClass().getCanonicalName(), "Searching ListEntry by UUID resulted null. " +
@@ -264,9 +295,7 @@ public class ListController implements IListController {
             return null;
         }
 
-        ListEntry toChange = Select.from(ListEntry.class).where(
-                Condition.prop("m_list").eq(_list.getId()),
-                Condition.prop("m_product").eq(_product.getId())).first();
+        ListEntry toChange = getEntryByListAndProduct(_list, _product);
         return strikeItem(toChange, false);
     }
 
@@ -276,38 +305,39 @@ public class ListController implements IListController {
             return null;
         }
 
-        ListEntry toChange = Select.from(ListEntry.class).where(
-                Condition.prop("m_list").eq(_list.getId()),
-                Condition.prop("m_product").eq(_product.getId())).first();
+        ListEntry toChange = getEntryByListAndProduct(_list, _product);
         return unstrikeItem(toChange, false);
     }
 
     private ListEntry unstrikeItem(ListEntry _toChange, boolean _reload) {
+        return updateStruckItem(_toChange, _reload, false);
+    }
+
+    private ListEntry updateStruckItem(ListEntry _toChange, boolean _reload, boolean _struck) {
         if (_toChange == null) {
             return null;
         }
 
-        ListEntry rtn = (_reload ? SugarRecord.findById(ListEntry.class,_toChange.getId()) : _toChange);
-        rtn.mStruck = false;
-        rtn.save();
-
-        mBus.post(new ListItemChangedMessage(Change.CHANGED, rtn));
-
+        ContentValues entryUpdateCV = new ContentValues(1);
+        entryUpdateCV.put(ListEntry.COLUMN.STRUCK, _struck);
+        int chagedItems = mResolver.update(_toChange.toUri(InstalistProvider.BASE_CONTENT_URI),
+                entryUpdateCV,
+                null, null);
+        ListEntry rtn;
+        if (_reload) {
+            rtn = getEntryById(_toChange.mUUID);
+        } else {
+            _toChange.mStruck = _struck;
+            rtn = _toChange;
+        }
+        if (chagedItems > 0) {
+            mBus.post(new ListItemChangedMessage(Change.CHANGED, rtn));
+        }
         return rtn;
     }
 
     private ListEntry strikeItem(ListEntry _item, boolean _reload) {
-        if (_item == null) {
-            return null;
-        }
-
-        ListEntry rtn = (_reload ? SugarRecord.findById(ListEntry.class,_item.getId()) : _item);
-        rtn.mStruck = true;
-        rtn.save();
-
-        mBus.post(new ListItemChangedMessage(Change.CHANGED, rtn));
-
-        return rtn;
+        return updateStruckItem(_item, _reload, true);
     }
 
     @Override
@@ -326,10 +356,7 @@ public class ListController implements IListController {
             return false;
         }
 
-        ListEntry toDelete = Select.from(ListEntry.class).where(
-                Condition.prop("m_list").eq(_list.getId()),
-                Condition.prop("m_product").eq(_product.getId())).first();
-
+        ListEntry toDelete = getEntryByListAndProduct(_list, _product);
         return removeItem(toDelete);
     }
 
@@ -339,17 +366,13 @@ public class ListController implements IListController {
             return false;
         }
 
-        Long listId = _item.mList.getId();
-        Long productId = _item.mProduct.getId();
-        _item.delete();
-
-        mBus.post(new ListItemChangedMessage(Change.DELETED, _item));
-
-        long deletedEntryCount = Select.from(ListEntry.class).where(
-                Condition.prop("m_list").eq(listId),
-                Condition.prop("m_product").eq(productId)).count();
-
-        return deletedEntryCount == 0;
+        int deletedEntries = mResolver.delete(_item.toUri(InstalistProvider.BASE_CONTENT_URI), null,
+                null);
+        if (deletedEntries > 0) {
+            mBus.post(new ListItemChangedMessage(Change.DELETED, _item));
+            return true;
+        }
+        return false;
     }
 
     @Override
@@ -358,17 +381,16 @@ public class ListController implements IListController {
             return null;
         }
 
-        ListEntry toChange = SugarRecord.findById(ListEntry.class, _item.getId());
-        if (toChange == null) {
-            return null;
+        ContentValues entryUpdateCV = new ContentValues(1);
+        entryUpdateCV.put(ListEntry.COLUMN.PRIORITY, _newPrio);
+        int changedEntries = mResolver.update(_item.toUri(InstalistProvider.BASE_CONTENT_URI),
+                entryUpdateCV, null, null);
+        ListEntry entry = getEntryById(_item.mUUID);
+        if (changedEntries > 0) {
+            mBus.post(new ListItemChangedMessage(Change.CHANGED, entry));
         }
 
-        toChange.mPriority = _newPrio;
-        toChange.save();
-
-        mBus.post(new ListItemChangedMessage(Change.CHANGED, toChange));
-
-        return toChange;
+        return entry;
     }
 
     @Override
@@ -381,6 +403,17 @@ public class ListController implements IListController {
         if (_name == null || _name.length() == 0 || existsListName(_name)) {
             return null;
         }
+
+        ContentValues newListCV = new ContentValues(2);
+        newListCV.put(ShoppingList.COLUMN.NAME, _name);
+        if (_category == null) {
+            newListCV.putNull(ShoppingList.COLUMN.CATEGORY);
+        } else {
+            newListCV.put(ShoppingList.COLUMN.CATEGORY, _category.mUUID);
+        }
+        Uri createdList = mResolver.insert(Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI,
+                "category"), newListCV);
+
 
         Category targetCategory = null;
         if (_category != null) {
