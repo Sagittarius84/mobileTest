@@ -50,8 +50,8 @@ public class ProviderTestUtils {
      */
     public static Uri insertTag(IInternalProvider _tagProvider, String _uuid, String tagName) {
         ContentValues contentValues = new ContentValues();
-        contentValues.put(Tag.COLUMN_NO_TABLE_PREFIXED.COLUMN_ID, _uuid);
-        contentValues.put(Tag.COLUMN_NO_TABLE_PREFIXED.COLUMN_NAME, tagName);
+        contentValues.put(Tag.COLUMN.ID, _uuid);
+        contentValues.put(Tag.COLUMN.NAME, tagName);
 
         return _tagProvider.insert(Uri.parse(TagProvider.SINGLE_TAG_CONTENT_URI.replace("*", _uuid)), contentValues);
     }

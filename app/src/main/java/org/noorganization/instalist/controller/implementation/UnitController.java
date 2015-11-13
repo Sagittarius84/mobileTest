@@ -35,9 +35,9 @@ public class UnitController implements IUnitController {
         mResolver = mContext.getContentResolver();
     }
 
-    static UnitController getInstance() {
+    static UnitController getInstance(Context _context) {
         if (mInstance == null) {
-            mInstance = new UnitController(Context _context);
+            mInstance = new UnitController(_context);
         }
         return mInstance;
     }

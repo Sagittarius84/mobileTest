@@ -7,16 +7,11 @@ import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
-import com.orm.SugarRecord;
-import com.orm.query.Condition;
-import com.orm.query.Select;
-
 import org.noorganization.instalist.controller.IProductController;
+import org.noorganization.instalist.controller.ITagController;
 import org.noorganization.instalist.controller.IUnitController;
 import org.noorganization.instalist.controller.event.Change;
-import org.noorganization.instalist.controller.event.ListItemChangedMessage;
 import org.noorganization.instalist.controller.event.ProductChangedMessage;
-import org.noorganization.instalist.controller.event.RecipeChangedMessage;
 import org.noorganization.instalist.model.Ingredient;
 import org.noorganization.instalist.model.ListEntry;
 import org.noorganization.instalist.model.Product;
@@ -25,10 +20,8 @@ import org.noorganization.instalist.model.TaggedProduct;
 import org.noorganization.instalist.model.Unit;
 import org.noorganization.instalist.provider.InstalistProvider;
 import org.noorganization.instalist.provider.internal.IngredientProvider;
-import org.noorganization.instalist.provider.internal.ListEntryProvider;
 import org.noorganization.instalist.provider.internal.ProductProvider;
-
-import java.util.List;
+import org.noorganization.instalist.provider.internal.TaggedProductProvider;
 
 import de.greenrobot.event.EventBus;
 
@@ -42,12 +35,14 @@ public class ProductController implements IProductController {
     private Context mContext;
     private ContentResolver mResolver;
     private IUnitController mUnitController;
+    private ITagController mTagController;
 
     private ProductController(Context _context) {
         mBus = EventBus.getDefault();
         mContext = _context;
         mResolver = mContext.getContentResolver();
         mUnitController = ControllerFactory.getUnitController();
+        mTagController = ControllerFactory.getTagController();
     }
 
     static ProductController getInstance(Context _context) {
@@ -181,48 +176,63 @@ public class ProductController implements IProductController {
             return false;
         }
 
-        if(!_deleteCompletely) {
+        Cursor listEntryCursor = mResolver.query(Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI, "entry"), ListEntry.COLUMN.ALL_COLUMNS, ListEntry.COLUMN.PRODUCT + "= ?", new String[]{_toRemove.mUUID}, null, null);
+        Cursor ingredientCursor = mResolver.query(Uri.parse(IngredientProvider.MULTIPLE_INGREDIENT_CONTENT_URI), Ingredient.COLUMN.ALL_COLUMNS, Ingredient.COLUMN.PRODUCT_ID + "= ?", new String[]{_toRemove.mUUID}, null, null);
+        if (listEntryCursor == null) {
+            Log.e(LOG_TAG, "Query for listEntry was not possible in removeProduct.");
+            return false;
+        }
 
-            Cursor listEntryCursor = mResolver.query(Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI, "entry"), ListEntry.COLUMN.ALL_COLUMNS, ListEntry.COLUMN.PRODUCT + "= ?", new String[]{_toRemove.mUUID}, null, null);
-            if(listEntryCursor == null){
-                Log.e(LOG_TAG, "Query for listEntry was not possible in removeProduct.");
-                return false;
-            }
-            if(listEntryCursor.getCount() > 0){
+        if (ingredientCursor == null) {
+            Log.e(LOG_TAG, "Query for ingredient was not possible in removeProduct.");
+            return false;
+        }
+
+        if (!_deleteCompletely) {
+            if (listEntryCursor.getCount() > 0) {
                 Log.e(LOG_TAG, "There are still ListEntries connected to this product. Either set deleteCompletely flag or remove the ListEntries by yourself.");
                 listEntryCursor.close();
                 return false;
             }
-            Cursor ingredientCursor = mResolver.query(Uri.parse(IngredientProvider.MULTIPLE_INGREDIENT_CONTENT_URI), Ingredient.COLUMN.ALL_COLUMNS, Ingredient.COLUMN.PRODUCT_ID + "= ?", new String[]{_toRemove.mUUID}, null, null);
-            if(ingredientCursor == null){
-                Log.e(LOG_TAG, "Query for ingredient was not possible in removeProduct.");
-                return false;
-            }
 
-            if(ingredientCursor.getCount() > 0){
+            if (ingredientCursor.getCount() > 0) {
                 Log.e(LOG_TAG, "There are still ingredients connected to this product. Either set deleteCompletely flag or remove the ingredients by your self.");
                 ingredientCursor.close();
                 return false;
             }
-
-            listEntryCursor.close();
-            ingredientCursor.close();
         }
 
-        // TODO later this day
+        // TODO this seems really obsolete and will be a bottleneck if we want to delet each single entry
+/*        listEntryCursor.moveToFirst();
+        ingredientCursor.moveToFirst();
+        do {
+            ListEntry entry = new ListEntry();
+            entry.mUUID = listEntryCursor.getString(listEntryCursor.getColumnIndex(ListEntry.COLUMN.ID));
+            entry.mAmount = listEntryCursor.getFloat(listEntryCursor.getColumnIndex(ListEntry.COLUMN.AMOUNT));
+            entry.mPriority = listEntryCursor.getInt(listEntryCursor.getColumnIndex(ListEntry.COLUMN.PRIORITY));
+            entry.mStruck = listEntryCursor.getInt(listEntryCursor.getColumnIndex(ListEntry.COLUMN.STRUCK)) > 0;
+            entry.mList =
+            listEntryCursor.getString();
+            mBus.post(new ListItemChangedMessage(Change.DELETED, currentEntry));
+        } while(listEntryCursor.moveToNext());
+
         for (ListEntry currentEntry : foundEntries) {
-            currentEntry.delete();
             mBus.post(new ListItemChangedMessage(Change.DELETED, currentEntry));
         }
         for (Ingredient currentIngredient : foundIngredients) {
-            currentIngredient.delete();
             mBus.post(new RecipeChangedMessage(Change.CHANGED,
                     currentIngredient.mRecipe));
         }
-        SugarRecord.deleteAll(TaggedProduct.class, "m_product = ?", _toRemove.getId() + "");
-        _toRemove.delete();
-        mBus.post(new ProductChangedMessage(Change.DELETED, foundProduct));
+*/
 
+        int affectedProducts = mResolver.delete(Uri.parse(ProductProvider.SINGLE_PRODUCT_CONTENT_URI.replace("*", _toRemove.mUUID)), null, null);
+
+        if (affectedProducts > 0) {
+            mBus.post(new ProductChangedMessage(Change.DELETED, foundProduct));
+        }
+
+        listEntryCursor.close();
+        ingredientCursor.close();
         return true;
     }
 
@@ -231,18 +241,28 @@ public class ProductController implements IProductController {
         if (_product == null || _tag == null) {
             return false;
         }
-        Product foundProduct = SugarRecord.findById(Product.class, _product.getId());
-        Tag foundTag = SugarRecord.findById(Tag.class, _tag.getId());
+        Product foundProduct = findById(_product.mUUID);
+        Tag foundTag = mTagController.findById(_tag.mUUID);
         if (foundProduct == null || foundTag == null) {
             return false;
         }
 
-        long existingTagCount = Select.from(TaggedProduct.class).where(
-                Condition.prop(TaggedProduct.ATTR_PRODUCT).eq(foundProduct.getId())).and(
-                Condition.prop(TaggedProduct.ATTR_TAG).eq(foundTag.getId())).count();
-        if (existingTagCount == 0) {
+        Cursor taggedProductCursor = mResolver.query(Uri.parse(TaggedProductProvider.MULTIPLE_TAGGED_PRODUCT_BY_TAG_CONTENT_URI.replace("*", foundTag.mUUID)),
+                TaggedProduct.ALL_COLUMNS_JOINED,
+                TaggedProduct.COLUMN_TABLE_PREFIXED.COLUMN_PRODUCT_ID + "=?",
+                new String[]{foundProduct.mUUID}, null);
+
+        if (taggedProductCursor == null) {
+            return false;
+        }
+
+        // check if this {@link TaggedProduct} exists already in the database.
+        if (taggedProductCursor.getCount() == 0) {
             TaggedProduct newProductsTag = new TaggedProduct(_tag, _product);
-            newProductsTag.save();
+            Uri taggedProductUri = mResolver.insert(Uri.parse(TaggedProductProvider.MULTIPLE_TAGGED_PRODUCT_CONTENT_URI), newProductsTag.toContentValues());
+            if (taggedProductUri == null) {
+                return false;
+            }
             mBus.post(new ProductChangedMessage(Change.CHANGED, foundProduct));
         }
 
@@ -255,19 +275,53 @@ public class ProductController implements IProductController {
             return;
         }
 
-        Product foundProduct = SugarRecord.findById(Product.class, _product.getId());
+        Product foundProduct = findById(_product.mUUID);
         if (foundProduct == null) {
             return;
         }
 
-        List<TaggedProduct> taggedProducts = Select.from(TaggedProduct.class).where(
-                Condition.prop(TaggedProduct.ATTR_PRODUCT).eq(foundProduct.getId())).and(
-                Condition.prop(TaggedProduct.ATTR_TAG).eq(_tag.getId())).list();
-        if (taggedProducts.size() != 0) {
-            for (TaggedProduct currentToDelete : taggedProducts) {
-                currentToDelete.delete();
-            }
+        Tag foundTag = mTagController.findById(_tag.mUUID);
+        if (foundTag == null) {
+            return;
+        }
+
+        Cursor taggedProductCursor = mResolver.query(Uri.parse(TaggedProductProvider.MULTIPLE_TAGGED_PRODUCT_BY_TAG_CONTENT_URI.replace("*", foundTag.mUUID)),
+                TaggedProduct.ALL_COLUMNS_JOINED,
+                TaggedProduct.COLUMN_TABLE_PREFIXED.COLUMN_PRODUCT_ID + "=?",
+                new String[]{foundProduct.mUUID}, null);
+
+        if (taggedProductCursor == null) {
+            return;
+        }
+
+        if (taggedProductCursor.getCount() != 0) {
+            taggedProductCursor.moveToFirst();
+            do {
+                TaggedProduct taggedProduct = parse(taggedProductCursor);
+                mResolver.delete(Uri.parse(TaggedProductProvider.SINGLE_TAGGED_PRODUCT_CONTENT_URI.replace("*", taggedProduct.mUUID)), null, null);
+            } while (taggedProductCursor.moveToNext());
+
             mBus.post(new ProductChangedMessage(Change.CHANGED, foundProduct));
         }
+    }
+
+    public TaggedProduct parse(Cursor _cursor) {
+        TaggedProduct taggedProduct = new TaggedProduct();
+
+        Tag tag = new Tag();
+        tag.mUUID = _cursor.getString(_cursor.getColumnIndex(TaggedProduct.COLUMN_TABLE_PREFIXED.COLUMN_TAG_ID));
+        tag.mName = _cursor.getString(_cursor.getColumnIndex(Tag.COLUMN_PREFIXED.NAME));
+
+        Product product = new Product();
+        product.mUUID = _cursor.getString(_cursor.getColumnIndex(TaggedProduct.COLUMN_TABLE_PREFIXED.COLUMN_PRODUCT_ID));
+        product.mName = _cursor.getString(_cursor.getColumnIndex(Product.PREFIXED_COLUMN.NAME));
+        product.mUUID = _cursor.getString(_cursor.getColumnIndex(Product.PREFIXED_COLUMN.ID));
+        product.mDefaultAmount = _cursor.getFloat(_cursor.getColumnIndex(Product.PREFIXED_COLUMN.DEFAULT_AMOUNT));
+        product.mStepAmount = _cursor.getFloat(_cursor.getColumnIndex(Product.PREFIXED_COLUMN.STEP_AMOUNT));
+
+        taggedProduct.mTag = tag;
+        taggedProduct.mProduct = product;
+
+        return taggedProduct;
     }
 }

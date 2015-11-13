@@ -45,7 +45,7 @@ public class TagProvider implements IInternalProvider {
     /**
      * The content uri for actions with multiple unit.
      * Supports not {@link android.content.ContentProvider#update(Uri, ContentValues, String, String[])}
-     * and {@link android.content.ContentProvider#insert(Uri, ContentValues)}
+     * IMPORTANT:  {@link android.content.ContentProvider#insert(Uri, ContentValues)} will insert an single tag with a generated uuid.
      */
     public static final String MULTIPLE_TAG_CONTENT_URI = InstalistProvider.BASE_CONTENT_URI + "/" + MULTIPLE_TAG_STRING;
 
@@ -84,7 +84,7 @@ public class TagProvider implements IInternalProvider {
         switch (mMatcher.match(_uri)) {
 
             case SINGLE_TAG:
-                String selection = ProviderUtils.prependIdToQuery(Tag.COLUMN_TABLE_PREFIXED.COLUMN_ID, _selection);
+                String selection = ProviderUtils.prependIdToQuery(Tag.COLUMN_PREFIXED.ID, _selection);
                 String[] selectionArgs = ProviderUtils.prependSelectionArgs(_selectionArgs, _uri.getLastPathSegment());
                 cursor = mDatabase.query(Tag.TABLE_NAME, _projection, selection, selectionArgs, null, null, _sortOrder);
                 break;
@@ -126,15 +126,21 @@ public class TagProvider implements IInternalProvider {
                     return null;
                     //throw new SQLiteException("Failed to add a record into " + _uri);
                 }
-                Cursor cursor = mDatabase.query(Tag.TABLE_NAME, new String[]{Tag.COLUMN_TABLE_PREFIXED.COLUMN_ID},
-                        SQLiteUtils.COLUMN_ROW_ID + "=?", new String[]{String.valueOf(rowId)},
-                        null, null, null, null);
-                cursor.moveToFirst();
                 newUri = Uri.parse(SINGLE_TAG_CONTENT_URI.replace("*",
-                        cursor.getString(cursor.getColumnIndex(Tag.COLUMN_TABLE_PREFIXED.COLUMN_ID))));
-                cursor.close();
+                        _values.getAsString((Tag.COLUMN_PREFIXED.ID))));
                 break;
             case MULTIPLE_TAGS:
+                // insert only single tag with no given id
+                _values.put(Tag.COLUMN.ID, SQLiteUtils.generateId(mDatabase, Tag.TABLE_NAME).toString());
+                rowId = mDatabase.insert(Tag.TABLE_NAME, null, _values);
+                // insertion went wrong
+                if (rowId == -1) {
+                    return null;
+                    //throw new SQLiteException("Failed to add a record into " + _uri);
+                }
+                newUri = Uri.parse(SINGLE_TAG_CONTENT_URI.replace("*",
+                        _values.getAsString((Tag.COLUMN_PREFIXED.ID))));
+                break;
             default:
                 throw new IllegalArgumentException("The given Uri is not supported: " + _uri);
         }
@@ -152,7 +158,7 @@ public class TagProvider implements IInternalProvider {
 
         switch (mMatcher.match(_uri)) {
             case SINGLE_TAG:
-                String selection = ProviderUtils.prependIdToQuery(Tag.COLUMN_TABLE_PREFIXED.COLUMN_ID, null);
+                String selection = ProviderUtils.prependIdToQuery(Tag.COLUMN_PREFIXED.ID, null);
                 String[] selectionArgs = ProviderUtils.prependSelectionArgs(null, _uri.getLastPathSegment());
                 affectedRows = mDatabase.delete(Tag.TABLE_NAME, selection, selectionArgs);
                 break;
@@ -174,7 +180,7 @@ public class TagProvider implements IInternalProvider {
         int affectedRows = 0;
         switch (mMatcher.match(_uri)) {
             case SINGLE_TAG:
-                String selection = ProviderUtils.prependIdToQuery(Tag.COLUMN_TABLE_PREFIXED.COLUMN_ID, null);
+                String selection = ProviderUtils.prependIdToQuery(Tag.COLUMN_PREFIXED.ID, null);
                 String[] selectionArgs = ProviderUtils.prependSelectionArgs(null, _uri.getLastPathSegment());
                 affectedRows = mDatabase.update(Tag.TABLE_NAME, _values, selection, selectionArgs);
                 break;

@@ -35,4 +35,12 @@ public interface ITagController {
      * @param _toRemove The valid (created through {@link #createTag(String)}) Tag. Not null.
      */
     void removeTag(Tag _toRemove);
+
+    /**
+     * Find a {@link Tag} by an id.
+     * @param _uuid the uuid of an tag.
+     * @return the tag itself or null if none was found.
+     */
+    Tag findById(String _uuid);
+
 }

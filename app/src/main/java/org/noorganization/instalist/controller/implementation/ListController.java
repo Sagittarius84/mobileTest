@@ -116,7 +116,7 @@ public class ListController implements IListController {
                         _list.getUriPath() + "/entry"),
                 new String[]{ListEntry.COLUMN.ID},
                 ListEntry.COLUMN.PRODUCT + " = ?",
-                new String[]{_product.id},
+                new String[]{_product.mUUID},
                 null);
         if (entrySearch == null) {
             Log.e(getClass().getCanonicalName(), "Search for ListEntry by product failed. " +
@@ -462,7 +462,7 @@ public class ListController implements IListController {
         }
 
         ShoppingList savedList = getListById(_list.mUUID);
-        Product savedProduct = mProductController.findById(_product.id);
+        Product savedProduct = mProductController.findById(_product.mUUID);
         if (savedList == null || savedProduct == null) {
             return null;
         }
@@ -472,7 +472,7 @@ public class ListController implements IListController {
                 Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI, listUri.getPath() + "/entry"),
                 new String[]{ListEntry.COLUMN.ID, ListEntry.COLUMN.AMOUNT},
                 ListEntry.PREFIXED_COLUMN.PRODUCT + " = ?",
-                new String[]{_product.id},
+                new String[]{_product.mUUID},
                 null);
         if (entryCheck == null) {
             Log.e(getClass().getCanonicalName(), "Searching for existing ListEntry (to change it) " +
@@ -481,7 +481,7 @@ public class ListController implements IListController {
         }
         ContentValues newEntryCV = new ContentValues(5);
         newEntryCV.put(ListEntry.COLUMN.LIST, savedList.mUUID);
-        newEntryCV.put(ListEntry.COLUMN.PRODUCT, savedProduct.id);
+        newEntryCV.put(ListEntry.COLUMN.PRODUCT, savedProduct.mUUID);
         if (_prioUsed) {
             newEntryCV.put(ListEntry.COLUMN.PRIORITY, _prio);
         }

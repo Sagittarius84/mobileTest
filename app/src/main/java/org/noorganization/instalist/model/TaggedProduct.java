@@ -1,5 +1,7 @@
 package org.noorganization.instalist.model;
 
+import android.content.ContentValues;
+
 import com.orm.StringUtil;
 import com.orm.SugarRecord;
 
@@ -52,7 +54,7 @@ public class TaggedProduct extends SugarRecord<TaggedProduct> {
     /**
      * Returns the column names with qualified table names.
      */
-    public final static String[] ALL_COLUMNS_JOINED = {Tag.COLUMN_TABLE_PREFIXED.COLUMN_ID, Tag.COLUMN_TABLE_PREFIXED.COLUMN_NAME,
+    public final static String[] ALL_COLUMNS_JOINED = {Tag.COLUMN_PREFIXED.ID, Tag.COLUMN_PREFIXED.NAME,
             COLUMN_TABLE_PREFIXED.COLUMN_ID, COLUMN_TABLE_PREFIXED.COLUMN_TAG_ID, COLUMN_TABLE_PREFIXED.COLUMN_PRODUCT_ID,
             Product.PREFIXED_COLUMN.ID, Product.PREFIXED_COLUMN.NAME, Product.PREFIXED_COLUMN.DEFAULT_AMOUNT,
             Product.PREFIXED_COLUMN.STEP_AMOUNT, Product.PREFIXED_COLUMN.UNIT};
@@ -64,10 +66,12 @@ public class TaggedProduct extends SugarRecord<TaggedProduct> {
             + COLUMN_NO_TABLE_PREFIXED.COLUMN_PRODUCT_ID + " TEXT,"
             + "FOREIGN KEY (" + COLUMN_NO_TABLE_PREFIXED.COLUMN_PRODUCT_ID + ") REFERENCES " + Product.TABLE_NAME + " (" + Product.COLUMN.ID + ") "
             + "ON UPDATE CASCADE ON DELETE CASCADE,"
-            + "FOREIGN KEY (" + COLUMN_NO_TABLE_PREFIXED.COLUMN_TAG_ID + ") REFERENCES " + Tag.TABLE_NAME + " (" + Tag.COLUMN_NO_TABLE_PREFIXED.COLUMN_ID + ") "
+            + "FOREIGN KEY (" + COLUMN_NO_TABLE_PREFIXED.COLUMN_TAG_ID + ") REFERENCES " + Tag.TABLE_NAME + " (" + Tag.COLUMN.ID + ") "
             + "ON UPDATE CASCADE ON DELETE CASCADE"
             + ")";
 
+
+    public String mUUID;
     public Tag mTag;
     public Product mProduct;
 
@@ -100,4 +104,13 @@ public class TaggedProduct extends SugarRecord<TaggedProduct> {
     public static List<TaggedProduct> findTaggedProductsByProduct(Product _product) {
         return TaggedProduct.find(TaggedProduct.class, "m_product = ?", _product.getId().toString());
     }
+
+    public ContentValues toContentValues(){
+        ContentValues cv = new ContentValues();
+        cv.put(COLUMN_NO_TABLE_PREFIXED.COLUMN_ID, this.mUUID);
+        cv.put(COLUMN_NO_TABLE_PREFIXED.COLUMN_PRODUCT_ID, this.mProduct != null ? this.mProduct.mUUID : null);
+        cv.put(COLUMN_NO_TABLE_PREFIXED.COLUMN_TAG_ID, this.mTag != null ? this.mTag.mUUID : null);
+        return cv;
+    }
+
 }

@@ -13,9 +13,9 @@ import android.text.TextUtils;
 import org.noorganization.instalist.model.Product;
 import org.noorganization.instalist.model.Tag;
 import org.noorganization.instalist.model.TaggedProduct;
+import org.noorganization.instalist.presenter.utils.ProviderUtils;
 import org.noorganization.instalist.provider.InstalistProvider;
 import org.noorganization.instalist.utils.SQLiteUtils;
-import org.noorganization.instalist.presenter.utils.ProviderUtils;
 
 import java.util.List;
 
@@ -23,7 +23,7 @@ import java.util.List;
  * The TaggedProductProvider provides the interaction with products which are tagged. This means you
  * can add a tag to a product or simply query a list of products by a custom tag. It provides a
  * huge variety of dynamic.
- *
+ * <p/>
  * Created by Tino on 26.10.2015.
  */
 public class TaggedProductProvider implements IInternalProvider {
@@ -105,7 +105,7 @@ public class TaggedProductProvider implements IInternalProvider {
     public Cursor query(@NonNull Uri _uri, String[] _projection, String _selection, String[] _selectionArgs, String _sortOrder) {
         Cursor cursor = null;
         // projection is null so there will be no data be fetched
-        if(_projection == null || _projection.length == 0){
+        if (_projection == null || _projection.length == 0) {
             return null;
         }
 
@@ -114,7 +114,7 @@ public class TaggedProductProvider implements IInternalProvider {
             case SINGLE_TAGGED_PRODUCT:
                 String sql = "SELECT " + TextUtils.join(",", _projection);
                 sql += " FROM " + TaggedProduct.TABLE_NAME + " INNER JOIN " + Tag.TABLE_NAME + " ON "
-                        + TaggedProduct.COLUMN_TABLE_PREFIXED.COLUMN_TAG_ID + "=" + Tag.COLUMN_TABLE_PREFIXED.COLUMN_ID;
+                        + TaggedProduct.COLUMN_TABLE_PREFIXED.COLUMN_TAG_ID + "=" + Tag.COLUMN_PREFIXED.ID;
                 sql += " INNER JOIN " + Product.TABLE_NAME + " ON " + TaggedProduct.COLUMN_TABLE_PREFIXED.COLUMN_PRODUCT_ID + " = " + Product.PREFIXED_COLUMN.ID;
                 sql += " WHERE " + TaggedProduct.COLUMN_TABLE_PREFIXED.COLUMN_ID + "=\"" + _uri.getLastPathSegment() + "\"";
                 if (_selection != null && _selection.length() > 0) {
@@ -130,7 +130,7 @@ public class TaggedProductProvider implements IInternalProvider {
             case MULTIPLE_TAGGED_PRODUCTS:
                 sql = "SELECT " + TextUtils.join(",", _projection);
                 sql += " FROM " + TaggedProduct.TABLE_NAME + " INNER JOIN " + Tag.TABLE_NAME + " ON "
-                         + TaggedProduct.COLUMN_TABLE_PREFIXED.COLUMN_TAG_ID + "=" + Tag.COLUMN_TABLE_PREFIXED.COLUMN_ID;
+                        + TaggedProduct.COLUMN_TABLE_PREFIXED.COLUMN_TAG_ID + "=" + Tag.COLUMN_PREFIXED.ID;
                 sql += " INNER JOIN " + Product.TABLE_NAME + " ON " + TaggedProduct.COLUMN_TABLE_PREFIXED.COLUMN_PRODUCT_ID + " = " + Product.PREFIXED_COLUMN.ID;
                 if (_selection != null && _selection.length() > 0) {
                     sql += " AND ";
@@ -146,7 +146,7 @@ public class TaggedProductProvider implements IInternalProvider {
                 String tagId = _uri.getLastPathSegment();
                 sql = "SELECT " + TextUtils.join(",", _projection);
                 sql += " FROM " + TaggedProduct.TABLE_NAME + " INNER JOIN " + Tag.TABLE_NAME + " ON "
-                        + TaggedProduct.COLUMN_TABLE_PREFIXED.COLUMN_TAG_ID + "=" + Tag.COLUMN_TABLE_PREFIXED.COLUMN_ID;
+                        + TaggedProduct.COLUMN_TABLE_PREFIXED.COLUMN_TAG_ID + "=" + Tag.COLUMN_PREFIXED.ID;
                 sql += " INNER JOIN " + Product.TABLE_NAME + " ON " + TaggedProduct.COLUMN_TABLE_PREFIXED.COLUMN_PRODUCT_ID + "=" + Product.PREFIXED_COLUMN.ID;
                 sql += " WHERE " + TaggedProduct.COLUMN_TABLE_PREFIXED.COLUMN_TAG_ID + "=\"" + tagId + "\"";
                 if (_selection != null && _selection.length() > 0) {
@@ -207,6 +207,16 @@ public class TaggedProductProvider implements IInternalProvider {
                         cursor.getString(cursor.getColumnIndex(TaggedProduct.COLUMN_TABLE_PREFIXED.COLUMN_ID))));
                 break;
             case MULTIPLE_TAGGED_PRODUCTS:
+                _values.put(TaggedProduct.COLUMN_NO_TABLE_PREFIXED.COLUMN_ID, SQLiteUtils.generateId(mDatabase, TaggedProduct.TABLE_NAME).toString());
+                rowId = mDatabase.insert(TaggedProduct.TABLE_NAME, null, _values);
+                // insertion went wrong
+                if (rowId == -1) {
+                    return null;
+                    //throw new SQLiteException("Failed to add a record into " + _uri);
+                }
+                newUri = Uri.parse(SINGLE_TAGGED_PRODUCT_CONTENT_URI.replace("*",
+                        _values.getAsString(TaggedProduct.COLUMN_NO_TABLE_PREFIXED.COLUMN_ID)));
+                break;
             case MULTIPLE_TAGGED_PRODUCT_BY_TAG:
             default:
                 throw new IllegalArgumentException("The given Uri is not supported: " + _uri);

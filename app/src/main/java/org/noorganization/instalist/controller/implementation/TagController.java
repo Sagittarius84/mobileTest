@@ -1,17 +1,15 @@
 package org.noorganization.instalist.controller.implementation;
 
-import com.orm.SugarRecord;
-import com.orm.query.Condition;
-import com.orm.query.Select;
+import android.content.ContentResolver;
+import android.content.Context;
+import android.database.Cursor;
+import android.net.Uri;
 
-import org.noorganization.instalist.controller.IProductController;
 import org.noorganization.instalist.controller.ITagController;
 import org.noorganization.instalist.controller.event.Change;
 import org.noorganization.instalist.controller.event.TagChangedMessage;
 import org.noorganization.instalist.model.Tag;
-import org.noorganization.instalist.model.TaggedProduct;
-
-import java.util.List;
+import org.noorganization.instalist.provider.internal.TagProvider;
 
 import de.greenrobot.event.EventBus;
 
@@ -20,31 +18,41 @@ public class TagController implements ITagController {
     private static TagController mInstance;
 
     private EventBus mBus;
+    private ContentResolver mResolver;
 
-    private TagController() {
+    private TagController(Context _context) {
         mBus = EventBus.getDefault();
+        mResolver = _context.getContentResolver();
     }
 
-    static ITagController getInstance() {
+    static ITagController getInstance(Context _context) {
         if (mInstance == null) {
-            mInstance = new TagController();
+            mInstance = new TagController(_context);
         }
         return mInstance;
     }
 
     @Override
     public Tag createTag(String _title) {
-        if (_title == null || Select.from(Tag.class).where(Condition.prop("m_name").eq(_title)).
-                count() > 0) {
+        Cursor tagCursor = mResolver.query(Uri.parse(TagProvider.MULTIPLE_TAG_CONTENT_URI), Tag.COLUMN.ALL_COLUMNS, Tag.COLUMN.NAME + "= ?", new String[]{_title}, null, null);
+        if (_title == null || tagCursor == null || tagCursor.getCount() > 0) {
+            if (tagCursor != null) {
+                tagCursor.close();
+            }
             return null;
         }
 
-        Tag rtn = new Tag(_title);
-        rtn.save();
+        tagCursor.close();
 
-        mBus.post(new TagChangedMessage(Change.CREATED, rtn));
+        Tag tag = new Tag(_title);
+        Uri tagUri = mResolver.insert(Uri.parse(TagProvider.MULTIPLE_TAG_CONTENT_URI), tag.toContentValues());
+        // insertion went wrong
+        if (tagUri == null) {
+            return null;
+        }
 
-        return rtn;
+        mBus.post(new TagChangedMessage(Change.CREATED, tag));
+        return tag;
     }
 
     @Override
@@ -53,23 +61,34 @@ public class TagController implements ITagController {
             return null;
         }
 
-        Tag toChange = SugarRecord.findById(Tag.class, _toRename.getId());
+        Tag toChange = findById(_toRename.mUUID);
         if (toChange == null || _newTitle == null) {
-            return toChange;
+            return null;
         }
 
-        for (Tag toCheck : Select.from(Tag.class).where(Condition.prop("m_name").eq(_newTitle)).
-                list()) {
-            if (toCheck.getId().compareTo(toChange.getId()) != 0) {
-                return toChange;
+        // check if name was changed
+        if (!_toRename.mName.equals(_newTitle)) {
+            Cursor cursor = mResolver.query(Uri.parse(TagProvider.MULTIPLE_TAG_CONTENT_URI),
+                    Tag.COLUMN.ALL_COLUMNS, Tag.COLUMN.NAME + "=? AND " + Tag.COLUMN.ID + " <> ?",
+                    new String[]{_toRename.mName, _toRename.mUUID},
+                    null);
+            if (cursor == null || cursor.getCount() > 0) {
+                if (cursor != null) {
+                    cursor.close();
+                }
+                return null;
             }
+            cursor.close();
         }
 
         toChange.mName = _newTitle;
-        toChange.save();
+        int updatedRows = mResolver.update(Uri.parse(TagProvider.SINGLE_TAG_CONTENT_URI.replace("*", toChange.mUUID)), toChange.toContentValues(), null, null);
+
+        if (updatedRows == 0) {
+            return null;
+        }
 
         mBus.post(new TagChangedMessage(Change.CHANGED, toChange));
-
         return toChange;
     }
 
@@ -78,15 +97,33 @@ public class TagController implements ITagController {
         if (_toRemove == null) {
             return;
         }
-
+        /*
         List<TaggedProduct> taggedProducts = Select.from(TaggedProduct.class).
                 where(Condition.prop(TaggedProduct.ATTR_TAG).eq(_toRemove.getId())).list();
         IProductController productController = ControllerFactory.getProductController();
         for (TaggedProduct toNotify : taggedProducts) {
             productController.removeTagFromProduct(toNotify.mProduct, toNotify.mTag);
         }
+        */
+        int removedRows = mResolver.delete(Uri.parse(TagProvider.SINGLE_TAG_CONTENT_URI.replace("*", _toRemove.mUUID)), null, null);
+        if (removedRows == 0) {
+            return;
+        }
 
-        _toRemove.delete();
         mBus.post(new TagChangedMessage(Change.DELETED, _toRemove));
+    }
+
+    @Override
+    public Tag findById(String _uuid) {
+        Cursor cursor = mResolver.query(Uri.parse(TagProvider.SINGLE_TAG_CONTENT_URI.replace("*", _uuid)), Tag.COLUMN.ALL_COLUMNS, null, null, null);
+        if (cursor == null || cursor.getCount() == 0) {
+            return null;
+        }
+        cursor.moveToFirst();
+        Tag tag = new Tag();
+        tag.mUUID = cursor.getString(cursor.getColumnIndex(Tag.COLUMN.ID));
+        tag.mName = cursor.getString(cursor.getColumnIndex(Tag.COLUMN.NAME));
+        cursor.close();
+        return tag;
     }
 }

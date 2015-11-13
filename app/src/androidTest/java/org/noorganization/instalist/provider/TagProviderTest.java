@@ -54,8 +54,8 @@ public class TagProviderTest extends AndroidTestCase {
         assertNotNull(productCursor);
         assertEquals(1, productCursor.getCount());
         productCursor.moveToFirst();
-        assertEquals("TestTag1", productCursor.getString(productCursor.getColumnIndex(Tag.COLUMN_TABLE_PREFIXED.COLUMN_NAME)));
-        assertEquals(uuid, productCursor.getString(productCursor.getColumnIndex(Tag.COLUMN_TABLE_PREFIXED.COLUMN_ID)));
+        assertEquals("TestTag1", productCursor.getString(productCursor.getColumnIndex(Tag.COLUMN_PREFIXED.NAME)));
+        assertEquals(uuid, productCursor.getString(productCursor.getColumnIndex(Tag.COLUMN_PREFIXED.ID)));
 
         String uuid2 = UUID.randomUUID().toString();
         mDatabase.execSQL("INSERT INTO " + Tag.TABLE_NAME + " VALUES (?,?)", new String[]{
@@ -63,15 +63,15 @@ public class TagProviderTest extends AndroidTestCase {
                 "TestTag2"
         });
 
-        productCursor = mTagProvider.query(multipleTagsUri, null, null, null, Tag.COLUMN_TABLE_PREFIXED.COLUMN_NAME + " ASC");
+        productCursor = mTagProvider.query(multipleTagsUri, null, null, null, Tag.COLUMN_PREFIXED.NAME + " ASC");
         assertNotNull(productCursor);
         assertEquals(2, productCursor.getCount());
         productCursor.moveToFirst();
-        assertEquals("TestTag1", productCursor.getString(productCursor.getColumnIndex(Tag.COLUMN_TABLE_PREFIXED.COLUMN_NAME)));
-        assertEquals(uuid, productCursor.getString(productCursor.getColumnIndex(Tag.COLUMN_TABLE_PREFIXED.COLUMN_ID)));
+        assertEquals("TestTag1", productCursor.getString(productCursor.getColumnIndex(Tag.COLUMN_PREFIXED.NAME)));
+        assertEquals(uuid, productCursor.getString(productCursor.getColumnIndex(Tag.COLUMN_PREFIXED.ID)));
         productCursor.moveToNext();
-        assertEquals("TestTag2", productCursor.getString(productCursor.getColumnIndex(Tag.COLUMN_TABLE_PREFIXED.COLUMN_NAME)));
-        assertEquals(uuid2, productCursor.getString(productCursor.getColumnIndex(Tag.COLUMN_TABLE_PREFIXED.COLUMN_ID)));
+        assertEquals("TestTag2", productCursor.getString(productCursor.getColumnIndex(Tag.COLUMN_PREFIXED.NAME)));
+        assertEquals(uuid2, productCursor.getString(productCursor.getColumnIndex(Tag.COLUMN_PREFIXED.ID)));
         resetDb();
     }
 
@@ -93,8 +93,8 @@ public class TagProviderTest extends AndroidTestCase {
         assertNotNull(productCursor);
         assertEquals(1, productCursor.getCount());
         productCursor.moveToFirst();
-        assertEquals("TestTag1", productCursor.getString(productCursor.getColumnIndex(Tag.COLUMN_TABLE_PREFIXED.COLUMN_NAME)));
-        assertEquals(uuid, productCursor.getString(productCursor.getColumnIndex(Tag.COLUMN_TABLE_PREFIXED.COLUMN_ID)));
+        assertEquals("TestTag1", productCursor.getString(productCursor.getColumnIndex(Tag.COLUMN_PREFIXED.NAME)));
+        assertEquals(uuid, productCursor.getString(productCursor.getColumnIndex(Tag.COLUMN_PREFIXED.ID)));
 
         String uuid2 = UUID.randomUUID().toString();
         mDatabase.execSQL("INSERT INTO " + Tag.TABLE_NAME + " VALUES (?,?)", new String[]{
@@ -107,8 +107,8 @@ public class TagProviderTest extends AndroidTestCase {
         assertNotNull(productCursor);
         assertEquals(1, productCursor.getCount());
         productCursor.moveToFirst();
-        assertEquals("TestTag2", productCursor.getString(productCursor.getColumnIndex(Tag.COLUMN_TABLE_PREFIXED.COLUMN_NAME)));
-        assertEquals(uuid2, productCursor.getString(productCursor.getColumnIndex(Tag.COLUMN_TABLE_PREFIXED.COLUMN_ID)));
+        assertEquals("TestTag2", productCursor.getString(productCursor.getColumnIndex(Tag.COLUMN_PREFIXED.NAME)));
+        assertEquals(uuid2, productCursor.getString(productCursor.getColumnIndex(Tag.COLUMN_PREFIXED.ID)));
         resetDb();
     }
 
@@ -126,20 +126,20 @@ public class TagProviderTest extends AndroidTestCase {
         ContentValues contentValues = new ContentValues();
         String uuid = UUID.randomUUID().toString();
 
-        contentValues.put(Tag.COLUMN_NO_TABLE_PREFIXED.COLUMN_ID, uuid);
-        contentValues.put(Tag.COLUMN_NO_TABLE_PREFIXED.COLUMN_NAME, "TestTag");
+        contentValues.put(Tag.COLUMN.ID, uuid);
+        contentValues.put(Tag.COLUMN.NAME, "TestTag");
 
         Uri uri = mTagProvider.insert(Uri.parse(TagProvider.SINGLE_TAG_CONTENT_URI.replace("*", uuid)), contentValues);
         String pseudoUri = TagProvider.SINGLE_TAG_CONTENT_URI.replace("*", uuid);
         assertNotNull(uri);
         assertEquals(pseudoUri, uri.toString());
 
-        Cursor cursor = mTagProvider.query(uri, Tag.COLUMN_TABLE_PREFIXED.ALL_COLUMNS, null, null, null);
+        Cursor cursor = mTagProvider.query(uri, Tag.COLUMN_PREFIXED.ALL_COLUMNS, null, null, null);
         assertNotNull(cursor);
         assertEquals(1, cursor.getCount());
         cursor.moveToFirst();
-        assertEquals(uuid, cursor.getString(cursor.getColumnIndex(Tag.COLUMN_TABLE_PREFIXED.COLUMN_ID)));
-        assertEquals("TestTag", cursor.getString(cursor.getColumnIndex(Tag.COLUMN_TABLE_PREFIXED.COLUMN_NAME)));
+        assertEquals(uuid, cursor.getString(cursor.getColumnIndex(Tag.COLUMN_PREFIXED.ID)));
+        assertEquals("TestTag", cursor.getString(cursor.getColumnIndex(Tag.COLUMN_PREFIXED.NAME)));
         resetDb();
     }
 
@@ -149,15 +149,15 @@ public class TagProviderTest extends AndroidTestCase {
         ContentValues contentValues = new ContentValues();
         String uuid = UUID.randomUUID().toString();
 
-        contentValues.put(Tag.COLUMN_NO_TABLE_PREFIXED.COLUMN_ID, uuid);
-        contentValues.put(Tag.COLUMN_NO_TABLE_PREFIXED.COLUMN_NAME, "TestTag");
+        contentValues.put(Tag.COLUMN.ID, uuid);
+        contentValues.put(Tag.COLUMN.NAME, "TestTag");
 
 
         Uri uri = mTagProvider.insert(Uri.parse(TagProvider.SINGLE_TAG_CONTENT_URI.replace("*", uuid)), contentValues);
 
         int affectedRows = mTagProvider.delete(uri, null, null);
         assertEquals(1, affectedRows);
-        Cursor cursor = mTagProvider.query(uri, Tag.COLUMN_TABLE_PREFIXED.ALL_COLUMNS, null, null, null);
+        Cursor cursor = mTagProvider.query(uri, Tag.COLUMN_PREFIXED.ALL_COLUMNS, null, null, null);
         assertNotNull(cursor);
         assertEquals(0, cursor.getCount());
     }
@@ -166,34 +166,34 @@ public class TagProviderTest extends AndroidTestCase {
         ContentValues contentValues = new ContentValues();
         String uuid = UUID.randomUUID().toString();
 
-        contentValues.put(Tag.COLUMN_NO_TABLE_PREFIXED.COLUMN_ID, uuid);
-        contentValues.put(Tag.COLUMN_NO_TABLE_PREFIXED.COLUMN_NAME, "TestTag1");
+        contentValues.put(Tag.COLUMN.ID, uuid);
+        contentValues.put(Tag.COLUMN.NAME, "TestTag1");
 
         mTagProvider.insert(Uri.parse(TagProvider.SINGLE_TAG_CONTENT_URI.replace("*", uuid)), contentValues);
 
         String uuid2 = UUID.randomUUID().toString();
 
-        contentValues.put(Tag.COLUMN_NO_TABLE_PREFIXED.COLUMN_ID, uuid2);
-        contentValues.put(Tag.COLUMN_NO_TABLE_PREFIXED.COLUMN_NAME, "TestTag2");
+        contentValues.put(Tag.COLUMN.ID, uuid2);
+        contentValues.put(Tag.COLUMN.NAME, "TestTag2");
 
         mTagProvider.insert(Uri.parse(TagProvider.SINGLE_TAG_CONTENT_URI.replace("*", uuid2)), contentValues);
 
-        int affectedRows = mTagProvider.delete(Uri.parse(TagProvider.MULTIPLE_TAG_CONTENT_URI), Tag.COLUMN_TABLE_PREFIXED.COLUMN_NAME + " LIKE ?", new String[]{"%TestTag%"});
+        int affectedRows = mTagProvider.delete(Uri.parse(TagProvider.MULTIPLE_TAG_CONTENT_URI), Tag.COLUMN_PREFIXED.NAME + " LIKE ?", new String[]{"%TestTag%"});
 
         assertEquals(2, affectedRows);
 
 
-        contentValues.put(Tag.COLUMN_NO_TABLE_PREFIXED.COLUMN_ID, uuid);
-        contentValues.put(Tag.COLUMN_NO_TABLE_PREFIXED.COLUMN_NAME, "TestTag1");
+        contentValues.put(Tag.COLUMN.ID, uuid);
+        contentValues.put(Tag.COLUMN.NAME, "TestTag1");
 
         mTagProvider.insert(Uri.parse(TagProvider.SINGLE_TAG_CONTENT_URI.replace("*", uuid)), contentValues);
 
-        contentValues.put(Tag.COLUMN_NO_TABLE_PREFIXED.COLUMN_ID, uuid2);
-        contentValues.put(Tag.COLUMN_NO_TABLE_PREFIXED.COLUMN_NAME, "TestTag2");
+        contentValues.put(Tag.COLUMN.ID, uuid2);
+        contentValues.put(Tag.COLUMN.NAME, "TestTag2");
 
         mTagProvider.insert(Uri.parse(TagProvider.SINGLE_TAG_CONTENT_URI.replace("*", uuid2)), contentValues);
 
-        affectedRows = mTagProvider.delete(Uri.parse(TagProvider.MULTIPLE_TAG_CONTENT_URI), Tag.COLUMN_TABLE_PREFIXED.COLUMN_NAME + " LIKE ?", new String[]{"%TestTag1%"});
+        affectedRows = mTagProvider.delete(Uri.parse(TagProvider.MULTIPLE_TAG_CONTENT_URI), Tag.COLUMN_PREFIXED.NAME + " LIKE ?", new String[]{"%TestTag1%"});
 
         assertEquals(1, affectedRows);
     }
@@ -202,21 +202,21 @@ public class TagProviderTest extends AndroidTestCase {
         ContentValues contentValues = new ContentValues();
         String uuid = UUID.randomUUID().toString();
 
-        contentValues.put(Tag.COLUMN_NO_TABLE_PREFIXED.COLUMN_ID, uuid);
-        contentValues.put(Tag.COLUMN_NO_TABLE_PREFIXED.COLUMN_NAME, "TestTag1");
+        contentValues.put(Tag.COLUMN.ID, uuid);
+        contentValues.put(Tag.COLUMN.NAME, "TestTag1");
 
         Uri uri = mTagProvider.insert(Uri.parse(TagProvider.SINGLE_TAG_CONTENT_URI.replace("*", uuid)), contentValues);
 
-        contentValues.put(Tag.COLUMN_NO_TABLE_PREFIXED.COLUMN_NAME, "TestTag2");
+        contentValues.put(Tag.COLUMN.NAME, "TestTag2");
         int affectedRows = mTagProvider.update(uri, contentValues, null, null);
 
         assertEquals(1, affectedRows);
 
-        Cursor cursor = mTagProvider.query(uri, Tag.COLUMN_TABLE_PREFIXED.ALL_COLUMNS, null, null, null);
+        Cursor cursor = mTagProvider.query(uri, Tag.COLUMN_PREFIXED.ALL_COLUMNS, null, null, null);
         assertEquals(1, cursor.getCount());
         cursor.moveToFirst();
 
-        assertEquals("TestTag2", cursor.getString(cursor.getColumnIndex(Tag.COLUMN_TABLE_PREFIXED.COLUMN_NAME)));
+        assertEquals("TestTag2", cursor.getString(cursor.getColumnIndex(Tag.COLUMN_PREFIXED.NAME)));
     }
 
 }
