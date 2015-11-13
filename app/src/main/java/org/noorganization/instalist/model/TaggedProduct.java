@@ -94,17 +94,6 @@ public class TaggedProduct extends SugarRecord<TaggedProduct> {
         mProduct = _product;
     }
 
-    /**
-     * Retrieves all tagged products for the given _product.
-     *
-     * @param _product the product where the associating TaggedProduct should be found.
-     * @return the TaggedProduct when found, else empty TaggedProductList.
-     * @deprecated it seems to be a weird method
-     */
-    public static List<TaggedProduct> findTaggedProductsByProduct(Product _product) {
-        return TaggedProduct.find(TaggedProduct.class, "m_product = ?", _product.getId().toString());
-    }
-
     public ContentValues toContentValues(){
         ContentValues cv = new ContentValues();
         cv.put(COLUMN_NO_TABLE_PREFIXED.COLUMN_ID, this.mUUID);

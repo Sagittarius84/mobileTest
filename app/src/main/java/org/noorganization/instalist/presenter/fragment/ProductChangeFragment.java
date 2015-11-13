@@ -212,7 +212,8 @@ public class ProductChangeFragment extends DialogFragment {
                 mProductName.setText(currentProduct.mName);
                 mProductAmount.setValue(currentProduct.mDefaultAmount);
 
-                List<TaggedProduct> taggedProductList = TaggedProduct.findTaggedProductsByProduct(currentProduct);
+                // TODO use a cursor instead!
+                List<TaggedProduct> taggedProductList = ControllerFactory.getProductController().findTaggedProductsByProduct(currentProduct);
                 StringBuilder tagBuffer = new StringBuilder();
                 if(!taggedProductList.isEmpty()){
                     Iterator<TaggedProduct> taggedProductIterator = taggedProductList.iterator();

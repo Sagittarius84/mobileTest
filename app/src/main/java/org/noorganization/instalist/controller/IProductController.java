@@ -4,7 +4,10 @@ import android.support.annotation.NonNull;
 
 import org.noorganization.instalist.model.Product;
 import org.noorganization.instalist.model.Tag;
+import org.noorganization.instalist.model.TaggedProduct;
 import org.noorganization.instalist.model.Unit;
+
+import java.util.List;
 
 /**
  * The interface for modifying Products (created by software engineering). From presenter part, do only
@@ -69,4 +72,5 @@ public interface IProductController {
      */
     void removeTagFromProduct(Product _product, Tag _tag);
 
+    List<TaggedProduct> findTaggedProductsByProduct(Product _product);
 }

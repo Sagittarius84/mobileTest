@@ -23,6 +23,9 @@ import org.noorganization.instalist.provider.internal.IngredientProvider;
 import org.noorganization.instalist.provider.internal.ProductProvider;
 import org.noorganization.instalist.provider.internal.TaggedProductProvider;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import de.greenrobot.event.EventBus;
 
 
@@ -323,5 +326,31 @@ public class ProductController implements IProductController {
         taggedProduct.mProduct = product;
 
         return taggedProduct;
+    }
+
+    /**
+     * Retrieves all tagged products for the given _product.
+     *
+     * @param _product the product where the associating TaggedProduct should be found.
+     * @return the TaggedProduct when found, else empty TaggedProductList.
+     * @deprecated it seems to be a weird method
+     */
+    @Override
+    public List<TaggedProduct> findTaggedProductsByProduct(Product _product) {
+        Cursor taggedProductCursor = mResolver.query(Uri.parse(TaggedProductProvider.MULTIPLE_TAGGED_PRODUCT_CONTENT_URI),
+                TaggedProduct.ALL_COLUMNS_JOINED,
+                TaggedProduct.COLUMN_TABLE_PREFIXED.COLUMN_PRODUCT_ID + "=?",
+                new String[]{_product.mUUID}, null);
+
+        if (taggedProductCursor == null) {
+            return null;
+        }
+
+        taggedProductCursor.moveToFirst();
+        List<TaggedProduct> taggedProducts = new ArrayList<>();
+        do{
+            taggedProducts.add(parse(taggedProductCursor));
+        } while(taggedProductCursor.moveToNext());
+        return taggedProducts;
     }
 }
