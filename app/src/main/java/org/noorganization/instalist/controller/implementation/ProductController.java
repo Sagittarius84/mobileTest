@@ -24,6 +24,9 @@ import org.noorganization.instalist.model.Tag;
 import org.noorganization.instalist.model.TaggedProduct;
 import org.noorganization.instalist.model.Unit;
 import org.noorganization.instalist.provider.InstalistProvider;
+import org.noorganization.instalist.provider.internal.IngredientProvider;
+import org.noorganization.instalist.provider.internal.ListEntryProvider;
+import org.noorganization.instalist.provider.internal.ProductProvider;
 
 import java.util.List;
 
@@ -32,10 +35,11 @@ import de.greenrobot.event.EventBus;
 
 public class ProductController implements IProductController {
 
+    private static String LOG_TAG = ProductController.class.getName();
     private static ProductController mInstance;
 
-    private EventBus        mBus;
-    private Context         mContext;
+    private EventBus mBus;
+    private Context mContext;
     private ContentResolver mResolver;
     private IUnitController mUnitController;
 
@@ -64,49 +68,55 @@ public class ProductController implements IProductController {
         if (Float.isInfinite(_stepAmount) || Float.isNaN(_stepAmount) || _stepAmount < 0.0f) {
             return null;
         }
-        if (_unit != null && SugarRecord.findById(Unit.class, _unit.getId()) == null) {
+
+        Unit unit = mUnitController.findById(_unit.mUUID);
+        if (unit == null) {
             return null;
         }
-        if (Select.from(Product.class).where(Condition.prop("m_name").eq(_name)).count() != 0) {
+
+        Cursor productCursor = mResolver.query(Uri.parse(ProductProvider.MULTIPLE_PRODUCT_CONTENT_URI), Product.COLUMN.ALL_COLUMNS, Product.COLUMN.NAME + "= ?", new String[]{_name}, null, null);
+        if (productCursor == null || productCursor.getCount() > 0) {
             return null;
         }
 
-        Product rtn = new Product(_name, _unit, _defaultAmount, _stepAmount);
-        rtn.save();
+        Product product = new Product();
+        product.mName = _name;
+        product.mDefaultAmount = _defaultAmount;
+        product.mStepAmount = _stepAmount;
+        product.mUnit = unit;
 
-        mBus.post(new ProductChangedMessage(Change.CREATED, rtn));
+        Uri productUri = mResolver.insert(Uri.parse(ProductProvider.MULTIPLE_PRODUCT_CONTENT_URI), product.toContentValues());
+        if (productUri == null) {
+            return null;
+        }
 
-        return rtn;
+        mBus.post(new ProductChangedMessage(Change.CREATED, product));
+
+        productCursor.close();
+        return product;
     }
 
     @Override
-    public Product getProductById(@NonNull String _uuid) {
-        Cursor productCursor = mResolver.query(
-                Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI, "product"),
-                Product.COLUMN.ALL_COLUMNS,
-                Product.COLUMN.ID + " = ?",
-                new String[]{ _uuid },
-                null);
-        if (productCursor == null) {
-            Log.e(getClass().getCanonicalName(), "Searching for Product by UUID failed with null " +
-                    "instead of Cursor. Returning no Product.");
-            return null;
-        } else if (productCursor.getCount() == 0) {
-            productCursor.close();
+    public Product findById(@NonNull String _uuid) {
+        Cursor productCursor = mResolver.query(Uri.parse(ProductProvider.SINGLE_PRODUCT_CONTENT_URI.replace("*", _uuid)), Product.COLUMN.ALL_COLUMNS, null, null, null);
+        if (productCursor == null || productCursor.getCount() != 1) {
             return null;
         }
         productCursor.moveToFirst();
-        Product rtn = new Product();
-        rtn.id = _uuid;
-        rtn.mDefaultAmount = productCursor.getFloat(productCursor.getColumnIndex(
-                Product.COLUMN.DEFAULT_AMOUNT));
-        rtn.mName = productCursor.getString(productCursor.getColumnIndex(Product.COLUMN.NAME));
-        rtn.mStepAmount = productCursor.getFloat(productCursor.getColumnIndex(
-                Product.COLUMN.STEP_AMOUNT));
-        rtn.mUnit = mUnitController.getUnitByID(productCursor.getString(
-                productCursor.getColumnIndex(Product.COLUMN.UNIT)));
+        Product product = new Product();
+        product.mName = productCursor.getString(productCursor.getColumnIndex(Product.COLUMN.NAME));
+        product.mUUID = productCursor.getString(productCursor.getColumnIndex(Product.COLUMN.ID));
+        product.mDefaultAmount = productCursor.getFloat(productCursor.getColumnIndex(Product.COLUMN.DEFAULT_AMOUNT));
+        product.mStepAmount = productCursor.getFloat(productCursor.getColumnIndex(Product.COLUMN.STEP_AMOUNT));
+        product.mUnit = mUnitController.findById(productCursor.getString(productCursor.getColumnIndex(Product.COLUMN.UNIT)));
+
+        /*
+        if(product.mUnit == null){
+            return null;
+        }
+        */
         productCursor.close();
-        return rtn;
+        return product;
     }
 
     @Override
@@ -114,42 +124,49 @@ public class ProductController implements IProductController {
         if (_toChange == null) {
             return null;
         }
-        Product rtn = SugarRecord.findById(Product.class, _toChange.getId());
-        if (rtn == null) {
+        Product oldProduct = this.findById(_toChange.mUUID);
+        if (oldProduct == null) {
             return null;
         }
         if (_toChange.mName == null || _toChange.mName.length() == 0) {
-            return rtn;
+            return oldProduct;
         }
         if (Float.isInfinite(_toChange.mDefaultAmount) || Float.isNaN(_toChange.mDefaultAmount) ||
                 _toChange.mDefaultAmount <= 0.0f) {
-            return rtn;
+            return oldProduct;
         }
         if (Float.isInfinite(_toChange.mStepAmount) || Float.isNaN(_toChange.mStepAmount) ||
                 _toChange.mStepAmount < 0.0f) {
-            return rtn;
+            return oldProduct;
         }
-        if (_toChange.mUnit != null &&
-                SugarRecord.findById(Unit.class, _toChange.mUnit.getId()) == null) {
-            return rtn;
-        }
-
-        for (Product productToCheck : Select.from(Product.class).
-                where(Condition.prop("m_name").eq(_toChange.mName)).list()) {
-            if (productToCheck.getId().compareTo(_toChange.getId()) != 0) {
-                return rtn;
-            }
+        // check if given unit exists
+        if (_toChange.mUnit != null && mUnitController.findById(_toChange.mUnit.mUUID) == null) {
+            return oldProduct;
         }
 
-        rtn.mName = _toChange.mName;
-        rtn.mUnit = _toChange.mUnit;
-        rtn.mDefaultAmount = _toChange.mDefaultAmount;
-        rtn.mStepAmount = _toChange.mStepAmount;
-        rtn.save();
+        // check if another product has the same name if this name was changed
+        Cursor productsWithSameName = mResolver.query(Uri.parse(ProductProvider.MULTIPLE_PRODUCT_CONTENT_URI),
+                Product.COLUMN.ALL_COLUMNS, Product.COLUMN.NAME + "= ? AND " + Product.COLUMN.ID + "<> ?", new String[]{_toChange.mName, _toChange.mUUID}, null, null);
+        if (productsWithSameName == null) {
+            Log.e(LOG_TAG, "Internal failure ");
+            return oldProduct;
+        }
+        // check if there is another item with the same name
+        if (productsWithSameName.getCount() > 0) {
+            return oldProduct;
+        }
+        productsWithSameName.close();
 
-        mBus.post(new ProductChangedMessage(Change.CHANGED, rtn));
+        _toChange.mUUID = oldProduct.mUUID;
 
-        return rtn;
+        Uri productUri = mResolver.insert(Uri.parse(ProductProvider.SINGLE_PRODUCT_CONTENT_URI.replace("*", _toChange.mUUID)), _toChange.toContentValues());
+        if (productUri == null) {
+            return oldProduct;
+        }
+
+        mBus.post(new ProductChangedMessage(Change.CHANGED, _toChange));
+
+        return _toChange;
     }
 
     @Override
@@ -158,19 +175,41 @@ public class ProductController implements IProductController {
             return false;
         }
 
-        Product foundProduct = SugarRecord.findById(Product.class, _toRemove.getId());
+        Product foundProduct = findById(_toRemove.mUUID);
         if (foundProduct == null) {
+            // no product to delete
             return false;
         }
 
-        List<ListEntry>  foundEntries     = Select.from(ListEntry.class).
-                where(Condition.prop(ListEntry.ATTR_PRODUCT).eq(_toRemove.getId())).list();
-        List<Ingredient> foundIngredients = Select.from(Ingredient.class).
-                where(Condition.prop(Ingredient.ATTR_PRODUCT).eq(_toRemove.getId())).list();
-        if (!_deleteCompletely && (foundEntries.size() > 0 || foundIngredients.size() > 0)) {
-            return false;
+        if(!_deleteCompletely) {
+
+            Cursor listEntryCursor = mResolver.query(Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI, "entry"), ListEntry.COLUMN.ALL_COLUMNS, ListEntry.COLUMN.PRODUCT + "= ?", new String[]{_toRemove.mUUID}, null, null);
+            if(listEntryCursor == null){
+                Log.e(LOG_TAG, "Query for listEntry was not possible in removeProduct.");
+                return false;
+            }
+            if(listEntryCursor.getCount() > 0){
+                Log.e(LOG_TAG, "There are still ListEntries connected to this product. Either set deleteCompletely flag or remove the ListEntries by yourself.");
+                listEntryCursor.close();
+                return false;
+            }
+            Cursor ingredientCursor = mResolver.query(Uri.parse(IngredientProvider.MULTIPLE_INGREDIENT_CONTENT_URI), Ingredient.COLUMN.ALL_COLUMNS, Ingredient.COLUMN.PRODUCT_ID + "= ?", new String[]{_toRemove.mUUID}, null, null);
+            if(ingredientCursor == null){
+                Log.e(LOG_TAG, "Query for ingredient was not possible in removeProduct.");
+                return false;
+            }
+
+            if(ingredientCursor.getCount() > 0){
+                Log.e(LOG_TAG, "There are still ingredients connected to this product. Either set deleteCompletely flag or remove the ingredients by your self.");
+                ingredientCursor.close();
+                return false;
+            }
+
+            listEntryCursor.close();
+            ingredientCursor.close();
         }
 
+        // TODO later this day
         for (ListEntry currentEntry : foundEntries) {
             currentEntry.delete();
             mBus.post(new ListItemChangedMessage(Change.DELETED, currentEntry));
@@ -193,7 +232,7 @@ public class ProductController implements IProductController {
             return false;
         }
         Product foundProduct = SugarRecord.findById(Product.class, _product.getId());
-        Tag     foundTag     = SugarRecord.findById(Tag.class, _tag.getId());
+        Tag foundTag = SugarRecord.findById(Tag.class, _tag.getId());
         if (foundProduct == null || foundTag == null) {
             return false;
         }

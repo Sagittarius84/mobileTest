@@ -12,6 +12,7 @@ import android.support.annotation.Nullable;
 
 import org.noorganization.instalist.provider.internal.CategoryProvider;
 import org.noorganization.instalist.provider.internal.IInternalProvider;
+import org.noorganization.instalist.provider.internal.IngredientProvider;
 import org.noorganization.instalist.provider.internal.ListEntryProvider;
 import org.noorganization.instalist.provider.internal.ProductProvider;
 import org.noorganization.instalist.provider.internal.ShoppingListProvider;
@@ -51,6 +52,7 @@ public class InstalistProvider extends ContentProvider {
         IInternalProvider taggedProductProvider = new TaggedProductProvider(getContext());
         IInternalProvider shoppingListProvider = new ShoppingListProvider(getContext());
         IInternalProvider listEntryProvider = new ListEntryProvider(getContext());
+        IInternalProvider ingredientProvider = new IngredientProvider(getContext());
 
         categoryProvider.onCreate(mDatabase);
         productProvider.onCreate(mDatabase);
@@ -59,6 +61,7 @@ public class InstalistProvider extends ContentProvider {
         taggedProductProvider.onCreate(mDatabase);
         shoppingListProvider.onCreate(mDatabase);
         listEntryProvider.onCreate(mDatabase);
+        ingredientProvider.onCreate(mDatabase);
 
         mInternalProviders = new HashMap<>();
         mInternalProviders.put("category", categoryProvider);
@@ -68,6 +71,7 @@ public class InstalistProvider extends ContentProvider {
         mInternalProviders.put("taggedProduct", taggedProductProvider);
         mInternalProviders.put("list", shoppingListProvider);
         mInternalProviders.put("entry", listEntryProvider);
+        mInternalProviders.put("ingredient", ingredientProvider);
         return true;
     }
 

@@ -58,7 +58,7 @@ public class UnitController implements IUnitController {
     }
 
     @Override
-    public Unit getUnitByID(@NonNull String _uuid) {
+    public Unit findById(@NonNull String _uuid) {
         Cursor unitCursor = mResolver.query(
                 Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI, "unit"),
                 Unit.COLUMN.ALL_COLUMNS,

@@ -24,10 +24,10 @@ public interface IUnitController {
 
     /**
      * Searches a unit by UUID.
-     * @param _uuid
-     * @return
+     * @param _uuid the id of the searched {@link Unit}.
+     * @return null if no unit was found else the unit.
      */
-    Unit getUnitByID(@NonNull String _uuid);
+    Unit findById(@NonNull String _uuid);
 
     /**
      * Rename the Unit, if possible.

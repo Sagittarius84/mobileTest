@@ -1,14 +1,18 @@
 package org.noorganization.instalist.model;
 
+import android.content.ContentResolver;
+import android.content.ContentValues;
+import android.database.Cursor;
 import android.net.Uri;
 
-import com.orm.SugarRecord;
+import org.noorganization.instalist.provider.internal.ProductProvider;
+import org.noorganization.instalist.provider.internal.UnitProvider;
 
 /**
  * Represents a product.
  * Created by michi on 14.04.15.
  */
-public class Product extends SugarRecord<Product> {
+public class Product {
 
     public final static String TABLE_NAME = "product";
 
@@ -61,36 +65,42 @@ public class Product extends SugarRecord<Product> {
             + "ON DELETE SET NULL ON UPDATE NO ACTION"
             + ");";
 
-    public String id;
+    public String mUUID;
 
     public String mName;
-    /** The unit of the product. Can also be null if the products has no unit. */
-    public Unit   mUnit;
-    /** The default amount is usually 1.0f */
-    public float  mDefaultAmount;
-    /** The amount to increase or decrease over quick buttons. Usually 1.0f. */
-    public float  mStepAmount;
+    /**
+     * The unit of the product. Can also be null if the products has no unit.
+     */
+    public Unit mUnit;
+    /**
+     * The default amount is usually 1.0f
+     */
+    public float mDefaultAmount;
+    /**
+     * The amount to increase or decrease over quick buttons. Usually 1.0f.
+     */
+    public float mStepAmount;
 
     public Product() {
-        mUnit          = null;
-        mName          = "";
+        mUnit = null;
+        mName = "";
         mDefaultAmount = 1.0f;
-        mStepAmount    = 1.0f;
+        mStepAmount = 1.0f;
     }
 
 
     public Product(String _name, Unit _unit, float _defaultAmount, float _stepAmount) {
-        mUnit          = _unit;
-        mName          = _name;
+        mUnit = _unit;
+        mName = _name;
         mDefaultAmount = _defaultAmount;
-        mStepAmount    = _stepAmount;
+        mStepAmount = _stepAmount;
     }
 
     public Product(String _name, Unit _unit) {
-        mUnit          = _unit;
-        mName          = _name;
+        mUnit = _unit;
+        mName = _name;
         mDefaultAmount = 1.0f;
-        mStepAmount    = 1.0f;
+        mStepAmount = 1.0f;
     }
 
     @Override
@@ -117,30 +127,46 @@ public class Product extends SugarRecord<Product> {
             return false;
         }
 
-        return getId().compareTo(anotherProduct.getId()) == 0;
+        return mUUID.compareTo(anotherProduct.mUUID) == 0;
     }
+
 
     @Override
     public int hashCode() {
-        return getId().intValue();
+        return mUUID.hashCode();
     }
-
 
     @Override
     public String toString() {
         return "Product{" +
+                "mUUID='" + mUUID + '\'' +
                 "mName='" + mName + '\'' +
-                ", mUnit=" + (mUnit == null ? "null" : "id:"+mUnit.getId()) +
+                ", mUnit=" + (mUnit == null ? "null" : "id:" + mUnit.mUUID) +
                 ", mDefaultAmount=" + mDefaultAmount +
                 ", mStepAmount=" + mStepAmount +
                 '}';
     }
 
     public Uri toUri(Uri _baseUri) {
-        if (id == null) {
+        if (mUUID == null) {
             return null;
         }
 
-        return Uri.withAppendedPath(_baseUri, "product/" + id);
+        return Uri.withAppendedPath(_baseUri, "product/" + mUUID);
+    }
+
+    /**
+     * Creates a {@link ContentValues} Object with all column fields of this class.
+     *
+     * @return the contentvalues for this instance.
+     */
+    public ContentValues toContentValues() {
+        ContentValues cv = new ContentValues(5);
+        cv.put(COLUMN.ID, this.mUUID == null ? null : this.mUUID);
+        cv.put(COLUMN.NAME, this.mName);
+        cv.put(COLUMN.DEFAULT_AMOUNT, this.mDefaultAmount);
+        cv.put(COLUMN.STEP_AMOUNT, this.mStepAmount);
+        cv.put(COLUMN.UNIT, this.mUnit.mUUID);
+        return cv;
     }
 }

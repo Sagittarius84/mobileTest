@@ -100,7 +100,7 @@ public class ListController implements IListController {
         rtn.mUUID = entryCursor.getString(entryCursor.getColumnIndex(ListEntry.COLUMN.ID));
         rtn.mList = getListById(entryCursor.getString(entryCursor.getColumnIndex(
                 ListEntry.COLUMN.LIST)));
-        rtn.mProduct = mProductController.getProductById(entryCursor.getString(
+        rtn.mProduct = mProductController.findById(entryCursor.getString(
                 entryCursor.getColumnIndex(ListEntry.COLUMN.PRODUCT)));
         rtn.mAmount = entryCursor.getFloat(entryCursor.getColumnIndex(ListEntry.COLUMN.AMOUNT));
         rtn.mPriority = entryCursor.getInt(entryCursor.getColumnIndex(ListEntry.COLUMN.PRIORITY));
@@ -462,7 +462,7 @@ public class ListController implements IListController {
         }
 
         ShoppingList savedList = getListById(_list.mUUID);
-        Product savedProduct = mProductController.getProductById(_product.id);
+        Product savedProduct = mProductController.findById(_product.id);
         if (savedList == null || savedProduct == null) {
             return null;
         }

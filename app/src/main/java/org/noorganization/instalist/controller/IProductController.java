@@ -32,7 +32,7 @@ public interface IProductController {
      * @param _uuid The UUID to search for. Not Null.
      * @return Either the found product or null if not found or something went wrong.
      */
-    Product getProductById(@NonNull String _uuid);
+    Product findById(@NonNull String _uuid);
 
     /**
      * Changes a product.
@@ -68,4 +68,5 @@ public interface IProductController {
      * @param _tag The valid tag, not null.
      */
     void removeTagFromProduct(Product _product, Tag _tag);
+
 }

@@ -144,7 +144,7 @@ public class ListEntry extends SugarRecord<ListEntry> {
     public String toString() {
         return "ListEntry { id = " + getId() + ", mList.id = " + (mList == null ? "none" :
                 mList.mUUID.toString()) +
-                ", mProduct.id = " + (mProduct == null ? "none" : mProduct.getId()) +
+                ", mProduct.id = " + (mProduct == null ? "none" : mProduct.mUUID) +
                 ", mStruck = " + mStruck + ", mAmount" + mAmount + " }";
     }
 

@@ -239,10 +239,10 @@ public class RecipeProviderTest extends AndroidTestCase {
         uri = uri.buildUpon().appendPath("ingredient").appendPath(uuid).build();
 
         ContentValues ingredientValues = new ContentValues();
-        ingredientValues.put(Ingredient.COLUMN_NO_TABLE_PREFIXED.COLUMN_ID, uuid);
-        ingredientValues.put(Ingredient.COLUMN_NO_TABLE_PREFIXED.COLUMN_PRODUCT_ID, uuidProduct);
-        ingredientValues.put(Ingredient.COLUMN_NO_TABLE_PREFIXED.COLUMN_RECIPE_ID, uuidRecipe);
-        ingredientValues.put(Ingredient.COLUMN_NO_TABLE_PREFIXED.COLUMN_AMOUNT, 1.0f);
+        ingredientValues.put(Ingredient.COLUMN.ID, uuid);
+        ingredientValues.put(Ingredient.COLUMN.PRODUCT_ID, uuidProduct);
+        ingredientValues.put(Ingredient.COLUMN.RECIPE_ID, uuidRecipe);
+        ingredientValues.put(Ingredient.COLUMN.AMOUNT, 1.0f);
 
         Uri ingredientUri = mRecipeProvider.insert(uri, ingredientValues);
         uri = Uri.parse(RecipeProvider.SINGLE_RECIPE_INGREDIENT_CONTENT_URI.replaceFirst("\\*", uuidRecipe).replaceFirst("\\*", uuid));
@@ -250,14 +250,14 @@ public class RecipeProviderTest extends AndroidTestCase {
         assertNotNull(ingredientUri);
         assertEquals(true, uri.compareTo(ingredientUri) == 0);
 
-        Cursor cursor = mRecipeProvider.query(uri, Ingredient.COLUMN_NO_TABLE_PREFIXED.ALL_COLUMNS, null, null, null);
+        Cursor cursor = mRecipeProvider.query(uri, Ingredient.COLUMN.ALL_COLUMNS, null, null, null);
 
         assertNotNull(cursor);
         // only one ingredient should be included
         assertEquals(1, cursor.getCount());
 
         cursor.moveToFirst();
-        assertEquals(uuid, cursor.getString(cursor.getColumnIndex(Ingredient.COLUMN_NO_TABLE_PREFIXED.COLUMN_ID)));
+        assertEquals(uuid, cursor.getString(cursor.getColumnIndex(Ingredient.COLUMN.ID)));
 
     }
 
@@ -279,14 +279,14 @@ public class RecipeProviderTest extends AndroidTestCase {
         Uri uri = Uri.parse(RecipeProvider.SINGLE_RECIPE_INGREDIENT_CONTENT_URI.replaceFirst("\\*", uuidRecipe).replaceFirst("\\*", uuid));
         assertNotNull(uri);
 
-        Cursor cursor = mRecipeProvider.query(uri, Ingredient.COLUMN_NO_TABLE_PREFIXED.ALL_COLUMNS, null, null, null);
+        Cursor cursor = mRecipeProvider.query(uri, Ingredient.COLUMN.ALL_COLUMNS, null, null, null);
 
         assertNotNull(cursor);
         // only one ingredient should be included
         assertEquals(1, cursor.getCount());
 
         cursor.moveToFirst();
-        assertEquals(uuid, cursor.getString(cursor.getColumnIndex(Ingredient.COLUMN_NO_TABLE_PREFIXED.COLUMN_ID)));
+        assertEquals(uuid, cursor.getString(cursor.getColumnIndex(Ingredient.COLUMN.ID)));
         cursor.close();
     }
 
@@ -313,18 +313,18 @@ public class RecipeProviderTest extends AndroidTestCase {
 
         Uri uri = Uri.parse(RecipeProvider.MULTIPLE_RECIPE_INGREDIENT_CONTENT_URI.replaceFirst("\\*", uuidRecipe));
 
-        Cursor cursor = mRecipeProvider.query(uri, Ingredient.COLUMN_NO_TABLE_PREFIXED.ALL_COLUMNS, null, null, Ingredient.COLUMN_NO_TABLE_PREFIXED.COLUMN_AMOUNT + " ASC");
+        Cursor cursor = mRecipeProvider.query(uri, Ingredient.COLUMN.ALL_COLUMNS, null, null, Ingredient.COLUMN.AMOUNT + " ASC");
 
         assertNotNull(cursor);
         // only one ingredient should be included
         assertEquals(2, cursor.getCount());
 
         cursor.moveToFirst();
-        assertEquals(uuid, cursor.getString(cursor.getColumnIndex(Ingredient.COLUMN_NO_TABLE_PREFIXED.COLUMN_ID)));
-        assertEquals(uuidProduct1, cursor.getString(cursor.getColumnIndex(Ingredient.COLUMN_NO_TABLE_PREFIXED.COLUMN_PRODUCT_ID)));
+        assertEquals(uuid, cursor.getString(cursor.getColumnIndex(Ingredient.COLUMN.ID)));
+        assertEquals(uuidProduct1, cursor.getString(cursor.getColumnIndex(Ingredient.COLUMN.PRODUCT_ID)));
         assertTrue(cursor.moveToNext());
-        assertEquals(uuid2, cursor.getString(cursor.getColumnIndex(Ingredient.COLUMN_NO_TABLE_PREFIXED.COLUMN_ID)));
-        assertEquals(uuidProduct2, cursor.getString(cursor.getColumnIndex(Ingredient.COLUMN_NO_TABLE_PREFIXED.COLUMN_PRODUCT_ID)));
+        assertEquals(uuid2, cursor.getString(cursor.getColumnIndex(Ingredient.COLUMN.ID)));
+        assertEquals(uuidProduct2, cursor.getString(cursor.getColumnIndex(Ingredient.COLUMN.PRODUCT_ID)));
         cursor.close();
     }
 
@@ -343,10 +343,10 @@ public class RecipeProviderTest extends AndroidTestCase {
         uri = uri.buildUpon().appendPath("ingredient").appendPath(uuid).build();
 
         ContentValues ingredientValues = new ContentValues();
-        ingredientValues.put(Ingredient.COLUMN_NO_TABLE_PREFIXED.COLUMN_ID, uuid);
-        ingredientValues.put(Ingredient.COLUMN_NO_TABLE_PREFIXED.COLUMN_PRODUCT_ID, uuidProduct);
-        ingredientValues.put(Ingredient.COLUMN_NO_TABLE_PREFIXED.COLUMN_RECIPE_ID, uuidRecipe);
-        ingredientValues.put(Ingredient.COLUMN_NO_TABLE_PREFIXED.COLUMN_AMOUNT, 1.0f);
+        ingredientValues.put(Ingredient.COLUMN.ID, uuid);
+        ingredientValues.put(Ingredient.COLUMN.PRODUCT_ID, uuidProduct);
+        ingredientValues.put(Ingredient.COLUMN.RECIPE_ID, uuidRecipe);
+        ingredientValues.put(Ingredient.COLUMN.AMOUNT, 1.0f);
 
         Uri ingredientUri = mRecipeProvider.insert(uri, ingredientValues);
         uri = Uri.parse(RecipeProvider.SINGLE_RECIPE_INGREDIENT_CONTENT_URI.replaceFirst("\\*", uuidRecipe).replaceFirst("\\*", uuid));
@@ -358,7 +358,7 @@ public class RecipeProviderTest extends AndroidTestCase {
         uri = Uri.parse(RecipeProvider.MULTIPLE_RECIPE_INGREDIENT_CONTENT_URI.replaceFirst("\\*", uuidRecipe));
 
         // check if the entries are really removed.
-        Cursor cursor = mRecipeProvider.query(uri, Ingredient.COLUMN_NO_TABLE_PREFIXED.ALL_COLUMNS, null, null, Ingredient.COLUMN_NO_TABLE_PREFIXED.COLUMN_AMOUNT + " ASC");
+        Cursor cursor = mRecipeProvider.query(uri, Ingredient.COLUMN.ALL_COLUMNS, null, null, Ingredient.COLUMN.AMOUNT + " ASC");
         assertNotNull(cursor);
         assertEquals(0, cursor.getCount());
         cursor.close();
@@ -387,15 +387,15 @@ public class RecipeProviderTest extends AndroidTestCase {
         Uri uri2 = Uri.parse(RecipeProvider.SINGLE_RECIPE_INGREDIENT_CONTENT_URI.replaceFirst("\\*", uuidRecipe).replaceFirst("\\*", uuid2));
 
         ContentValues ingredientValues = new ContentValues();
-        ingredientValues.put(Ingredient.COLUMN_NO_TABLE_PREFIXED.COLUMN_ID, uuid);
-        ingredientValues.put(Ingredient.COLUMN_NO_TABLE_PREFIXED.COLUMN_PRODUCT_ID, uuidProduct);
-        ingredientValues.put(Ingredient.COLUMN_NO_TABLE_PREFIXED.COLUMN_RECIPE_ID, uuidRecipe);
-        ingredientValues.put(Ingredient.COLUMN_NO_TABLE_PREFIXED.COLUMN_AMOUNT, 1.0f);
+        ingredientValues.put(Ingredient.COLUMN.ID, uuid);
+        ingredientValues.put(Ingredient.COLUMN.PRODUCT_ID, uuidProduct);
+        ingredientValues.put(Ingredient.COLUMN.RECIPE_ID, uuidRecipe);
+        ingredientValues.put(Ingredient.COLUMN.AMOUNT, 1.0f);
 
         mRecipeProvider.insert(uri1, ingredientValues);
 
-        ingredientValues.put(Ingredient.COLUMN_NO_TABLE_PREFIXED.COLUMN_ID, uuid2);
-        ingredientValues.put(Ingredient.COLUMN_NO_TABLE_PREFIXED.COLUMN_PRODUCT_ID, uuidProduct2);
+        ingredientValues.put(Ingredient.COLUMN.ID, uuid2);
+        ingredientValues.put(Ingredient.COLUMN.PRODUCT_ID, uuidProduct2);
         mRecipeProvider.insert(uri2, ingredientValues);
 
         Uri recipeUri = Uri.parse(RecipeProvider.MULTIPLE_RECIPE_INGREDIENT_CONTENT_URI.replaceFirst("\\*", uuidRecipe));
@@ -404,7 +404,7 @@ public class RecipeProviderTest extends AndroidTestCase {
 
         assertEquals(2, affectedRows);
         // check if the entries are really removed.
-        Cursor cursor = mRecipeProvider.query(recipeUri, Ingredient.COLUMN_NO_TABLE_PREFIXED.ALL_COLUMNS, null, null, Ingredient.COLUMN_NO_TABLE_PREFIXED.COLUMN_AMOUNT + " ASC");
+        Cursor cursor = mRecipeProvider.query(recipeUri, Ingredient.COLUMN.ALL_COLUMNS, null, null, Ingredient.COLUMN.AMOUNT + " ASC");
         assertNotNull(cursor);
         assertEquals(0, cursor.getCount());
         cursor.close();
@@ -431,19 +431,19 @@ public class RecipeProviderTest extends AndroidTestCase {
         Uri uri2 = Uri.parse(RecipeProvider.SINGLE_RECIPE_INGREDIENT_CONTENT_URI.replaceFirst("\\*", uuidRecipe).replaceFirst("\\*", uuid2));
 
         ContentValues ingredientValues = new ContentValues();
-        ingredientValues.put(Ingredient.COLUMN_NO_TABLE_PREFIXED.COLUMN_ID, uuid);
-        ingredientValues.put(Ingredient.COLUMN_NO_TABLE_PREFIXED.COLUMN_PRODUCT_ID, uuidProduct);
-        ingredientValues.put(Ingredient.COLUMN_NO_TABLE_PREFIXED.COLUMN_RECIPE_ID, uuidRecipe);
-        ingredientValues.put(Ingredient.COLUMN_NO_TABLE_PREFIXED.COLUMN_AMOUNT, 1.0f);
+        ingredientValues.put(Ingredient.COLUMN.ID, uuid);
+        ingredientValues.put(Ingredient.COLUMN.PRODUCT_ID, uuidProduct);
+        ingredientValues.put(Ingredient.COLUMN.RECIPE_ID, uuidRecipe);
+        ingredientValues.put(Ingredient.COLUMN.AMOUNT, 1.0f);
 
         mRecipeProvider.insert(uri1, ingredientValues);
 
-        ingredientValues.put(Ingredient.COLUMN_NO_TABLE_PREFIXED.COLUMN_ID, uuid2);
-        ingredientValues.put(Ingredient.COLUMN_NO_TABLE_PREFIXED.COLUMN_PRODUCT_ID, uuidProduct2);
+        ingredientValues.put(Ingredient.COLUMN.ID, uuid2);
+        ingredientValues.put(Ingredient.COLUMN.PRODUCT_ID, uuidProduct2);
         mRecipeProvider.insert(uri2, ingredientValues);
 
-        ingredientValues.put(Ingredient.COLUMN_NO_TABLE_PREFIXED.COLUMN_ID, uuid);
-        ingredientValues.put(Ingredient.COLUMN_NO_TABLE_PREFIXED.COLUMN_AMOUNT, 5.0f);
+        ingredientValues.put(Ingredient.COLUMN.ID, uuid);
+        ingredientValues.put(Ingredient.COLUMN.AMOUNT, 5.0f);
 
         Uri ingredientUri = Uri.parse(RecipeProvider.SINGLE_RECIPE_INGREDIENT_CONTENT_URI.replaceFirst("\\*", uuidRecipe).replaceFirst("\\*", uuid));
         int affectedRows = mRecipeProvider.update(ingredientUri,
@@ -452,11 +452,11 @@ public class RecipeProviderTest extends AndroidTestCase {
 
         assertEquals(1, affectedRows);
 
-        Cursor cursor = mRecipeProvider.query(ingredientUri, Ingredient.COLUMN_NO_TABLE_PREFIXED.ALL_COLUMNS, null, null, null);
+        Cursor cursor = mRecipeProvider.query(ingredientUri, Ingredient.COLUMN.ALL_COLUMNS, null, null, null);
         assertNotNull(cursor);
         cursor.moveToFirst();
-        assertEquals(uuid, cursor.getString(cursor.getColumnIndex(Ingredient.COLUMN_NO_TABLE_PREFIXED.COLUMN_ID)));
-        assertEquals(5.0f, cursor.getFloat(cursor.getColumnIndex(Ingredient.COLUMN_NO_TABLE_PREFIXED.COLUMN_AMOUNT)));
+        assertEquals(uuid, cursor.getString(cursor.getColumnIndex(Ingredient.COLUMN.ID)));
+        assertEquals(5.0f, cursor.getFloat(cursor.getColumnIndex(Ingredient.COLUMN.AMOUNT)));
         cursor.close();
 
     }

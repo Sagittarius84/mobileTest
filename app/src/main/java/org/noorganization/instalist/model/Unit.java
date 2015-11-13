@@ -1,6 +1,10 @@
 package org.noorganization.instalist.model;
 
-import com.orm.SugarRecord;
+import android.content.ContentResolver;
+import android.database.Cursor;
+import android.net.Uri;
+
+import org.noorganization.instalist.provider.internal.UnitProvider;
 
 import java.util.UUID;
 
@@ -8,7 +12,7 @@ import java.util.UUID;
  * Represents a unit of a product. For example: kilogram
  * Created by michi on 14.04.15.
  */
-public class Unit extends SugarRecord<Unit> {
+public class Unit {
 
     public final static String TABLE_NAME = "unit";
 
@@ -53,7 +57,6 @@ public class Unit extends SugarRecord<Unit> {
         mUUID = _uuid;
         mName = _name;
     }
-
 
     @Override
     public boolean equals(Object other) {
