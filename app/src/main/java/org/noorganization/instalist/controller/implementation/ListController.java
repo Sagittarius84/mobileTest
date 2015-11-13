@@ -6,7 +6,6 @@ import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
 import android.support.annotation.NonNull;
-import android.support.v4.app.INotificationSideChannel;
 import android.util.Log;
 
 import com.orm.SugarRecord;
@@ -25,6 +24,7 @@ import org.noorganization.instalist.model.Product;
 import org.noorganization.instalist.model.ShoppingList;
 import org.noorganization.instalist.provider.InstalistProvider;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import de.greenrobot.event.EventBus;
@@ -32,17 +32,17 @@ import de.greenrobot.event.EventBus;
 
 /**
  * Implementation of {@link org.noorganization.instalist.controller.IListController} as
- * singleton. Please retrieve your instance per {@link #getInstance()}.
+ * singleton. Please retrieve your instance per {@link ListController#getInstance(Context _context)}.
  */
 public class ListController implements IListController {
 
     private static ListController mInstance;
 
-    private EventBus            mBus;
-    private Context             mContext;
-    private IProductController  mProductController;
+    private EventBus mBus;
+    private Context mContext;
+    private IProductController mProductController;
     private ICategoryController mCategoryController;
-    private ContentResolver     mResolver;
+    private ContentResolver mResolver;
 
     private ListController(Context _context) {
         mBus = EventBus.getDefault();
@@ -52,7 +52,7 @@ public class ListController implements IListController {
         mResolver = mContext.getContentResolver();
     }
 
-    static ListController getInstance(Context _context) {
+    public static ListController getInstance(Context _context) {
         if (mInstance == null) {
             mInstance = new ListController(_context);
         }
@@ -60,79 +60,8 @@ public class ListController implements IListController {
         return mInstance;
     }
 
-    private ListEntry addOrChangeItem(ShoppingList _list, Product _product, float _amount,
-                                      boolean _prioUsed, int _prio, boolean _addAmount) {
-        if (_list == null || _product == null) {
-            return null;
-        }
 
-        ShoppingList savedList = getListById(_list.mUUID);
-        Product savedProduct = mProductController.getProductById(_product.id);
-        if (savedList == null || savedProduct == null) {
-            return null;
-        }
-
-        Uri listUri = savedList.toUri(InstalistProvider.BASE_CONTENT_URI);
-        Cursor entryCheck = mResolver.query(
-                Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI, listUri.getPath() + "/entry"),
-                new String[]{ ListEntry.COLUMN.ID, ListEntry.COLUMN.AMOUNT },
-                ListEntry.PREFIXED_COLUMN.PRODUCT + " = ?",
-                new String[]{ _product.id },
-                null);
-        if (entryCheck == null) {
-            Log.e(getClass().getCanonicalName(), "Searching for existing ListEntry (to change it) " +
-                    "failed. Returning no ListEntry.");
-            return null;
-        }
-        ContentValues newEntryCV = new ContentValues(5);
-        newEntryCV.put(ListEntry.COLUMN.LIST, savedList.mUUID);
-        newEntryCV.put(ListEntry.COLUMN.PRODUCT, savedProduct.id);
-        if (_prioUsed) {
-            newEntryCV.put(ListEntry.COLUMN.PRIORITY, _prio);
-        }
-        ListEntry rtn;
-        if(entryCheck.getCount() == 0) {
-            newEntryCV.put(ListEntry.COLUMN.AMOUNT, _amount);
-            entryCheck.close();
-
-            Uri newEntryUri = mResolver.insert(
-                    Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI,
-                            savedList.getUriPath() + "/entry"),
-                    newEntryCV);
-            if (newEntryUri == null) {
-                return null;
-            }
-            rtn = new ListEntry();
-            rtn.mUUID = newEntryUri.getLastPathSegment();
-            rtn.mAmount = _amount;
-            rtn.mList = savedList;
-            rtn.mProduct = savedProduct;
-            rtn.mPriority = (_prioUsed ? _prio : ListEntry.DEFAULTS.PRIORITY);
-            rtn.mStruck = (ListEntry.DEFAULTS.STRUCK != 0);
-
-            mBus.post(new ListItemChangedMessage(Change.CREATED, rtn));
-        } else {
-            entryCheck.moveToFirst();
-            if (_addAmount) {
-                newEntryCV.put(ListEntry.COLUMN.AMOUNT, _amount + entryCheck.getFloat(
-                        entryCheck.getColumnIndex(ListEntry.COLUMN.AMOUNT)));
-            } else {
-                newEntryCV.put(ListEntry.COLUMN.AMOUNT, _amount);
-            }
-
-            String entryUUID = entryCheck.getString(entryCheck.getColumnIndex(ListEntry.COLUMN.ID));
-            int updatedItems = mResolver.update(
-                    Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI,
-                            savedList.getUriPath() + "/entry/" + entryUUID),
-                    newEntryCV,
-                    null, null);
-            rtn = getEntryById(entryUUID);
-            if (updatedItems != 0) {
-                mBus.post(new ListItemChangedMessage(Change.CHANGED, rtn));
-            }
-        }
-        return rtn;
-    }
+    // region Public methods
 
     @Override
     public ListEntry addOrChangeItem(ShoppingList _list, Product _product, float _amount) {
@@ -141,7 +70,7 @@ public class ListController implements IListController {
 
     @Override
     public ListEntry addOrChangeItem(ShoppingList _list, Product _product, float _amount, int _prio) {
-        return addOrChangeItem(_list,_product, _amount, true, _prio, false);
+        return addOrChangeItem(_list, _product, _amount, true, _prio, false);
     }
 
     @Override
@@ -152,7 +81,7 @@ public class ListController implements IListController {
     @Override
     public ListEntry addOrChangeItem(ShoppingList _list, Product _product, float _amount, int _prio,
                                      boolean _addAmount) {
-        return addOrChangeItem(_list,_product, _amount, true, _prio, true);
+        return addOrChangeItem(_list, _product, _amount, true, _prio, true);
     }
 
     @Override
@@ -241,7 +170,7 @@ public class ListController implements IListController {
         Cursor itemsToStrike = mResolver.query(
                 Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI,
                         _list.toUri(InstalistProvider.BASE_CONTENT_URI).getPath() + "/entry"),
-                new String[]{ ListEntry.COLUMN.ID },
+                new String[]{ListEntry.COLUMN.ID},
                 null, null, null);
         if (itemsToStrike != null) {
             itemsToStrike.moveToFirst();
@@ -251,7 +180,7 @@ public class ListController implements IListController {
             while (!itemsToStrike.isAfterLast()) {
                 String entryUUID = itemsToStrike.getString(itemsToStrike.getColumnIndex(
                         ListEntry.COLUMN.ID));
-                if(mResolver.update(Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI,
+                if (mResolver.update(Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI,
                         prefixPath + entryUUID), strikeCV, null, null) == 1) {
                     mBus.post(new ListItemChangedMessage(Change.CHANGED, getEntryById(entryUUID)));
                 }
@@ -279,7 +208,7 @@ public class ListController implements IListController {
             while (!itemsToStrike.isAfterLast()) {
                 String entryUUID = itemsToStrike.getString(itemsToStrike.getColumnIndex(
                         ListEntry.COLUMN.ID));
-                if(mResolver.update(Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI,
+                if (mResolver.update(Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI,
                         prefixPath + entryUUID), strikeCV, null, null) == 1) {
                     mBus.post(new ListItemChangedMessage(Change.CHANGED, getEntryById(entryUUID)));
                 }
@@ -307,37 +236,6 @@ public class ListController implements IListController {
 
         ListEntry toChange = getEntryByListAndProduct(_list, _product);
         return unstrikeItem(toChange, false);
-    }
-
-    private ListEntry unstrikeItem(ListEntry _toChange, boolean _reload) {
-        return updateStruckItem(_toChange, _reload, false);
-    }
-
-    private ListEntry updateStruckItem(ListEntry _toChange, boolean _reload, boolean _struck) {
-        if (_toChange == null) {
-            return null;
-        }
-
-        ContentValues entryUpdateCV = new ContentValues(1);
-        entryUpdateCV.put(ListEntry.COLUMN.STRUCK, _struck);
-        int chagedItems = mResolver.update(_toChange.toUri(InstalistProvider.BASE_CONTENT_URI),
-                entryUpdateCV,
-                null, null);
-        ListEntry rtn;
-        if (_reload) {
-            rtn = getEntryById(_toChange.mUUID);
-        } else {
-            _toChange.mStruck = _struck;
-            rtn = _toChange;
-        }
-        if (chagedItems > 0) {
-            mBus.post(new ListItemChangedMessage(Change.CHANGED, rtn));
-        }
-        return rtn;
-    }
-
-    private ListEntry strikeItem(ListEntry _item, boolean _reload) {
-        return updateStruckItem(_item, _reload, true);
     }
 
     @Override
@@ -406,29 +304,34 @@ public class ListController implements IListController {
 
         ContentValues newListCV = new ContentValues(2);
         newListCV.put(ShoppingList.COLUMN.NAME, _name);
+
+        String insertUri = InstalistProvider.BASE_CONTENT_URI.getPath().concat("category/").concat("?").concat("/list");
         if (_category == null) {
+            // no category is selected, use default one
             newListCV.putNull(ShoppingList.COLUMN.CATEGORY);
+            // set the category to the default uuid
+            insertUri = String.format(insertUri, "-");
+            // TODO do a query to get the category in here?
         } else {
+            // category is set by uuid
             newListCV.put(ShoppingList.COLUMN.CATEGORY, _category.mUUID);
-        }
-        Uri createdList = mResolver.insert(Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI,
-                "category"), newListCV);
-
-
-        Category targetCategory = null;
-        if (_category != null) {
-            targetCategory = SugarRecord.findById(Category.class, _category.getId());
-            if (targetCategory == null) {
-                return null;
-            }
+            insertUri = String.format(insertUri, _category.mUUID);
         }
 
-        ShoppingList rtn = new ShoppingList(_name, targetCategory);
-        rtn.save();
+        // add list to db
+        // TODO this should do it if I understand your intention correct
+        Uri createdList = mResolver.insert(Uri.parse(insertUri), newListCV);
 
-        mBus.post(new ListChangedMessage(Change.CREATED, rtn));
+        if(createdList == null){
+            return null;
+        }
 
-        return rtn;
+        ShoppingList shoppingList = new ShoppingList();
+        shoppingList.mUUID = createdList.getLastPathSegment();
+        shoppingList.mCategory = _category;
+        mBus.post(new ListChangedMessage(Change.CREATED, shoppingList));
+
+        return shoppingList;
     }
 
     @Override
@@ -437,19 +340,15 @@ public class ListController implements IListController {
             return false;
         }
 
-        long countOfLinksToList = Select.from(ListEntry.class).where(
-                Condition.prop("m_list").eq(_list.getId())).count();
+        int deletedListCount = mResolver.delete(Uri.parse(_list.getUriPath()), null, null);
 
-        if (countOfLinksToList > 0) {
-            return false;
+        if(deletedListCount > 0 ){
+            mBus.post(new ListChangedMessage(Change.DELETED, _list));
+            return  true;
         }
 
-        Long oldId = _list.getId();
-        _list.delete();
-
-        mBus.post(new ListChangedMessage(Change.DELETED, _list));
-
-        return ShoppingList.findById(ShoppingList.class, oldId) == null;
+        Cursor cursor = mResolver.query(_list.toUri(InstalistProvider.BASE_CONTENT_URI), ShoppingList.COLUMN.ALL_COLUMNS, null, null, null);
+        return cursor != null && cursor.getCount() == 0;
     }
 
     @Override
@@ -459,13 +358,17 @@ public class ListController implements IListController {
             return _list;
         }
 
-        ShoppingList rtn = ShoppingList.findById(ShoppingList.class, _list.getId());
-        rtn.mName = _newName;
-        rtn.save();
+        String oldName = _list.mName;
+        _list.mName = _newName;
+        int affectedRows = mResolver.update(_list.toUri(InstalistProvider.BASE_CONTENT_URI), _list.toContentValues(), null, null);
 
-        mBus.post(new ListChangedMessage(Change.CHANGED, rtn));
+        if(affectedRows > 0 ) {
+            mBus.post(new ListChangedMessage(Change.CHANGED, _list));
+        } else{
+            _list.mName = oldName;
+        }
 
-        return rtn;
+        return _list;
     }
 
     @Override
@@ -474,26 +377,85 @@ public class ListController implements IListController {
             return null;
         }
 
-        ShoppingList listToChange = SugarRecord.findById(ShoppingList.class, _list.getId());
-        if (listToChange == null) {
+        Cursor listCursor = mResolver.query(Uri.parse(_list.getUriPath()), ShoppingList.COLUMN.ALL_COLUMNS, null, null, null);
+        if (listCursor == null || listCursor.getCount() == 0) {
             return null;
         }
 
-        Category targetCategory = null;
+        listCursor.moveToFirst();
+
+        // assign the values new to prevent some name changes and to get a consistent state
+        ShoppingList shoppingList = new ShoppingList();
+        shoppingList.mUUID = listCursor.getString(listCursor.getColumnIndex(ShoppingList.COLUMN.ID));
+        shoppingList.mName = listCursor.getString(listCursor.getColumnIndex(ShoppingList.COLUMN.NAME));
+        shoppingList.mCategory = _list.mCategory;
+
+
+        Cursor categoryCursor = null;
+        Category category = null;
+
         if (_category != null) {
-            targetCategory = SugarRecord.findById(Category.class, _category.getId());
-            if (targetCategory == null) {
-                return listToChange;
+            categoryCursor = mResolver.query(_category.toUri(InstalistProvider.BASE_CONTENT_URI), Category.COLUMN.ALL_COLUMNS, null, null, null);
+            if (categoryCursor == null || categoryCursor.getCount() == 0) {
+                return shoppingList;
             }
+
+            categoryCursor.moveToFirst();
+            category = new Category();
+            category.mUUID = categoryCursor.getString(categoryCursor.getColumnIndex(Category.COLUMN.ID));
+            category.mName = categoryCursor.getString(categoryCursor.getColumnIndex(Category.COLUMN.NAME));
+            shoppingList.mCategory = category;
         }
 
-        listToChange.mCategory = targetCategory;
-        listToChange.save();
 
-        mBus.post(new ListChangedMessage(Change.CHANGED, listToChange));
+        int affectedRows = mResolver.update(shoppingList.toUri(InstalistProvider.BASE_CONTENT_URI), shoppingList.toContentValues(), null, null);
+        if(affectedRows > 0) {
+            mBus.post(new ListChangedMessage(Change.CHANGED, shoppingList));
+        }
 
-        return listToChange;
+        return shoppingList;
     }
+
+
+    /**
+     * Searches a ShoppingList by name. The name has to match exactly, or nothing will be found.
+     * // TODO obsolete?
+     * @param _name The name of the list. Any String but not null.
+     * @return Either the found list or null if no list is matching.
+     */
+    public static ShoppingList findByName(String _name) {
+        // TODO move to controller.
+
+        if (_name == null) {
+            return null;
+        }
+
+        //return Select.from(ShoppingList.class).where(Condition.prop("m_name").eq(_name)).first();
+        return null;
+    }
+
+    /**
+     * Adds all listnames to a list.
+     * // TODO obsolete?
+     * @return a list with the current shoppingListNames.
+     */
+    public static List<String> getShoppingListNames() {
+        // TODO move to controller.
+        return new ArrayList<>(0);
+        /*
+        List<ShoppingList> shoppingLists = Select.from(ShoppingList.class).list();
+        List<String> shoppingListNames = new ArrayList<>();
+
+        for (ShoppingList shoppingList : shoppingLists) {
+            shoppingListNames.add(shoppingList.mName);
+        }
+
+        return shoppingListNames;*/
+    }
+
+    //endregion public methods
+
+    //region Private methods
 
     private boolean existsListName(String _name) {
         long existingListWithSameNameCount = Select.from(ShoppingList.class).where(
@@ -501,4 +463,123 @@ public class ListController implements IListController {
 
         return (existingListWithSameNameCount > 0);
     }
+
+    /**
+     * TODO Description pls
+     *
+     * @param _list
+     * @param _product
+     * @param _amount
+     * @param _prioUsed
+     * @param _prio
+     * @param _addAmount
+     * @return
+     */
+    private ListEntry addOrChangeItem(ShoppingList _list, Product _product, float _amount,
+                                      boolean _prioUsed, int _prio, boolean _addAmount) {
+        if (_list == null || _product == null) {
+            return null;
+        }
+
+        ShoppingList savedList = getListById(_list.mUUID);
+        Product savedProduct = mProductController.getProductById(_product.id);
+        if (savedList == null || savedProduct == null) {
+            return null;
+        }
+
+        Uri listUri = savedList.toUri(InstalistProvider.BASE_CONTENT_URI);
+        Cursor entryCheck = mResolver.query(
+                Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI, listUri.getPath() + "/entry"),
+                new String[]{ListEntry.COLUMN.ID, ListEntry.COLUMN.AMOUNT},
+                ListEntry.PREFIXED_COLUMN.PRODUCT + " = ?",
+                new String[]{_product.id},
+                null);
+        if (entryCheck == null) {
+            Log.e(getClass().getCanonicalName(), "Searching for existing ListEntry (to change it) " +
+                    "failed. Returning no ListEntry.");
+            return null;
+        }
+        ContentValues newEntryCV = new ContentValues(5);
+        newEntryCV.put(ListEntry.COLUMN.LIST, savedList.mUUID);
+        newEntryCV.put(ListEntry.COLUMN.PRODUCT, savedProduct.id);
+        if (_prioUsed) {
+            newEntryCV.put(ListEntry.COLUMN.PRIORITY, _prio);
+        }
+        ListEntry rtn;
+        if (entryCheck.getCount() == 0) {
+            newEntryCV.put(ListEntry.COLUMN.AMOUNT, _amount);
+            entryCheck.close();
+
+            Uri newEntryUri = mResolver.insert(
+                    Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI,
+                            savedList.getUriPath() + "/entry"),
+                    newEntryCV);
+            if (newEntryUri == null) {
+                return null;
+            }
+            rtn = new ListEntry();
+            rtn.mUUID = newEntryUri.getLastPathSegment();
+            rtn.mAmount = _amount;
+            rtn.mList = savedList;
+            rtn.mProduct = savedProduct;
+            rtn.mPriority = (_prioUsed ? _prio : ListEntry.DEFAULTS.PRIORITY);
+            rtn.mStruck = (ListEntry.DEFAULTS.STRUCK != 0);
+
+            mBus.post(new ListItemChangedMessage(Change.CREATED, rtn));
+        } else {
+            entryCheck.moveToFirst();
+            if (_addAmount) {
+                newEntryCV.put(ListEntry.COLUMN.AMOUNT, _amount + entryCheck.getFloat(
+                        entryCheck.getColumnIndex(ListEntry.COLUMN.AMOUNT)));
+            } else {
+                newEntryCV.put(ListEntry.COLUMN.AMOUNT, _amount);
+            }
+
+            String entryUUID = entryCheck.getString(entryCheck.getColumnIndex(ListEntry.COLUMN.ID));
+            int updatedItems = mResolver.update(
+                    Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI,
+                            savedList.getUriPath() + "/entry/" + entryUUID),
+                    newEntryCV,
+                    null, null);
+            rtn = getEntryById(entryUUID);
+            if (updatedItems != 0) {
+                mBus.post(new ListItemChangedMessage(Change.CHANGED, rtn));
+            }
+        }
+        return rtn;
+    }
+
+    private ListEntry unstrikeItem(ListEntry _toChange, boolean _reload) {
+        return updateStruckItem(_toChange, _reload, false);
+    }
+
+    private ListEntry updateStruckItem(ListEntry _toChange, boolean _reload, boolean _struck) {
+        if (_toChange == null) {
+            return null;
+        }
+
+        ContentValues entryUpdateCV = new ContentValues(1);
+        entryUpdateCV.put(ListEntry.COLUMN.STRUCK, _struck);
+        int chagedItems = mResolver.update(_toChange.toUri(InstalistProvider.BASE_CONTENT_URI),
+                entryUpdateCV,
+                null, null);
+        ListEntry rtn;
+        if (_reload) {
+            rtn = getEntryById(_toChange.mUUID);
+        } else {
+            _toChange.mStruck = _struck;
+            rtn = _toChange;
+        }
+        if (chagedItems > 0) {
+            mBus.post(new ListItemChangedMessage(Change.CHANGED, rtn));
+        }
+        return rtn;
+    }
+
+    private ListEntry strikeItem(ListEntry _item, boolean _reload) {
+        return updateStruckItem(_item, _reload, true);
+    }
+
+//endregion Private methods
+
 }

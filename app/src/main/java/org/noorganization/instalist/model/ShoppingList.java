@@ -1,5 +1,6 @@
 package org.noorganization.instalist.model;
 
+import android.content.ContentValues;
 import android.net.Uri;
 
 import com.orm.StringUtil;
@@ -76,39 +77,7 @@ public class ShoppingList {
         //return Select.from(ListEntry.class).where(Condition.prop("m_list").eq(getId())).list();
     }
 
-    /**
-     * Searches a ShoppingList by name. The name has to match exactly, or nothing will be found.
-     * @param _name The name of the list. Any String but not null.
-     * @return Either the found list or null if no list is matching.
-     */
-    public static ShoppingList findByName(String _name) {
-        // TODO move to controller.
 
-        if (_name == null) {
-            return null;
-        }
-
-        //return Select.from(ShoppingList.class).where(Condition.prop("m_name").eq(_name)).first();
-        return null;
-    }
-
-    /**
-     * Adds all listnames to a list.
-     * @return a list with the current shoppingListNames.
-     */
-    public static List<String> getShoppingListNames(){
-        // TODO move to controller.
-        return new ArrayList<>(0);
-        /*
-        List<ShoppingList> shoppingLists = Select.from(ShoppingList.class).list();
-        List<String> shoppingListNames = new ArrayList<>();
-
-        for (ShoppingList shoppingList : shoppingLists) {
-            shoppingListNames.add(shoppingList.mName);
-        }
-
-        return shoppingListNames;*/
-    }
 
     @Override
     public boolean equals(Object o) {
@@ -138,6 +107,11 @@ public class ShoppingList {
         return (int) UUID.fromString(mUUID).getLeastSignificantBits();
     }
 
+    /**
+     * Creates a full qualified URI to accces the list ressource with the content resolver for the provider {@link org.noorganization.instalist.provider.InstalistProvider}.
+     * @param _baseUri the base url of the provider.
+     * @return null if uuid is null else the uri to the list object.
+     */
     public Uri toUri(Uri _baseUri) {
         if (mUUID == null) {
             return null;
@@ -153,4 +127,13 @@ public class ShoppingList {
 
         return "category/" +  (mCategory == null ? "-" : mCategory.mUUID) + "/list/" + mUUID;
     }
+
+    public ContentValues toContentValues() {
+        ContentValues contentValues = new ContentValues(3);
+        contentValues.put(COLUMN.ID, this.mUUID);
+        contentValues.put(COLUMN.NAME, this.mName);
+        contentValues.put(COLUMN.CATEGORY, this.mCategory.mUUID);
+        return contentValues;
+    }
+
 }
