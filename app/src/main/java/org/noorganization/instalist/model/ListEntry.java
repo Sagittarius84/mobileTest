@@ -2,7 +2,6 @@ package org.noorganization.instalist.model;
 
 import android.net.Uri;
 
-import com.orm.StringUtil;
 import com.orm.SugarRecord;
 
 /**
@@ -57,54 +56,52 @@ public class ListEntry extends SugarRecord<ListEntry> {
             COLUMN.LIST + " TEXT NOT NULL, " +
             COLUMN.STRUCK + " INTEGER NOT NULL DEFAULT " + DEFAULTS.STRUCK + ", " +
             "FOREIGN KEY (" + COLUMN.PRODUCT + ") REFERENCES " + Product.TABLE_NAME + " (" +
-                Product.COLUMN.ID + ") ON UPDATE CASCADE ON DELETE CASCADE, " +
+            Product.COLUMN.ID + ") ON UPDATE CASCADE ON DELETE CASCADE, " +
             "FOREIGN KEY (list) REFERENCES list (_id) ON UPDATE CASCADE ON DELETE CASCADE)";
 
-    public final static String ATTR_LIST     = StringUtil.toSQLName("mList");
-    public final static String ATTR_PRODUCT  = StringUtil.toSQLName("mProduct");
-    public final static String ATTR_AMOUNT   = StringUtil.toSQLName("mAmount");
-    public final static String ATTR_STRUCK   = StringUtil.toSQLName("mStruck");
-    public final static String ATTR_PRIORITY = StringUtil.toSQLName("mPriority");
-
-    public String       mUUID;
+    public String mUUID;
     public ShoppingList mList;
-    public Product      mProduct;
-    /** The amount of product that's listed */
-    public float        mAmount;
-    /** Whether a product is struck through, i.e. because it's already bought. */
-    public boolean      mStruck;
-    public int          mPriority;
+    public Product mProduct;
+    /**
+     * The amount of product that's listed
+     */
+    public float mAmount;
+    /**
+     * Whether a product is struck through, i.e. because it's already bought.
+     */
+    public boolean mStruck;
+    public int mPriority;
 
     public ListEntry() {
-        mList     = null;
-        mProduct  = null;
-        mAmount   = 1.0f;
-        mStruck   = false;
+        mList = null;
+        mProduct = null;
+        mAmount = 1.0f;
+        mStruck = false;
         mPriority = 0;
     }
 
 
     public ListEntry(ShoppingList _list, Product _product, float _amount) {
-        mList     = _list;
-        mProduct  = _product;
-        mAmount   = _amount;
-        mStruck   = false;
+        mList = _list;
+        mProduct = _product;
+        mAmount = _amount;
+        mStruck = false;
         mPriority = 0;
     }
 
     public ListEntry(ShoppingList _list, Product _product, float _amount, boolean _struck) {
-        mList     = _list;
-        mProduct  = _product;
-        mAmount   = _amount;
-        mStruck   = _struck;
+        mList = _list;
+        mProduct = _product;
+        mAmount = _amount;
+        mStruck = _struck;
         mPriority = 0;
     }
 
     public ListEntry(ShoppingList _list, Product _product, float _amount, boolean _struck, int _prio) {
-        mList     = _list;
-        mProduct  = _product;
-        mAmount   = _amount;
-        mStruck   = _struck;
+        mList = _list;
+        mProduct = _product;
+        mAmount = _amount;
+        mStruck = _struck;
         mPriority = _prio;
     }
 
@@ -131,7 +128,7 @@ public class ListEntry extends SugarRecord<ListEntry> {
         return true;
     }
 
-    public static ListEntry getListEntryById(long _Id){
+    public static ListEntry getListEntryById(long _Id) {
         return ListEntry.findById(ListEntry.class, _Id);
     }
 

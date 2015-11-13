@@ -43,25 +43,25 @@ public class ShoppingList {
             COLUMN.ID + " TEXT PRIMARY KEY NOT NULL, " +
             COLUMN.NAME + " TEXT NOT NULL, " +
             COLUMN.CATEGORY + " TEXT, " +
-            "FOREIGN KEY (" + COLUMN.CATEGORY + ") REFERENCES " + Category.TABLE_NAME+
+            "FOREIGN KEY (" + COLUMN.CATEGORY + ") REFERENCES " + Category.TABLE_NAME +
             " (" + Category.COLUMN.ID + ") ON UPDATE CASCADE ON DELETE CASCADE)";
 
     public final static String ATTR_NAME = StringUtil.toSQLName("mName");
     public final static String ATTR_CATEGORY = StringUtil.toSQLName("mCategory");
 
-    public String   mUUID;
-    public String   mName;
+    public String mUUID;
+    public String mName;
     public Category mCategory;
 
     public ShoppingList() {
-        mUUID     = null;
-        mName     = "";
+        mUUID = null;
+        mName = "";
         mCategory = null;
     }
 
     public ShoppingList(String _uuid, String _name) {
-        mUUID     = _uuid;
-        mName     = _name;
+        mUUID = _uuid;
+        mName = _name;
         mCategory = null;
     }
 
@@ -78,13 +78,12 @@ public class ShoppingList {
     }
 
 
-
     @Override
     public boolean equals(Object o) {
-        if (this == o){
+        if (this == o) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()){
+        if (o == null || getClass() != o.getClass()) {
             return false;
         }
 
@@ -109,6 +108,7 @@ public class ShoppingList {
 
     /**
      * Creates a full qualified URI to accces the list ressource with the content resolver for the provider {@link org.noorganization.instalist.provider.InstalistProvider}.
+     *
      * @param _baseUri the base url of the provider.
      * @return null if uuid is null else the uri to the list object.
      */
@@ -125,7 +125,7 @@ public class ShoppingList {
             return null;
         }
 
-        return "category/" +  (mCategory == null ? "-" : mCategory.mUUID) + "/list/" + mUUID;
+        return "category/" + (mCategory == null ? "-" : mCategory.mUUID) + "/list/" + mUUID;
     }
 
     public ContentValues toContentValues() {

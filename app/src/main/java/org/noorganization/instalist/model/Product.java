@@ -1,12 +1,7 @@
 package org.noorganization.instalist.model;
 
-import android.content.ContentResolver;
 import android.content.ContentValues;
-import android.database.Cursor;
 import android.net.Uri;
-
-import org.noorganization.instalist.provider.internal.ProductProvider;
-import org.noorganization.instalist.provider.internal.UnitProvider;
 
 /**
  * Represents a product.

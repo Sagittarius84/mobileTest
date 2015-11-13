@@ -114,9 +114,9 @@ public class TaggedProductProvider implements IInternalProvider {
             case SINGLE_TAGGED_PRODUCT:
                 String sql = "SELECT " + TextUtils.join(",", _projection);
                 sql += " FROM " + TaggedProduct.TABLE_NAME + " INNER JOIN " + Tag.TABLE_NAME + " ON "
-                        + TaggedProduct.COLUMN_TABLE_PREFIXED.COLUMN_TAG_ID + "=" + Tag.COLUMN_PREFIXED.ID;
-                sql += " INNER JOIN " + Product.TABLE_NAME + " ON " + TaggedProduct.COLUMN_TABLE_PREFIXED.COLUMN_PRODUCT_ID + " = " + Product.PREFIXED_COLUMN.ID;
-                sql += " WHERE " + TaggedProduct.COLUMN_TABLE_PREFIXED.COLUMN_ID + "=\"" + _uri.getLastPathSegment() + "\"";
+                        + TaggedProduct.COLUMN_PREFIXED.TAG_ID + "=" + Tag.COLUMN_PREFIXED.ID;
+                sql += " INNER JOIN " + Product.TABLE_NAME + " ON " + TaggedProduct.COLUMN_PREFIXED.PRODUCT_ID + " = " + Product.PREFIXED_COLUMN.ID;
+                sql += " WHERE " + TaggedProduct.COLUMN_PREFIXED.ID + "=\"" + _uri.getLastPathSegment() + "\"";
                 if (_selection != null && _selection.length() > 0) {
                     sql += " AND ";
                     sql += String.format(_selection, _selectionArgs);
@@ -130,8 +130,8 @@ public class TaggedProductProvider implements IInternalProvider {
             case MULTIPLE_TAGGED_PRODUCTS:
                 sql = "SELECT " + TextUtils.join(",", _projection);
                 sql += " FROM " + TaggedProduct.TABLE_NAME + " INNER JOIN " + Tag.TABLE_NAME + " ON "
-                        + TaggedProduct.COLUMN_TABLE_PREFIXED.COLUMN_TAG_ID + "=" + Tag.COLUMN_PREFIXED.ID;
-                sql += " INNER JOIN " + Product.TABLE_NAME + " ON " + TaggedProduct.COLUMN_TABLE_PREFIXED.COLUMN_PRODUCT_ID + " = " + Product.PREFIXED_COLUMN.ID;
+                        + TaggedProduct.COLUMN_PREFIXED.TAG_ID + "=" + Tag.COLUMN_PREFIXED.ID;
+                sql += " INNER JOIN " + Product.TABLE_NAME + " ON " + TaggedProduct.COLUMN_PREFIXED.PRODUCT_ID + " = " + Product.PREFIXED_COLUMN.ID;
                 if (_selection != null && _selection.length() > 0) {
                     sql += " AND ";
                     sql += String.format(_selection, _selectionArgs);
@@ -146,9 +146,9 @@ public class TaggedProductProvider implements IInternalProvider {
                 String tagId = _uri.getLastPathSegment();
                 sql = "SELECT " + TextUtils.join(",", _projection);
                 sql += " FROM " + TaggedProduct.TABLE_NAME + " INNER JOIN " + Tag.TABLE_NAME + " ON "
-                        + TaggedProduct.COLUMN_TABLE_PREFIXED.COLUMN_TAG_ID + "=" + Tag.COLUMN_PREFIXED.ID;
-                sql += " INNER JOIN " + Product.TABLE_NAME + " ON " + TaggedProduct.COLUMN_TABLE_PREFIXED.COLUMN_PRODUCT_ID + "=" + Product.PREFIXED_COLUMN.ID;
-                sql += " WHERE " + TaggedProduct.COLUMN_TABLE_PREFIXED.COLUMN_TAG_ID + "=\"" + tagId + "\"";
+                        + TaggedProduct.COLUMN_PREFIXED.TAG_ID + "=" + Tag.COLUMN_PREFIXED.ID;
+                sql += " INNER JOIN " + Product.TABLE_NAME + " ON " + TaggedProduct.COLUMN_PREFIXED.PRODUCT_ID + "=" + Product.PREFIXED_COLUMN.ID;
+                sql += " WHERE " + TaggedProduct.COLUMN_PREFIXED.TAG_ID + "=\"" + tagId + "\"";
                 if (_selection != null && _selection.length() > 0) {
                     sql += " AND ";
                     sql += String.format(_selection, _selectionArgs);
@@ -199,15 +199,15 @@ public class TaggedProductProvider implements IInternalProvider {
                     return null;
                     //throw new SQLiteException("Failed to add a record into " + _uri);
                 }
-                Cursor cursor = mDatabase.query(TaggedProduct.TABLE_NAME, new String[]{TaggedProduct.COLUMN_TABLE_PREFIXED.COLUMN_ID},
+                Cursor cursor = mDatabase.query(TaggedProduct.TABLE_NAME, new String[]{TaggedProduct.COLUMN_PREFIXED.ID},
                         SQLiteUtils.COLUMN_ROW_ID + "=?", new String[]{String.valueOf(rowId)},
                         null, null, null, null);
                 cursor.moveToFirst();
                 newUri = Uri.parse(SINGLE_TAGGED_PRODUCT_CONTENT_URI.replace("*",
-                        cursor.getString(cursor.getColumnIndex(TaggedProduct.COLUMN_TABLE_PREFIXED.COLUMN_ID))));
+                        cursor.getString(cursor.getColumnIndex(TaggedProduct.COLUMN_PREFIXED.ID))));
                 break;
             case MULTIPLE_TAGGED_PRODUCTS:
-                _values.put(TaggedProduct.COLUMN_NO_TABLE_PREFIXED.COLUMN_ID, SQLiteUtils.generateId(mDatabase, TaggedProduct.TABLE_NAME).toString());
+                _values.put(TaggedProduct.COLUMN.ID, SQLiteUtils.generateId(mDatabase, TaggedProduct.TABLE_NAME).toString());
                 rowId = mDatabase.insert(TaggedProduct.TABLE_NAME, null, _values);
                 // insertion went wrong
                 if (rowId == -1) {
@@ -215,7 +215,7 @@ public class TaggedProductProvider implements IInternalProvider {
                     //throw new SQLiteException("Failed to add a record into " + _uri);
                 }
                 newUri = Uri.parse(SINGLE_TAGGED_PRODUCT_CONTENT_URI.replace("*",
-                        _values.getAsString(TaggedProduct.COLUMN_NO_TABLE_PREFIXED.COLUMN_ID)));
+                        _values.getAsString(TaggedProduct.COLUMN.ID)));
                 break;
             case MULTIPLE_TAGGED_PRODUCT_BY_TAG:
             default:
@@ -235,7 +235,7 @@ public class TaggedProductProvider implements IInternalProvider {
         List<String> pathSegments = _uri.getPathSegments();
         switch (mMatcher.match(_uri)) {
             case SINGLE_TAGGED_PRODUCT:
-                String selection = ProviderUtils.prependIdToQuery(TaggedProduct.COLUMN_TABLE_PREFIXED.COLUMN_ID, null);
+                String selection = ProviderUtils.prependIdToQuery(TaggedProduct.COLUMN_PREFIXED.ID, null);
                 String[] selectionArgs = ProviderUtils.prependSelectionArgs(null, _uri.getLastPathSegment());
                 affectedRows = mDatabase.delete(TaggedProduct.TABLE_NAME, selection, selectionArgs);
                 break;
@@ -245,8 +245,8 @@ public class TaggedProductProvider implements IInternalProvider {
             case SINGLE_TAGGED_PRODUCT_BY_TAG:
                 String tagged_id = pathSegments.get(1);
                 String tag_id = pathSegments.get(3);
-                selection = ProviderUtils.prependIdToQuery(TaggedProduct.COLUMN_TABLE_PREFIXED.COLUMN_ID, _selection);
-                selection = ProviderUtils.prependIdToQuery(TaggedProduct.COLUMN_TABLE_PREFIXED.COLUMN_TAG_ID, selection);
+                selection = ProviderUtils.prependIdToQuery(TaggedProduct.COLUMN_PREFIXED.ID, _selection);
+                selection = ProviderUtils.prependIdToQuery(TaggedProduct.COLUMN_PREFIXED.TAG_ID, selection);
                 selectionArgs = ProviderUtils.prependSelectionArgs(_selectionArgs, tagged_id);
                 selectionArgs = ProviderUtils.prependSelectionArgs(_selectionArgs, tag_id);
 
@@ -254,7 +254,7 @@ public class TaggedProductProvider implements IInternalProvider {
                 break;
             case MULTIPLE_TAGGED_PRODUCT_BY_TAG:
                 tag_id = _uri.getLastPathSegment();
-                selection = ProviderUtils.prependIdToQuery(TaggedProduct.COLUMN_TABLE_PREFIXED.COLUMN_TAG_ID, _selection);
+                selection = ProviderUtils.prependIdToQuery(TaggedProduct.COLUMN_PREFIXED.TAG_ID, _selection);
                 selectionArgs = ProviderUtils.prependSelectionArgs(_selectionArgs, tag_id);
                 affectedRows = mDatabase.delete(TaggedProduct.TABLE_NAME, selection, selectionArgs);
                 break;
@@ -273,14 +273,14 @@ public class TaggedProductProvider implements IInternalProvider {
         int affectedRows = 0;
         switch (mMatcher.match(_uri)) {
             case SINGLE_TAGGED_PRODUCT:
-                String selection = ProviderUtils.prependIdToQuery(TaggedProduct.COLUMN_TABLE_PREFIXED.COLUMN_ID, null);
+                String selection = ProviderUtils.prependIdToQuery(TaggedProduct.COLUMN_PREFIXED.ID, null);
                 String[] selectionArgs = ProviderUtils.prependSelectionArgs(null, _uri.getLastPathSegment());
                 affectedRows = mDatabase.update(TaggedProduct.TABLE_NAME, _values, selection, selectionArgs);
                 break;
             case SINGLE_TAGGED_PRODUCT_BY_TAG:
                 List<String> pathSegments = _uri.getPathSegments();
-                selection = ProviderUtils.prependIdToQuery(TaggedProduct.COLUMN_TABLE_PREFIXED.COLUMN_PRODUCT_ID, _selection);
-                selection = ProviderUtils.prependIdToQuery(TaggedProduct.COLUMN_TABLE_PREFIXED.COLUMN_TAG_ID, _selection);
+                selection = ProviderUtils.prependIdToQuery(TaggedProduct.COLUMN_PREFIXED.PRODUCT_ID, _selection);
+                selection = ProviderUtils.prependIdToQuery(TaggedProduct.COLUMN_PREFIXED.TAG_ID, _selection);
                 selectionArgs = ProviderUtils.prependSelectionArgs(_selectionArgs, pathSegments.get(1));
                 selectionArgs = ProviderUtils.prependSelectionArgs(_selectionArgs, pathSegments.get(3));
 

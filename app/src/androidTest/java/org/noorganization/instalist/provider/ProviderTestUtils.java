@@ -65,8 +65,8 @@ public class ProviderTestUtils {
      */
     public static Uri insertRecipe(IInternalProvider mRecipeProvider, String uuidRecipe, String name) {
         ContentValues contentValues = new ContentValues();
-        contentValues.put(Recipe.COLUMN_NO_TABLE_PREFIXED.COLUMN_ID, uuidRecipe);
-        contentValues.put(Recipe.COLUMN_NO_TABLE_PREFIXED.COLUMN_NAME, name);
+        contentValues.put(Recipe.COLUMN.ID, uuidRecipe);
+        contentValues.put(Recipe.COLUMN.NAME, name);
         // insert at begin a recipe
         return mRecipeProvider.insert(Uri.parse(RecipeProvider.SINGLE_RECIPE_CONTENT_URI.replace("*", uuidRecipe)), contentValues);
     }

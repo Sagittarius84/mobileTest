@@ -2,8 +2,6 @@ package org.noorganization.instalist.model;
 
 import android.net.Uri;
 
-import com.orm.StringUtil;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -37,13 +35,10 @@ public class Category {
     }
 
 
-
-
     public static final String DB_CREATE = "CREATE TABLE " + TABLE_NAME + " (" +
             COLUMN.ID + " TEXT PRIMARY KEY NOT NULL, " +
             COLUMN.NAME + " TEXT NOT NULL)";
 
-    public static final String ATTR_NAME = StringUtil.toSQLName("mName");
 
     public String mUUID;
     public String mName;
@@ -66,18 +61,19 @@ public class Category {
     /**
      * TODO: Migrate function to Controller.
      */
-    public static List<ShoppingList> getListsWithoutCategory(){
+    public static List<ShoppingList> getListsWithoutCategory() {
         // WTF?! 0 as null value?! This was not documented in SugarORM's doc and is really weird.
         //return Select.from(ShoppingList.class).where(Condition.prop(ShoppingList.ATTR_CATEGORY).eq(0)).list();
         return new ArrayList<>(0);
     }
+
     @Override
     public boolean equals(Object _another) {
         if (_another == this) {
             return true;
         }
 
-        if (_another == null ||_another.getClass() != getClass()) {
+        if (_another == null || _another.getClass() != getClass()) {
             return false;
         }
 

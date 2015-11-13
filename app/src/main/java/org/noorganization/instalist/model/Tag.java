@@ -75,9 +75,10 @@ public class Tag {
 
     /**
      * Creates an {@link ContentValues} object that will include each attribute defined.
+     *
      * @return the instance related ContentValues.
      */
-    public ContentValues toContentValues(){
+    public ContentValues toContentValues() {
         ContentValues cv = new ContentValues(2);
         cv.put(COLUMN.ID, this.mUUID);
         cv.put(COLUMN.NAME, this.mName);

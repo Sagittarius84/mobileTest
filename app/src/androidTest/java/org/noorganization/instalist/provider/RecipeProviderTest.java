@@ -47,7 +47,7 @@ public class RecipeProviderTest extends AndroidTestCase {
 
     public void testQueryMultipleRecipes() {
         Uri multipleRecipesUri = Uri.parse(RecipeProvider.MULTIPLE_RECIPE_CONTENT_URI);
-        Cursor noProducts = mRecipeProvider.query(multipleRecipesUri, Recipe.COLUMN_TABLE_PREFIXED.ALL_COLUMNS, null, null, null);
+        Cursor noProducts = mRecipeProvider.query(multipleRecipesUri, Recipe.COLUMN_PREFIXED.ALL_COLUMNS, null, null, null);
         assertNotNull(noProducts);
         assertEquals(0, noProducts.getCount());
 
@@ -57,12 +57,12 @@ public class RecipeProviderTest extends AndroidTestCase {
                 "TestRecipe1"
         });
 
-        Cursor productCursor = mRecipeProvider.query(multipleRecipesUri, Recipe.COLUMN_TABLE_PREFIXED.ALL_COLUMNS, null, null, null);
+        Cursor productCursor = mRecipeProvider.query(multipleRecipesUri, Recipe.COLUMN_PREFIXED.ALL_COLUMNS, null, null, null);
         assertNotNull(productCursor);
         assertEquals(1, productCursor.getCount());
         productCursor.moveToFirst();
-        assertEquals("TestRecipe1", productCursor.getString(productCursor.getColumnIndex(Recipe.COLUMN_TABLE_PREFIXED.COLUMN_NAME)));
-        assertEquals(uuid, productCursor.getString(productCursor.getColumnIndex(Recipe.COLUMN_TABLE_PREFIXED.COLUMN_ID)));
+        assertEquals("TestRecipe1", productCursor.getString(productCursor.getColumnIndex(Recipe.COLUMN_PREFIXED.NAME)));
+        assertEquals(uuid, productCursor.getString(productCursor.getColumnIndex(Recipe.COLUMN_PREFIXED.ID)));
 
         String uuid2 = UUID.randomUUID().toString();
         mDatabase.execSQL("INSERT INTO " + Recipe.TABLE_NAME + " VALUES (?,?)", new String[]{
@@ -70,21 +70,21 @@ public class RecipeProviderTest extends AndroidTestCase {
                 "TestRecipe2"
         });
 
-        productCursor = mRecipeProvider.query(multipleRecipesUri, Recipe.COLUMN_TABLE_PREFIXED.ALL_COLUMNS, null, null, Recipe.COLUMN_TABLE_PREFIXED.COLUMN_NAME + " ASC");
+        productCursor = mRecipeProvider.query(multipleRecipesUri, Recipe.COLUMN_PREFIXED.ALL_COLUMNS, null, null, Recipe.COLUMN_PREFIXED.NAME + " ASC");
         assertNotNull(productCursor);
         assertEquals(2, productCursor.getCount());
         productCursor.moveToFirst();
-        assertEquals("TestRecipe1", productCursor.getString(productCursor.getColumnIndex(Recipe.COLUMN_TABLE_PREFIXED.COLUMN_NAME)));
-        assertEquals(uuid, productCursor.getString(productCursor.getColumnIndex(Recipe.COLUMN_TABLE_PREFIXED.COLUMN_ID)));
+        assertEquals("TestRecipe1", productCursor.getString(productCursor.getColumnIndex(Recipe.COLUMN_PREFIXED.NAME)));
+        assertEquals(uuid, productCursor.getString(productCursor.getColumnIndex(Recipe.COLUMN_PREFIXED.ID)));
         productCursor.moveToNext();
-        assertEquals("TestRecipe2", productCursor.getString(productCursor.getColumnIndex(Recipe.COLUMN_TABLE_PREFIXED.COLUMN_NAME)));
-        assertEquals(uuid2, productCursor.getString(productCursor.getColumnIndex(Recipe.COLUMN_TABLE_PREFIXED.COLUMN_ID)));
+        assertEquals("TestRecipe2", productCursor.getString(productCursor.getColumnIndex(Recipe.COLUMN_PREFIXED.NAME)));
+        assertEquals(uuid2, productCursor.getString(productCursor.getColumnIndex(Recipe.COLUMN_PREFIXED.ID)));
         resetDb();
     }
 
     public void testQuerySingleRecipe() {
         Cursor noCategory = mRecipeProvider.query(Uri.parse(RecipeProvider.SINGLE_RECIPE_CONTENT_URI.replace("*",
-                UUID.randomUUID().toString())), Recipe.COLUMN_TABLE_PREFIXED.ALL_COLUMNS, null, null, null);
+                UUID.randomUUID().toString())), Recipe.COLUMN_PREFIXED.ALL_COLUMNS, null, null, null);
 
         assertNotNull(noCategory);
         assertEquals(0, noCategory.getCount());
@@ -96,12 +96,12 @@ public class RecipeProviderTest extends AndroidTestCase {
         });
 
         Cursor productCursor = mRecipeProvider.query(Uri.parse(RecipeProvider.SINGLE_RECIPE_CONTENT_URI.replace("*",
-                uuid)), Recipe.COLUMN_TABLE_PREFIXED.ALL_COLUMNS, null, null, null);
+                uuid)), Recipe.COLUMN_PREFIXED.ALL_COLUMNS, null, null, null);
         assertNotNull(productCursor);
         assertEquals(1, productCursor.getCount());
         productCursor.moveToFirst();
-        assertEquals("TestRecipe1", productCursor.getString(productCursor.getColumnIndex(Recipe.COLUMN_TABLE_PREFIXED.COLUMN_NAME)));
-        assertEquals(uuid, productCursor.getString(productCursor.getColumnIndex(Recipe.COLUMN_TABLE_PREFIXED.COLUMN_ID)));
+        assertEquals("TestRecipe1", productCursor.getString(productCursor.getColumnIndex(Recipe.COLUMN_PREFIXED.NAME)));
+        assertEquals(uuid, productCursor.getString(productCursor.getColumnIndex(Recipe.COLUMN_PREFIXED.ID)));
 
         String uuid2 = UUID.randomUUID().toString();
         mDatabase.execSQL("INSERT INTO " + Recipe.TABLE_NAME + " VALUES (?,?)", new String[]{
@@ -110,12 +110,12 @@ public class RecipeProviderTest extends AndroidTestCase {
         });
 
         productCursor = mRecipeProvider.query(Uri.parse(RecipeProvider.SINGLE_RECIPE_CONTENT_URI.replace("*", uuid2)),
-                Recipe.COLUMN_TABLE_PREFIXED.ALL_COLUMNS, null, null, null);
+                Recipe.COLUMN_PREFIXED.ALL_COLUMNS, null, null, null);
         assertNotNull(productCursor);
         assertEquals(1, productCursor.getCount());
         productCursor.moveToFirst();
-        assertEquals("TestRecipe2", productCursor.getString(productCursor.getColumnIndex(Recipe.COLUMN_TABLE_PREFIXED.COLUMN_NAME)));
-        assertEquals(uuid2, productCursor.getString(productCursor.getColumnIndex(Recipe.COLUMN_TABLE_PREFIXED.COLUMN_ID)));
+        assertEquals("TestRecipe2", productCursor.getString(productCursor.getColumnIndex(Recipe.COLUMN_PREFIXED.NAME)));
+        assertEquals(uuid2, productCursor.getString(productCursor.getColumnIndex(Recipe.COLUMN_PREFIXED.ID)));
         resetDb();
     }
 
@@ -144,12 +144,12 @@ public class RecipeProviderTest extends AndroidTestCase {
         assertNotNull(uri);
         assertEquals(pseudoUri, uri.toString());
 
-        Cursor cursor = mRecipeProvider.query(uri, Recipe.COLUMN_TABLE_PREFIXED.ALL_COLUMNS, null, null, null);
+        Cursor cursor = mRecipeProvider.query(uri, Recipe.COLUMN_PREFIXED.ALL_COLUMNS, null, null, null);
         assertNotNull(cursor);
         assertEquals(1, cursor.getCount());
         cursor.moveToFirst();
-        assertEquals(uuid, cursor.getString(cursor.getColumnIndex(Recipe.COLUMN_TABLE_PREFIXED.COLUMN_ID)));
-        assertEquals("TestRecipe", cursor.getString(cursor.getColumnIndex(Recipe.COLUMN_TABLE_PREFIXED.COLUMN_NAME)));
+        assertEquals(uuid, cursor.getString(cursor.getColumnIndex(Recipe.COLUMN_PREFIXED.ID)));
+        assertEquals("TestRecipe", cursor.getString(cursor.getColumnIndex(Recipe.COLUMN_PREFIXED.NAME)));
         resetDb();
     }
 
@@ -163,7 +163,7 @@ public class RecipeProviderTest extends AndroidTestCase {
 
         int affectedRows = mRecipeProvider.delete(uri, null, null);
         assertEquals(1, affectedRows);
-        Cursor cursor = mRecipeProvider.query(uri, Recipe.COLUMN_TABLE_PREFIXED.ALL_COLUMNS, null, null, null);
+        Cursor cursor = mRecipeProvider.query(uri, Recipe.COLUMN_PREFIXED.ALL_COLUMNS, null, null, null);
         assertNotNull(cursor);
         assertEquals(0, cursor.getCount());
     }
@@ -179,7 +179,7 @@ public class RecipeProviderTest extends AndroidTestCase {
         Uri uri2 = ProviderTestUtils.insertRecipe(mRecipeProvider, uuid2, "TestRecipe2");
         assertNotNull(uri2);
 
-        int affectedRows = mRecipeProvider.delete(Uri.parse(RecipeProvider.MULTIPLE_RECIPE_CONTENT_URI), Recipe.COLUMN_TABLE_PREFIXED.COLUMN_NAME + " LIKE ?", new String[]{"%TestRecipe%"});
+        int affectedRows = mRecipeProvider.delete(Uri.parse(RecipeProvider.MULTIPLE_RECIPE_CONTENT_URI), Recipe.COLUMN_PREFIXED.NAME + " LIKE ?", new String[]{"%TestRecipe%"});
 
         assertEquals(2, affectedRows);
 
@@ -188,7 +188,7 @@ public class RecipeProviderTest extends AndroidTestCase {
         uri2 = ProviderTestUtils.insertRecipe(mRecipeProvider, uuid2, "TestRecipe2");
         assertNotNull(uri2);
 
-        affectedRows = mRecipeProvider.delete(Uri.parse(RecipeProvider.MULTIPLE_RECIPE_CONTENT_URI), Recipe.COLUMN_TABLE_PREFIXED.COLUMN_NAME + " LIKE ?", new String[]{"%TestRecipe1%"});
+        affectedRows = mRecipeProvider.delete(Uri.parse(RecipeProvider.MULTIPLE_RECIPE_CONTENT_URI), Recipe.COLUMN_PREFIXED.NAME + " LIKE ?", new String[]{"%TestRecipe1%"});
 
         assertEquals(1, affectedRows);
     }
@@ -200,17 +200,17 @@ public class RecipeProviderTest extends AndroidTestCase {
         Uri uri = ProviderTestUtils.insertRecipe(mRecipeProvider, uuid, "TestRecipe1");
         assertNotNull(uri);
 
-        contentValues.put(Recipe.COLUMN_NO_TABLE_PREFIXED.COLUMN_ID, uuid);
-        contentValues.put(Recipe.COLUMN_NO_TABLE_PREFIXED.COLUMN_NAME, "TestRecipe2");
+        contentValues.put(Recipe.COLUMN.ID, uuid);
+        contentValues.put(Recipe.COLUMN.NAME, "TestRecipe2");
         int affectedRows = mRecipeProvider.update(uri, contentValues, null, null);
 
         assertEquals(1, affectedRows);
 
-        Cursor cursor = mRecipeProvider.query(uri, Recipe.COLUMN_TABLE_PREFIXED.ALL_COLUMNS, null, null, null);
+        Cursor cursor = mRecipeProvider.query(uri, Recipe.COLUMN_PREFIXED.ALL_COLUMNS, null, null, null);
         assertEquals(1, cursor.getCount());
         cursor.moveToFirst();
 
-        assertEquals("TestRecipe2", cursor.getString(cursor.getColumnIndex(Recipe.COLUMN_TABLE_PREFIXED.COLUMN_NAME)));
+        assertEquals("TestRecipe2", cursor.getString(cursor.getColumnIndex(Recipe.COLUMN_PREFIXED.NAME)));
         cursor.close();
     }
 

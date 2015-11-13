@@ -1,11 +1,6 @@
 package org.noorganization.instalist.model;
 
-import android.content.ContentResolver;
 import android.content.ContentValues;
-import android.database.Cursor;
-import android.net.Uri;
-
-import org.noorganization.instalist.provider.internal.UnitProvider;
 
 import java.util.UUID;
 
@@ -37,7 +32,7 @@ public class Unit {
 
 
     /**
-     * @deprecated  do not use anymore instead use {@link COLUMN#NAME}
+     * @deprecated do not use anymore instead use {@link COLUMN#NAME}
      */
     public static String ATTR_NAME = "m_name";
 
@@ -72,7 +67,7 @@ public class Unit {
         return (((mName == null && anotherUnit.mName == null) ||
                 (mName != null && mName.equals(anotherUnit.mName))) &&
                 ((mUUID == null && anotherUnit.mUUID == null) ||
-                        (mUUID != null &&mUUID.equals(anotherUnit.mUUID))));
+                        (mUUID != null && mUUID.equals(anotherUnit.mUUID))));
     }
 
     @Override
@@ -83,7 +78,7 @@ public class Unit {
         return (int) UUID.fromString(mUUID).getLeastSignificantBits();
     }
 
-    public ContentValues toContentValues(){
+    public ContentValues toContentValues() {
         ContentValues cv = new ContentValues(2);
         cv.put(COLUMN.ID, this.mUUID);
         cv.put(COLUMN.NAME, this.mName);

@@ -14,7 +14,7 @@ import java.util.List;
 public class Recipe extends SugarRecord<Recipe> {
 
     /**
-     * @deprecated use instead {@link COLUMN_TABLE_PREFIXED#COLUMN_NAME}
+     * @deprecated use instead {@link COLUMN_PREFIXED#NAME}
      */
     public final static String ATTR_NAME = StringUtil.toSQLName("mName");
 
@@ -23,26 +23,26 @@ public class Recipe extends SugarRecord<Recipe> {
     /**
      * Column names that does not contain the table prefix.
      */
-    public final static class COLUMN_NO_TABLE_PREFIXED {
-        public final static String COLUMN_ID = "_id";
-        public final static String COLUMN_NAME = "name";
-        public final static String[] ALL_COLUMNS = {COLUMN_ID, COLUMN_NAME};
+    public final static class COLUMN {
+        public final static String ID = "_id";
+        public final static String NAME = "name";
+        public final static String[] ALL_COLUMNS = {ID, NAME};
     }
 
     /**
      * Column names that are prefixed with the table name. So like this TableName.ColumnName
      */
-    public final static class COLUMN_TABLE_PREFIXED {
-        public final static String COLUMN_ID = TABLE_NAME.concat("." + COLUMN_NO_TABLE_PREFIXED.COLUMN_ID);
-        public final static String COLUMN_NAME = TABLE_NAME.concat("." + COLUMN_NO_TABLE_PREFIXED.COLUMN_NAME);
-        public final static String[] ALL_COLUMNS = {COLUMN_ID, COLUMN_NAME};
+    public final static class COLUMN_PREFIXED {
+        public final static String ID = TABLE_NAME.concat("." + COLUMN.ID);
+        public final static String NAME = TABLE_NAME.concat("." + COLUMN.NAME);
+        public final static String[] ALL_COLUMNS = {ID, NAME};
     }
 
 
     public final static String DATABASE_CREATE = "CREATE TABLE " + TABLE_NAME
             + "("
-            + COLUMN_NO_TABLE_PREFIXED.COLUMN_ID + " TEXT PRIMARY KEY,"
-            + COLUMN_NO_TABLE_PREFIXED.COLUMN_NAME + " TEXT"
+            + COLUMN.ID + " TEXT PRIMARY KEY,"
+            + COLUMN.NAME + " TEXT"
             + ")";
 
     public String mName;

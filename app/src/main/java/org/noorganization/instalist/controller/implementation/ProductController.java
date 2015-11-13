@@ -252,7 +252,7 @@ public class ProductController implements IProductController {
 
         Cursor taggedProductCursor = mResolver.query(Uri.parse(TaggedProductProvider.MULTIPLE_TAGGED_PRODUCT_BY_TAG_CONTENT_URI.replace("*", foundTag.mUUID)),
                 TaggedProduct.ALL_COLUMNS_JOINED,
-                TaggedProduct.COLUMN_TABLE_PREFIXED.COLUMN_PRODUCT_ID + "=?",
+                TaggedProduct.COLUMN_PREFIXED.PRODUCT_ID + "=?",
                 new String[]{foundProduct.mUUID}, null);
 
         if (taggedProductCursor == null) {
@@ -290,7 +290,7 @@ public class ProductController implements IProductController {
 
         Cursor taggedProductCursor = mResolver.query(Uri.parse(TaggedProductProvider.MULTIPLE_TAGGED_PRODUCT_BY_TAG_CONTENT_URI.replace("*", foundTag.mUUID)),
                 TaggedProduct.ALL_COLUMNS_JOINED,
-                TaggedProduct.COLUMN_TABLE_PREFIXED.COLUMN_PRODUCT_ID + "=?",
+                TaggedProduct.COLUMN_PREFIXED.PRODUCT_ID + "=?",
                 new String[]{foundProduct.mUUID}, null);
 
         if (taggedProductCursor == null) {
@@ -311,7 +311,7 @@ public class ProductController implements IProductController {
 
     public Product parseProduct(Cursor _cursor){
         Product product = new Product();
-        product.mUUID = _cursor.getString(_cursor.getColumnIndex(TaggedProduct.COLUMN_TABLE_PREFIXED.COLUMN_PRODUCT_ID));
+        product.mUUID = _cursor.getString(_cursor.getColumnIndex(TaggedProduct.COLUMN_PREFIXED.PRODUCT_ID));
         product.mName = _cursor.getString(_cursor.getColumnIndex(Product.PREFIXED_COLUMN.NAME));
         product.mUUID = _cursor.getString(_cursor.getColumnIndex(Product.PREFIXED_COLUMN.ID));
         product.mDefaultAmount = _cursor.getFloat(_cursor.getColumnIndex(Product.PREFIXED_COLUMN.DEFAULT_AMOUNT));
@@ -323,7 +323,7 @@ public class ProductController implements IProductController {
         TaggedProduct taggedProduct = new TaggedProduct();
 
         Tag tag = new Tag();
-        tag.mUUID = _cursor.getString(_cursor.getColumnIndex(TaggedProduct.COLUMN_TABLE_PREFIXED.COLUMN_TAG_ID));
+        tag.mUUID = _cursor.getString(_cursor.getColumnIndex(TaggedProduct.COLUMN_PREFIXED.TAG_ID));
         tag.mName = _cursor.getString(_cursor.getColumnIndex(Tag.COLUMN_PREFIXED.NAME));
 
         Product product = parseProduct(_cursor);
@@ -345,7 +345,7 @@ public class ProductController implements IProductController {
     public List<TaggedProduct> findTaggedProductsByProduct(Product _product) {
         Cursor taggedProductCursor = mResolver.query(Uri.parse(TaggedProductProvider.MULTIPLE_TAGGED_PRODUCT_CONTENT_URI),
                 TaggedProduct.ALL_COLUMNS_JOINED,
-                TaggedProduct.COLUMN_TABLE_PREFIXED.COLUMN_PRODUCT_ID + "=?",
+                TaggedProduct.COLUMN_PREFIXED.PRODUCT_ID + "=?",
                 new String[]{_product.mUUID}, null);
 
         if (taggedProductCursor == null) {

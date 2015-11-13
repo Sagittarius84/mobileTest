@@ -1,6 +1,5 @@
 package org.noorganization.instalist.model;
 
-import com.orm.StringUtil;
 import com.orm.SugarRecord;
 
 /**
@@ -26,37 +25,25 @@ public class Ingredient extends SugarRecord<Ingredient> {
      * Column names that are prefixed with the table name. So like this TableName.ColumnName
      */
     public final static class COLUMN_PREFIXED {
-        public final static String ID = TABLE_NAME.concat(COLUMN.ID);
-        public final static String PRODUCT_ID = TABLE_NAME.concat(COLUMN.PRODUCT_ID);
-        public final static String RECIPE_ID = TABLE_NAME.concat(COLUMN.RECIPE_ID);
-        public final static String AMOUNT = TABLE_NAME.concat(COLUMN.AMOUNT);
+        public final static String ID = TABLE_NAME.concat(Ingredient.COLUMN.ID);
+        public final static String PRODUCT_ID = TABLE_NAME.concat(Ingredient.COLUMN.PRODUCT_ID);
+        public final static String RECIPE_ID = TABLE_NAME.concat(Ingredient.COLUMN.RECIPE_ID);
+        public final static String AMOUNT = TABLE_NAME.concat(Ingredient.COLUMN.AMOUNT);
         public final static String[] ALL_COLUMNS = {ID, PRODUCT_ID, RECIPE_ID, AMOUNT};
     }
 
 
     public final static String DATABASE_CREATE = "CREATE TABLE " + TABLE_NAME
             + "("
-            + COLUMN.ID + " TEXT PRIMARY KEY,"
-            + COLUMN.PRODUCT_ID + " TEXT,"
-            + COLUMN.RECIPE_ID + " TEXT,"
-            + COLUMN.AMOUNT + " REAL,"
-            + "FOREIGN KEY (" + COLUMN.PRODUCT_ID + ") REFERENCES " +  Product.TABLE_NAME + "( " + Product.COLUMN.ID + " )"
+            + Ingredient.COLUMN.ID + " TEXT PRIMARY KEY,"
+            + Ingredient.COLUMN.PRODUCT_ID + " TEXT,"
+            + Ingredient.COLUMN.RECIPE_ID + " TEXT,"
+            + Ingredient.COLUMN.AMOUNT + " REAL,"
+            + "FOREIGN KEY (" + Ingredient.COLUMN.PRODUCT_ID + ") REFERENCES " + Product.TABLE_NAME + "( " + Product.COLUMN.ID + " )"
             + "ON UPDATE CASCADE ON DELETE CASCADE,"
-            + "FOREIGN KEY (" + COLUMN.RECIPE_ID + ") REFERENCES " +  Recipe.TABLE_NAME + "( " + Recipe.COLUMN_NO_TABLE_PREFIXED.COLUMN_ID + " )"
+            + "FOREIGN KEY (" + Ingredient.COLUMN.RECIPE_ID + ") REFERENCES " + Recipe.TABLE_NAME + "( " + Recipe.COLUMN.ID + " )"
             + "ON UPDATE CASCADE ON DELETE CASCADE"
             + ")";
-    /**
-     * @deprecated use {@link COLUMN#ID}
-     */
-    public final static String ATTR_PRODUCT = StringUtil.toSQLName("mProduct");
-    /**
-     * @deprecated use {@link COLUMN#AMOUNT}
-     */
-    public final static String ATTR_AMOUNT = StringUtil.toSQLName("mAmount");
-    /**
-     * @deprecated use {@link COLUMN#RECIPE_ID}
-     */
-    public final static String ATTR_RECIPE = StringUtil.toSQLName("mRecipe");
 
     public Product mProduct;
     public Recipe mRecipe;

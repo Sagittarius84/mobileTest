@@ -5,8 +5,6 @@ import android.content.ContentValues;
 import com.orm.StringUtil;
 import com.orm.SugarRecord;
 
-import java.util.List;
-
 /**
  * Represents a virtual category entry for a product. Since category usually make people think a
  * thing can only be in one category, the word "tag" is more fitting. For example: A tomato is
@@ -15,11 +13,11 @@ import java.util.List;
  */
 public class TaggedProduct extends SugarRecord<TaggedProduct> {
     /**
-     * @deprecated us instead {@link COLUMN_TABLE_PREFIXED#COLUMN_TAG_ID}
+     * @deprecated us instead {@link COLUMN_PREFIXED#TAG_ID}
      */
     public final static String ATTR_TAG = StringUtil.toSQLName("mTag");
     /**
-     * @deprecated use instead {@link COLUMN_TABLE_PREFIXED#COLUMN_PRODUCT_ID}
+     * @deprecated use instead {@link COLUMN_PREFIXED#PRODUCT_ID}
      */
     public final static String ATTR_PRODUCT = StringUtil.toSQLName("mProduct");
 
@@ -28,45 +26,45 @@ public class TaggedProduct extends SugarRecord<TaggedProduct> {
     /**
      * Column names that does not contain the table prefix.
      */
-    public final static class COLUMN_NO_TABLE_PREFIXED {
+    public final static class COLUMN {
 
-        public final static String COLUMN_ID = "_id";
-        public final static String COLUMN_TAG_ID = "tag_id";
-        public final static String COLUMN_PRODUCT_ID = "product_id";
+        public final static String ID = "_id";
+        public final static String TAG_ID = "tag_id";
+        public final static String PRODUCT_ID = "product_id";
         /**
          * Will return all columns of this TaggedProduct Table.
          */
-        public final static String[] ALL_COLUMNS = {COLUMN_ID, COLUMN_TAG_ID, COLUMN_PRODUCT_ID};
+        public final static String[] ALL_COLUMNS = {ID, TAG_ID, PRODUCT_ID};
     }
 
     /**
      * Column names that are prefixed with the table name. So like this TableName.ColumnName
      */
-    public final static class COLUMN_TABLE_PREFIXED {
+    public final static class COLUMN_PREFIXED {
 
-        public final static String COLUMN_ID = TABLE_NAME.concat("." + COLUMN_NO_TABLE_PREFIXED.COLUMN_ID);
-        public final static String COLUMN_TAG_ID = TABLE_NAME.concat("." + COLUMN_NO_TABLE_PREFIXED.COLUMN_TAG_ID);
-        public final static String COLUMN_PRODUCT_ID = TABLE_NAME.concat("." + COLUMN_NO_TABLE_PREFIXED.COLUMN_PRODUCT_ID);
+        public final static String ID = TABLE_NAME.concat("." + COLUMN.ID);
+        public final static String TAG_ID = TABLE_NAME.concat("." + COLUMN.TAG_ID);
+        public final static String PRODUCT_ID = TABLE_NAME.concat("." + COLUMN.PRODUCT_ID);
 
-        public final static String[] ALL_COLUMNS = {COLUMN_ID, COLUMN_TAG_ID, COLUMN_PRODUCT_ID};
+        public final static String[] ALL_COLUMNS = {ID, TAG_ID, PRODUCT_ID};
     }
 
     /**
      * Returns the column names with qualified table names.
      */
     public final static String[] ALL_COLUMNS_JOINED = {Tag.COLUMN_PREFIXED.ID, Tag.COLUMN_PREFIXED.NAME,
-            COLUMN_TABLE_PREFIXED.COLUMN_ID, COLUMN_TABLE_PREFIXED.COLUMN_TAG_ID, COLUMN_TABLE_PREFIXED.COLUMN_PRODUCT_ID,
+            COLUMN_PREFIXED.ID, COLUMN_PREFIXED.TAG_ID, COLUMN_PREFIXED.PRODUCT_ID,
             Product.PREFIXED_COLUMN.ID, Product.PREFIXED_COLUMN.NAME, Product.PREFIXED_COLUMN.DEFAULT_AMOUNT,
             Product.PREFIXED_COLUMN.STEP_AMOUNT, Product.PREFIXED_COLUMN.UNIT};
 
     public final static String DATABASE_CREATE = "CREATE TABLE " + TABLE_NAME
             + "("
-            + COLUMN_NO_TABLE_PREFIXED.COLUMN_ID + " TEXT PRIMARY KEY,"
-            + COLUMN_NO_TABLE_PREFIXED.COLUMN_TAG_ID + " TEXT,"
-            + COLUMN_NO_TABLE_PREFIXED.COLUMN_PRODUCT_ID + " TEXT,"
-            + "FOREIGN KEY (" + COLUMN_NO_TABLE_PREFIXED.COLUMN_PRODUCT_ID + ") REFERENCES " + Product.TABLE_NAME + " (" + Product.COLUMN.ID + ") "
+            + COLUMN.ID + " TEXT PRIMARY KEY,"
+            + COLUMN.TAG_ID + " TEXT,"
+            + COLUMN.PRODUCT_ID + " TEXT,"
+            + "FOREIGN KEY (" + COLUMN.PRODUCT_ID + ") REFERENCES " + Product.TABLE_NAME + " (" + Product.COLUMN.ID + ") "
             + "ON UPDATE CASCADE ON DELETE CASCADE,"
-            + "FOREIGN KEY (" + COLUMN_NO_TABLE_PREFIXED.COLUMN_TAG_ID + ") REFERENCES " + Tag.TABLE_NAME + " (" + Tag.COLUMN.ID + ") "
+            + "FOREIGN KEY (" + COLUMN.TAG_ID + ") REFERENCES " + Tag.TABLE_NAME + " (" + Tag.COLUMN.ID + ") "
             + "ON UPDATE CASCADE ON DELETE CASCADE"
             + ")";
 
@@ -94,11 +92,11 @@ public class TaggedProduct extends SugarRecord<TaggedProduct> {
         mProduct = _product;
     }
 
-    public ContentValues toContentValues(){
+    public ContentValues toContentValues() {
         ContentValues cv = new ContentValues();
-        cv.put(COLUMN_NO_TABLE_PREFIXED.COLUMN_ID, this.mUUID);
-        cv.put(COLUMN_NO_TABLE_PREFIXED.COLUMN_PRODUCT_ID, this.mProduct != null ? this.mProduct.mUUID : null);
-        cv.put(COLUMN_NO_TABLE_PREFIXED.COLUMN_TAG_ID, this.mTag != null ? this.mTag.mUUID : null);
+        cv.put(COLUMN.ID, this.mUUID);
+        cv.put(COLUMN.PRODUCT_ID, this.mProduct != null ? this.mProduct.mUUID : null);
+        cv.put(COLUMN.TAG_ID, this.mTag != null ? this.mTag.mUUID : null);
         return cv;
     }
 

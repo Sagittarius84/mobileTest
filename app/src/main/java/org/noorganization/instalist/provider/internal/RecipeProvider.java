@@ -100,7 +100,7 @@ public class RecipeProvider implements IInternalProvider {
         switch (mMatcher.match(_uri)) {
 
             case SINGLE_RECIPE:
-                String selection = ProviderUtils.prependIdToQuery(Recipe.COLUMN_NO_TABLE_PREFIXED.COLUMN_ID, _selection);
+                String selection = ProviderUtils.prependIdToQuery(Recipe.COLUMN.ID, _selection);
                 String[] selectionArgs = ProviderUtils.prependSelectionArgs(_selectionArgs, _uri.getLastPathSegment());
                 cursor = mDatabase.query(Recipe.TABLE_NAME, _projection, selection, selectionArgs, null, null, _sortOrder);
                 break;
@@ -159,12 +159,12 @@ public class RecipeProvider implements IInternalProvider {
                 if (rowId == -1) {
                     return null;
                 }
-                Cursor cursor = mDatabase.query(Recipe.TABLE_NAME, new String[]{Recipe.COLUMN_TABLE_PREFIXED.COLUMN_ID},
+                Cursor cursor = mDatabase.query(Recipe.TABLE_NAME, new String[]{Recipe.COLUMN_PREFIXED.ID},
                         SQLiteUtils.COLUMN_ROW_ID + "=?", new String[]{String.valueOf(rowId)},
                         null, null, null, null);
                 cursor.moveToFirst();
                 newUri = Uri.parse(SINGLE_RECIPE_CONTENT_URI.replace("*",
-                        cursor.getString(cursor.getColumnIndex(Recipe.COLUMN_TABLE_PREFIXED.COLUMN_ID))));
+                        cursor.getString(cursor.getColumnIndex(Recipe.COLUMN_PREFIXED.ID))));
                 cursor.close();
                 break;
             case SINGLE_RECIPE_INGREDIENT:
@@ -201,7 +201,7 @@ public class RecipeProvider implements IInternalProvider {
 
         switch (mMatcher.match(_uri)) {
             case SINGLE_RECIPE:
-                String selection = ProviderUtils.prependIdToQuery(Recipe.COLUMN_TABLE_PREFIXED.COLUMN_ID, null);
+                String selection = ProviderUtils.prependIdToQuery(Recipe.COLUMN_PREFIXED.ID, null);
                 String[] selectionArgs = ProviderUtils.prependSelectionArgs(null, _uri.getLastPathSegment());
                 affectedRows = mDatabase.delete(Recipe.TABLE_NAME, selection, selectionArgs);
                 break;
@@ -238,7 +238,7 @@ public class RecipeProvider implements IInternalProvider {
         int affectedRows = 0;
         switch (mMatcher.match(_uri)) {
             case SINGLE_RECIPE:
-                String selection = ProviderUtils.prependIdToQuery(Recipe.COLUMN_NO_TABLE_PREFIXED.COLUMN_ID, null);
+                String selection = ProviderUtils.prependIdToQuery(Recipe.COLUMN.ID, null);
                 String[] selectionArgs = ProviderUtils.prependSelectionArgs(null, _uri.getLastPathSegment());
                 affectedRows = mDatabase.update(Recipe.TABLE_NAME, _values, selection, selectionArgs);
                 break;
