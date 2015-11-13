@@ -124,15 +124,20 @@ public class UnitProvider implements IInternalProvider {
                     return null;
                     //throw new SQLiteException("Failed to add a record into " + _uri);
                 }
-                Cursor cursor = mDatabase.query(Unit.TABLE_NAME, new String[]{Unit.COLUMN.ID},
-                        SQLiteUtils.COLUMN_ROW_ID + "=?", new String[]{String.valueOf(rowId)},
-                        null, null, null, null);
-                cursor.moveToFirst();
-                newUri = Uri.parse(SINGLE_UNIT_CONTENT_URI.replace("*",
-                        cursor.getString(cursor.getColumnIndex(Unit.COLUMN.ID))));
-                cursor.close();
+
+                newUri = Uri.parse(SINGLE_UNIT_CONTENT_URI.replace("*", _values.getAsString(Unit.COLUMN.ID)));
                 break;
             case MULTIPLE_UNITS:
+                _values.put(Unit.COLUMN.ID, SQLiteUtils.generateId(mDatabase, Unit.TABLE_NAME).toString());
+                rowId = mDatabase.insert(Unit.TABLE_NAME, null, _values);
+                // insertion went wrong
+                if (rowId == -1) {
+                    return null;
+                    //throw new SQLiteException("Failed to add a record into " + _uri);
+                }
+
+                newUri = Uri.parse(SINGLE_UNIT_CONTENT_URI.replace("*", _values.getAsString(Unit.COLUMN.ID)));
+                break;
             default:
                 throw new IllegalArgumentException("The given Uri is not supported: " + _uri);
         }

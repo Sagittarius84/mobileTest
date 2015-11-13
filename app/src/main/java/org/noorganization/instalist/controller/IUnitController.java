@@ -30,12 +30,19 @@ public interface IUnitController {
     Unit findById(@NonNull String _uuid);
 
     /**
-     * Rename the Unit, if possible.
-     * @param _unit The valid unit to rename. Not null.
-     * @param _newName The new name of the unit. Not null. Not existent.
-     * @return The modified Unit if everything went ok, the last saved unit if renaming was not
-     * possible or null if the unit could not be found.
+     * Find the Unit by its name.
+     * @param _name the name to search.
+     * @return the related unit or null if nothing was found.
      */
+    Unit findByName(String _name);
+
+        /**
+         * Rename the Unit, if possible.
+         * @param _unit The valid unit to rename. Not null.
+         * @param _newName The new name of the unit. Not null. Not existent.
+         * @return The modified Unit if everything went ok, the last saved unit if renaming was not
+         * possible or null if the unit could not be found.
+         */
     Unit renameUnit(Unit _unit, String _newName);
 
     /**

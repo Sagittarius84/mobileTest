@@ -7,26 +7,24 @@ import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
-import com.orm.SugarRecord;
-import com.orm.query.Condition;
-import com.orm.query.Select;
-
 import org.noorganization.instalist.controller.IProductController;
 import org.noorganization.instalist.controller.IUnitController;
 import org.noorganization.instalist.controller.event.Change;
 import org.noorganization.instalist.controller.event.UnitChangedMessage;
 import org.noorganization.instalist.model.Product;
 import org.noorganization.instalist.model.Unit;
-import org.noorganization.instalist.provider.InstalistProvider;
+import org.noorganization.instalist.provider.internal.ProductProvider;
+import org.noorganization.instalist.provider.internal.UnitProvider;
 
 import de.greenrobot.event.EventBus;
 
 public class UnitController implements IUnitController {
 
+    private static String LOG_TAG = UnitController.class.getName();
     private static UnitController mInstance;
 
-    private EventBus        mBus;
-    private Context         mContext;
+    private EventBus mBus;
+    private Context mContext;
     private ContentResolver mResolver;
 
     private UnitController(Context _context) {
@@ -44,13 +42,20 @@ public class UnitController implements IUnitController {
 
     @Override
     public Unit createUnit(String _name) {
+
         if (_name == null ||
-                Select.from(Unit.class).where(Condition.prop("m_name").eq(_name)).count() != 0) {
+                findByName(_name) != null) {
             return null;
         }
 
-        Unit newUnit = new Unit(_name);
-        newUnit.save();
+        Unit newUnit = new Unit();
+        newUnit.mName = _name;
+
+        Uri unitUri = mResolver.insert(Uri.parse(UnitProvider.MULTIPLE_UNIT_CONTENT_URI), newUnit.toContentValues());
+
+        if (unitUri == null) {
+            return null;
+        }
 
         mBus.post(new UnitChangedMessage(Change.CREATED, newUnit));
 
@@ -60,7 +65,7 @@ public class UnitController implements IUnitController {
     @Override
     public Unit findById(@NonNull String _uuid) {
         Cursor unitCursor = mResolver.query(
-                Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI, "unit"),
+                Uri.parse(UnitProvider.MULTIPLE_UNIT_CONTENT_URI),
                 Unit.COLUMN.ALL_COLUMNS,
                 Unit.COLUMN.ID + " = ?",
                 new String[]{_uuid},
@@ -82,27 +87,62 @@ public class UnitController implements IUnitController {
     }
 
     @Override
+    public Unit findByName(String _name) {
+        Cursor unitCursor = mResolver.query(
+                Uri.parse(UnitProvider.MULTIPLE_UNIT_CONTENT_URI),
+                Unit.COLUMN.ALL_COLUMNS,
+                Unit.COLUMN.NAME + " = ?",
+                new String[]{_name},
+                null);
+        if (unitCursor == null) {
+            Log.e(getClass().getCanonicalName(), "Searching for Product by UUID failed with null " +
+                    "instead of Cursor. Returning no Product.");
+            return null;
+        } else if (unitCursor.getCount() == 0) {
+            unitCursor.close();
+            return null;
+        }
+        unitCursor.moveToFirst();
+        Unit rtn = new Unit();
+        rtn.mUUID = unitCursor.getString(unitCursor.getColumnIndex(Unit.COLUMN.ID));
+        rtn.mName = unitCursor.getString(unitCursor.getColumnIndex(Unit.COLUMN.NAME));
+        unitCursor.close();
+        return rtn;
+    }
+
+    @Override
     public Unit renameUnit(Unit _unit, String _newName) {
         if (_unit == null) {
             return null;
         }
 
-        Unit toChange = SugarRecord.findById(Unit.class, _unit.getId());
+        Unit toChange = findById(_unit.mUUID);
         if (toChange == null || _newName == null) {
             return toChange;
         }
 
-        for (Unit toCheck : Select.from(Unit.class).where(Condition.prop("m_name").eq(_newName)).list()) {
-            if (!toCheck.getId().equals(_unit.getId())) {
-                return toChange;
-            }
+        Cursor cursor = mResolver.query(Uri.parse(UnitProvider.MULTIPLE_UNIT_CONTENT_URI),
+                Unit.COLUMN.ALL_COLUMNS, Unit.COLUMN.NAME + "=? AND " + Unit.COLUMN.ID + " <> ?",
+                new String[]{_unit.mName, _unit.mUUID},
+                null);
+
+        if (cursor == null) {
+            return null;
+        }
+        if (cursor.getCount() != 0) {
+            return toChange;
         }
 
         toChange.mName = _newName;
-        toChange.save();
+
+        int updatedRows = mResolver.update(Uri.parse(UnitProvider.SINGLE_UNIT_CONTENT_URI.replace("*", toChange.mUUID)), toChange.toContentValues(), null, null);
+
+        if (updatedRows == 0) {
+            return null;
+        }
 
         mBus.post(new UnitChangedMessage(Change.CHANGED, toChange));
-
+        cursor.close();
         return toChange;
     }
 
@@ -113,31 +153,70 @@ public class UnitController implements IUnitController {
         }
 
         IProductController productController = ControllerFactory.getProductController();
+        Cursor cursor;
 
         switch (_mode) {
             case MODE_DELETE_REFERENCES:
-                for (Product toDelete : Select.from(Product.class).
-                        where(Condition.prop("m_unit").eq(_unit.getId())).list()) {
-                    productController.removeProduct(toDelete, true);
+
+                cursor = mResolver.query(Uri.parse(ProductProvider.MULTIPLE_PRODUCT_CONTENT_URI),
+                        Product.PREFIXED_COLUMN.ALL_COLUMNS,
+                        Product.PREFIXED_COLUMN.UNIT + "=?",
+                        new String[]{_unit.mUUID}, null);
+
+                if (cursor == null) {
+                    Log.e(LOG_TAG, "MODE DELETE REFERENCES no cursor fetched.");
+                    return false;
                 }
+
+                do {
+                    productController.removeProduct(productController.parseProduct(cursor), true);
+                } while (cursor.moveToNext());
+
                 break;
             case MODE_UNLINK_REFERENCES:
-                for (Product toUnlink : Select.from(Product.class).
-                        where(Condition.prop("m_unit").eq(_unit.getId())).list()) {
-                    toUnlink.mUnit = null;
-                    productController.modifyProduct(toUnlink);
+                cursor = mResolver.query(Uri.parse(ProductProvider.MULTIPLE_PRODUCT_CONTENT_URI),
+                        Product.PREFIXED_COLUMN.ALL_COLUMNS,
+                        Product.PREFIXED_COLUMN.UNIT + "=?",
+                        new String[]{_unit.mUUID}, null);
+
+                if (cursor == null) {
+                    Log.e(LOG_TAG, "MODE_UNLINK_REFERENCES no cursor fetched.");
+                    return false;
                 }
+
+                do {
+                    Product product = productController.parseProduct(cursor);
+                    product.mUnit = null;
+                    productController.modifyProduct(product);
+                } while (cursor.moveToNext());
+
                 break;
             case MODE_BREAK_DELETION:
-                if (Select.from(Product.class).where(Condition.prop("m_unit").eq(_unit.getId())).
-                        count() == 0) {
-                    break;
+                cursor = mResolver.query(Uri.parse(ProductProvider.MULTIPLE_PRODUCT_CONTENT_URI),
+                        Product.PREFIXED_COLUMN.ALL_COLUMNS,
+                        Product.PREFIXED_COLUMN.UNIT + "=?",
+                        new String[]{_unit.mUUID}, null);
+
+                if (cursor == null) {
+                    Log.e(LOG_TAG, "MODE_BREAK_DELETION no cursor fetched.");
+                    return false;
                 }
+
+                if (cursor.getCount() != 0) {
+                    return false;
+                }
+
+                break;
             default:
                 return false;
         }
 
-        _unit.delete();
+        cursor.close();
+
+        int deletedRows = mResolver.delete(Uri.parse(UnitProvider.SINGLE_UNIT_CONTENT_URI.replace("*", _unit.mUUID)), null, null);
+        if (deletedRows == 0) {
+            return false;
+        }
 
         mBus.post(new UnitChangedMessage(Change.DELETED, _unit));
 

@@ -1,6 +1,7 @@
 package org.noorganization.instalist.model;
 
 import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.database.Cursor;
 import android.net.Uri;
 
@@ -80,5 +81,12 @@ public class Unit {
             return 0;
         }
         return (int) UUID.fromString(mUUID).getLeastSignificantBits();
+    }
+
+    public ContentValues toContentValues(){
+        ContentValues cv = new ContentValues(2);
+        cv.put(COLUMN.ID, this.mUUID);
+        cv.put(COLUMN.NAME, this.mName);
+        return cv;
     }
 }
