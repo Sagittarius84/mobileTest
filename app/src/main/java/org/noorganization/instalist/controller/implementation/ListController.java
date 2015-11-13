@@ -8,10 +8,6 @@ import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
-import com.orm.SugarRecord;
-import com.orm.query.Condition;
-import com.orm.query.Select;
-
 import org.noorganization.instalist.controller.ICategoryController;
 import org.noorganization.instalist.controller.IListController;
 import org.noorganization.instalist.controller.IProductController;
@@ -24,9 +20,6 @@ import org.noorganization.instalist.model.Product;
 import org.noorganization.instalist.model.ShoppingList;
 import org.noorganization.instalist.provider.InstalistProvider;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import de.greenrobot.event.EventBus;
 
 
@@ -36,6 +29,7 @@ import de.greenrobot.event.EventBus;
  */
 public class ListController implements IListController {
 
+    private static String LOG_TAG = ListController.class.getName();
     private static ListController mInstance;
 
     private EventBus mBus;
@@ -132,8 +126,10 @@ public class ListController implements IListController {
             return null;
         }
         entrySearch.moveToFirst();
-        return getEntryById(entrySearch.getString(entrySearch.getColumnIndex(
+        ListEntry listEntry =  getEntryById(entrySearch.getString(entrySearch.getColumnIndex(
                 ListEntry.COLUMN.ID)));
+        entrySearch.close();
+        return  listEntry;
     }
 
     @Override
@@ -311,7 +307,6 @@ public class ListController implements IListController {
             newListCV.putNull(ShoppingList.COLUMN.CATEGORY);
             // set the category to the default uuid
             insertUri = String.format(insertUri, "-");
-            // TODO do a query to get the category in here?
         } else {
             // category is set by uuid
             newListCV.put(ShoppingList.COLUMN.CATEGORY, _category.mUUID);
@@ -322,7 +317,7 @@ public class ListController implements IListController {
         // TODO this should do it if I understand your intention correct
         Uri createdList = mResolver.insert(Uri.parse(insertUri), newListCV);
 
-        if(createdList == null){
+        if (createdList == null) {
             return null;
         }
 
@@ -342,13 +337,18 @@ public class ListController implements IListController {
 
         int deletedListCount = mResolver.delete(Uri.parse(_list.getUriPath()), null, null);
 
-        if(deletedListCount > 0 ){
+        if (deletedListCount > 0) {
             mBus.post(new ListChangedMessage(Change.DELETED, _list));
-            return  true;
+            return true;
         }
 
         Cursor cursor = mResolver.query(_list.toUri(InstalistProvider.BASE_CONTENT_URI), ShoppingList.COLUMN.ALL_COLUMNS, null, null, null);
-        return cursor != null && cursor.getCount() == 0;
+
+        boolean rtn = cursor != null && cursor.getCount() == 0;
+        if(cursor != null){
+            cursor.close();
+        }
+        return rtn;
     }
 
     @Override
@@ -362,9 +362,9 @@ public class ListController implements IListController {
         _list.mName = _newName;
         int affectedRows = mResolver.update(_list.toUri(InstalistProvider.BASE_CONTENT_URI), _list.toContentValues(), null, null);
 
-        if(affectedRows > 0 ) {
+        if (affectedRows > 0) {
             mBus.post(new ListChangedMessage(Change.CHANGED, _list));
-        } else{
+        } else {
             _list.mName = oldName;
         }
 
@@ -391,8 +391,8 @@ public class ListController implements IListController {
         shoppingList.mCategory = _list.mCategory;
 
 
-        Cursor categoryCursor = null;
-        Category category = null;
+        Cursor categoryCursor;
+        Category category;
 
         if (_category != null) {
             categoryCursor = mResolver.query(_category.toUri(InstalistProvider.BASE_CONTENT_URI), Category.COLUMN.ALL_COLUMNS, null, null, null);
@@ -405,11 +405,14 @@ public class ListController implements IListController {
             category.mUUID = categoryCursor.getString(categoryCursor.getColumnIndex(Category.COLUMN.ID));
             category.mName = categoryCursor.getString(categoryCursor.getColumnIndex(Category.COLUMN.NAME));
             shoppingList.mCategory = category;
+
+            categoryCursor.close();
         }
 
+        listCursor.close();
 
         int affectedRows = mResolver.update(shoppingList.toUri(InstalistProvider.BASE_CONTENT_URI), shoppingList.toContentValues(), null, null);
-        if(affectedRows > 0) {
+        if (affectedRows > 0) {
             mBus.post(new ListChangedMessage(Change.CHANGED, shoppingList));
         }
 
@@ -417,63 +420,40 @@ public class ListController implements IListController {
     }
 
 
-    /**
-     * Searches a ShoppingList by name. The name has to match exactly, or nothing will be found.
-     * // TODO obsolete?
-     * @param _name The name of the list. Any String but not null.
-     * @return Either the found list or null if no list is matching.
-     */
-    public static ShoppingList findByName(String _name) {
-        // TODO move to controller.
-
-        if (_name == null) {
-            return null;
-        }
-
-        //return Select.from(ShoppingList.class).where(Condition.prop("m_name").eq(_name)).first();
-        return null;
-    }
-
-    /**
-     * Adds all listnames to a list.
-     * // TODO obsolete?
-     * @return a list with the current shoppingListNames.
-     */
-    public static List<String> getShoppingListNames() {
-        // TODO move to controller.
-        return new ArrayList<>(0);
-        /*
-        List<ShoppingList> shoppingLists = Select.from(ShoppingList.class).list();
-        List<String> shoppingListNames = new ArrayList<>();
-
-        for (ShoppingList shoppingList : shoppingLists) {
-            shoppingListNames.add(shoppingList.mName);
-        }
-
-        return shoppingListNames;*/
-    }
-
     //endregion public methods
 
     //region Private methods
 
+    /**
+     * Checks if an list with the given name already exists in the database.
+     *
+     * @param _name the name to be checked.
+     * @return true if there is an exisiting one else false.
+     */
     private boolean existsListName(String _name) {
-        long existingListWithSameNameCount = Select.from(ShoppingList.class).where(
-                Condition.prop("m_name").eq(_name)).count();
+        Uri requestUri = Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI, "list");
+        Cursor listCursor = mResolver.query(requestUri, new String[]{ShoppingList.COLUMN.NAME}, ShoppingList.COLUMN.NAME + "= ?", new String[]{_name}, null);
 
-        return (existingListWithSameNameCount > 0);
+        if (listCursor == null) {
+            Log.e(LOG_TAG, "Internal failure while querying a list name in method existsListName(String _name).");
+            // return true just to prevent errors that can result from this.
+            return true;
+        }
+        boolean rtn = listCursor.getCount() > 0;
+        listCursor.close();
+        return rtn;
     }
 
     /**
-     * TODO Description pls
-     *
-     * @param _list
-     * @param _product
-     * @param _amount
-     * @param _prioUsed
-     * @param _prio
-     * @param _addAmount
-     * @return
+     * Adds or updates a Listentry to a given {@link ShoppingList}.
+     * // TODO: further description needed
+     * @param _list the list where the item should be added or updated.
+     * @param _product the product to insert/update.
+     * @param _amount the new amount of the product in the given list.
+     * @param _prioUsed flag that describes if the prio is used.
+     * @param _prio the prio that will be assigned.
+     * @param _addAmount the standard amount to add when hitting the inc/dec buttons.
+     * @return the new listentry or null if some failure happened.
      */
     private ListEntry addOrChangeItem(ShoppingList _list, Product _product, float _amount,
                                       boolean _prioUsed, int _prio, boolean _addAmount) {
