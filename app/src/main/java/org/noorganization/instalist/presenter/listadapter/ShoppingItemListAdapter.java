@@ -10,6 +10,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 
 import org.noorganization.instalist.R;
+import org.noorganization.instalist.controller.implementation.ControllerFactory;
 import org.noorganization.instalist.model.ListEntry;
 import org.noorganization.instalist.model.Unit;
 import org.noorganization.instalist.presenter.customview.AmountPicker;
@@ -213,7 +214,7 @@ public class ShoppingItemListAdapter extends RecyclerView.Adapter<RecyclerView.V
 
     @Override
     public void addListEntry(long _ListEntryId) {
-        ListEntry listEntry = ListEntry.getListEntryById(_ListEntryId);
+        ListEntry listEntry = ControllerFactory.getListController(mContext).getEntryById(_ListEntryId);
         mListOfEntries.add(new ListEntryItemWrapper(listEntry));
         Collections.sort(mListOfEntries, mCurrentComparator);
         // if here is a position like -1 there must be some strange effects going on.
@@ -233,7 +234,7 @@ public class ShoppingItemListAdapter extends RecyclerView.Adapter<RecyclerView.V
 
     @Override
     public void updateListEntry(long _ListEntryId) {
-        ListEntry listEntry        = ListEntry.getListEntryById(_ListEntryId);
+        ListEntry listEntry        = ControllerFactory.getListController(mContext).getEntryById(_ListEntryId);
         int       positionToUpdate = getPositionForId(_ListEntryId);
         if (positionToUpdate < 0 || positionToUpdate > mListOfEntries.size()) {
             Log.e(LOG_TAG, "Update ListEntry from position " + positionToUpdate + " is out of bounds");

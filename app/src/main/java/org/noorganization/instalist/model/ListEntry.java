@@ -2,13 +2,11 @@ package org.noorganization.instalist.model;
 
 import android.net.Uri;
 
-import com.orm.SugarRecord;
-
 /**
  * Represents a product written on a shoppinglist.
  * Created by michi on 14.04.15.
  */
-public class ListEntry extends SugarRecord<ListEntry> {
+public class ListEntry {
 
     public static final String TABLE_NAME = "listentry";
 
@@ -116,7 +114,7 @@ public class ListEntry extends SugarRecord<ListEntry> {
 
         ListEntry that = (ListEntry) o;
 
-        if (!getId().equals(that.getId()) ||
+        if (!mUUID.equals(that.mUUID) ||
                 Float.compare(that.mAmount, mAmount) != 0 ||
                 mStruck != that.mStruck ||
                 (mList == null && that.mList != null) || (mList != null && !mList.equals(that.mList)) ||
@@ -128,30 +126,26 @@ public class ListEntry extends SugarRecord<ListEntry> {
         return true;
     }
 
-    public static ListEntry getListEntryById(long _Id) {
-        return ListEntry.findById(ListEntry.class, _Id);
-    }
-
     @Override
     public int hashCode() {
-        return getId().intValue();
+        return mUUID.hashCode();
     }
 
     @Override
     public String toString() {
-        return "ListEntry { id = " + getId() + ", mList.id = " + (mList == null ? "none" :
-                mList.mUUID.toString()) +
+        return "ListEntry { id = " + mUUID + ", mList.id = " + (mList == null ? "none" :
+                mList.mUUID) +
                 ", mProduct.id = " + (mProduct == null ? "none" : mProduct.mUUID) +
                 ", mStruck = " + mStruck + ", mAmount" + mAmount + " }";
     }
 
     public Uri toUri(Uri _baseUri) {
-        if (mList == null || getId() == 0) {
+        if (mList == null || mUUID == null) {
             return null;
         }
 
         return Uri.withAppendedPath(_baseUri, "category/" +
                 (mList.mCategory == null ? "-" : mList.mCategory.mUUID) + "/list/" +
-                mList.mUUID + "/entry/" + getId());
+                mList.mUUID + "/entry/" + mUUID);
     }
 }

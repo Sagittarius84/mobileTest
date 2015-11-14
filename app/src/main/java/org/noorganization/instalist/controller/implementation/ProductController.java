@@ -44,8 +44,8 @@ public class ProductController implements IProductController {
         mBus = EventBus.getDefault();
         mContext = _context;
         mResolver = mContext.getContentResolver();
-        mUnitController = ControllerFactory.getUnitController();
-        mTagController = ControllerFactory.getTagController();
+        mUnitController = ControllerFactory.getUnitController(_context);
+        mTagController = ControllerFactory.getTagController(_context);
     }
 
     static ProductController getInstance(Context _context) {
@@ -88,6 +88,7 @@ public class ProductController implements IProductController {
             return null;
         }
 
+        product.mUUID = productUri.getLastPathSegment();
         mBus.post(new ProductChangedMessage(Change.CREATED, product));
 
         productCursor.close();
@@ -261,11 +262,12 @@ public class ProductController implements IProductController {
 
         // check if this {@link TaggedProduct} exists already in the database.
         if (taggedProductCursor.getCount() == 0) {
-            TaggedProduct newProductsTag = new TaggedProduct(_tag, _product);
-            Uri taggedProductUri = mResolver.insert(Uri.parse(TaggedProductProvider.MULTIPLE_TAGGED_PRODUCT_CONTENT_URI), newProductsTag.toContentValues());
+            TaggedProduct newTaggedProduct = new TaggedProduct(_tag, _product);
+            Uri taggedProductUri = mResolver.insert(Uri.parse(TaggedProductProvider.MULTIPLE_TAGGED_PRODUCT_CONTENT_URI), newTaggedProduct.toContentValues());
             if (taggedProductUri == null) {
                 return false;
             }
+            newTaggedProduct.mUUID = taggedProductUri.getLastPathSegment();
             mBus.post(new ProductChangedMessage(Change.CHANGED, foundProduct));
         }
 

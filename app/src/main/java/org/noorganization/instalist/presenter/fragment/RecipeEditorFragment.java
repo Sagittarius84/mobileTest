@@ -15,6 +15,7 @@ import com.orm.SugarRecord;
 import com.orm.query.Condition;
 import com.orm.query.Select;
 
+import org.noorganization.instalist.GlobalApplication;
 import org.noorganization.instalist.R;
 import org.noorganization.instalist.controller.IRecipeController;
 import org.noorganization.instalist.controller.implementation.ControllerFactory;
@@ -76,14 +77,13 @@ public class RecipeEditorFragment extends BaseFragment {
         parameters.putInt(BK_EDITOR_MODE, EDITOR_MODE_EDIT);
         parameters.putLong(BK_RECIPE_ID, _recipeId);
 
-        List<Ingredient> currentIngredients = SugarRecord.findById(Recipe.class, _recipeId).
-                getIngredients();
+        List<Ingredient> currentIngredients = ControllerFactory.getRecipeController(GlobalApplication.getContext()).getIngredients(_recipeId);
 
         long resultingIds[] = new long[currentIngredients.size()];
         float resultingAmounts[] = new float[currentIngredients.size()];
         int convertIndex = 0;
         for (Ingredient currentIngredient : currentIngredients) {
-            resultingIds[convertIndex] = currentIngredient.mProduct.getId();
+            resultingIds[convertIndex] = currentIngredient.mProduct.mUUID;
             resultingAmounts[convertIndex] = currentIngredient.mAmount;
             convertIndex++;
         }

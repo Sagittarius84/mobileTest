@@ -1,12 +1,12 @@
 package org.noorganization.instalist.model;
 
-import com.orm.SugarRecord;
+import android.content.ContentValues;
 
 /**
  * Represents a product as ingredient in a recipe.
  * Created by michi on 14.04.15.
  */
-public class Ingredient extends SugarRecord<Ingredient> {
+public class Ingredient {
 
     public final static String TABLE_NAME = "ingredient";
 
@@ -45,6 +45,7 @@ public class Ingredient extends SugarRecord<Ingredient> {
             + "ON UPDATE CASCADE ON DELETE CASCADE"
             + ")";
 
+    public String mUUID;
     public Product mProduct;
     public Recipe mRecipe;
     public float mAmount;
@@ -59,6 +60,15 @@ public class Ingredient extends SugarRecord<Ingredient> {
         mProduct = _product;
         mRecipe = _recipe;
         mAmount = _amount;
+    }
+
+    public ContentValues toContentValues() {
+        ContentValues cv = new ContentValues(4);
+        cv.put(COLUMN.ID, this.mUUID);
+        cv.put(COLUMN.PRODUCT_ID, this.mProduct.mUUID);
+        cv.put(COLUMN.RECIPE_ID, this.mRecipe.mUUID);
+        cv.put(COLUMN.AMOUNT, this.mAmount);
+        return cv;
     }
 
     @Override
@@ -81,12 +91,12 @@ public class Ingredient extends SugarRecord<Ingredient> {
         if (!mRecipe.equals(anotherIngredient.mRecipe)) {
             return false;
         }
-        return getId().compareTo(anotherIngredient.getId()) == 0;
+        return mUUID.compareTo(anotherIngredient.mUUID) == 0;
 
     }
 
     @Override
     public int hashCode() {
-        return getId().intValue();
+        return mUUID.hashCode();
     }
 }

@@ -26,11 +26,13 @@ public class UnitController implements IUnitController {
     private EventBus mBus;
     private Context mContext;
     private ContentResolver mResolver;
+    private IProductController mProductController;
 
     private UnitController(Context _context) {
         mBus = EventBus.getDefault();
         mContext = _context;
         mResolver = mContext.getContentResolver();
+        mProductController = ControllerFactory.getProductController(_context);
     }
 
     static UnitController getInstance(Context _context) {
@@ -56,7 +58,7 @@ public class UnitController implements IUnitController {
         if (unitUri == null) {
             return null;
         }
-
+        newUnit.mUUID = unitUri.getLastPathSegment();
         mBus.post(new UnitChangedMessage(Change.CREATED, newUnit));
 
         return newUnit;
@@ -151,8 +153,6 @@ public class UnitController implements IUnitController {
         if (_unit == null) {
             return true;
         }
-
-        IProductController productController = ControllerFactory.getProductController();
         Cursor cursor;
 
         switch (_mode) {
@@ -169,7 +169,7 @@ public class UnitController implements IUnitController {
                 }
 
                 do {
-                    productController.removeProduct(productController.parseProduct(cursor), true);
+                    mProductController.removeProduct(mProductController.parseProduct(cursor), true);
                 } while (cursor.moveToNext());
 
                 break;
@@ -185,9 +185,9 @@ public class UnitController implements IUnitController {
                 }
 
                 do {
-                    Product product = productController.parseProduct(cursor);
+                    Product product = mProductController.parseProduct(cursor);
                     product.mUnit = null;
-                    productController.modifyProduct(product);
+                    mProductController.modifyProduct(product);
                 } while (cursor.moveToNext());
 
                 break;

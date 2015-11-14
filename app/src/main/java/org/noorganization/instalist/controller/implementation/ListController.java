@@ -41,8 +41,8 @@ public class ListController implements IListController {
     private ListController(Context _context) {
         mBus = EventBus.getDefault();
         mContext = _context;
-        mProductController = ControllerFactory.getProductController();
-        mCategoryController = ControllerFactory.getCategoryController();
+        mProductController = ControllerFactory.getProductController(_context);
+        mCategoryController = ControllerFactory.getCategoryController(_context);
         mResolver = mContext.getContentResolver();
     }
 

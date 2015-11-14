@@ -1,5 +1,7 @@
 package org.noorganization.instalist;
 
+import android.content.Context;
+
 import com.orm.SugarApp;
 
 import org.noorganization.instalist.controller.database_seed.DatabaseSeeder;
@@ -40,4 +42,7 @@ public class GlobalApplication extends SugarApp {
         return mInstance;
     }
 
+    public static Context getContext(){
+        return getInstance().getApplicationContext();
+    }
 }

@@ -1,5 +1,7 @@
 package org.noorganization.instalist.controller.implementation;
 
+import android.content.Context;
+
 import org.noorganization.instalist.controller.ICategoryController;
 import org.noorganization.instalist.controller.IListController;
 import org.noorganization.instalist.controller.IProductController;
@@ -14,27 +16,27 @@ import org.noorganization.instalist.controller.IUnitController;
  * Created by Michi on 11.05.2015.
  */
 public class ControllerFactory {
-    public static IListController getListController() {
-        return ListController.getInstance();
+    public static IListController getListController(Context _context) {
+        return ListController.getInstance(_context);
     }
 
-    public static IProductController getProductController() {
-        return ProductController.getInstance();
+    public static IProductController getProductController(Context _context) {
+        return ProductController.getInstance(_context);
     }
 
-    public static IRecipeController getRecipeController() {
-        return RecipeController.getInstance();
+    public static IRecipeController getRecipeController(Context _context) {
+        return RecipeController.getInstance(_context);
     }
 
-    public static IUnitController getUnitController() {
-        return UnitController.getInstance();
+    public static IUnitController getUnitController(Context _context) {
+        return UnitController.getInstance(_context);
     }
 
-    public static ITagController getTagController() {
-        return TagController.getInstance();
+    public static ITagController getTagController(Context _context) {
+        return TagController.getInstance(_context);
     }
 
-    public static ICategoryController getCategoryController() {
-        return CategoryController.getInstance();
+    public static ICategoryController getCategoryController(Context _context) {
+        return CategoryController.getInstance(_context);
     }
 }

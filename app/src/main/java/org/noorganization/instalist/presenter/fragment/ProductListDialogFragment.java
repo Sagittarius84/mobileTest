@@ -466,7 +466,7 @@ public class ProductListDialogFragment extends BaseFragment {
                         break;
                     case RECIPE_LIST_ENTRY:
                         Recipe recipe = (Recipe) (listEntry.getItem());
-                        List<Ingredient> ingredients = recipe.getIngredients();
+                        List<Ingredient> ingredients = ControllerFactory.getRecipeController(mContext).getIngredients(recipe.mUUID);
                         for (Ingredient ingredient : ingredients) {
                             if (resultingProducts.containsKey(ingredient.mProduct)) {
                                 resultingProducts.put(ingredient.mProduct,

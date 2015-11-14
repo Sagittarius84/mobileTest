@@ -3,7 +3,6 @@ package org.noorganization.instalist.model;
 import android.content.ContentValues;
 
 import com.orm.StringUtil;
-import com.orm.SugarRecord;
 
 /**
  * Represents a virtual category entry for a product. Since category usually make people think a
@@ -11,7 +10,7 @@ import com.orm.SugarRecord;
  * vegetarian. But it's also lactose-free (or it should be at least).
  * Created by michi on 14.04.15.
  */
-public class TaggedProduct extends SugarRecord<TaggedProduct> {
+public class TaggedProduct {
     /**
      * @deprecated us instead {@link COLUMN_PREFIXED#TAG_ID}
      */
@@ -100,4 +99,21 @@ public class TaggedProduct extends SugarRecord<TaggedProduct> {
         return cv;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof TaggedProduct)) return false;
+
+        TaggedProduct that = (TaggedProduct) o;
+
+        if (!mUUID.equals(that.mUUID)) return false;
+        if (!mTag.equals(that.mTag)) return false;
+        return mProduct.equals(that.mProduct);
+
+    }
+
+    @Override
+    public int hashCode() {
+        return mUUID.hashCode();
+    }
 }

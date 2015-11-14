@@ -1,27 +1,47 @@
 package org.noorganization.instalist.controller.implementation;
 
-import com.orm.SugarRecord;
-import com.orm.query.Condition;
-import com.orm.query.Select;
+import android.content.ContentResolver;
+import android.content.Context;
+import android.database.Cursor;
+import android.net.Uri;
+import android.support.annotation.NonNull;
+import android.util.Log;
 
+import org.noorganization.instalist.controller.IProductController;
 import org.noorganization.instalist.controller.IRecipeController;
 import org.noorganization.instalist.controller.event.Change;
 import org.noorganization.instalist.controller.event.RecipeChangedMessage;
 import org.noorganization.instalist.model.Ingredient;
 import org.noorganization.instalist.model.Product;
 import org.noorganization.instalist.model.Recipe;
+import org.noorganization.instalist.provider.internal.IngredientProvider;
+import org.noorganization.instalist.provider.internal.RecipeProvider;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import de.greenrobot.event.EventBus;
 
 public class RecipeController implements IRecipeController {
-    private static RecipeController mInstance;
-    private EventBus mBus;
 
-    static IRecipeController getInstance() {
+    private static String LOG_TAG = RecipeController.class.getName();
+    private static RecipeController mInstance;
+
+    private EventBus mBus;
+    private ContentResolver mResolver;
+    private IProductController mProductController;
+
+    static IRecipeController getInstance(Context _context) {
         if (mInstance == null) {
-            mInstance = new RecipeController();
+            mInstance = new RecipeController(_context);
         }
         return mInstance;
+    }
+
+    private RecipeController(Context _context) {
+        mBus = EventBus.getDefault();
+        mResolver = _context.getContentResolver();
+        mProductController = ControllerFactory.getProductController(_context);
     }
 
     @Override
@@ -29,13 +49,21 @@ public class RecipeController implements IRecipeController {
         if (_name == null) {
             return null;
         }
-        if(Select.from(Recipe.class).where(Condition.prop("m_name").eq(_name)).count() != 0) {
+        // check if recipe already exists
+        if (findByName(_name) != null) {
+            Log.e(LOG_TAG, "createRecipe: Creation of recipe failed because name is already taken.");
             return null;
         }
 
         Recipe rtn = new Recipe(_name);
-        rtn.save();
+        Uri recipeUri = mResolver.insert(Uri.parse(RecipeProvider.MULTIPLE_RECIPE_CONTENT_URI), rtn.toContentValues());
 
+        if (recipeUri == null) {
+            Log.e(LOG_TAG, "createRecipe: Insertion of recipe failed.");
+            return null;
+        }
+
+        rtn.mUUID = recipeUri.getLastPathSegment();
         mBus.post(new RecipeChangedMessage(Change.CREATED, rtn));
 
         return rtn;
@@ -46,20 +74,40 @@ public class RecipeController implements IRecipeController {
         if (_newName == null || _toChange == null) {
             return null;
         }
-        Recipe toRename = SugarRecord.findById(Recipe.class, _toChange.getId());
+
+        Recipe toRename = findById(_toChange.mUUID);
         if (toRename == null) {
             return null;
         }
 
-        for (Recipe toCheck : Select.from(Recipe.class).
-                where(Condition.prop("m_name").eq(_newName)).list()) {
-            if (toCheck.getId().compareTo(toRename.getId()) != 0) {
-                return toRename;
+        Cursor recipeCursor = mResolver.query(Uri.parse(RecipeProvider.MULTIPLE_RECIPE_CONTENT_URI),
+                Recipe.COLUMN.ALL_COLUMNS,
+                Recipe.COLUMN.NAME + " = ? AND " + Recipe.COLUMN.ID + "<>" + toRename.mUUID,
+                null,
+                null,
+                null
+        );
+
+        // check if there is no further recipe with this name
+        if (recipeCursor == null || recipeCursor.getCount() != 0) {
+            if (recipeCursor != null) {
+                recipeCursor.close();
             }
+            return null;
         }
+        recipeCursor.close();
 
         toRename.mName = _newName;
-        toRename.save();
+
+        int updatedRows = mResolver.update(Uri.parse(RecipeProvider.SINGLE_RECIPE_CONTENT_URI.replace("*", toRename.mUUID)),
+                toRename.toContentValues(),
+                null,
+                null);
+
+        if (updatedRows == 0) {
+            Log.e(LOG_TAG, "Update Recipe name went wrong, no row was updated.");
+            return null;
+        }
 
         mBus.post(new RecipeChangedMessage(Change.CHANGED, toRename));
 
@@ -72,10 +120,24 @@ public class RecipeController implements IRecipeController {
             return;
         }
 
-        Recipe toDelete = SugarRecord.findById(Recipe.class, _toRemove.getId());
+        Recipe toDelete = findById(_toRemove.mUUID);
         if (toDelete != null) {
-            SugarRecord.deleteAll(Ingredient.class, "m_recipe = ?", _toRemove.getId() + "");
-            toDelete.delete();
+            int affectedRows = mResolver.delete(Uri.parse(RecipeProvider.MULTIPLE_RECIPE_INGREDIENT_CONTENT_URI.replace("*", toDelete.mUUID)),
+                    null,
+                    null
+            );
+            Log.i(LOG_TAG, "Deleted " + affectedRows + " ingredients");
+            affectedRows = mResolver.delete(Uri.parse(RecipeProvider.SINGLE_RECIPE_CONTENT_URI.replace("*", toDelete.mUUID)),
+                    null,
+                    null);
+
+            if (affectedRows == 0) {
+                Log.e(LOG_TAG, "No recipe deleted.");
+                return;
+            }
+        } else {
+            Log.d(LOG_TAG, "No Recipe found.");
+            return;
         }
 
         mBus.post(new RecipeChangedMessage(Change.DELETED, toDelete));
@@ -86,26 +148,53 @@ public class RecipeController implements IRecipeController {
         if (_recipe == null || _productToAdd == null) {
             return null;
         }
+        if (_amount < 0.001f) {
+            return null;
+        }
 
-        Recipe savedRecipe = SugarRecord.findById(Recipe.class, _recipe.getId());
-        Product savedProduct = SugarRecord.findById(Product.class, _productToAdd.getId());
+        Recipe savedRecipe = findById(_recipe.mUUID);
+        Product savedProduct = mProductController.findById(_productToAdd.mUUID);
+
         if (savedProduct == null || savedRecipe == null) {
             return null;
         }
-        Ingredient toCreateOrChange = Select.from(Ingredient.class).where(
-                Condition.prop("m_product").eq(savedProduct.getId()),
-                Condition.prop("m_recipe").eq(savedRecipe.getId())).first();
-        if (_amount < 0.001f) {
-            return toCreateOrChange;
-        }
-        if (toCreateOrChange == null) {
-            toCreateOrChange = new Ingredient(savedProduct, savedRecipe, _amount);
-        } else {
-            toCreateOrChange.mAmount = _amount;
-        }
-        toCreateOrChange.save();
 
-        return toCreateOrChange;
+        Cursor ingredientCursor = mResolver.query(Uri.parse(IngredientProvider.MULTIPLE_INGREDIENT_CONTENT_URI),
+                Ingredient.COLUMN.ALL_COLUMNS,
+                Ingredient.COLUMN.PRODUCT_ID + " =? AND " + Ingredient.COLUMN.RECIPE_ID + "=?",
+                new String[]{savedProduct.mUUID, savedRecipe.mUUID},
+                null,
+                null
+        );
+
+        if (ingredientCursor == null) {
+            Log.e(LOG_TAG, "AddOrChangeIngredient: No ingredientcursor can be fetched.");
+            return null;
+        }
+
+        Ingredient ingredient = parse(ingredientCursor);
+        if (ingredient == null) {
+            ingredient = new Ingredient(savedProduct, savedRecipe, _amount);
+            Uri ingredientUri = mResolver.insert(Uri.parse(RecipeProvider.MULTIPLE_RECIPE_CONTENT_URI.replace("*", savedRecipe.mUUID)),
+                    ingredient.toContentValues());
+            if (ingredientUri == null) {
+                Log.e(LOG_TAG, "AddOrChangeIngredient: insert ingredient went wrong.");
+                return null;
+            }
+            ingredient.mUUID = ingredientUri.getLastPathSegment();
+        } else {
+            ingredient.mAmount = _amount;
+            int updatedElements = mResolver.update(Uri.parse(RecipeProvider.SINGLE_RECIPE_INGREDIENT_CONTENT_URI.replaceFirst("\\*", savedRecipe.mUUID).replace("*", ingredient.mUUID)),
+                    ingredient.toContentValues(),
+                    null,
+                    null);
+            if (updatedElements == 0) {
+                Log.e(LOG_TAG, "AddOrChangeIngredient: update ingredient went wrong. Nothing gets updated.");
+                return null;
+            }
+        }
+
+        return ingredient;
     }
 
     @Override
@@ -114,11 +203,13 @@ public class RecipeController implements IRecipeController {
             return;
         }
 
-        Ingredient toRemove = Select.from(Ingredient.class).where(
-                Condition.prop("m_recipe").eq(_recipe.getId()),
-                Condition.prop("m_product").eq(_productToRemove.getId())).first();
-        if (toRemove != null) {
-            toRemove.delete();
+        int deletedRows = mResolver.delete(Uri.parse(IngredientProvider.MULTIPLE_INGREDIENT_CONTENT_URI),
+                Ingredient.COLUMN.PRODUCT_ID + " =? AND " + Ingredient.COLUMN.RECIPE_ID + "=?",
+                new String[]{_productToRemove.mUUID, _recipe.mUUID}
+        );
+
+        if (deletedRows == 0) {
+            Log.e(LOG_TAG, "removeIngredient: No ingredient deleted.");
         }
     }
 
@@ -128,14 +219,115 @@ public class RecipeController implements IRecipeController {
             return;
         }
 
-        Ingredient toRemove = SugarRecord.findById(Ingredient.class, _toRemove.getId());
-        if (toRemove == null) {
-            return;
+        int removedIngredients = mResolver.delete(Uri.parse(IngredientProvider.SINGLE_INGREDIENT_CONTENT_URI.replace("*", _toRemove.mUUID)),
+                null,
+                null);
+
+        if (removedIngredients == 0) {
+            Log.e(LOG_TAG, "No ingredient deleted: " + _toRemove.mUUID);
         }
-        toRemove.delete();
     }
 
-    private RecipeController() {
-        mBus = EventBus.getDefault();
+
+    @Override
+    public Recipe findById(String _uuid) {
+        Cursor recipeCursor = mResolver.query(Uri.parse(RecipeProvider.SINGLE_RECIPE_CONTENT_URI.replace("*", _uuid)),
+                Recipe.COLUMN.ALL_COLUMNS,
+                null,
+                null,
+                null
+        );
+
+        if (recipeCursor == null) {
+            Log.e(LOG_TAG, "Recipe findById: cannot fetch recipecursor or ingredientcursor");
+            return null;
+        }
+
+        if (recipeCursor.getCount() == 0) {
+            Log.e(LOG_TAG, "Recipe findById: There is no recipe with the id: " + _uuid + " in the database.");
+            return null;
+        }
+
+        recipeCursor.moveToFirst();
+        Recipe recipe = new Recipe();
+        recipe.mUUID = _uuid;
+        recipe.mName = recipeCursor.getString(recipeCursor.getColumnIndex(Recipe.COLUMN.NAME));
+
+        recipeCursor.close();
+        return recipe;
+    }
+
+    @Override
+    public Recipe findByName(@NonNull String _name) {
+        Cursor recipeCursor = mResolver.query(Uri.parse(RecipeProvider.MULTIPLE_RECIPE_CONTENT_URI),
+                Recipe.COLUMN.ALL_COLUMNS,
+                Recipe.COLUMN.NAME + "=?",
+                new String[]{_name},
+                null
+        );
+
+        if (recipeCursor == null) {
+            Log.e(LOG_TAG, "Recipe findByName: cannot fetch recipecursor or ingredientcursor");
+            return null;
+        }
+
+        if (recipeCursor.getCount() == 0) {
+            Log.e(LOG_TAG, "Recipe findByName: There is no recipe with the id: " + _name + " in the database.");
+            return null;
+        }
+
+        recipeCursor.moveToFirst();
+        Recipe recipe = new Recipe();
+        recipe.mUUID = _name;
+        recipe.mName = recipeCursor.getString(recipeCursor.getColumnIndex(Recipe.COLUMN.NAME));
+
+        recipeCursor.close();
+        return recipe;
+    }
+
+    public List<Ingredient> getIngredients(@NonNull String _recipeUUID) {
+        List<Ingredient> ingredients = new ArrayList<>();
+        Cursor cursor =mResolver.query(Uri.parse(RecipeProvider.MULTIPLE_RECIPE_INGREDIENT_CONTENT_URI.replace("*", _recipeUUID)),
+                Ingredient.COLUMN.ALL_COLUMNS,
+                null,
+                null,
+                null
+        );
+        if(cursor == null || cursor.getCount() == 0){
+            if(cursor!= null){
+                cursor.close();
+            }
+            return ingredients;
+        }
+        cursor.moveToFirst();
+        do{
+            ingredients.add(parse(cursor));
+        }while(cursor.moveToNext());
+
+        return ingredients;
+    }
+
+    /**
+     * Parse the Ingredient from an given cursor. Does not close the cursor
+     *
+     * @param _cursor the cursor with the ingredient info
+     * @return the ingredient or null if no ingredient was found.
+     */
+    public Ingredient parse(@NonNull Cursor _cursor) {
+        if (_cursor.getCount() == 0) {
+            return null;
+        }
+        _cursor.moveToFirst();
+        Ingredient ingredient = new Ingredient();
+        ingredient.mUUID = _cursor.getString(_cursor.getColumnIndex(Ingredient.COLUMN.ID));
+        ingredient.mAmount = _cursor.getFloat(_cursor.getColumnIndex(Ingredient.COLUMN.AMOUNT));
+        ingredient.mProduct = mProductController.findById(_cursor.getString(_cursor.getColumnIndex(Ingredient.COLUMN.PRODUCT_ID)));
+        ingredient.mRecipe = this.findById(_cursor.getString(_cursor.getColumnIndex(Ingredient.COLUMN.RECIPE_ID)));
+
+        if (ingredient.mProduct == null || ingredient.mRecipe == null) {
+            Log.i(LOG_TAG, "AddOrChangeIngredient: No product or recipe can be found with the given ids.");
+            return null;
+        }
+        return ingredient;
     }
 }

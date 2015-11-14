@@ -1,17 +1,14 @@
 package org.noorganization.instalist.model;
 
-import com.orm.StringUtil;
-import com.orm.SugarRecord;
-import com.orm.query.Condition;
-import com.orm.query.Select;
+import android.content.ContentValues;
 
-import java.util.List;
+import com.orm.StringUtil;
 
 /**
  * Represents a logical recipe. Like ShoppingList, it does not contain a real java list.
  * Created by michi on 14.04.15.
  */
-public class Recipe extends SugarRecord<Recipe> {
+public class Recipe {
 
     /**
      * @deprecated use instead {@link COLUMN_PREFIXED#NAME}
@@ -45,6 +42,7 @@ public class Recipe extends SugarRecord<Recipe> {
             + COLUMN.NAME + " TEXT"
             + ")";
 
+    public String mUUID;
     public String mName;
 
     public Recipe() {
@@ -55,8 +53,11 @@ public class Recipe extends SugarRecord<Recipe> {
         mName = _name;
     }
 
-    public List<Ingredient> getIngredients() {
-        return Select.from(Ingredient.class).where(Condition.prop("m_recipe").eq(getId())).list();
+    public ContentValues toContentValues() {
+        ContentValues cv = new ContentValues(2);
+        cv.put(COLUMN.ID, this.mUUID);
+        cv.put(COLUMN.NAME, this.mName);
+        return cv;
     }
 
     @Override
@@ -70,11 +71,11 @@ public class Recipe extends SugarRecord<Recipe> {
 
         Recipe anotherRecipe = (Recipe) anotherObject;
 
-        return mName.equals(anotherRecipe.mName) && getId().compareTo(anotherRecipe.getId()) == 0;
+        return mName.equals(anotherRecipe.mName) && mUUID.compareTo(anotherRecipe.mUUID) == 0;
     }
 
     @Override
     public int hashCode() {
-        return getId().intValue();
+        return mUUID.hashCode();
     }
 }

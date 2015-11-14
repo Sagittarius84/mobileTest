@@ -50,7 +50,7 @@ public class TagController implements ITagController {
         if (tagUri == null) {
             return null;
         }
-
+        tag.mUUID = tagUri.getLastPathSegment();
         mBus.post(new TagChangedMessage(Change.CREATED, tag));
         return tag;
     }
