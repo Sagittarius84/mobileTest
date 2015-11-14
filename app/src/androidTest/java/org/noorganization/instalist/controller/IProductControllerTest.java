@@ -1,10 +1,9 @@
 package org.noorganization.instalist.controller;
 
+import android.content.ContentResolver;
+import android.database.Cursor;
+import android.net.Uri;
 import android.test.AndroidTestCase;
-
-import com.orm.SugarRecord;
-import com.orm.query.Condition;
-import com.orm.query.Select;
 
 import org.noorganization.instalist.controller.implementation.ControllerFactory;
 import org.noorganization.instalist.model.ListEntry;
@@ -13,6 +12,11 @@ import org.noorganization.instalist.model.ShoppingList;
 import org.noorganization.instalist.model.Tag;
 import org.noorganization.instalist.model.TaggedProduct;
 import org.noorganization.instalist.model.Unit;
+import org.noorganization.instalist.provider.InstalistProvider;
+import org.noorganization.instalist.provider.internal.ProductProvider;
+import org.noorganization.instalist.provider.internal.TagProvider;
+import org.noorganization.instalist.provider.internal.TaggedProductProvider;
+import org.noorganization.instalist.provider.internal.UnitProvider;
 
 public class IProductControllerTest extends AndroidTestCase {
 
@@ -23,48 +27,52 @@ public class IProductControllerTest extends AndroidTestCase {
     Tag mTag;
 
     IProductController mController2Test;
+    IUnitController mUnitController;
+    ITagController mTagController;
+    IListController mListController;
+
+    ContentResolver mResolver;
 
     @Override
     public void setUp() throws Exception {
         super.setUp();
+        mResolver = mContext.getContentResolver();
+        mUnitController = ControllerFactory.getUnitController(mContext);
+        mController2Test = ControllerFactory.getProductController(mContext);
+        mTagController = ControllerFactory.getTagController(mContext);
+        mListController = ControllerFactory.getListController(mContext);
 
-        mLiter = new Unit("_TEST_l");
-        mLiter.save();
-        mMilk = new Product("_TEST_milk", mLiter);
-        mMilk.save();
-        mBroccoli = new Product("_TEST_broccoli", null);
-        mBroccoli.save();
-        mTag = new Tag("_TEST_vegetable");
-        mTag.save();
+        mLiter = mUnitController.createUnit("_TEST_l");
+        assertNotNull(mLiter);
 
-        mList = new ShoppingList("_TEST_home");
-        mList.save();
+        mMilk = mController2Test.createProduct("_TEST_milk", mLiter, 1.0f, 1.0f);
+        assertNotNull(mMilk);
 
-        ControllerFactory.getListController().addOrChangeItem(mList, mMilk, 1.0f);
+        mBroccoli = mController2Test.createProduct("_TEST_broccoli", null, 1.0f, 1.0f);
+        assertNotNull(mBroccoli);
 
-        new TaggedProduct(mTag, mBroccoli).save();
+        mTag = mTagController.createTag("_TEST_vegetable");
+        assertNotNull(mTag);
 
-        mController2Test = ControllerFactory.getProductController();
+        mList = mListController.addList("_TEST_home");
+        assertNotNull(mList);
+        ListEntry entry = mListController.addOrChangeItem(mList, mMilk, 1.0f);
+        assertNotNull(entry);
+        assertNotNull(mController2Test.addTagToProduct(mBroccoli, mTag));
+
     }
 
     @Override
     public void tearDown() throws Exception {
         super.tearDown();
 
-        SugarRecord.deleteAll(ListEntry.class,
-                "m_list = ? or m_product = ?",
-                mList.getId() + "",
-                mMilk.getId() + "");
+        mResolver.delete(Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI, "entry"), null, null);
+        mResolver.delete(Uri.parse(TaggedProductProvider.MULTIPLE_TAGGED_PRODUCT_CONTENT_URI), null, null);
 
-        SugarRecord.deleteAll(TaggedProduct.class,
-                "m_tag = ? or m_product = ?",
-                mTag.getId() + "",
-                mBroccoli.getId() + "");
-
-        SugarRecord.deleteAll(ShoppingList.class, "m_name LIKE '_TEST_%'");
-        SugarRecord.deleteAll(Product.class, "m_name LIKE '_TEST_%'");
-        SugarRecord.deleteAll(Unit.class, "m_name LIKE '_TEST_%'");
-        SugarRecord.deleteAll(Tag.class, "m_name LIKE '_TEST_%'");
+        mResolver.delete(Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI, "list"), null, null);
+        mResolver.delete(Uri.parse(ProductProvider.MULTIPLE_PRODUCT_CONTENT_URI), null, null);
+        mResolver.delete(Uri.parse(UnitProvider.MULTIPLE_UNIT_CONTENT_URI), null, null);
+        mResolver.delete(Uri.parse(TagProvider.MULTIPLE_TAG_CONTENT_URI), null, null);
     }
 
     public void testCreateProduct() throws Exception {
@@ -75,7 +83,7 @@ public class IProductControllerTest extends AndroidTestCase {
 
         Product createdProduct = mController2Test.createProduct("_TEST_butter", null, 1.0f, 0.25f);
         assertNotNull(createdProduct);
-        Product savedProduct = SugarRecord.findById(Product.class, createdProduct.getId());
+        Product savedProduct = mController2Test.findById(createdProduct.mUUID);
         assertNotNull(savedProduct);
         assertEquals(createdProduct, savedProduct);
         assertEquals("_TEST_butter", createdProduct.mName);
@@ -98,34 +106,69 @@ public class IProductControllerTest extends AndroidTestCase {
 
     public void testRemoveProduct() throws Exception {
         assertFalse(mController2Test.removeProduct(mMilk, false));
-        assertNotNull(SugarRecord.findById(Product.class, mMilk.getId()));
-        assertEquals(1, Select.from(ListEntry.class).where(
-                Condition.prop("m_product").eq(mMilk.getId())).count());
+        assertNotNull(mController2Test.findById(mMilk.mUUID));
+
+        Cursor listEntryCursor = mResolver.query(Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI, "entry"),
+                ListEntry.COLUMN.ALL_COLUMNS,
+                ListEntry.COLUMN.PRODUCT + "=?",
+                new String[]{mMilk.mUUID},
+                null
+        );
+        assertNotNull(listEntryCursor);
+        assertEquals(1, listEntryCursor.getCount());
+        listEntryCursor.close();
 
         assertTrue(mController2Test.removeProduct(mBroccoli, false));
-        assertNull(SugarRecord.findById(Product.class, mBroccoli.getId()));
-        assertEquals(0, Select.from(TaggedProduct.class).where(
-                Condition.prop("m_product").eq(mBroccoli.getId())).count());
+        assertNull(mController2Test.findById(mBroccoli.mUUID));
+
+        Cursor taggedProductCursor = mResolver.query(Uri.parse(TaggedProductProvider.MULTIPLE_TAGGED_PRODUCT_CONTENT_URI),
+                TaggedProduct.ALL_COLUMNS_JOINED,
+                TaggedProduct.COLUMN_PREFIXED.PRODUCT_ID + "=?",
+                new String[]{mBroccoli.mUUID},
+                null
+        );
+        assertNotNull(taggedProductCursor);
+
+        assertEquals(0, taggedProductCursor.getCount());
+        taggedProductCursor.close();
 
         assertTrue(mController2Test.removeProduct(mMilk, true));
-        assertNull(SugarRecord.findById(Product.class, mMilk.getId()));
-        assertEquals(0, Select.from(ListEntry.class).where(
-                Condition.prop("m_product").eq(mMilk.getId())).count());
+        assertNull(mController2Test.findById(mMilk.mUUID));
+
+        listEntryCursor = mResolver.query(Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI, "entry"),
+                ListEntry.COLUMN.ALL_COLUMNS,
+                ListEntry.COLUMN.PRODUCT + "=?",
+                new String[]{mMilk.mUUID},
+                null
+        );
+        assertNotNull(listEntryCursor);
+        assertEquals(1, listEntryCursor.getCount());
+        listEntryCursor.close();
 
     }
 
     public void testAddTagToProduct() throws Exception {
-        assertTrue(mController2Test.addTagToProduct(mMilk, mTag));
-        assertNotNull(Select.from(TaggedProduct.class).
-                where(Condition.prop("m_product").eq(mMilk.getId())).
-                and(Condition.prop("m_tag").eq(mTag.getId())).first());
+        assertNotNull(mController2Test.addTagToProduct(mMilk, mTag));
+
+        Cursor taggedProductCursor = mResolver.query(Uri.parse(TaggedProductProvider.MULTIPLE_TAGGED_PRODUCT_CONTENT_URI),
+                TaggedProduct.ALL_COLUMNS_JOINED,
+                TaggedProduct.COLUMN_PREFIXED.PRODUCT_ID + "=? AND " + TaggedProduct.COLUMN_PREFIXED.TAG_ID + "=?",
+                new String[]{mMilk.mUUID, mTag.mUUID},
+                null
+        );
+        assertNotNull(taggedProductCursor);
+        assertEquals(0, taggedProductCursor.getCount());
     }
 
     public void testRemoveTagFromProduct() throws Exception {
         mController2Test.removeTagFromProduct(mBroccoli, mTag);
-
-        assertEquals(0, Select.from(TaggedProduct.class).
-                where(Condition.prop("m_product").eq(mBroccoli.getId())).
-                and(Condition.prop("m_tag").eq(mTag.getId())).count());
+        Cursor taggedProductCursor = mResolver.query(Uri.parse(TaggedProductProvider.MULTIPLE_TAGGED_PRODUCT_CONTENT_URI),
+                TaggedProduct.ALL_COLUMNS_JOINED,
+                TaggedProduct.COLUMN_PREFIXED.PRODUCT_ID + "=? AND " + TaggedProduct.COLUMN_PREFIXED.TAG_ID + "=?",
+                new String[]{mBroccoli.mUUID, mTag.mUUID},
+                null
+        );
+        assertNotNull(taggedProductCursor);
+        assertEquals(0, taggedProductCursor.getCount());
     }
 }

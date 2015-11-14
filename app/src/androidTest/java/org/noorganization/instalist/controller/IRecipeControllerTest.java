@@ -1,5 +1,7 @@
 package org.noorganization.instalist.controller;
 
+import android.content.ContentResolver;
+import android.net.Uri;
 import android.test.AndroidTestCase;
 
 import com.orm.SugarRecord;
@@ -10,6 +12,11 @@ import org.noorganization.instalist.controller.implementation.ControllerFactory;
 import org.noorganization.instalist.model.Ingredient;
 import org.noorganization.instalist.model.Product;
 import org.noorganization.instalist.model.Recipe;
+import org.noorganization.instalist.provider.internal.IngredientProvider;
+import org.noorganization.instalist.provider.internal.ProductProvider;
+import org.noorganization.instalist.provider.internal.RecipeProvider;
+import org.noorganization.instalist.provider.internal.TagProvider;
+import org.noorganization.instalist.provider.internal.TaggedProductProvider;
 
 public class IRecipeControllerTest extends AndroidTestCase {
 
@@ -23,9 +30,12 @@ public class IRecipeControllerTest extends AndroidTestCase {
 
     IRecipeController mRecipeController;
 
+    ContentResolver mResolver;
+
     public void setUp() throws Exception {
         super.setUp();
 
+        mResolver = mContext.getContentResolver();
         mCheeseCake = new Recipe("_TEST_cheesecake");
         mCheeseCake.save();
         mPuffPastries = new Recipe("_TEST_puffpastries");
@@ -47,13 +57,9 @@ public class IRecipeControllerTest extends AndroidTestCase {
     }
 
     public void tearDown() throws Exception {
-        SugarRecord.deleteAll(Ingredient.class, "m_product = ? or m_product = ? or m_product = ? " +
-                        "or m_recipe = ? or m_recipe = ?",
-                mFlour.getId()+"", mEgg.getId()+"", mCurd.getId()+"", mCheeseCake.getId()+"",
-                mPuffPastries.getId()+"");
-
-        SugarRecord.deleteAll(Recipe.class, "m_name LIKE '_TEST_%'");
-        SugarRecord.deleteAll(Product.class, "m_name LIKE '_TEST_%'");
+        mResolver.delete(Uri.parse(IngredientProvider.MULTIPLE_INGREDIENT_CONTENT_URI), null, null);
+        mResolver.delete(Uri.parse(ProductProvider.MULTIPLE_PRODUCT_CONTENT_URI), null, null);
+        mResolver.delete(Uri.parse(RecipeProvider.MULTIPLE_RECIPE_CONTENT_URI), null, null);
     }
 
     public void testCreateRecipe() throws Exception {
