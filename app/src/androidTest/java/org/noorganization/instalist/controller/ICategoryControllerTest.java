@@ -29,7 +29,7 @@ public class ICategoryControllerTest extends AndroidTestCase {
         Uri createdCat = mResolver.insert(
                 Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI, "category"),
                 testWorkCatCV);
-        mCategoryWork = new Category(UUID.fromString(createdCat.getLastPathSegment()), "_TEST_work");
+        mCategoryWork = new Category(createdCat.getLastPathSegment(), "_TEST_work");
         ContentValues testHWStoreListCV = new ContentValues(2);
         testHWStoreListCV.put(ShoppingList.COLUMN.NAME, "_TEST_hardware store");
         testHWStoreListCV.put(ShoppingList.COLUMN.CATEGORY,
@@ -38,10 +38,10 @@ public class ICategoryControllerTest extends AndroidTestCase {
                 Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI, "category/" +
                         createdCat.getLastPathSegment() + "/list"),
                 testHWStoreListCV);
-        mListHardwareStore = new ShoppingList(UUID.fromString(createdList.getLastPathSegment()),
+        mListHardwareStore = new ShoppingList(createdList.getLastPathSegment(),
                 "_TEST_hardware store", mCategoryWork);
 
-        mCategoryController = ControllerFactory.getCategoryController();
+        mCategoryController = ControllerFactory.getCategoryController(mContext);
     }
 
     public void tearDown() throws Exception {
@@ -115,14 +115,14 @@ public class ICategoryControllerTest extends AndroidTestCase {
 
     public void testGetCategoryById() throws Exception {
         assertNull(mCategoryController.getCategoryByID(null));
-        assertNull(mCategoryController.getCategoryByID(UUID.randomUUID()));
+        assertNull(mCategoryController.getCategoryByID(UUID.randomUUID().toString()));
 
         assertEquals(mCategoryWork, mCategoryController.getCategoryByID(mCategoryWork.mUUID));
     }
 
     public void testRenameCategory() throws Exception {
         assertNull(mCategoryController.renameCategory(null, ""));
-        Category notSavedCategory = new Category(UUID.randomUUID(), "_TEST_not saved category");
+        Category notSavedCategory = new Category(UUID.randomUUID().toString(), "_TEST_not saved category");
         assertNull(mCategoryController.renameCategory(notSavedCategory, "_TEST_still not saved category"));
         assertEquals(mCategoryWork, mCategoryController.renameCategory(mCategoryWork, ""));
 
@@ -142,11 +142,11 @@ public class ICategoryControllerTest extends AndroidTestCase {
     public void testRemoveCategory() throws Exception {
         // Nothing should happen if a wrong input is given.
         mCategoryController.removeCategory(null);
-        Category notSavedCategory = new Category(UUID.randomUUID(), "_TEST_not saved category");
+        Category notSavedCategory = new Category(UUID.randomUUID().toString(), "_TEST_not saved category");
         mCategoryController.removeCategory(notSavedCategory);
 
         // If a category gets deleted, lists have to be unlinked.
-        UUID deletedId = mCategoryWork.mUUID;
+        String deletedId = mCategoryWork.mUUID;
         mCategoryController.removeCategory(mCategoryWork);
         Cursor catCheck = mResolver.query(
                 Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI, "category/" +

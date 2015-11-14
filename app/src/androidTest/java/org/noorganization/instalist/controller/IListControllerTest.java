@@ -1,5 +1,9 @@
 package org.noorganization.instalist.controller;
 
+import android.content.ContentResolver;
+import android.content.ContentValues;
+import android.database.Cursor;
+import android.net.Uri;
 import android.test.AndroidTestCase;
 
 import com.orm.SugarRecord;
@@ -9,6 +13,9 @@ import org.noorganization.instalist.model.Category;
 import org.noorganization.instalist.model.ListEntry;
 import org.noorganization.instalist.model.Product;
 import org.noorganization.instalist.model.ShoppingList;
+import org.noorganization.instalist.provider.InstalistProvider;
+import org.noorganization.instalist.provider.internal.CategoryProvider;
+import org.noorganization.instalist.provider.internal.ShoppingListProvider;
 
 import java.util.List;
 
@@ -20,16 +27,53 @@ public class IListControllerTest extends AndroidTestCase {
     private Product mProductBread;
     private Product mProductButter;
     private Category mCategoryHardwareStore;
+    private ContentResolver mResolver;
 
     private IListController mLML4Test;
 
     public void setUp() throws Exception {
         super.setUp();
 
-        mListWork = new ShoppingList("_TEST_work");
-        mListWork.save();
-        mListHome = new ShoppingList("_TEST_home");
-        mListHome.save();
+        ContentValues newListCV = new ContentValues(2);
+        String insertUri = InstalistProvider.BASE_CONTENT_URI.getPath().concat("category/").concat("?").concat("/list");
+
+        mResolver = mContext.getContentResolver();
+        Cursor categoryCursor = mResolver.query(Uri.parse(InstalistProvider.BASE_CONTENT_URI.getPath().concat("category")),
+                Category.COLUMN.ALL_COLUMNS,
+                Category.COLUMN.ID + "=?",
+                new String[]{"-"},
+                null
+                );
+
+        assertNotNull(categoryCursor);
+        assertTrue(categoryCursor.getCount() > 0);
+
+        Category category = new Category();
+        category.mUUID = "-";
+        category.mName = categoryCursor.getString(categoryCursor.getColumnIndex(Category.COLUMN.NAME));
+
+        Uri uri = Uri.parse(String.format(insertUri, "-"));
+        mListWork = new ShoppingList();
+        mListWork.mName = "_Test_work";
+        mListWork.mCategory = category;
+
+        Uri insertedListUri = mResolver.insert(uri, mListWork.toContentValues());
+        assertNotNull(insertedListUri);
+
+        mListWork.mUUID = insertedListUri.getLastPathSegment();
+
+
+        uri = Uri.parse(String.format(insertUri, "-"));
+        mListHome = new ShoppingList();
+        mListHome.mName = "_TEST_home";
+        mListHome.mCategory = category;
+
+        insertedListUri = mResolver.insert(uri, mListHome.toContentValues());
+        assertNotNull(insertedListUri);
+
+        mListHome.mUUID = insertedListUri.getLastPathSegment();
+
+        // insert products
         mProductBread = new Product("_TEST_bread", null);
         mProductBread.save();
         mProductButter = new Product("_TEST_butter", null);
@@ -53,6 +97,14 @@ public class IListControllerTest extends AndroidTestCase {
         SugarRecord.deleteAll(ShoppingList.class, "m_name LIKE '_TEST_%'");
         SugarRecord.deleteAll(Product.class, "m_name LIKE '_TEST_%'");
         SugarRecord.deleteAll(Category.class, "m_name LIKE '_TEST_%'");
+    }
+
+    public void testCreateShoppingList(){
+        // TODO implement
+    }
+
+    public void testDeleteShoppingList(){
+        // TODO implement
     }
 
     public void testAddOrChangeItem() throws Exception {
