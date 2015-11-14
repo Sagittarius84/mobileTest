@@ -1,12 +1,9 @@
 package org.noorganization.instalist.controller;
 
 import android.content.ContentResolver;
-import android.content.ContentValues;
 import android.database.Cursor;
 import android.net.Uri;
 import android.test.AndroidTestCase;
-
-import com.orm.SugarRecord;
 
 import org.noorganization.instalist.controller.implementation.ControllerFactory;
 import org.noorganization.instalist.model.Category;
@@ -14,8 +11,7 @@ import org.noorganization.instalist.model.ListEntry;
 import org.noorganization.instalist.model.Product;
 import org.noorganization.instalist.model.ShoppingList;
 import org.noorganization.instalist.provider.InstalistProvider;
-import org.noorganization.instalist.provider.internal.CategoryProvider;
-import org.noorganization.instalist.provider.internal.ShoppingListProvider;
+import org.noorganization.instalist.provider.internal.ProductProvider;
 
 import java.util.List;
 
@@ -29,126 +25,141 @@ public class IListControllerTest extends AndroidTestCase {
     private Category mCategoryHardwareStore;
     private ContentResolver mResolver;
 
-    private IListController mLML4Test;
+    private IListController mListController;
+    private ICategoryController mCategoryController;
+    private IProductController mProductController;
 
     public void setUp() throws Exception {
         super.setUp();
 
-        ContentValues newListCV = new ContentValues(2);
-        String insertUri = InstalistProvider.BASE_CONTENT_URI.getPath().concat("category/").concat("?").concat("/list");
-
         mResolver = mContext.getContentResolver();
-        Cursor categoryCursor = mResolver.query(Uri.parse(InstalistProvider.BASE_CONTENT_URI.getPath().concat("category")),
-                Category.COLUMN.ALL_COLUMNS,
-                Category.COLUMN.ID + "=?",
-                new String[]{"-"},
-                null
-                );
+        mListController = ControllerFactory.getListController(mContext);
+        mCategoryController = ControllerFactory.getCategoryController(mContext);
+        mProductController = ControllerFactory.getProductController(mContext);
+    }
 
-        assertNotNull(categoryCursor);
-        assertTrue(categoryCursor.getCount() > 0);
-
-        Category category = new Category();
-        category.mUUID = "-";
-        category.mName = categoryCursor.getString(categoryCursor.getColumnIndex(Category.COLUMN.NAME));
-
-        Uri uri = Uri.parse(String.format(insertUri, "-"));
-        mListWork = new ShoppingList();
-        mListWork.mName = "_Test_work";
-        mListWork.mCategory = category;
-
-        Uri insertedListUri = mResolver.insert(uri, mListWork.toContentValues());
-        assertNotNull(insertedListUri);
-
-        mListWork.mUUID = insertedListUri.getLastPathSegment();
-
-
-        uri = Uri.parse(String.format(insertUri, "-"));
-        mListHome = new ShoppingList();
-        mListHome.mName = "_TEST_home";
-        mListHome.mCategory = category;
-
-        insertedListUri = mResolver.insert(uri, mListHome.toContentValues());
-        assertNotNull(insertedListUri);
-
-        mListHome.mUUID = insertedListUri.getLastPathSegment();
-
+    public void insertTestData() {
+        createLists();
         // insert products
-        mProductBread = new Product("_TEST_bread", null);
-        mProductBread.save();
-        mProductButter = new Product("_TEST_butter", null);
-        mProductButter.save();
-        mListEntryButterForWork = new ListEntry(mListWork, mProductButter, 1.0f);
-        mListEntryButterForWork.save();
-        mCategoryHardwareStore = new Category("_TEST_hardware store");
-        mCategoryHardwareStore.save();
+        mProductBread = mProductController.createProduct("_TEST_bread", null, 1.0f, 1.0f);
+        assertNotNull(mProductBread);
 
-        mLML4Test = ControllerFactory.getListController();
+        mProductButter = mProductController.createProduct("_TEST_butter", null, 1.0f, 1.0f);
+        assertNotNull(mProductButter);
+
+        mListEntryButterForWork = mListController.addOrChangeItem(mListWork, mProductButter, 1.0f);
+
+        mCategoryHardwareStore = mCategoryController.createCategory("_TEST_hardware store");
+        assertNotNull(mCategoryHardwareStore);
+
     }
 
     public void tearDown() throws Exception {
-        SugarRecord.deleteAll(ListEntry.class,
-                "m_list = ? or m_list = ? or m_product = ? or m_product = ?",
-                mListWork.getId() + "",
-                mListHome.getId() + "",
-                mProductBread.getId() + "",
-                mProductButter.getId() + "");
 
-        SugarRecord.deleteAll(ShoppingList.class, "m_name LIKE '_TEST_%'");
-        SugarRecord.deleteAll(Product.class, "m_name LIKE '_TEST_%'");
-        SugarRecord.deleteAll(Category.class, "m_name LIKE '_TEST_%'");
+        mResolver.delete(Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI, "list"), null, null);
+        mResolver.delete(Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI, "entry"), null, null);
+        mResolver.delete(Uri.parse(ProductProvider.MULTIPLE_PRODUCT_CONTENT_URI), null, null);
+        mResolver.delete(Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI, "category"), null, null);
     }
 
-    public void testCreateShoppingList(){
-        // TODO implement
+    public void testCreateShoppingList() {
+        ShoppingList shoppingList = mListController.addList("test_list");
+        assertNotNull(shoppingList);
+        Cursor shoppingListCursor = mResolver.query(Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI, "list"),
+                ShoppingList.COLUMN.ALL_COLUMNS,
+                ShoppingList.COLUMN.ID + "=?",
+                new String[]{shoppingList.mUUID},
+                null
+        );
+
+        assertNotNull(shoppingListCursor);
+        assertEquals(1, shoppingListCursor.getCount());
+
+        assertTrue(shoppingListCursor.moveToFirst());
+        assertEquals(shoppingList.mUUID, shoppingListCursor.getString(shoppingListCursor.getColumnIndex(ShoppingList.COLUMN.ID)));
+        assertEquals(shoppingList.mName, shoppingListCursor.getString(shoppingListCursor.getColumnIndex(ShoppingList.COLUMN.NAME)));
+        assertEquals(shoppingList.mCategory.mUUID, shoppingListCursor.getString(shoppingListCursor.getColumnIndex(ShoppingList.COLUMN.CATEGORY)));
+
+        shoppingListCursor.close();
     }
 
-    public void testDeleteShoppingList(){
-        // TODO implement
+    public void testFindShoppingListById() {
+        ShoppingList shoppingList1 = mListController.addList("test_list1");
+        ShoppingList shoppingList2 = mListController.addList("test_list2");
+
+        assertNotNull(shoppingList1);
+        assertNotNull(shoppingList2);
+
+        ShoppingList shoppingListTest1 = mListController.getListById(shoppingList1.mUUID);
+        assertEquals(shoppingList1.mUUID, shoppingListTest1.mUUID);
+        assertEquals(shoppingList1.mName, shoppingListTest1.mName);
+        assertEquals(shoppingList1.mCategory.mUUID, shoppingListTest1.mCategory.mUUID);
+
+    }
+
+    public void testDeleteShoppingList() {
+        ShoppingList shoppingList = mListController.addList("test_list");
+        ShoppingList shoppingList2 = mListController.addList("test_list2");
+
+        assertNotNull(shoppingList);
+        assertTrue(mListController.removeList(shoppingList));
+
+        Cursor shoppingListCursor = mResolver.query(Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI, "list"),
+                ShoppingList.COLUMN.ALL_COLUMNS,
+                ShoppingList.COLUMN.ID + "=?",
+                new String[]{shoppingList.mUUID},
+                null
+        );
+
+        assertNotNull(shoppingListCursor);
+        assertEquals(0, shoppingListCursor.getCount());
     }
 
     public void testAddOrChangeItem() throws Exception {
-        assertNull(mLML4Test.addOrChangeItem(null, mProductButter, 1.0f));
-        assertNull(mLML4Test.addOrChangeItem(mListHome, null, 1.0f));
-        assertNull(mLML4Test.addOrChangeItem(mListHome, mProductButter, -1.0f));
+        createLists();
 
-        ListEntry returnedUnchangedEntry = mLML4Test.addOrChangeItem(mListWork, mProductButter, -1.0f);
+        assertNull(mListController.addOrChangeItem(null, mProductButter, 1.0f));
+        assertNull(mListController.addOrChangeItem(mListHome, null, 1.0f));
+        assertNull(mListController.addOrChangeItem(mListHome, mProductButter, -1.0f));
+
+        ListEntry returnedUnchangedEntry = mListController.addOrChangeItem(mListWork, mProductButter, -1.0f);
         assertNotNull(returnedUnchangedEntry);
-        ListEntry unchangedEntry = SugarRecord.findById(ListEntry.class, mListEntryButterForWork.getId());
+        ListEntry unchangedEntry = mListController.getEntryById(mListEntryButterForWork.mUUID);
+
         assertEquals(mListEntryButterForWork, unchangedEntry);
         assertEquals(returnedUnchangedEntry, unchangedEntry);
 
-        ListEntry returnedEntry = mLML4Test.addOrChangeItem(mListWork, mProductButter, 2.0f, 0);
+        ListEntry returnedEntry = mListController.addOrChangeItem(mListWork, mProductButter, 2.0f, 0);
         assertNotNull(returnedEntry);
-        ListEntry changedEntry = SugarRecord.findById(ListEntry.class, mListEntryButterForWork.getId());
+        ListEntry changedEntry = mListController.getEntryById(mListEntryButterForWork.mUUID);
         assertNotNull(changedEntry);
         assertNotNull(changedEntry.mProduct);
         assertNotNull(changedEntry.mList);
         assertEquals(2.0f, changedEntry.mAmount, 0.001f);
         assertFalse(changedEntry.mStruck);
         assertEquals(0, returnedEntry.mPriority);
-        assertEquals(mListWork.getId(), changedEntry.mList.getId());
-        assertEquals(mProductButter.getId(), changedEntry.mProduct.getId());
+        assertEquals(mListWork.mUUID, changedEntry.mList.mUUID);
+        assertEquals(mProductButter.mUUID, changedEntry.mProduct.mUUID);
         assertEquals(changedEntry, returnedEntry);
 
-        ListEntry returnedEntry2 = mLML4Test.addOrChangeItem(mListHome, mProductButter, 2.0f, 5);
+        ListEntry returnedEntry2 = mListController.addOrChangeItem(mListHome, mProductButter, 2.0f, 5);
         assertNotNull(returnedEntry2);
         assertEquals(mListHome, returnedEntry2.mList);
         assertEquals(mProductButter, returnedEntry2.mProduct);
         assertEquals(2.0f, returnedEntry2.mAmount, 0.001f);
         assertFalse(returnedEntry2.mStruck);
         assertEquals(5, returnedEntry2.mPriority);
-        ListEntry createdEntry2 = SugarRecord.findById(ListEntry.class, returnedEntry2.getId());
+        ListEntry createdEntry2 = mListController.getEntryById(returnedEntry2.mUUID);
         assertEquals(createdEntry2, returnedEntry2);
 
-        ListEntry returnedSecondEntry = mLML4Test.addOrChangeItem(mListHome, mProductBread, 1.0f);
+        ListEntry returnedSecondEntry = mListController.addOrChangeItem(mListHome, mProductBread, 1.0f);
         assertNotNull(returnedSecondEntry);
         assertEquals(mListHome, returnedSecondEntry.mList);
         assertEquals(mProductBread, returnedSecondEntry.mProduct);
         assertEquals(1.0f, returnedSecondEntry.mAmount, 0.001f);
         assertFalse(returnedSecondEntry.mStruck);
         assertEquals(0, returnedSecondEntry.mPriority);
-        ListEntry createdSecondEntry = SugarRecord.findById(ListEntry.class, returnedSecondEntry.getId());
+        ListEntry createdSecondEntry = mListController.getEntryById(returnedSecondEntry.mUUID);
         assertEquals(returnedSecondEntry, createdSecondEntry);
 
         List<ListEntry> allEntriesOfHomeList = mListHome.getEntries();
@@ -156,134 +167,161 @@ public class IListControllerTest extends AndroidTestCase {
         assertTrue(allEntriesOfHomeList.contains(returnedEntry2));
         assertTrue(allEntriesOfHomeList.contains(returnedSecondEntry));
 
-        ListEntry returnedThirdEntry = mLML4Test.addOrChangeItem(mListHome, mProductBread, 1.0f, true);
+        ListEntry returnedThirdEntry = mListController.addOrChangeItem(mListHome, mProductBread, 1.0f, true);
         assertNotNull(returnedThirdEntry);
         assertEquals(2.0f, returnedThirdEntry.mAmount, 0.001f);
-        assertEquals(returnedThirdEntry, SugarRecord.findById(ListEntry.class, returnedSecondEntry.getId()));
+        assertEquals(returnedThirdEntry, mListController.getEntryById(returnedSecondEntry.mUUID));
+    }
+
+    private void createLists() {
+
+        mListWork = mListController.addList("_Test_work");
+        mListHome = mListController.addList("TEST_home");
+
+        assertNotNull(mListWork);
+        assertNotNull(mListHome);
     }
 
     public void testStrikeAllItems() throws Exception {
-        ListEntry breadForWork = new ListEntry(mListWork, mProductBread, 1.0f, false);
-        breadForWork.save();
+        ListEntry breadForWork = mListController.addOrChangeItem(mListWork, mProductBread, 1.0f, false);
 
-        mLML4Test.strikeAllItems(mListWork);
+        assertNotNull(breadForWork);
 
-        assertTrue(SugarRecord.findById(ListEntry.class, mListEntryButterForWork.getId()).mStruck);
-        assertTrue(SugarRecord.findById(ListEntry.class, breadForWork.getId()).mStruck);
+        mListController.strikeAllItems(mListWork);
+
+        assertTrue(mListController.getEntryById(mListEntryButterForWork.mUUID).mStruck);
+        assertTrue(mListController.getEntryById(breadForWork.mUUID).mStruck);
     }
 
     public void testUnstrikeAllItems() throws Exception {
+        insertTestData();
 
-        ListEntry breadForWork = new ListEntry(mListWork, mProductBread, 1.0f, true);
-        breadForWork.save();
+        ListEntry breadForWork = mListController.addOrChangeItem(mListWork, mProductBread, 1.0f, true);
 
-        mListEntryButterForWork.mStruck = true;
-        mListEntryButterForWork.save();
+        assertNotNull(breadForWork);
 
-        mLML4Test.unstrikeAllItems(mListWork);
+        mListController.strikeItem(breadForWork);
 
-        assertFalse(SugarRecord.findById(ListEntry.class, mListEntryButterForWork.getId()).mStruck);
-        assertFalse(SugarRecord.findById(ListEntry.class, breadForWork.getId()).mStruck);
+        mListController.unstrikeAllItems(mListWork);
+
+        assertFalse(mListController.getEntryById(mListEntryButterForWork.mUUID).mStruck);
+        assertFalse(mListController.getEntryById(breadForWork.mUUID).mStruck);
     }
 
     public void testStrikeItem() throws Exception {
-        assertNull(mLML4Test.strikeItem(mListHome, mProductBread));
+        insertTestData();
 
-        ListEntry changedFirstListEntry = mLML4Test.strikeItem(mListWork, mProductButter);
+        assertNull(mListController.strikeItem(mListHome, mProductBread));
+
+        ListEntry changedFirstListEntry = mListController.strikeItem(mListWork, mProductButter);
         assertNotNull(changedFirstListEntry);
         assertEquals(true, changedFirstListEntry.mStruck);
 
-        ListEntry changedSecondListEntry = mLML4Test.strikeItem(mListEntryButterForWork);
+        ListEntry changedSecondListEntry = mListController.strikeItem(mListEntryButterForWork);
         assertNotNull(changedSecondListEntry);
         assertEquals(changedFirstListEntry, changedSecondListEntry);
     }
 
     public void testUnstrikeItem() throws Exception {
+        insertTestData();
 
-        mListEntryButterForWork.mStruck = true;
-        mListEntryButterForWork.save();
+        mListEntryButterForWork = mListController.strikeItem(mListEntryButterForWork);
 
-        assertNull(mLML4Test.unstrikeItem(mListHome, mProductBread));
+        assertNotNull(mListEntryButterForWork);
+        assertNull(mListController.unstrikeItem(mListHome, mProductBread));
 
-        ListEntry changedFirstListEntry = mLML4Test.unstrikeItem(mListWork, mProductButter);
+        ListEntry changedFirstListEntry = mListController.unstrikeItem(mListWork, mProductButter);
         assertNotNull(changedFirstListEntry);
         assertFalse(changedFirstListEntry.mStruck);
 
-        ListEntry changedSecondListEntry = mLML4Test.unstrikeItem(mListEntryButterForWork);
+        ListEntry changedSecondListEntry = mListController.unstrikeItem(mListEntryButterForWork);
         assertNotNull(changedSecondListEntry);
         assertEquals(changedFirstListEntry, changedSecondListEntry);
 
     }
 
     public void testRemoveItem() throws Exception {
-        assertFalse(mLML4Test.removeItem(mListHome, mProductBread));
+        insertTestData();
+        assertFalse(mListController.removeItem(mListHome, mProductBread));
 
-        assertTrue(mLML4Test.removeItem(mListWork, mProductButter));
-        assertNull(SugarRecord.findById(ListEntry.class, mListEntryButterForWork.getId()));
+        assertTrue(mListController.removeItem(mListWork, mProductButter));
+        assertNull(mListController.getEntryById(mListEntryButterForWork.mUUID));
     }
 
     public void testAddList() throws Exception {
-        assertNull(mLML4Test.addList("_TEST_work"));
+        insertTestData();
+        assertNull(mListController.addList("_TEST_work"));
 
-        ShoppingList returnedList = mLML4Test.addList("_TEST_forMom");
+        ShoppingList returnedList = mListController.addList("_TEST_forMom");
         assertEquals("_TEST_forMom", returnedList.mName);
         assertNull(returnedList.mCategory);
-        ShoppingList savedList = SugarRecord.findById(ShoppingList.class, returnedList.getId());
+        ShoppingList savedList = mListController.getListById(returnedList.mUUID);
         assertNotNull(savedList);
         assertEquals(returnedList, savedList);
 
-        Category notSavedCat = new Category("_TEST_not saved");
-        assertNull(mLML4Test.addList("_TEST_hardware", notSavedCat));
-        assertNull(mLML4Test.addList(null, mCategoryHardwareStore));
+        Category notSavedCat = new Category();
+        notSavedCat.mName = "_TEST_not saved";
 
-        ShoppingList returned2ndList = mLML4Test.addList("_TEST_hardware", mCategoryHardwareStore);
+        assertNull(mListController.addList("_TEST_hardware", notSavedCat));
+        assertNull(mListController.addList(null, mCategoryHardwareStore));
+
+        ShoppingList returned2ndList = mListController.addList("_TEST_hardware", mCategoryHardwareStore);
         assertNotNull(returned2ndList);
         assertEquals(mCategoryHardwareStore, returned2ndList.mCategory);
     }
 
     public void testRemoveList() throws Exception {
-        // list is filled, so should not be deletable
-        assertFalse(mLML4Test.removeList(mListWork));
-        assertEquals(mListWork, SugarRecord.findById(ShoppingList.class, mListWork.getId()));
+        insertTestData();
 
-        assertTrue(mLML4Test.removeList(mListHome));
-        assertNull(SugarRecord.findById(ShoppingList.class, mListHome.getId()));
+        // list is filled, so should not be deletable
+        assertFalse(mListController.removeList(mListWork));
+        assertEquals(mListWork, mListController.getListById(mListWork.mUUID));
+
+        assertTrue(mListController.removeList(mListHome));
+        assertNull(mListController.getEntryById(mListHome.mUUID));
     }
 
     public void testRenameList() throws Exception {
-        ShoppingList changedList1 = mLML4Test.renameList(mListWork, "_TEST_home");
-        assertEquals("_TEST_work", changedList1.mName);
-        assertEquals(changedList1, SugarRecord.findById(ShoppingList.class, mListWork.getId()));
+        insertTestData();
 
-        ShoppingList changedList2 = mLML4Test.renameList(mListWork, "_TEST_forMom");
+        ShoppingList changedList1 = mListController.renameList(mListWork, "_TEST_home");
+        assertEquals("_TEST_work", changedList1.mName);
+        assertEquals(changedList1, mListController.getListById(mListWork.mUUID));
+
+        ShoppingList changedList2 = mListController.renameList(mListWork, "_TEST_forMom");
         assertEquals("_TEST_forMom", changedList2.mName);
-        assertEquals(changedList2, SugarRecord.findById(ShoppingList.class, mListWork.getId()));
+        assertEquals(changedList2, mListController.getListById(mListWork.mUUID));
     }
 
     public void testMoveToCategory() throws Exception {
-        Category notSavedCat = new Category("_TEST_not saved");
-        assertEquals(mListWork, mLML4Test.moveToCategory(mListWork, notSavedCat));
-        assertNull(mLML4Test.moveToCategory(null, mCategoryHardwareStore));
+        insertTestData();
 
-        ShoppingList returnedList1 = mLML4Test.moveToCategory(mListWork, mCategoryHardwareStore);
+        Category notSavedCat = new Category();
+        notSavedCat.mName = "_TEST_not saved";
+        assertEquals(mListWork, mListController.moveToCategory(mListWork, notSavedCat));
+        assertNull(mListController.moveToCategory(null, mCategoryHardwareStore));
+
+        ShoppingList returnedList1 = mListController.moveToCategory(mListWork, mCategoryHardwareStore);
         assertNotNull(returnedList1);
         assertEquals(mListWork.mName, returnedList1.mName);
         assertEquals(mCategoryHardwareStore, returnedList1.mCategory);
-        assertEquals(returnedList1, SugarRecord.findById(ShoppingList.class, mListWork.getId()));
+        assertEquals(returnedList1, mListController.getListById(mListWork.mUUID));
     }
 
     public void testSetItemPriority() throws Exception {
-        assertNull(mLML4Test.setItemPriority(null, 5));
-        ListEntry notSavedEntry = new ListEntry(mListHome, mProductBread, 1.0f);
-        assertNull(mLML4Test.setItemPriority(notSavedEntry, 5));
+        insertTestData();
 
-        ListEntry returnedEntry1 = mLML4Test.setItemPriority(mListEntryButterForWork, 5);
+        assertNull(mListController.setItemPriority(null, 5));
+        ListEntry notSavedEntry = new ListEntry(mListHome, mProductBread, 1.0f);
+        assertNull(mListController.setItemPriority(notSavedEntry, 5));
+
+        ListEntry returnedEntry1 = mListController.setItemPriority(mListEntryButterForWork, 5);
         assertNotNull(returnedEntry1);
         assertEquals(5, returnedEntry1.mPriority);
         assertEquals(mListEntryButterForWork.mAmount, returnedEntry1.mAmount);
         assertEquals(mListEntryButterForWork.mList, returnedEntry1.mList);
         assertEquals(mListEntryButterForWork.mProduct, returnedEntry1.mProduct);
         assertEquals(mListEntryButterForWork.mStruck, returnedEntry1.mStruck);
-        assertEquals(returnedEntry1, SugarRecord.findById(ListEntry.class, mListEntryButterForWork.getId()));
+        assertEquals(returnedEntry1, mListController.getEntryById(mListEntryButterForWork.mUUID));
     }
 }
