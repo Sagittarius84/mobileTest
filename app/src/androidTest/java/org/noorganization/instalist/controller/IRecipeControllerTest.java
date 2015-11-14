@@ -1,12 +1,9 @@
 package org.noorganization.instalist.controller;
 
 import android.content.ContentResolver;
+import android.database.Cursor;
 import android.net.Uri;
 import android.test.AndroidTestCase;
-
-import com.orm.SugarRecord;
-import com.orm.query.Condition;
-import com.orm.query.Select;
 
 import org.noorganization.instalist.controller.implementation.ControllerFactory;
 import org.noorganization.instalist.model.Ingredient;
@@ -15,8 +12,6 @@ import org.noorganization.instalist.model.Recipe;
 import org.noorganization.instalist.provider.internal.IngredientProvider;
 import org.noorganization.instalist.provider.internal.ProductProvider;
 import org.noorganization.instalist.provider.internal.RecipeProvider;
-import org.noorganization.instalist.provider.internal.TagProvider;
-import org.noorganization.instalist.provider.internal.TaggedProductProvider;
 
 public class IRecipeControllerTest extends AndroidTestCase {
 
@@ -29,31 +24,33 @@ public class IRecipeControllerTest extends AndroidTestCase {
     Ingredient mCurdInCake;
 
     IRecipeController mRecipeController;
+    IProductController mProductController;
 
     ContentResolver mResolver;
 
     public void setUp() throws Exception {
         super.setUp();
-
+        mRecipeController = ControllerFactory.getRecipeController(mContext);
+        mProductController = ControllerFactory.getProductController(mContext);
         mResolver = mContext.getContentResolver();
-        mCheeseCake = new Recipe("_TEST_cheesecake");
-        mCheeseCake.save();
-        mPuffPastries = new Recipe("_TEST_puffpastries");
-        mPuffPastries.save();
 
-        mCurd = new Product("_TEST_curd", null);
-        mCurd.save();
-        mFlour = new Product("_TEST_flour", null);
-        mFlour.save();
-        mEgg = new Product("_TEST_egg", null);
-        mEgg.save();
+        mCheeseCake = mRecipeController.createRecipe("_TEST_cheesecake");
+        assertNotNull(mCheeseCake);
 
-        mFlourInCake = new Ingredient(mFlour, mCheeseCake, 0.3f);
-        mFlourInCake.save();
-        mCurdInCake = new Ingredient(mCurd, mCheeseCake, 0.5f);
-        mCurdInCake.save();
+        mPuffPastries = mRecipeController.createRecipe("_TEST_puffpastries");
+        assertNotNull(mPuffPastries);
 
-        mRecipeController = ControllerFactory.getRecipeController();
+        mCurd = mProductController.createProduct("_TEST_curd", null, 1.0f, 1.0f);
+        assertNotNull(mCurd);
+        mFlour = mProductController.createProduct("_TEST_flour", null, 1.0f, 1.0f);
+        assertNotNull(mFlour);
+        mEgg = mProductController.createProduct("_TEST_egg", null, 1.0f, 1.0f);
+        assertNotNull(mEgg);
+
+        mFlourInCake = mRecipeController.addOrChangeIngredient(mCheeseCake, mFlour, 0.3f);
+        assertNotNull(mFlourInCake);
+        mCurdInCake = mRecipeController.addOrChangeIngredient(mCheeseCake,mCurd, 0.5f);
+        assertNotNull(mCurdInCake);
     }
 
     public void tearDown() throws Exception {
@@ -69,7 +66,7 @@ public class IRecipeControllerTest extends AndroidTestCase {
         Recipe returnedRecipe = mRecipeController.createRecipe("_TEST_pancakes");
         assertNotNull(returnedRecipe);
         assertEquals("_TEST_pancakes", returnedRecipe.mName);
-        Recipe savedRecipe = SugarRecord.findById(Recipe.class, returnedRecipe.getId());
+        Recipe savedRecipe = mRecipeController.findById(returnedRecipe.mUUID);
         assertNotNull(savedRecipe);
         assertEquals(returnedRecipe, savedRecipe);
     }
@@ -82,9 +79,15 @@ public class IRecipeControllerTest extends AndroidTestCase {
         mRecipeController.removeRecipe(invalidRecipe);
 
         mRecipeController.removeRecipe(mCheeseCake);
-        assertNull(SugarRecord.findById(Recipe.class, mCheeseCake.getId()));
-        assertEquals(0, Select.from(Ingredient.class).
-                where(Condition.prop("m_recipe").eq(mCheeseCake.getId())).count());
+        assertNull(mRecipeController.findById(mCheeseCake.mUUID));
+
+        Cursor ingredientCursor = mResolver.query(Uri.parse(IngredientProvider.MULTIPLE_INGREDIENT_CONTENT_URI),
+                Ingredient.COLUMN.ALL_COLUMNS,
+                Ingredient.COLUMN.RECIPE_ID,
+                new String[]{mCheeseCake.mUUID},
+                null);
+        assertNotNull(ingredientCursor);
+        assertEquals(0, ingredientCursor.getCount());
     }
 
     public void testAddOrChangeIngredient() throws Exception {
@@ -98,8 +101,7 @@ public class IRecipeControllerTest extends AndroidTestCase {
         assertEquals(mCheeseCake, returnedCreatedIngredient.mRecipe);
         assertEquals(mEgg, returnedCreatedIngredient.mProduct);
         assertEquals(2.0f, returnedCreatedIngredient.mAmount, 0.001f);
-        Ingredient savedCreatedIngredient = SugarRecord.findById(Ingredient.class,
-                returnedCreatedIngredient.getId());
+        Ingredient savedCreatedIngredient = mRecipeController.findIngredientById(returnedCreatedIngredient.mUUID);
         assertNotNull(savedCreatedIngredient);
         assertEquals(returnedCreatedIngredient, savedCreatedIngredient);
 
@@ -118,13 +120,13 @@ public class IRecipeControllerTest extends AndroidTestCase {
     public void testRemoveIngredient() throws Exception {
         // nothing should happen.
         mRecipeController.removeIngredient(null);
-        assertNotNull(SugarRecord.findById(Ingredient.class, mFlourInCake.getId()));
+        assertNotNull(mRecipeController.findIngredientById(mFlourInCake.mUUID));
 
         mRecipeController.removeIngredient(mFlourInCake);
-        assertNull(SugarRecord.findById(Ingredient.class, mFlourInCake.getId()));
+        assertNotNull(mRecipeController.findIngredientById(mFlourInCake.mUUID));
 
         mRecipeController.removeIngredient(mCheeseCake, mCurd);
-        assertNull(SugarRecord.findById(Ingredient.class, mCurdInCake.getId()));
+        assertNotNull(mRecipeController.findIngredientById(mCurdInCake.mUUID));
     }
 
     public void testRenameRecipe() throws Exception {

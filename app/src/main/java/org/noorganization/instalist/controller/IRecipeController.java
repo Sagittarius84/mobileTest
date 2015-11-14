@@ -78,6 +78,8 @@ public interface IRecipeController {
      */
     Recipe findByName(@NonNull String _name);
 
+    Ingredient findIngredientById(String _uuid);
+
     /**
      * Find a list of ingredients by a given recipe uuid.
      *

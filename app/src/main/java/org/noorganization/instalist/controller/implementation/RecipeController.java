@@ -330,4 +330,16 @@ public class RecipeController implements IRecipeController {
         }
         return ingredient;
     }
+
+    @Override
+    public Ingredient findIngredientById(String _uuid) {
+        Cursor cursor = mResolver.query(Uri.parse(IngredientProvider.SINGLE_INGREDIENT_CONTENT_URI.replace("*", _uuid)),
+                Ingredient.COLUMN.ALL_COLUMNS,
+                null,
+                null,
+                null
+        );
+
+        return parse(cursor);
+    }
 }
