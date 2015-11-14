@@ -87,4 +87,6 @@ public interface IRecipeController {
      * @return a list of ingredients.
      */
     List<Ingredient> getIngredients(@NonNull String _recipeUUID);
+
+    List<Recipe> listAll();
 }

@@ -4,6 +4,8 @@ import android.support.annotation.NonNull;
 
 import org.noorganization.instalist.model.Unit;
 
+import java.util.List;
+
 /**
  * The interface for modifying Units (created by software engineering). From presenter part, do only
  * modify data over this interface for keeping integrity.
@@ -55,5 +57,5 @@ public interface IUnitController {
      */
     boolean deleteUnit(Unit _unit, int _mode);
 
-
+    List<Unit> listAll(String _orderByColumn, boolean _asc);
 }

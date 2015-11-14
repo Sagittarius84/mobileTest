@@ -15,6 +15,7 @@ import org.noorganization.instalist.model.Ingredient;
 import org.noorganization.instalist.model.Product;
 import org.noorganization.instalist.model.Recipe;
 import org.noorganization.instalist.provider.internal.IngredientProvider;
+import org.noorganization.instalist.provider.internal.ProductProvider;
 import org.noorganization.instalist.provider.internal.RecipeProvider;
 
 import java.util.ArrayList;
@@ -341,5 +342,32 @@ public class RecipeController implements IRecipeController {
         );
 
         return parse(cursor);
+    }
+
+    @Override
+    public List<Recipe> listAll() {
+        Cursor recipeCursor = mResolver.query(Uri.parse(RecipeProvider.MULTIPLE_RECIPE_CONTENT_URI),
+                Recipe.COLUMN.ALL_COLUMNS,
+                null,
+                null,
+                null);
+
+        if (recipeCursor == null) {
+            return null;
+        }
+
+        recipeCursor.moveToFirst();
+        List<Recipe> recipes = new ArrayList<>();
+        do {
+            recipes.add(parseRecipe(recipeCursor));
+        } while (recipeCursor.moveToNext());
+        return recipes;
+    }
+
+    private Recipe parseRecipe(Cursor _cursor){
+        Recipe recipe = new Recipe();
+        recipe.mUUID = _cursor.getString(_cursor.getColumnIndex(Recipe.COLUMN.ID));
+        recipe.mName = _cursor.getString(_cursor.getColumnIndex(Recipe.COLUMN.NAME));
+        return recipe;
     }
 }

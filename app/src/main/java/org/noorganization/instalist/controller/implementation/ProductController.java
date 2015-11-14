@@ -367,4 +367,25 @@ public class ProductController implements IProductController {
         } while (taggedProductCursor.moveToNext());
         return taggedProducts;
     }
+
+    @Override
+    public List<Product> listAll() {
+        Cursor productCursor = mResolver.query(Uri.parse(ProductProvider.MULTIPLE_PRODUCT_CONTENT_URI),
+                Product.COLUMN.ALL_COLUMNS,
+                null,
+                null,
+                null);
+
+        if (productCursor == null) {
+            return null;
+        }
+
+        productCursor.moveToFirst();
+        List<Product> products = new ArrayList<>();
+        do {
+            products.add(parseProduct(productCursor));
+        } while (productCursor.moveToNext());
+        return products;
+    }
+
 }

@@ -83,4 +83,5 @@ public interface IProductController {
 
     Product parseProduct(Cursor _cursor);
 
+    List<Product> listAll();
 }

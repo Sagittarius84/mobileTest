@@ -117,6 +117,29 @@ public class TagController implements ITagController {
     public Tag findById(String _uuid) {
         Cursor cursor = mResolver.query(Uri.parse(TagProvider.SINGLE_TAG_CONTENT_URI.replace("*", _uuid)), Tag.COLUMN.ALL_COLUMNS, null, null, null);
         if (cursor == null || cursor.getCount() == 0) {
+            if(cursor != null){
+                cursor.close();
+            }
+            return null;
+        }
+        cursor.moveToFirst();
+        Tag tag = new Tag();
+        tag.mUUID = cursor.getString(cursor.getColumnIndex(Tag.COLUMN.ID));
+        tag.mName = cursor.getString(cursor.getColumnIndex(Tag.COLUMN.NAME));
+        cursor.close();
+        return tag;
+    }
+
+    @Override
+    public Tag findByName(String _name) {
+        Cursor cursor = mResolver.query(Uri.parse(TagProvider.MULTIPLE_TAG_CONTENT_URI),
+                Tag.COLUMN.ALL_COLUMNS,
+                Tag.COLUMN.NAME + "=?",
+                new String[]{_name}, null);
+        if (cursor == null || cursor.getCount() == 0) {
+            if(cursor != null){
+                cursor.close();
+            }
             return null;
         }
         cursor.moveToFirst();

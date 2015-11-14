@@ -19,9 +19,7 @@ import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.Toast;
 
-import com.orm.SugarRecord;
-import com.orm.query.Select;
-
+import org.noorganization.instalist.GlobalApplication;
 import org.noorganization.instalist.R;
 import org.noorganization.instalist.controller.IProductController;
 import org.noorganization.instalist.controller.implementation.ControllerFactory;
@@ -48,31 +46,31 @@ import de.greenrobot.event.EventBus;
  */
 public class ProductChangeFragment extends DialogFragment {
 
-    private static final String BUNDLE_KEY_PRODUCT_ID   = "ProductId";
+    private static final String BUNDLE_KEY_PRODUCT_ID = "ProductId";
 
-    private InputParamsHolder   mInputParams;
+    private InputParamsHolder mInputParams;
     /**
      * used when product values should be rendered into view.
      */
-    private Product     mProduct;
+    private Product mProduct;
 
 
     /**
      * Holds the input parameter views. Also delivers methods to retrieve the content of these
      * views.
      */
-    private class InputParamsHolder{
-        private EditText     mProductName;
+    private class InputParamsHolder {
+        private EditText mProductName;
         private AmountPicker mProductAmount;
-        private EditText     mProductTags;
-        private EditText     mProductStep;
-        private CheckBox     mProductAdvancedSwitch;
+        private EditText mProductTags;
+        private EditText mProductStep;
+        private CheckBox mProductAdvancedSwitch;
         private LinearLayout mProductAdvancedContents;
-        private Spinner      mUnits;
-        private Context      mContext;
-        private List<Unit>   mUnitList;
+        private Spinner mUnits;
+        private Context mContext;
+        private List<Unit> mUnitList;
 
-        public InputParamsHolder(Dialog _dialog, View _parentView){
+        public InputParamsHolder(Dialog _dialog, View _parentView) {
             this.mContext = _dialog.getContext();
             initViews(_parentView);
         }
@@ -80,20 +78,23 @@ public class ProductChangeFragment extends DialogFragment {
         /**
          * Checks if all needed editable fields are filled.
          * Marks an unfilled entry as not filled.
+         *
          * @return true, if all elements are filled. false, if at least one element is not filled.
          */
-        public boolean isFilled(){
+        public boolean isFilled() {
             return ViewUtils.checkEditTextIsFilled(mProductName);
         }
 
-        /**         * checks if the input matches the conventions.
+        /**
+         * checks if the input matches the conventions.
+         *
          * @return true if  all is fine, false when some value is curious.
          */
-        public boolean isValid(){
+        public boolean isValid() {
             boolean returnValue = true;
 
             float amount = mProductAmount.getValue();
-            if(amount <= 0.0f){
+            if (amount <= 0.0f) {
                 Toast.makeText(mContext, R.string.product_creation_fragment, Toast.LENGTH_SHORT).show();
                 returnValue = false;
             }
@@ -104,17 +105,19 @@ public class ProductChangeFragment extends DialogFragment {
 
         /**
          * Gets the product name.
+         *
          * @return name of the product.
          */
-        public String getProductName(){
+        public String getProductName() {
             return mProductName.getText().toString();
         }
 
         /**
          * Creates a float value of the amount input.
-         * @return  a float value of the amount input. if edittext is set the value of this, else 0.0f.
+         *
+         * @return a float value of the amount input. if edittext is set the value of this, else 0.0f.
          */
-        public float getProductAmount(){
+        public float getProductAmount() {
             return mProductAmount.getValue();
         }
 
@@ -127,9 +130,10 @@ public class ProductChangeFragment extends DialogFragment {
 
         /**
          * Splits the tags in the given edittext. Separator is comma.
+         *
          * @return a string array of extracted tags.
          */
-        public String[] getTags(){
+        public String[] getTags() {
             String tagValue = mProductTags.getText().toString();
             LinkedList<String> rtn = new LinkedList<>(Arrays.asList(tagValue.split("\\s*,\\s*")));
             int last_size = rtn.size() + 1;
@@ -151,16 +155,16 @@ public class ProductChangeFragment extends DialogFragment {
         /**
          * Assigns the context to the edit view elements in this class. (like EditText)
          */
-        private void initViews(View _parentView){
+        private void initViews(View _parentView) {
 
-            mProductName             = (EditText) _parentView.findViewById(R.id.product_details_product_name);
-            mProductAmount           = (AmountPicker) _parentView.findViewById(R.id.product_details_amount);
-            mProductTags             = (EditText) _parentView.findViewById(R.id.product_details_tag);
-            mProductStep             = (EditText) _parentView.findViewById(R.id.product_details_step);
-            mProductAdvancedSwitch   = (CheckBox) _parentView.findViewById(R.id.product_details_advanced);
+            mProductName = (EditText) _parentView.findViewById(R.id.product_details_product_name);
+            mProductAmount = (AmountPicker) _parentView.findViewById(R.id.product_details_amount);
+            mProductTags = (EditText) _parentView.findViewById(R.id.product_details_tag);
+            mProductStep = (EditText) _parentView.findViewById(R.id.product_details_step);
+            mProductAdvancedSwitch = (CheckBox) _parentView.findViewById(R.id.product_details_advanced);
             mProductAdvancedContents = (LinearLayout) _parentView.
                     findViewById(R.id.product_details_advanced_contents);
-            mUnits                   = (Spinner) _parentView.findViewById(R.id.product_details_unit);
+            mUnits = (Spinner) _parentView.findViewById(R.id.product_details_unit);
 
             mProductAdvancedContents.
                     setVisibility(mProductAdvancedSwitch.isChecked() ? View.VISIBLE : View.GONE);
@@ -192,7 +196,7 @@ public class ProductChangeFragment extends DialogFragment {
                 }
             });
 
-            mUnitList = Select.from(Unit.class).orderBy(Unit.ATTR_NAME).list();
+            mUnitList = ControllerFactory.getUnitController(getContext()).listAll(Unit.COLUMN.NAME, true);
             mUnitList.add(0, null);
             String[] displayUnitStrings = new String[mUnitList.size()];
             displayUnitStrings[0] = mContext.getString(R.string.no_unit);
@@ -213,9 +217,9 @@ public class ProductChangeFragment extends DialogFragment {
                 mProductAmount.setValue(currentProduct.mDefaultAmount);
 
                 // TODO use a cursor instead!
-                List<TaggedProduct> taggedProductList = ControllerFactory.getProductController().findTaggedProductsByProduct(currentProduct);
+                List<TaggedProduct> taggedProductList = ControllerFactory.getProductController(mContext).findTaggedProductsByProduct(currentProduct);
                 StringBuilder tagBuffer = new StringBuilder();
-                if(!taggedProductList.isEmpty()){
+                if (!taggedProductList.isEmpty()) {
                     Iterator<TaggedProduct> taggedProductIterator = taggedProductList.iterator();
                     while (taggedProductIterator.hasNext()) {
                         tagBuffer.append(taggedProductIterator.next());
@@ -239,10 +243,11 @@ public class ProductChangeFragment extends DialogFragment {
 
     /**
      * saves the new product.
+     *
      * @return true by success false by fail.
      */
-    private boolean saveProduct(){
-        IProductController productController = ControllerFactory.getProductController();
+    private boolean saveProduct() {
+        IProductController productController = ControllerFactory.getProductController(GlobalApplication.getContext());
 
         if (mProduct == null) {
             mProduct = productController.createProduct(
@@ -260,10 +265,10 @@ public class ProductChangeFragment extends DialogFragment {
             selectedProducts.put(mProduct, mProduct.mDefaultAmount);
             EventBus.getDefault().post(new ProductSelectMessage(selectedProducts));
         } else {
-            mProduct.mName          = mInputParams.getProductName();
+            mProduct.mName = mInputParams.getProductName();
             mProduct.mDefaultAmount = mInputParams.getProductAmount();
-            mProduct.mStepAmount    = mInputParams.getProductStep();
-            mProduct.mUnit          = mInputParams.getProductDefaultUnit();
+            mProduct.mStepAmount = mInputParams.getProductStep();
+            mProduct.mUnit = mInputParams.getProductDefaultUnit();
 
             Product savedProduct = productController.modifyProduct(mProduct);
             if (!mProduct.equals(savedProduct)) {
@@ -276,17 +281,21 @@ public class ProductChangeFragment extends DialogFragment {
 
     /**
      * Saves all the given tags.
-     * @param _Product the product where they should be associated.
-     * @return true if all goes well, false if something is wrong.
+     *
+     * @param _Product the product with which they should be associated.
+     * @return true if all goes well, false if something went wrong.
      */
-    private boolean saveTags(Product _Product){
+    private boolean saveTags(Product _Product) {
         String[] tagArray = mInputParams.getTags();
         for (String currentTag : tagArray) {
-            Tag tag = ControllerFactory.getTagController().createTag(currentTag);
+            Tag tag = ControllerFactory.getTagController(GlobalApplication.getContext()).createTag(currentTag);
             if (tag == null) {
-                tag = Tag.find(Tag.class, "m_name = ?", currentTag).get(0);
+                tag = ControllerFactory.getTagController(GlobalApplication.getContext()).findByName(currentTag);
+                if (tag == null) {
+                    return false;
+                }
             }
-            if (!ControllerFactory.getProductController().addTagToProduct(_Product, tag)) {
+            if (ControllerFactory.getProductController(GlobalApplication.getContext()).addTagToProduct(_Product, tag) == null) {
                 return false;
             }
         }
@@ -295,9 +304,10 @@ public class ProductChangeFragment extends DialogFragment {
 
     /**
      * Creates an instance of an ProductChangeFragment with the details of the product.
+     *
      * @return the new instance of this fragment.
      */
-    public static ProductChangeFragment newCreateInstance(){
+    public static ProductChangeFragment newCreateInstance() {
         ProductChangeFragment fragment = new ProductChangeFragment();
         Bundle args = new Bundle();
         fragment.setArguments(args);
@@ -306,10 +316,11 @@ public class ProductChangeFragment extends DialogFragment {
 
     /**
      * Creates an instance of an ProductChangeFragment.
+     *
      * @param _productId the id in the database of the product that should be edited.
      * @return the new instance of this fragment.
      */
-    public static ProductChangeFragment newChangeInstance(long _productId){
+    public static ProductChangeFragment newChangeInstance(long _productId) {
         ProductChangeFragment fragment = new ProductChangeFragment();
         Bundle args = new Bundle();
         args.putLong(BUNDLE_KEY_PRODUCT_ID, _productId);
@@ -322,7 +333,8 @@ public class ProductChangeFragment extends DialogFragment {
         super.onCreate(savedInstanceState);
 
         if (getArguments().containsKey(BUNDLE_KEY_PRODUCT_ID)) {
-            mProduct = SugarRecord.findById(Product.class, getArguments().getLong(BUNDLE_KEY_PRODUCT_ID));
+            mProduct = ControllerFactory.getProductController(GlobalApplication.getContext())
+                    .findById(getArguments().getString(BUNDLE_KEY_PRODUCT_ID));
         }
     }
 

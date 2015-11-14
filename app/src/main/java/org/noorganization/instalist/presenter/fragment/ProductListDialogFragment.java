@@ -20,8 +20,6 @@ import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.ListView;
 
-import com.orm.SugarRecord;
-
 import org.noorganization.instalist.R;
 import org.noorganization.instalist.controller.IListController;
 import org.noorganization.instalist.controller.event.ProductChangedMessage;
@@ -61,17 +59,17 @@ public class ProductListDialogFragment extends BaseFragment {
     private static final String LOG_TAG = ProductListDialogFragment.class.getName();
 
     public static final String FILTER_BY_PRODUCT = "0";
-    public static final String FILTER_BY_RECIPE  = "1";
-    public static final String FILTER_SHOW_ALL   = "2";
-    public static final String SAVED_ITEM_LIST   = "SAVED_ITEM_LIST";
+    public static final String FILTER_BY_RECIPE = "1";
+    public static final String FILTER_SHOW_ALL = "2";
+    public static final String SAVED_ITEM_LIST = "SAVED_ITEM_LIST";
 
-    private Button   mCreateProductButton;
-    private Button   mAddProductsButton;
-    private Button   mCreateRecipeButton;
+    private Button mCreateProductButton;
+    private Button mAddProductsButton;
+    private Button mCreateRecipeButton;
     private ListView mMixedListView;
 
-    private static final String BUNDLE_KEY_LIST_ID       = "listId";
-    private static final String BK_COMPABILITY           = "comp";
+    private static final String BUNDLE_KEY_LIST_ID = "listId";
+    private static final String BK_COMPABILITY = "comp";
     private static final String BK_ALLOW_RECIPE_CREATION = "recipeCreation";
 
     // create the abstract selectable list entries to show mixed entries
@@ -81,7 +79,7 @@ public class ProductListDialogFragment extends BaseFragment {
     private ListAddModeCompability mCompatibility;
 
     private IBaseActivity mBaseActivityInterface;
-    private Context       mContext;
+    private Context mContext;
 
 
     /**
@@ -118,7 +116,7 @@ public class ProductListDialogFragment extends BaseFragment {
      */
     public static ProductListDialogFragment newInstance(long _ListId) {
         ProductListDialogFragment fragment = new ProductListDialogFragment();
-        Bundle                    args     = new Bundle();
+        Bundle args = new Bundle();
         args.putBoolean(BK_COMPABILITY, true);
         args.putLong(BUNDLE_KEY_LIST_ID, _ListId);
         args.putBoolean(BK_ALLOW_RECIPE_CREATION, true);
@@ -128,7 +126,7 @@ public class ProductListDialogFragment extends BaseFragment {
 
     public static ProductListDialogFragment newInstance() {
         ProductListDialogFragment fragment = new ProductListDialogFragment();
-        Bundle                    args     = new Bundle();
+        Bundle args = new Bundle();
         args.putBoolean(BK_COMPABILITY, false);
         args.putBoolean(BK_ALLOW_RECIPE_CREATION, true);
         fragment.setArguments(args);
@@ -152,13 +150,13 @@ public class ProductListDialogFragment extends BaseFragment {
         setHasOptionsMenu(true);
 
         if (bundle.getBoolean(BK_COMPABILITY)) {
-            mCompatibility = new ListAddModeCompability(bundle.getLong(BUNDLE_KEY_LIST_ID));
+            mCompatibility = new ListAddModeCompability(bundle.getString(BUNDLE_KEY_LIST_ID));
         }
 
 
-        if (_savedInstanceState == null || ! _savedInstanceState.containsKey(SAVED_ITEM_LIST)) {
-            List<Product> productList = Product.listAll(Product.class);
-            List<Recipe> recipeList = Recipe.listAll(Recipe.class);
+        if (_savedInstanceState == null || !_savedInstanceState.containsKey(SAVED_ITEM_LIST)) {
+            List<Product> productList = ControllerFactory.getProductController(mContext).listAll();
+            List<Recipe> recipeList = ControllerFactory.getRecipeController(mContext).listAll();
             //List<ListEntry> listEntries = mCurrentShoppingList.getEntries();
 
             // remove all inserted list entries
@@ -210,7 +208,7 @@ public class ProductListDialogFragment extends BaseFragment {
         mListAdapter.getFilter().filter(FILTER_SHOW_ALL);
         mMixedListView.setAdapter(mListAdapter);
 
-        if (! getArguments().getBoolean(BK_ALLOW_RECIPE_CREATION)) {
+        if (!getArguments().getBoolean(BK_ALLOW_RECIPE_CREATION)) {
             mCreateRecipeButton.setVisibility(View.GONE);
         }
 
@@ -224,7 +222,7 @@ public class ProductListDialogFragment extends BaseFragment {
         _Inflater.inflate(R.menu.menu_product_list_dialog, _Menu);
 
         // adds search ability to the toolbar
-        MenuItem      searchItem    = _Menu.findItem(R.id.menu_product_list_dialog_search);
+        MenuItem searchItem = _Menu.findItem(R.id.menu_product_list_dialog_search);
         SearchManager searchManager = (SearchManager) mContext.getSystemService(Context.SEARCH_SERVICE);
 
         SearchView searchView = null;
@@ -309,13 +307,13 @@ public class ProductListDialogFragment extends BaseFragment {
         if (_Menu == null) {
             return;
         }
-        MenuItem   searchMenuItem = _Menu.findItem(R.id.menu_product_list_dialog_search);
-        SearchView searchView     = (SearchView) searchMenuItem.getActionView();
+        MenuItem searchMenuItem = _Menu.findItem(R.id.menu_product_list_dialog_search);
+        SearchView searchView = (SearchView) searchMenuItem.getActionView();
         searchMenuItem.setIcon(R.drawable.ic_search_white_36dp);
 
 
-        int                  searchTextViewId = android.support.v7.appcompat.R.id.search_src_text;
-        AutoCompleteTextView searchTextView   = (AutoCompleteTextView) searchView.findViewById(searchTextViewId);
+        int searchTextViewId = android.support.v7.appcompat.R.id.search_src_text;
+        AutoCompleteTextView searchTextView = (AutoCompleteTextView) searchView.findViewById(searchTextViewId);
         searchTextView.setHintTextColor(getResources().getColor(R.color.white));
         searchTextView.setTextColor(getResources().getColor(android.R.color.white));
         searchTextView.setTextSize(16.0f);
@@ -324,7 +322,7 @@ public class ProductListDialogFragment extends BaseFragment {
         SpannableStringBuilder ssb = new SpannableStringBuilder("   "); // for the icon
         //ssb.append(hintText);
         Drawable searchIcon = getResources().getDrawable(R.drawable.ic_search_white_36dp);
-        int      textSize   = (int) (searchTextView.getTextSize() * 1.25);
+        int textSize = (int) (searchTextView.getTextSize() * 1.25);
         searchIcon.setBounds(0, 0, textSize, textSize);
         ssb.setSpan(new ImageSpan(searchIcon), 1, 2, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
         searchTextView.setHint(ssb);
@@ -406,8 +404,8 @@ public class ProductListDialogFragment extends BaseFragment {
 
         private ShoppingList mCurrentShoppingList;
 
-        public ListAddModeCompability(long _id) {
-            mCurrentShoppingList = SugarRecord.findById(ShoppingList.class, _id);
+        public ListAddModeCompability(String _id) {
+            mCurrentShoppingList = ControllerFactory.getListController(mContext).getListById(_id);
 
             if (mCurrentShoppingList == null) {
                 throw new IllegalStateException(ProductListDialogFragment.class.toString() +
@@ -421,7 +419,7 @@ public class ProductListDialogFragment extends BaseFragment {
          * @param _selectedProducts
          */
         public void onEventMainThread(ProductSelectMessage _selectedProducts) {
-            IListController mListController = ControllerFactory.getListController();
+            IListController mListController = ControllerFactory.getListController(mContext);
 
             for (Product product : _selectedProducts.mProducts.keySet()) {
                 // 2 possible solutions for adding to current shoppinglist
@@ -444,13 +442,13 @@ public class ProductListDialogFragment extends BaseFragment {
         @Override
         public void onClick(View v) {
             Iterator<IBaseListEntry> listEntryIterator = mListAdapter.getCheckedListEntries();
-            Map<Product, Float>      resultingProducts = new HashMap<>();
+            Map<Product, Float> resultingProducts = new HashMap<>();
 
             while (listEntryIterator.hasNext()) {
                 IBaseListEntry listEntry = listEntryIterator.next();
 
                 // skip this entry when not selected/checked
-                if (! listEntry.isChecked()) {
+                if (!listEntry.isChecked()) {
                     continue;
                 }
 

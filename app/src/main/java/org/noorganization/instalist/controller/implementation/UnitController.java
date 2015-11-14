@@ -16,6 +16,9 @@ import org.noorganization.instalist.model.Unit;
 import org.noorganization.instalist.provider.internal.ProductProvider;
 import org.noorganization.instalist.provider.internal.UnitProvider;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import de.greenrobot.event.EventBus;
 
 public class UnitController implements IUnitController {
@@ -221,5 +224,35 @@ public class UnitController implements IUnitController {
         mBus.post(new UnitChangedMessage(Change.DELETED, _unit));
 
         return true;
+    }
+
+    @Override
+    public List<Unit> listAll(String _orderByColumn, boolean _asc) {
+        List<Unit> unitArray = new ArrayList<>();
+        Cursor cursor = mResolver.query(Uri.parse(UnitProvider.MULTIPLE_UNIT_CONTENT_URI),
+                Unit.COLUMN.ALL_COLUMNS,
+                null,
+                null,
+                _orderByColumn + " " + (_asc ? "ASC" : "DESC"));
+        if (cursor == null || cursor.getCount() == 0) {
+            if (cursor != null) {
+                cursor.close();
+            }
+            return unitArray;
+        }
+        cursor.moveToFirst();
+
+        do {
+            unitArray.add(parse(cursor));
+        } while (cursor.moveToNext());
+        cursor.close();
+        return unitArray;
+    }
+
+    public Unit parse(Cursor _cursor) {
+        Unit unit = new Unit();
+        unit.mUUID = _cursor.getString(_cursor.getColumnIndex(Unit.COLUMN.ID));
+        unit.mName = _cursor.getString(_cursor.getColumnIndex(Unit.COLUMN.NAME));
+        return unit;
     }
 }

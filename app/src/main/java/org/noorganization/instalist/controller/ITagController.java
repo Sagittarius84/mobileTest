@@ -43,4 +43,5 @@ public interface ITagController {
      */
     Tag findById(String _uuid);
 
+    Tag findByName(String _name);
 }
