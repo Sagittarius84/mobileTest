@@ -1,12 +1,14 @@
 package org.noorganization.instalist.controller;
 
+import android.content.ContentResolver;
+import android.net.Uri;
 import android.test.AndroidTestCase;
-
-import com.orm.SugarRecord;
 
 import org.noorganization.instalist.controller.implementation.ControllerFactory;
 import org.noorganization.instalist.model.Product;
 import org.noorganization.instalist.model.Unit;
+import org.noorganization.instalist.provider.internal.ProductProvider;
+import org.noorganization.instalist.provider.internal.UnitProvider;
 
 public class IUnitControllerTest extends AndroidTestCase {
 
@@ -17,28 +19,35 @@ public class IUnitControllerTest extends AndroidTestCase {
     Product mShelf;
 
     IUnitController mUnitController;
+    IProductController mProductController;
+    ContentResolver mResolver;
 
     public void setUp() throws Exception {
         super.setUp();
+        mUnitController = ControllerFactory.getUnitController(mContext);
+        mProductController = ControllerFactory.getProductController(mContext);
+        mResolver = mContext.getContentResolver();
 
-        mLiter = new Unit("_TEST_liter");
-        mLiter.save();
-        mGram = new Unit("_TEST_gram");
-        mGram.save();
-        mMeter = new Unit("_TEST_meter");
-        mMeter.save();
+        mLiter = mUnitController.createUnit("_TEST_liter");
+        mGram = mUnitController.createUnit("_TEST_gram");
+        mMeter = mUnitController.createUnit("_TEST_meter");
 
-        mMilk = new Product("_TEST_milk", mLiter);
-        mMilk.save();
-        mShelf = new Product("_TEST_shelf", mMeter);
-        mShelf.save();
+        assertNotNull(mLiter);
+        assertNotNull(mGram);
+        assertNotNull(mMeter);
 
-        mUnitController = ControllerFactory.getUnitController();
+
+        mMilk = mProductController.createProduct("_TEST_milk", mLiter, 1.0f, 1.0f);
+        mShelf = mProductController.createProduct("_TEST_shelf", mMeter, 1.0f, 1.0f);
+
+        assertNotNull(mMilk);
+        assertNotNull(mShelf);
+
     }
 
     public void tearDown() throws Exception {
-        SugarRecord.deleteAll(Unit.class, "m_name LIKE '_TEST_%'");
-        SugarRecord.deleteAll(Product.class, "m_name LIKE '_TEST_%'");
+        mResolver.delete(Uri.parse(UnitProvider.MULTIPLE_UNIT_CONTENT_URI), null, null);
+        mResolver.delete(Uri.parse(ProductProvider.MULTIPLE_PRODUCT_CONTENT_URI), null, null);
     }
 
     public void testCreateUnit() throws Exception {
@@ -48,7 +57,7 @@ public class IUnitControllerTest extends AndroidTestCase {
         Unit returnedUnit = mUnitController.createUnit("_TEST_pound");
         assertNotNull(returnedUnit);
         assertEquals("_TEST_pound", returnedUnit.mName);
-        Unit savedUnit = SugarRecord.findById(Unit.class, returnedUnit.getId());
+        Unit savedUnit = mUnitController.findById(returnedUnit.mUUID);
         assertNotNull(savedUnit);
         assertEquals(returnedUnit, savedUnit);
     }
@@ -59,12 +68,12 @@ public class IUnitControllerTest extends AndroidTestCase {
         Unit returnedUnchangedUnit = mUnitController.renameUnit(mGram, "_TEST_liter");
         assertNotNull(returnedUnchangedUnit);
         assertEquals(mGram, returnedUnchangedUnit);
-        assertEquals(returnedUnchangedUnit, SugarRecord.findById(Unit.class, returnedUnchangedUnit.getId()));
+        assertEquals(returnedUnchangedUnit, mUnitController.findById(returnedUnchangedUnit.mUUID));
 
         Unit returnedChangedUnit = mUnitController.renameUnit(mGram, "_TEST_pound");
         assertNotNull(returnedChangedUnit);
         assertEquals("_TEST_pound", returnedChangedUnit.mName);
-        assertEquals(returnedChangedUnit, SugarRecord.findById(Unit.class, returnedChangedUnit.getId()));
+        assertEquals(returnedChangedUnit, mUnitController.findById(returnedChangedUnit.mUUID));
     }
 
     public void testDeleteUnit() throws Exception {
@@ -74,10 +83,10 @@ public class IUnitControllerTest extends AndroidTestCase {
         assertTrue(mUnitController.deleteUnit(mGram, IUnitController.MODE_BREAK_DELETION));
 
         assertTrue(mUnitController.deleteUnit(mLiter, IUnitController.MODE_DELETE_REFERENCES));
-        assertNull(SugarRecord.findById(Product.class, mMilk.getId()));
+        assertNull(mProductController.findById(mMilk.mUUID));
 
         assertTrue(mUnitController.deleteUnit(mMeter, IUnitController.MODE_UNLINK_REFERENCES));
-        Product changedProduct = SugarRecord.findById(Product.class, mShelf.getId());
+        Product changedProduct = mProductController.findById( mShelf.mUUID);
         assertNotNull(changedProduct);
         assertNull(changedProduct.mUnit);
     }
