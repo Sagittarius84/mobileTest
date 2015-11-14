@@ -241,23 +241,23 @@ public class ProductController implements IProductController {
     }
 
     @Override
-    public boolean addTagToProduct(Product _product, Tag _tag) {
+    public TaggedProduct addTagToProduct(Product _product, Tag _tag) {
         if (_product == null || _tag == null) {
-            return false;
+            return null;
         }
         Product foundProduct = findById(_product.mUUID);
         Tag foundTag = mTagController.findById(_tag.mUUID);
         if (foundProduct == null || foundTag == null) {
-            return false;
+            return null;
         }
 
         Cursor taggedProductCursor = mResolver.query(Uri.parse(TaggedProductProvider.MULTIPLE_TAGGED_PRODUCT_BY_TAG_CONTENT_URI.replace("*", foundTag.mUUID)),
                 TaggedProduct.ALL_COLUMNS_JOINED,
-                TaggedProduct.COLUMN_PREFIXED.PRODUCT_ID + "=?",
-                new String[]{foundProduct.mUUID}, null);
+                TaggedProduct.COLUMN_PREFIXED.PRODUCT_ID + "=? AND " + TaggedProduct.COLUMN_PREFIXED.TAG_ID + "=?",
+                new String[]{foundProduct.mUUID, foundTag.mUUID}, null);
 
         if (taggedProductCursor == null) {
-            return false;
+            return null;
         }
 
         // check if this {@link TaggedProduct} exists already in the database.
@@ -265,13 +265,19 @@ public class ProductController implements IProductController {
             TaggedProduct newTaggedProduct = new TaggedProduct(_tag, _product);
             Uri taggedProductUri = mResolver.insert(Uri.parse(TaggedProductProvider.MULTIPLE_TAGGED_PRODUCT_CONTENT_URI), newTaggedProduct.toContentValues());
             if (taggedProductUri == null) {
-                return false;
+                taggedProductCursor.close();
+                return null;
             }
             newTaggedProduct.mUUID = taggedProductUri.getLastPathSegment();
             mBus.post(new ProductChangedMessage(Change.CHANGED, foundProduct));
+            taggedProductCursor.close();
+            return newTaggedProduct;
         }
+        TaggedProduct taggedProduct = new TaggedProduct(_tag, _product);
+        taggedProduct.mUUID = taggedProductCursor.getString(taggedProductCursor.getColumnIndex(TaggedProduct.COLUMN_PREFIXED.ID));
 
-        return true;
+        taggedProductCursor.close();
+        return taggedProduct;
     }
 
     @Override
@@ -311,7 +317,7 @@ public class ProductController implements IProductController {
     }
 
 
-    public Product parseProduct(Cursor _cursor){
+    public Product parseProduct(Cursor _cursor) {
         Product product = new Product();
         product.mUUID = _cursor.getString(_cursor.getColumnIndex(TaggedProduct.COLUMN_PREFIXED.PRODUCT_ID));
         product.mName = _cursor.getString(_cursor.getColumnIndex(Product.PREFIXED_COLUMN.NAME));
@@ -356,9 +362,9 @@ public class ProductController implements IProductController {
 
         taggedProductCursor.moveToFirst();
         List<TaggedProduct> taggedProducts = new ArrayList<>();
-        do{
+        do {
             taggedProducts.add(parse(taggedProductCursor));
-        } while(taggedProductCursor.moveToNext());
+        } while (taggedProductCursor.moveToNext());
         return taggedProducts;
     }
 }

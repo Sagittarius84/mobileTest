@@ -1,14 +1,16 @@
 package org.noorganization.instalist.controller;
 
+import android.content.ContentResolver;
+import android.net.Uri;
 import android.test.AndroidTestCase;
-import android.util.Log;
-
-import com.orm.SugarRecord;
 
 import org.noorganization.instalist.controller.implementation.ControllerFactory;
 import org.noorganization.instalist.model.Product;
 import org.noorganization.instalist.model.Tag;
 import org.noorganization.instalist.model.TaggedProduct;
+import org.noorganization.instalist.provider.internal.ProductProvider;
+import org.noorganization.instalist.provider.internal.TagProvider;
+import org.noorganization.instalist.provider.internal.TaggedProductProvider;
 
 public class ITagControllerTest extends AndroidTestCase {
 
@@ -19,30 +21,33 @@ public class ITagControllerTest extends AndroidTestCase {
     Product mCheese;
     TaggedProduct mCheeseMilkProductTag;
     ITagController mTagController;
+    IProductController mProductController;
+    ContentResolver mResolver;
 
     public void setUp() throws Exception {
         super.setUp();
+        mProductController = ControllerFactory.getProductController(mContext);
+        mTagController = ControllerFactory.getTagController(mContext);
+        mResolver = mContext.getContentResolver();
 
-        mMetalware = new Tag("_TEST_metalware");
-        mMetalware.save();
+        mMetalware = mTagController.createTag("_TEST_metalware");
+        mMilkProduct = mTagController.createTag(TEST_MILK_PRODUCT);
 
-        mMilkProduct = new Tag(TEST_MILK_PRODUCT);
-        mMilkProduct.save();
+        assertNotNull(mMetalware);
+        assertNotNull(mMilkProduct);
 
-        mCheese = new Product("_TEST_cheese", null);
-        mCheese.save();
+        mCheese = mProductController.createProduct("_TEST_cheese", null, 1.0f, 1.0f);
+        mCheeseMilkProductTag = mProductController.addTagToProduct(mCheese, mMilkProduct);
 
-        mCheeseMilkProductTag = new TaggedProduct(mMilkProduct, mCheese);
-        mCheeseMilkProductTag.save();
+        assertNotNull(mCheese);
+        assertNotNull(mCheeseMilkProductTag);
 
-        mTagController = ControllerFactory.getTagController();
     }
 
     public void tearDown() throws Exception {
-        SugarRecord.deleteAll(TaggedProduct.class, "m_product = ? or m_tag = ? or m_tag = ?",
-                mCheese.getId() + "", mMilkProduct.getId() + "", mMetalware.getId() + "");
-        SugarRecord.deleteAll(Product.class, "m_name LIKE '_TEST_%'");
-        SugarRecord.deleteAll(Tag.class, "m_name LIKE '_TEST_%'");
+        mResolver.delete(Uri.parse(TaggedProductProvider.MULTIPLE_TAGGED_PRODUCT_CONTENT_URI), null, null);
+        mResolver.delete(Uri.parse(ProductProvider.MULTIPLE_PRODUCT_CONTENT_URI), null, null);
+        mResolver.delete(Uri.parse(TagProvider.MULTIPLE_TAG_CONTENT_URI), null, null);
     }
 
     public void testCreateTag() throws Exception {
@@ -52,7 +57,7 @@ public class ITagControllerTest extends AndroidTestCase {
         Tag createdTag = mTagController.createTag("_TEST_vegetable");
         assertNotNull(createdTag);
         assertEquals("_TEST_vegetable", createdTag.mName);
-        assertEquals(createdTag, SugarRecord.findById(Tag.class, createdTag.getId()));
+        assertEquals(createdTag, mTagController.findById(createdTag.mUUID));
     }
 
     public void testRenameTag() throws Exception {
@@ -62,13 +67,13 @@ public class ITagControllerTest extends AndroidTestCase {
 
         Tag renamedTag = mTagController.renameTag(mMilkProduct, "_TEST_vegetable");
         assertEquals("_TEST_vegetable", renamedTag.mName);
-        assertEquals(renamedTag, SugarRecord.findById(Tag.class, mMilkProduct.getId()));
+        assertEquals(renamedTag, mTagController.findById(mMilkProduct.mUUID));
     }
 
     public void testRemoveTag() throws Exception {
         mTagController.removeTag(mMilkProduct);
-        assertNull(SugarRecord.findById(TaggedProduct.class, mCheeseMilkProductTag.getId()));
-        assertNotNull(SugarRecord.findById(Product.class, mCheese.getId()));
-        assertNotNull(SugarRecord.findById(Tag.class, mMetalware.getId()));
+        assertNull(mTagController.findById(mCheeseMilkProductTag.mUUID));
+        assertNotNull(mProductController.findById(mCheese.mUUID));
+        assertNotNull(mTagController.findById(mMetalware.mUUID));
     }
 }

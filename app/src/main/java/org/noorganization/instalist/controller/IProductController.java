@@ -69,7 +69,7 @@ public interface IProductController {
      * @param _tag     The valid tag, not null.
      * @return If saving worked.
      */
-    boolean addTagToProduct(Product _product, Tag _tag);
+    TaggedProduct addTagToProduct(Product _product, Tag _tag);
 
     /**
      * Removes a tag from the product, if tagged.
