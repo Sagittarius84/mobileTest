@@ -90,7 +90,7 @@ public class ProductListDialogFragment extends BaseFragment {
      * @param _recipeCreationEnabled Whether recipe creation should be allowed or not.
      * @return The new instance.
      */
-    public static ProductListDialogFragment newInstance(long _listId, boolean _recipeCreationEnabled) {
+    public static ProductListDialogFragment newInstance(String _listId, boolean _recipeCreationEnabled) {
         ProductListDialogFragment instance = newInstance(_listId);
         instance.getArguments().putBoolean(BK_ALLOW_RECIPE_CREATION, _recipeCreationEnabled);
         return instance;
@@ -114,11 +114,11 @@ public class ProductListDialogFragment extends BaseFragment {
      * @param _ListId the id of the list where the products should be added.
      * @return the new instance of this fragment.
      */
-    public static ProductListDialogFragment newInstance(long _ListId) {
+    public static ProductListDialogFragment newInstance(String _ListId) {
         ProductListDialogFragment fragment = new ProductListDialogFragment();
         Bundle args = new Bundle();
         args.putBoolean(BK_COMPABILITY, true);
-        args.putLong(BUNDLE_KEY_LIST_ID, _ListId);
+        args.putString(BUNDLE_KEY_LIST_ID, _ListId);
         args.putBoolean(BK_ALLOW_RECIPE_CREATION, true);
         fragment.setArguments(args);
         return fragment;

@@ -320,10 +320,10 @@ public class ProductChangeFragment extends DialogFragment {
      * @param _productId the id in the database of the product that should be edited.
      * @return the new instance of this fragment.
      */
-    public static ProductChangeFragment newChangeInstance(long _productId) {
+    public static ProductChangeFragment newChangeInstance(String _productId) {
         ProductChangeFragment fragment = new ProductChangeFragment();
         Bundle args = new Bundle();
-        args.putLong(BUNDLE_KEY_PRODUCT_ID, _productId);
+        args.putString(BUNDLE_KEY_PRODUCT_ID, _productId);
         fragment.setArguments(args);
         return fragment;
     }

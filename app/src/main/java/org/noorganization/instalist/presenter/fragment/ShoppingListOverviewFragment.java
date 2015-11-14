@@ -28,7 +28,6 @@ import org.noorganization.instalist.controller.implementation.ControllerFactory;
 import org.noorganization.instalist.model.ListEntry;
 import org.noorganization.instalist.model.Product;
 import org.noorganization.instalist.model.ShoppingList;
-import org.noorganization.instalist.presenter.touchlistener.OnRecyclerItemTouchListener;
 import org.noorganization.instalist.presenter.MainShoppingListView;
 import org.noorganization.instalist.presenter.customview.AmountPicker;
 import org.noorganization.instalist.presenter.dataholder.SelectableBaseItemListEntryDataHolder;
@@ -41,6 +40,7 @@ import org.noorganization.instalist.presenter.interfaces.IFragment;
 import org.noorganization.instalist.presenter.listadapter.ShoppingItemListAdapter;
 import org.noorganization.instalist.presenter.sorting.shoppingList.AlphabeticalListEntryComparator;
 import org.noorganization.instalist.presenter.sorting.shoppingList.PriorityListEntryComparator;
+import org.noorganization.instalist.presenter.touchlistener.OnRecyclerItemTouchListener;
 import org.noorganization.instalist.presenter.utils.PreferencesManager;
 import org.noorganization.instalist.presenter.utils.ViewUtils;
 
@@ -102,7 +102,7 @@ public class ShoppingListOverviewFragment extends BaseFragment implements IFragm
 
         private Context mContext;
         private View mView;
-        private long mListEntryId;
+        private String mListEntryId;
         /**
          * The {@link android.os.PowerManager.WakeLock} to let the screen on when in shopping mode.
          */
@@ -115,7 +115,7 @@ public class ShoppingListOverviewFragment extends BaseFragment implements IFragm
          * @param _View        the View of the selected element. Used to read the data from it.
          * @param _ListEntryId the Id of the clicked ListEntry.
          */
-        public OnShoppingListItemActionModeListener(Context _Context, View _View, long _ListEntryId) {
+        public OnShoppingListItemActionModeListener(Context _Context, View _View, String _ListEntryId) {
             mContext = _Context;
             mView = _View;
             mListEntryId = _ListEntryId;
@@ -178,14 +178,14 @@ public class ShoppingListOverviewFragment extends BaseFragment implements IFragm
                     entry.mAmount = value;
                     // entry.mUnit = unit;
 
-                    ControllerFactory.getListController().addOrChangeItem(mCurrentShoppingList, entry.mProduct, value);
+                    ControllerFactory.getListController(mContext).addOrChangeItem(mCurrentShoppingList, entry.mProduct, value);
                     _Mode.finish();
                     break;
                 case R.id.menu_cancel_action:
                     _Mode.finish();
                     break;
                 case R.id.menu_delete_action:
-                    ControllerFactory.getListController().removeItem(ListEntry.findById(ListEntry.class, mListEntryId));
+                    ControllerFactory.getListController(mContext).removeItem(mListController.getEntryById(mListEntryId));
                     _Mode.finish();
                     break;
                 default:
@@ -208,8 +208,8 @@ public class ShoppingListOverviewFragment extends BaseFragment implements IFragm
          * @param _Id the id of the ListEntry.
          * @return the ListEntry.
          */
-        private ListEntry getListEntryById(long _Id) {
-            ListEntry listEntry = ListEntry.findById(ListEntry.class, _Id);
+        private ListEntry getListEntryById(String _Id) {
+            ListEntry listEntry = ControllerFactory.getListController(mContext).getEntryById(_Id);
             if (listEntry == null) {
                 Log.e(LOG_TAG, "ListEntry is not defined.");
                 throw new NullPointerException("ListEntry is not defined.");
@@ -254,7 +254,7 @@ public class ShoppingListOverviewFragment extends BaseFragment implements IFragm
                     + " has no IBaseActivity interface attached.");
         }
 
-        mListController = ControllerFactory.getListController();
+        mListController = ControllerFactory.getListController(mContext);
     }
 
     @Override
@@ -273,8 +273,8 @@ public class ShoppingListOverviewFragment extends BaseFragment implements IFragm
             return;
         }
 
-        long listId = bundle.getLong(MainShoppingListView.KEY_LISTID);
-        mCurrentShoppingList = ShoppingList.findById(ShoppingList.class, listId);
+        String listId = bundle.getString(MainShoppingListView.KEY_LISTID);
+        mCurrentShoppingList = mListController.getListById(listId);
 
         // assign other listname if none is assigned
         if (mCurrentShoppingList == null) {
@@ -427,14 +427,15 @@ public class ShoppingListOverviewFragment extends BaseFragment implements IFragm
             @Override
             public void onSwipeRight(View _ChildView, int _Position) {
                 super.onSwipeRight(_ChildView, _Position);
-                ListEntry entry = ListEntry.findById(ListEntry.class, mShoppingItemListAdapter.getItemId(_Position));
+                ListEntry entry = mListController.getEntryById(mShoppingItemListAdapter.getItemId(_Position));
                 toggleStrike(entry);
             }
 
             @Override
             public void onSwipeLeft(View _ChildView, int _Position) {
                 super.onSwipeLeft(_ChildView, _Position);
-                ListEntry entry = ListEntry.findById(ListEntry.class, mShoppingItemListAdapter.getItemId(_Position));
+                ListEntry entry = mListController.getEntryById(mShoppingItemListAdapter.getItemId(_Position));
+                ;
                 toggleStrike(entry);
 
             }
@@ -508,7 +509,7 @@ public class ShoppingListOverviewFragment extends BaseFragment implements IFragm
     public void onEvent(ProductSelectMessage _message) {
         if (mHandlingProductSelectedMessages) {
             Map<Product, Float> productAmounts = _message.mProducts;
-            IListController controller = ControllerFactory.getListController();
+            IListController controller = ControllerFactory.getListController(mContext);
             for (Product currentProduct : productAmounts.keySet()) {
                 controller.addOrChangeItem(mCurrentShoppingList, currentProduct,
                         productAmounts.get(currentProduct), true);
@@ -537,7 +538,7 @@ public class ShoppingListOverviewFragment extends BaseFragment implements IFragm
      * @param _Entry the item that should be deleted.
      */
     public void onListItemUpdated(ListEntry _Entry) {
-        mShoppingItemListAdapter.updateListEntry(_Entry.getId());
+        mShoppingItemListAdapter.updateListEntry(_Entry.mUUID);
     }
 
     /**
@@ -546,7 +547,7 @@ public class ShoppingListOverviewFragment extends BaseFragment implements IFragm
      * @param _Entry the item that should be deleted.
      */
     public void onListItemDeleted(ListEntry _Entry) {
-        mShoppingItemListAdapter.removeListEntry(_Entry.getId());
+        mShoppingItemListAdapter.removeListEntry(_Entry.mUUID);
     }
 
     /**
@@ -555,8 +556,8 @@ public class ShoppingListOverviewFragment extends BaseFragment implements IFragm
      * @param _Entry The entry that should be added to the list.
      */
     public void onListItemAdded(ListEntry _Entry) {
-        if (_Entry.mList.getId().equals(mCurrentShoppingList.getId())) {
-            mShoppingItemListAdapter.addListEntry(_Entry.getId());
+        if (_Entry.mList.mUUID.equals(mCurrentShoppingList.mUUID)) {
+            mShoppingItemListAdapter.addListEntry(_Entry.mUUID);
         }
     }
 
