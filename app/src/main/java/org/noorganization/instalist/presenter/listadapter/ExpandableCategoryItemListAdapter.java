@@ -10,6 +10,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import org.noorganization.instalist.R;
+import org.noorganization.instalist.controller.IListController;
 import org.noorganization.instalist.controller.implementation.ControllerFactory;
 import org.noorganization.instalist.model.Category;
 import org.noorganization.instalist.model.ShoppingList;
@@ -19,6 +20,7 @@ import org.noorganization.instalist.presenter.interfaces.IBaseActivity;
 import org.noorganization.instalist.presenter.interfaces.ICategoryAdapter;
 
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Displays Categories and possible lists of these categories.
@@ -31,6 +33,8 @@ public class ExpandableCategoryItemListAdapter extends BaseExpandableListAdapter
     private List<Category>                     mListOfCategories;
     private IOnShoppingListClickListenerEvents mIOnShoppingListClickEvents;
 
+    private IListController mListController;
+
     private IBaseActivity mBaseAcitvity;
 
     public ExpandableCategoryItemListAdapter(Context _Context, List<Category> _ListOfCategories) {
@@ -38,6 +42,7 @@ public class ExpandableCategoryItemListAdapter extends BaseExpandableListAdapter
             throw new NullPointerException("Given List of categories cannot be null!");
         }
 
+        mListController = ControllerFactory.getListController(_Context);
         mInflater = (LayoutInflater) _Context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         mListOfCategories = _ListOfCategories;
         mBaseAcitvity = (IBaseActivity) _Context;
@@ -56,7 +61,7 @@ public class ExpandableCategoryItemListAdapter extends BaseExpandableListAdapter
 
     @Override
     public int getChildrenCount(int groupPosition) {
-        return mListOfCategories.get(groupPosition).getLists().size();
+        return mListController.getListsByCategory(mListOfCategories.get(groupPosition)).size();
     }
 
     @Override
@@ -66,17 +71,19 @@ public class ExpandableCategoryItemListAdapter extends BaseExpandableListAdapter
 
     @Override
     public Object getChild(int groupPosition, int childPosition) {
-        return mListOfCategories.get(groupPosition).getLists().get(childPosition);
+        return mListController.getListsByCategory(mListOfCategories.get(groupPosition)).
+                get(childPosition);
     }
 
     @Override
     public long getGroupId(int groupPosition) {
-        return mListOfCategories.get(groupPosition).getId();
+        return UUID.fromString(mListOfCategories.get(groupPosition).mUUID).getLeastSignificantBits();
     }
 
     @Override
     public long getChildId(int groupPosition, int childPosition) {
-        return mListOfCategories.get(groupPosition).getLists().get(childPosition).getId();
+        return UUID.fromString(mListController.getListsByCategory(mListOfCategories.get(groupPosition))
+                .get(childPosition).mUUID).getLeastSignificantBits();
     }
 
     @Override
@@ -104,7 +111,8 @@ public class ExpandableCategoryItemListAdapter extends BaseExpandableListAdapter
 
         //deleteImage.setOnClickListener(new OnDeleteCategoryClickListener(category.getId()));
         tvCategoryName.setText(category.mName);
-        tvCategoryItemCount.setText(String.valueOf(category.getLists().size()));
+        tvCategoryItemCount.setText(String.valueOf(mListController.getListsByCategory(category).
+                size()));
 
         return view;
     }
@@ -113,7 +121,8 @@ public class ExpandableCategoryItemListAdapter extends BaseExpandableListAdapter
     @Override
     public View getChildView(int groupPosition, int childPosition, boolean isLastChild, View convertView, ViewGroup parent) {
         ViewGroup    view;
-        ShoppingList shoppingList = mListOfCategories.get(groupPosition).getLists().get(childPosition);
+        ShoppingList shoppingList = mListController.getListsByCategory(mListOfCategories.
+                get(groupPosition)).get(childPosition);
 
         // check if the converted view is not null and check if it is already an expandable_list_view_list_item
         if (convertView != null && convertView.getId() == R.id.expandable_list_view_list_item) {
@@ -131,7 +140,7 @@ public class ExpandableCategoryItemListAdapter extends BaseExpandableListAdapter
         tvListName.setSelected(true);
 
         tvListName.setText(shoppingList.mName);
-        tvListItemCount.setText(String.valueOf(shoppingList.getEntries().size()));
+        tvListItemCount.setText(String.valueOf(mListController.getEntryCount(shoppingList)));
 
         // deleteImage.setOnClickListener(new OnDeleteShoppingListClickListener(shoppingList.getId()));
         view.setOnClickListener(new OnShoppingListClickListener(mIOnShoppingListClickEvents, shoppingList));
@@ -188,7 +197,7 @@ public class ExpandableCategoryItemListAdapter extends BaseExpandableListAdapter
         // loop through each item to find the desired item, binsearch won't work, because there is no sort list...
         int indexToUpdate = - 1;
         for (int Index = 0; Index < mListOfCategories.size(); ++ Index) {
-            if (mListOfCategories.get(Index).getId().equals(_Category.getId())) {
+            if (mListOfCategories.get(Index).mUUID.equals(_Category.mUUID)) {
                 indexToUpdate = Index;
                 break;
             }
@@ -202,16 +211,18 @@ public class ExpandableCategoryItemListAdapter extends BaseExpandableListAdapter
      * @param _Id Id of the category.
      * @return The category if found, else null.
      */
-    public Category findCategoryById(long _Id) {
+    public Category findCategoryById(String _Id) {
         Category retCategory = null;
         for (Category category : mListOfCategories) {
-            if (_Id == category.getId()) {
+            if (_Id.equals(category.mUUID)) {
                 retCategory = category;
                 break;
             }
         }
         return retCategory;
     }
+
+    // TODO: delete?
 
     private class OnDeleteCategoryClickListener implements View.OnClickListener {
         private long mCategoryId;
@@ -228,6 +239,8 @@ public class ExpandableCategoryItemListAdapter extends BaseExpandableListAdapter
             //removeCategory(category);
         }
     }
+
+    // TODO: delete?
 
     private class OnDeleteShoppingListClickListener implements View.OnClickListener {
         private long mShoppingListId;

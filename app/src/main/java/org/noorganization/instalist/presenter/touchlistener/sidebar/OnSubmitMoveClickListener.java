@@ -8,6 +8,7 @@ import android.widget.Toast;
 import android.widget.ViewSwitcher;
 
 import org.noorganization.instalist.R;
+import org.noorganization.instalist.controller.IListController;
 import org.noorganization.instalist.controller.implementation.ControllerFactory;
 import org.noorganization.instalist.model.Category;
 import org.noorganization.instalist.model.ShoppingList;
@@ -22,6 +23,7 @@ public class OnSubmitMoveClickListener implements View.OnClickListener {
     private ViewSwitcher mMainView;
     private Spinner mSpinner;
     private ShoppingList mShoppingList;
+    private IListController mListController;
 
     /**
      * Constructor of OnSubmitMoveClickListener.
@@ -30,12 +32,14 @@ public class OnSubmitMoveClickListener implements View.OnClickListener {
      * @param _Spinner The Spinner object where a category can be cohoosen.
      * @param _ShoppingList  The ShoppingList that should be moved.
      */
-    public OnSubmitMoveClickListener( LinearLayout _MoveCategoryLayout, ViewSwitcher _MainView,
-                                      Spinner _Spinner, ShoppingList _ShoppingList){
+    public OnSubmitMoveClickListener( Context _context, LinearLayout _MoveCategoryLayout,
+                                      ViewSwitcher _MainView, Spinner _Spinner,
+                                      ShoppingList _ShoppingList){
         mMoveCategoryLayout = _MoveCategoryLayout;
         mMainView = _MainView;
         mSpinner = _Spinner;
         mShoppingList = _ShoppingList;
+        mListController = ControllerFactory.getListController(_context);
     }
 
     @Override
@@ -44,7 +48,7 @@ public class OnSubmitMoveClickListener implements View.OnClickListener {
 
         Category category = (Category) mSpinner.getSelectedItem();
         Category oldCategory = mShoppingList.mCategory;
-        mShoppingList = ControllerFactory.getListController().moveToCategory(mShoppingList, category);
+        mShoppingList = mListController.moveToCategory(mShoppingList, category);
         if(mShoppingList == null){
             Toast.makeText(context, context.getString(R.string.change_of_category_of_list_failed), Toast.LENGTH_SHORT).show();
         }

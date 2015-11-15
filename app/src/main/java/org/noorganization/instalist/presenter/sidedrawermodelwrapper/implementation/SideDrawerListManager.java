@@ -8,6 +8,8 @@ import android.view.View;
 import android.widget.ExpandableListView;
 import android.widget.ListView;
 
+import org.noorganization.instalist.controller.ICategoryController;
+import org.noorganization.instalist.controller.implementation.ControllerFactory;
 import org.noorganization.instalist.model.Category;
 import org.noorganization.instalist.model.ShoppingList;
 import org.noorganization.instalist.presenter.interfaces.IBaseActivity;
@@ -29,6 +31,7 @@ public class SideDrawerListManager implements ISideDrawerListManager {
     private IBaseActivity       mBaseActivityInterface;
     private Context             mContext;
     private IShoppingListHelper mShoppingListHelper;
+    private ICategoryController mCategoryController;
 
     /**
      * Flag that indicates, when true, that currently the PlainList is selected,
@@ -45,8 +48,9 @@ public class SideDrawerListManager implements ISideDrawerListManager {
             throw new ClassCastException(_Activity.toString() + " has no IBaseActivity interface implemented.");
         }
         mContext = _Activity;
+        mCategoryController = ControllerFactory.getCategoryController(mContext);
 
-        long numOfCategories = Category.count(Category.class, null, new String[]{});
+        long numOfCategories = mCategoryController.getCategoryCount();
 
         mPlainShoppingListHelper = new PlainShoppingListHelper(mContext, mBaseActivityInterface, _PlainShoppingListView);
         mExpandableShoppingListHelper = new ExpandableShoppingListHelper(mContext, mBaseActivityInterface, _ExpandableCategoryListView);
@@ -119,7 +123,7 @@ public class SideDrawerListManager implements ISideDrawerListManager {
      */
     private void checkOfViewChange() {
 
-        long                numOfCategories       = Category.count(Category.class, null, new String[]{});
+        long                numOfCategories       = mCategoryController.getCategoryCount();
         IShoppingListHelper oldShoppingListHelper = mShoppingListHelper;
 
         if (numOfCategories > 1 && mIsPlainList) {

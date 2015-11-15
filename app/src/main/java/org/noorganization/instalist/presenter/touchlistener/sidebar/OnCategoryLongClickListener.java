@@ -9,6 +9,8 @@ import org.noorganization.instalist.R;
 import org.noorganization.instalist.model.Category;
 import org.noorganization.instalist.presenter.listadapter.ExpandableCategoryItemListAdapter;
 
+// TODO: delete?
+
 /**
  * Created by TS on 20.06.2015.
  */

@@ -7,6 +7,8 @@ import org.noorganization.instalist.model.ListEntry;
 import org.noorganization.instalist.model.Product;
 import org.noorganization.instalist.model.ShoppingList;
 
+import java.util.List;
+
 /**
  * IListController is the (by software engineering created) interface for modifying
  * shopping lists. If there is no documentation for the methods, following is always valid:
@@ -53,6 +55,8 @@ public interface IListController {
     ListEntry addOrChangeItem(ShoppingList _list, Product _product, float _amount, int _prio,
                               boolean _addAmount);
 
+    List<ShoppingList> getAllLists();
+
     /**
      * Searches a ListEntry.
      * @param _UUID The UUID identifying the entry.
@@ -68,12 +72,23 @@ public interface IListController {
      */
     ListEntry getEntryByListAndProduct(@NonNull ShoppingList _list, @NonNull Product _product);
 
+    int getEntryCount(@NonNull ShoppingList _list);
+
     /**
      * Searches a ShoppingList.
      * @param _UUID The UUID identifying the list.
      * @return The found ShoppingList or null if something went wrong or not found.
      */
     ShoppingList getListById(@NonNull String _UUID);
+
+    /**
+     * Searches ShoppingLists with given ids.
+     * @param _category The category, to use as parameter. If null, lists will be searched, which
+     *                  don't belong to a category.
+     * @return Either a list with results (may be also empty) or null if category does not exist (if
+     * set) or an error occurs.
+     */
+    List<ShoppingList> getListsByCategory(Category _category);
 
     /**
      * Strikes all items on a list.

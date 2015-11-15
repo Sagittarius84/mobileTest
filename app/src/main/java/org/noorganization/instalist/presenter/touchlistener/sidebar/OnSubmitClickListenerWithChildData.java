@@ -7,6 +7,7 @@ import android.widget.Toast;
 import android.widget.ViewSwitcher;
 
 import org.noorganization.instalist.R;
+import org.noorganization.instalist.controller.IListController;
 import org.noorganization.instalist.controller.implementation.ControllerFactory;
 import org.noorganization.instalist.model.ShoppingList;
 import org.noorganization.instalist.presenter.interfaces.IBaseActivity;
@@ -16,12 +17,16 @@ public class OnSubmitClickListenerWithChildData implements View.OnClickListener 
 
     private ViewSwitcher mViewSwitcher;
     private EditText     mNameEditText;
-    private long         mShoppingListId;
+    private String       mShoppingListId;
 
-    public OnSubmitClickListenerWithChildData(ViewSwitcher _ViewSwitcher, EditText _NameEditText, long _ShoppingListId) {
+    private IListController mListController;
+
+    public OnSubmitClickListenerWithChildData(Context _context, ViewSwitcher _ViewSwitcher,
+                                              EditText _NameEditText, String _ShoppingListId) {
         mViewSwitcher = _ViewSwitcher;
         mNameEditText = _NameEditText;
         mShoppingListId = _ShoppingListId;
+        mListController = ControllerFactory.getListController(_context);
     }
 
     @Override
@@ -35,8 +40,8 @@ public class OnSubmitClickListenerWithChildData implements View.OnClickListener 
         Context  context = _View.getContext();
 
         insertedText = mNameEditText.getText().toString();
-        oldShoppingList = ShoppingList.findById(ShoppingList.class, mShoppingListId);
-        newShoppingList = ControllerFactory.getListController().renameList(oldShoppingList, insertedText);
+        oldShoppingList = mListController.getListById(mShoppingListId);
+        newShoppingList = mListController.renameList(oldShoppingList, insertedText);
 
         if (newShoppingList == null) {
             Toast.makeText(_View.getContext(), context.getString(R.string.shopping_list_not_found), Toast.LENGTH_SHORT).show();

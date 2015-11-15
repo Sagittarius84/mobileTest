@@ -25,9 +25,12 @@ import android.widget.ListView;
 import android.widget.RelativeLayout;
 
 import org.noorganization.instalist.R;
+import org.noorganization.instalist.controller.ICategoryController;
+import org.noorganization.instalist.controller.IListController;
 import org.noorganization.instalist.controller.event.ListItemChangedMessage;
 import org.noorganization.instalist.controller.implementation.ControllerFactory;
 import org.noorganization.instalist.model.Category;
+import org.noorganization.instalist.model.ListEntry;
 import org.noorganization.instalist.model.ShoppingList;
 import org.noorganization.instalist.presenter.touchlistener.IOnShoppingListClickListenerEvents;
 import org.noorganization.instalist.presenter.touchlistener.sidebar.OnShoppingListAddClickListener;
@@ -65,6 +68,9 @@ public class MainShoppingListView extends AppCompatActivity implements IBaseActi
     public final static String KEY_LISTID            = "list_id";
     public static final String SIDE_DRAWER_TRANSLATE = "side_drawer_translate";
 
+    private ICategoryController  mCategoryController;
+    private IListController      mListController;
+
     private Toolbar              mToolbar;
     private View.OnClickListener mToolbarClickListener;
     private FrameLayout          mFrameLayout;
@@ -96,7 +102,7 @@ public class MainShoppingListView extends AppCompatActivity implements IBaseActi
      */
     private String mCurrentListName;
 
-    private long mDefaultCategoryId;
+    private String mDefaultCategoryId;
 
     private SideDrawerListManager mDrawerListManager;
 
@@ -113,17 +119,21 @@ public class MainShoppingListView extends AppCompatActivity implements IBaseActi
         mFragments = new ArrayList<>(1);
         setContentView(R.layout.activity_main_shopping_list_view);
 
+        mCategoryController = ControllerFactory.getCategoryController(this);
+        mListController = ControllerFactory.getListController(this);
+
         ExpandableListView expandableListView;
         ListView           plainListView;
 
         // init PreferencesManager
         PreferencesManager.initializeInstance(this);
-        mDefaultCategoryId = PreferencesManager.getInstance().getLongValue(PreferencesManager.KEY_DEFAULT_CATEGORY_ID);
-        Category category = Category.findById(Category.class, mDefaultCategoryId);
+        mDefaultCategoryId = PreferencesManager.getInstance().getStringValue(PreferencesManager.KEY_DEFAULT_CATEGORY_ID);
+        Category category = mCategoryController.getCategoryByID(mDefaultCategoryId);
 
         if (category == null) {
             // if not set generate a standard category and set the id of it to preferences
-            mDefaultCategoryId = ControllerFactory.getCategoryController().createCategory(DEFAULT_CATEGORY_NAME).getId();
+            category = mCategoryController.createCategory(DEFAULT_CATEGORY_NAME);
+            mDefaultCategoryId = category.mUUID;
             PreferencesManager.getInstance().setValue(PreferencesManager.KEY_DEFAULT_CATEGORY_ID, mDefaultCategoryId);
         }
 
@@ -154,8 +164,9 @@ public class MainShoppingListView extends AppCompatActivity implements IBaseActi
         // setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_OPEN);
 
         if (savedInstanceState == null) {
-            if (ShoppingList.count(ShoppingList.class, null, new String[]{}) > 0) {
-                selectList(ShoppingList.listAll(ShoppingList.class).get(0));
+            List<ShoppingList> foundListsInCat = mListController.getListsByCategory(category);
+            if (foundListsInCat.size() > 0) {
+                selectList(foundListsInCat.get(0));
             }
         }
     }
@@ -245,7 +256,7 @@ public class MainShoppingListView extends AppCompatActivity implements IBaseActi
     @Override
     protected void onResume() {
         super.onResume();
-        mAddListButton.setOnClickListener(new OnShoppingListAddClickListener(mDefaultCategoryId, mNewNameEditText));
+        mAddListButton.setOnClickListener(new OnShoppingListAddClickListener(this, mDefaultCategoryId, mNewNameEditText));
 
         mAddCategoryButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -257,10 +268,9 @@ public class MainShoppingListView extends AppCompatActivity implements IBaseActi
 
                 // create new category if insert of category failed, there will be shown an
                 // error hint to the user.
-                Category category = ControllerFactory.getCategoryController().createCategory(categoryName);
+                Category category = mCategoryController.createCategory(categoryName);
                 if (category == null) {
                     mNewNameEditText.setError(getResources().getString(R.string.category_exists));
-                    return;
                 } else {
                     addCategory(category);
                     mAddCategoryButton.setVisibility(View.GONE);
@@ -369,7 +379,7 @@ public class MainShoppingListView extends AppCompatActivity implements IBaseActi
 
         // init
         mCurrentListName = _ShoppingList.mName;
-        fragment = ShoppingListOverviewFragment.newInstance(_ShoppingList.getId());
+        fragment = ShoppingListOverviewFragment.newInstance(_ShoppingList.mUUID);
         ViewUtils.addFragment(this, fragment);
     }
 
@@ -459,10 +469,10 @@ public class MainShoppingListView extends AppCompatActivity implements IBaseActi
 
     @Override
     public void removeCategory(Category _Category) {
-        Category           category      = Category.findById(Category.class, mDefaultCategoryId);
-        List<ShoppingList> shoppingLists = Category.getListsWithoutCategory();
+        Category           category      = mCategoryController.getCategoryByID(mDefaultCategoryId);
+        List<ShoppingList> shoppingLists = mListController.getListsByCategory(null);
         for (ShoppingList shoppingList : shoppingLists) {
-            ShoppingList shoppingList1 = ControllerFactory.getListController().moveToCategory(shoppingList, category);
+            ShoppingList shoppingList1 = mListController.moveToCategory(shoppingList, category);
             updateList(shoppingList1);
         }
         mDrawerListManager.removeCategory(_Category);
@@ -485,8 +495,8 @@ public class MainShoppingListView extends AppCompatActivity implements IBaseActi
     }
 
     @Override
-    public void setSideDrawerAddListButtonListener(long _CategoryId) {
-        mAddListButton.setOnClickListener(new OnShoppingListAddClickListener(_CategoryId, mNewNameEditText));
+    public void setSideDrawerAddListButtonListener(String _CategoryId) {
+        mAddListButton.setOnClickListener(new OnShoppingListAddClickListener(this, _CategoryId, mNewNameEditText));
     }
 
     @Override

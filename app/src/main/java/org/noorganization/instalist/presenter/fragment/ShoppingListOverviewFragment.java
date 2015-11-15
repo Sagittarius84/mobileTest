@@ -231,11 +231,11 @@ public class ShoppingListOverviewFragment extends BaseFragment implements IFragm
      * @param _ListId id of the @Link{ShoppingList} that should be shown.
      * @return the new instance of this fragment.
      */
-    public static ShoppingListOverviewFragment newInstance(long _ListId) {
+    public static ShoppingListOverviewFragment newInstance(String _ListId) {
 
         ShoppingListOverviewFragment fragment = new ShoppingListOverviewFragment();
         Bundle args = new Bundle();
-        args.putLong(MainShoppingListView.KEY_LISTID, _ListId);
+        args.putString(MainShoppingListView.KEY_LISTID, _ListId);
         fragment.setArguments(args);
         return fragment;
     }

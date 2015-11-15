@@ -46,9 +46,6 @@ public class ShoppingList {
             "FOREIGN KEY (" + COLUMN.CATEGORY + ") REFERENCES " + Category.TABLE_NAME +
             " (" + Category.COLUMN.ID + ") ON UPDATE CASCADE ON DELETE CASCADE)";
 
-    public final static String ATTR_NAME = StringUtil.toSQLName("mName");
-    public final static String ATTR_CATEGORY = StringUtil.toSQLName("mCategory");
-
     public String mUUID;
     public String mName;
     public Category mCategory;
@@ -70,13 +67,6 @@ public class ShoppingList {
         mName = _name;
         mCategory = _category;
     }
-
-    public List<ListEntry> getEntries() {
-        // TODO move to controller.
-        return new ArrayList<>(0);
-        //return Select.from(ListEntry.class).where(Condition.prop("m_list").eq(getId())).list();
-    }
-
 
     @Override
     public boolean equals(Object o) {

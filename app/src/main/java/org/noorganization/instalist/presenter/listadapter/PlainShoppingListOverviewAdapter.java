@@ -8,6 +8,8 @@ import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
 import org.noorganization.instalist.R;
+import org.noorganization.instalist.controller.IListController;
+import org.noorganization.instalist.controller.implementation.ControllerFactory;
 import org.noorganization.instalist.model.ShoppingList;
 import org.noorganization.instalist.presenter.touchlistener.IOnShoppingListClickListenerEvents;
 import org.noorganization.instalist.presenter.touchlistener.OnShoppingListClickListener;
@@ -32,6 +34,8 @@ public class PlainShoppingListOverviewAdapter extends ArrayAdapter<ShoppingList>
     private final Context                            mContext;
     private       IOnShoppingListClickListenerEvents mIOnShoppingListClickEvents;
 
+    private       IListController mListController;
+
     public PlainShoppingListOverviewAdapter(Context _Context, List<ShoppingList> _ListOfShoppingLists) {
 
         super(_Context, R.layout.expandable_list_view_list_entry, _ListOfShoppingLists);
@@ -43,6 +47,7 @@ public class PlainShoppingListOverviewAdapter extends ArrayAdapter<ShoppingList>
             throw new ClassCastException(_Context.toString()
                     + " has no IOnShoppingListClickListenerEvents interface implemented.");
         }
+        mListController = ControllerFactory.getListController(mContext);
     }
 
     private static class ViewHolder {
@@ -72,7 +77,7 @@ public class PlainShoppingListOverviewAdapter extends ArrayAdapter<ShoppingList>
         holder.mtvListName.setText(listName);
 
         holder.mtvListName.setSelected(true);
-        holder.mtvListItemCount.setText(String.valueOf(shoppingList.getEntries().size()));
+        holder.mtvListItemCount.setText(String.valueOf(mListController.getEntryCount(shoppingList)));
 
         shoppingListNamesView.setOnClickListener(
                 new OnShoppingListClickListener(mIOnShoppingListClickEvents, mShoppingLists.get(_Position)));
@@ -122,7 +127,7 @@ public class PlainShoppingListOverviewAdapter extends ArrayAdapter<ShoppingList>
     private int indexOfShoppingList(ShoppingList _ShoppingList) {
         int indexOfList = -1;
         for (int index = 0; index < mShoppingLists.size(); ++index) {
-            if (_ShoppingList.getId() == mShoppingLists.get(index).getId()) {
+            if (_ShoppingList.mUUID.equals(mShoppingLists.get(index).mUUID)) {
                 indexOfList = index;
                 break;
             }

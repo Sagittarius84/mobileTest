@@ -17,6 +17,7 @@ import com.orm.query.Select;
 
 import org.noorganization.instalist.GlobalApplication;
 import org.noorganization.instalist.R;
+import org.noorganization.instalist.controller.IProductController;
 import org.noorganization.instalist.controller.IRecipeController;
 import org.noorganization.instalist.controller.implementation.ControllerFactory;
 import org.noorganization.instalist.model.Ingredient;
@@ -56,6 +57,9 @@ public class RecipeEditorFragment extends BaseFragment {
     private Button mSave;
     private IngredientListAdapter mIngredientAdapter;
 
+    private IRecipeController  mRecipeController;
+    private IProductController mProductController;
+
     /**
      * The default constructor needed by the FragmentManager. Use the newXXXInstance for creation
      * instead.
@@ -71,15 +75,16 @@ public class RecipeEditorFragment extends BaseFragment {
         return rtn;
     }
 
-    public static RecipeEditorFragment newUpdateInstance(long _recipeId) {
+    public static RecipeEditorFragment newUpdateInstance(String _recipeId) {
         RecipeEditorFragment rtn = new RecipeEditorFragment();
         Bundle parameters = new Bundle();
         parameters.putInt(BK_EDITOR_MODE, EDITOR_MODE_EDIT);
-        parameters.putLong(BK_RECIPE_ID, _recipeId);
+        parameters.putString(BK_RECIPE_ID, _recipeId);
 
-        List<Ingredient> currentIngredients = ControllerFactory.getRecipeController(GlobalApplication.getContext()).getIngredients(_recipeId);
+        List<Ingredient> currentIngredients = ControllerFactory.
+                getRecipeController(GlobalApplication.getContext()).getIngredients(_recipeId);
 
-        long resultingIds[] = new long[currentIngredients.size()];
+        String resultingIds[] = new String[currentIngredients.size()];
         float resultingAmounts[] = new float[currentIngredients.size()];
         int convertIndex = 0;
         for (Ingredient currentIngredient : currentIngredients) {
@@ -88,7 +93,7 @@ public class RecipeEditorFragment extends BaseFragment {
             convertIndex++;
         }
 
-        parameters.putLongArray(BK_ADD_PRODUCTS, resultingIds);
+        parameters.putStringArray(BK_ADD_PRODUCTS, resultingIds);
         parameters.putFloatArray(BK_ADD_AMOUNTS, resultingAmounts);
 
         rtn.setArguments(parameters);
@@ -99,6 +104,9 @@ public class RecipeEditorFragment extends BaseFragment {
     public void onCreate(Bundle _savedInstanceState) {
         super.onCreate(_savedInstanceState);
 
+        mRecipeController = ControllerFactory.getRecipeController(getActivity());
+        mProductController = ControllerFactory.getProductController(getActivity());
+
         Bundle parameters = getArguments();
         ActionBar supportActionBar = ((RecipeChangeActivity) getActivity()).getSupportActionBar();
 
@@ -107,7 +115,7 @@ public class RecipeEditorFragment extends BaseFragment {
             String title = "";
 
             if (parameters.getInt(BK_EDITOR_MODE) == EDITOR_MODE_EDIT) {
-                mRecipe = SugarRecord.findById(Recipe.class, parameters.getLong(BK_RECIPE_ID));
+                mRecipe = mRecipeController.findById(parameters.getString(BK_RECIPE_ID));
                 title = getString(R.string.edit_recipe);
             } else {
                 title = getString(R.string.create_recipe);
@@ -152,10 +160,10 @@ public class RecipeEditorFragment extends BaseFragment {
      * EventBus-receiver for selections made via ProductListDialogFragment.
      */
     public void onEvent(ProductSelectMessage _selectedProducts) {
-        long previousIds[] = getArguments().getLongArray(BK_ADD_PRODUCTS);
+        String previousIds[] = getArguments().getStringArray(BK_ADD_PRODUCTS);
         float previousAmounts[] = getArguments().getFloatArray(BK_ADD_AMOUNTS);
 
-        ArrayList<Long> newProductIds = new ArrayList<>();
+        ArrayList<String> newProductIds = new ArrayList<>();
         ArrayList<Float> newAmounts = new ArrayList<>();
 
         if (previousIds != null && previousAmounts != null) {
@@ -167,25 +175,25 @@ public class RecipeEditorFragment extends BaseFragment {
 
         for (Product currentProduct : _selectedProducts.mProducts.keySet()) {
             float amount = _selectedProducts.mProducts.get(currentProduct);
-            if (newProductIds.contains(currentProduct.getId())) {
-                int position = newProductIds.indexOf(currentProduct.getId());
+            if (newProductIds.contains(currentProduct.mUUID)) {
+                int position = newProductIds.indexOf(currentProduct.mUUID);
                 newAmounts.set(position, newAmounts.get(position) + amount);
             } else {
-                newProductIds.add(currentProduct.getId());
+                newProductIds.add(currentProduct.mUUID);
                 newAmounts.add(amount);
             }
 
             mIngredientAdapter.addIngredient(new Ingredient(currentProduct, null, amount));
         }
 
-        long resultingIds[] = new long[newProductIds.size()];
+        String resultingIds[] = new String[newProductIds.size()];
         float resultingAmounts[] = new float[newProductIds.size()];
         for (int convertIndex = 0; convertIndex < resultingIds.length; convertIndex++) {
             resultingIds[convertIndex] = newProductIds.get(convertIndex);
             resultingAmounts[convertIndex] = newAmounts.get(convertIndex);
         }
 
-        getArguments().putLongArray(BK_ADD_PRODUCTS, resultingIds);
+        getArguments().putStringArray(BK_ADD_PRODUCTS, resultingIds);
         getArguments().putFloatArray(BK_ADD_AMOUNTS, resultingAmounts);
     }
 
@@ -194,30 +202,30 @@ public class RecipeEditorFragment extends BaseFragment {
 
         List<Ingredient> currentIngredients = mIngredientAdapter.getIngredients();
 
-        long resultingIds[] = new long[currentIngredients.size()];
+        String resultingIds[] = new String[currentIngredients.size()];
         float resultingAmounts[] = new float[currentIngredients.size()];
         int convertIndex = 0;
         for (Ingredient currentIngredient : currentIngredients) {
-            resultingIds[convertIndex] = currentIngredient.mProduct.getId();
+            resultingIds[convertIndex] = currentIngredient.mProduct.mUUID;
             resultingAmounts[convertIndex] = currentIngredient.mAmount;
             convertIndex++;
         }
 
-        getArguments().putLongArray(BK_ADD_PRODUCTS, resultingIds);
+        getArguments().putStringArray(BK_ADD_PRODUCTS, resultingIds);
         getArguments().putFloatArray(BK_ADD_AMOUNTS, resultingAmounts);
 
         super.onPause();
     }
 
     private void addArgIngredients() {
-        long productIds[] = getArguments().getLongArray(BK_ADD_PRODUCTS);
+        String productIds[] = getArguments().getStringArray(BK_ADD_PRODUCTS);
         float amounts[] = getArguments().getFloatArray(BK_ADD_AMOUNTS);
         if (productIds == null || amounts == null || productIds.length != amounts.length) {
             return;
         }
 
         for (int currentIndex = 0; currentIndex < productIds.length; currentIndex++) {
-            Ingredient toAdd = new Ingredient(SugarRecord.findById(Product.class, productIds[currentIndex]),
+            Ingredient toAdd = new Ingredient(mProductController.findById(productIds[currentIndex]),
                     null,
                     amounts[currentIndex]);
             mIngredientAdapter.addIngredient(toAdd);
@@ -252,10 +260,10 @@ public class RecipeEditorFragment extends BaseFragment {
             rtn = false;
         } else {
             // title for recipe is set
-            List<Recipe> recipesToValidate = Select.from(Recipe.class).
-                    where(Condition.prop(Recipe.ATTR_NAME).eq(newName)).list();
+            Recipe recipeToValidate = mRecipeController.findByName(newName);
 
-            if (recipesToValidate.size() != 0 && (mRecipe == null || !mRecipe.getId().equals(recipesToValidate.get(0).getId()))) {
+            if (recipeToValidate != null && (mRecipe == null ||
+                    !mRecipe.mUUID.equals(recipeToValidate.mUUID))) {
                 // found elements that matches new name and recipe is new or recipe name is changed for another recipe
                 mRecipeName.setError(getString(R.string.name_exists));
                 rtn = false;
@@ -279,7 +287,7 @@ public class RecipeEditorFragment extends BaseFragment {
         @Override
         public void onClick(View view) {
             if (validate()) {
-                IRecipeController controller = ControllerFactory.getRecipeController();
+                IRecipeController controller = ControllerFactory.getRecipeController(getContext());
 
                 String newRecipeName = mRecipeName.getText().toString();
                 if (mRecipe == null) {

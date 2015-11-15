@@ -20,6 +20,9 @@ import org.noorganization.instalist.model.Product;
 import org.noorganization.instalist.model.ShoppingList;
 import org.noorganization.instalist.provider.InstalistProvider;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import de.greenrobot.event.EventBus;
 
 
@@ -79,6 +82,26 @@ public class ListController implements IListController {
     }
 
     @Override
+    public List<ShoppingList> getAllLists() {
+        Cursor listIDs = mResolver.query(
+                Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI, "list"),
+                new String[]{ ShoppingList.COLUMN.ID }, null, null, null);
+        if (listIDs == null) {
+            Log.e(getClass().getCanonicalName(), "Got null-cursor while retrieving all lists. " +
+                    "Returning null for error.");
+            return null;
+        }
+        ArrayList<ShoppingList> rtn = new ArrayList<>(listIDs.getCount());
+        listIDs.moveToFirst();
+        while (!listIDs.isAfterLast()) {
+            rtn.add(getListById(listIDs.getString(listIDs.getColumnIndex(ShoppingList.COLUMN.ID))));
+            listIDs.moveToNext();
+        }
+        listIDs.close();
+        return rtn;
+    }
+
+    @Override
     public ListEntry getEntryById(@NonNull String _UUID) {
         Cursor entryCursor = mResolver.query(
                 Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI, "entry"),
@@ -133,6 +156,22 @@ public class ListController implements IListController {
     }
 
     @Override
+    public int getEntryCount(@NonNull ShoppingList _list) {
+        Cursor entryIDs = mResolver.query(
+                Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI, _list.getUriPath() + "/entry"),
+                new String[]{ ListEntry.COLUMN.ID },
+                null, null, null);
+        if (entryIDs == null) {
+            Log.e(getClass().getCanonicalName(), "Retrieving ListEntry-IDs for counting them failed." +
+                    "Returning no entries.");
+            return 0;
+        }
+        int rtn = entryIDs.getCount();
+        entryIDs.close();
+        return rtn;
+    }
+
+    @Override
     public ShoppingList getListById(@NonNull String _UUID) {
         Cursor entryCursor = mContext.getContentResolver().query(
                 Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI, "list"),
@@ -155,6 +194,33 @@ public class ListController implements IListController {
         rtn.mName = entryCursor.getString(entryCursor.getColumnIndex(ShoppingList.COLUMN.NAME));
         rtn.mCategory = mCategoryController.getCategoryByID(entryCursor.getString(
                 entryCursor.getColumnIndex(ShoppingList.COLUMN.CATEGORY)));
+        return rtn;
+    }
+
+    @Override
+    public List<ShoppingList> getListsByCategory(Category _category) {
+        if (_category != null) {
+            Category savedCategory = mCategoryController.getCategoryByID(_category.mUUID);
+            if (savedCategory == null) {
+                return null;
+            }
+        }
+        Cursor ListsInCat = mResolver.query(
+                Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI, "category/" +
+                        (_category != null ? _category.mUUID : "-") + "/list"),
+                new String[]{ ShoppingList.COLUMN.ID }, null, null, null);
+        if (ListsInCat == null) {
+            Log.e(getClass().getCanonicalName(), "Got null-cursor while retrieving lists in " +
+                    "category. Returning null for error.");
+            return null;
+        }
+        ArrayList<ShoppingList> rtn = new ArrayList<>(ListsInCat.getCount());
+        ListsInCat.moveToFirst();
+        while (!ListsInCat.isAfterLast()) {
+            rtn.add(getListById(ListsInCat.getString(ListsInCat.getColumnIndex(ShoppingList.COLUMN.ID))));
+            ListsInCat.moveToNext();
+        }
+        ListsInCat.close();
         return rtn;
     }
 

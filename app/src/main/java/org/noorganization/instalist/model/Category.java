@@ -51,22 +51,6 @@ public class Category {
         mName = _name;
     }
 
-    /**
-     * TODO: Migrate function to Controller.
-     */
-    public List<ShoppingList> getLists() {
-        return new ArrayList<>(0);
-    }
-
-    /**
-     * TODO: Migrate function to Controller.
-     */
-    public static List<ShoppingList> getListsWithoutCategory() {
-        // WTF?! 0 as null value?! This was not documented in SugarORM's doc and is really weird.
-        //return Select.from(ShoppingList.class).where(Condition.prop(ShoppingList.ATTR_CATEGORY).eq(0)).list();
-        return new ArrayList<>(0);
-    }
-
     @Override
     public boolean equals(Object _another) {
         if (_another == this) {

@@ -5,6 +5,7 @@ import android.support.annotation.NonNull;
 
 import org.noorganization.instalist.model.Category;
 
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -21,11 +22,23 @@ public interface ICategoryController {
     Category createCategory(String _name);
 
     /**
+     * Collects all categories.
+     * @return A List of all categories (maybe empty). If something fails, null will be returned.
+     */
+    List<Category> getAllCategories();
+
+    /**
      * Searches a category by uuid.
      * @param _uuid The categories UUID. Not null.
      * @return Either a found an d parsed Category or null, if not found.
      */
     Category getCategoryByID(@NonNull String _uuid);
+
+    /**
+     * Returns the count of categories.
+     * @return The amount of categories.
+     */
+    int getCategoryCount();
 
     /**
      * Renames a category.

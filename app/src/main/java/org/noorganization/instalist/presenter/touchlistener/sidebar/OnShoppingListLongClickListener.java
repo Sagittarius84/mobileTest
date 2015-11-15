@@ -8,6 +8,8 @@ import android.widget.ViewSwitcher;
 import org.noorganization.instalist.R;
 import org.noorganization.instalist.model.ShoppingList;
 
+// TODO: delete?
+
 /**
  * Handles the viewchange from textview to edittext.
  */

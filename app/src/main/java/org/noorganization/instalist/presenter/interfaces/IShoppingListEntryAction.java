@@ -13,19 +13,19 @@ public interface IShoppingListEntryAction {
      * Adds the given ListEntry to the adapter.
      * @param _ListEntryId the Id of the ListEntry to add.
      */
-    void addListEntry(long _ListEntryId);
+    void addListEntry(String _ListEntryId);
 
     /**
      * Removes the ListEntry corresponding to the given Id.
      * @param _ListEntryId The id of the ListEntry that should be removed.
      */
-    void removeListEntry(long _ListEntryId);
+    void removeListEntry(String _ListEntryId);
 
     /**
      * Updates the given ListEntry corresponding to the given Id.
      * @param _ListEntryId The Id of the ListEntry to update.
      */
-    void updateListEntry(long _ListEntryId);
+    void updateListEntry(String _ListEntryId);
 
     /**
      * Resets the view back to normal view mode. So one unified view will be displayed.
@@ -45,5 +45,5 @@ public interface IShoppingListEntryAction {
      */
     void sortByComparator(Comparator<ListEntryItemWrapper> _Comparator);
 
-    int getPositionForId(long id);
+    int getPositionForId(String id);
 }

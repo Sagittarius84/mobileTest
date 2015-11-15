@@ -76,9 +76,9 @@ public class UnitEditorAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
         return rtn;
     }
 
-    public int getIndexOf(long _id) {
+    public int getIndexOf(String _id) {
         for (int position = 0; position < mUnderLyingUnits.size(); position++) {
-            if (mUnderLyingUnits.get(position).getId().compareTo(_id) == 0) {
+            if (mUnderLyingUnits.get(position).mUUID.compareTo(_id) == 0) {
                 return position;
             }
         }
@@ -162,7 +162,7 @@ public class UnitEditorAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
 
     public void update(Unit _toUpdate) {
         Comparator<Unit> comparator = AlphabeticalUnitComparator.getInstance();
-        int oldIndex = getIndexOf(_toUpdate.getId());
+        int oldIndex = getIndexOf(_toUpdate.mUUID);
         int newIndex = Collections.binarySearch(mUnderLyingUnits, _toUpdate, comparator);
 
         if (oldIndex == newIndex) {

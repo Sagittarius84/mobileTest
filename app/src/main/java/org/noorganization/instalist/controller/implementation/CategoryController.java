@@ -1,5 +1,6 @@
 package org.noorganization.instalist.controller.implementation;
 
+import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
@@ -13,6 +14,8 @@ import org.noorganization.instalist.controller.event.Change;
 import org.noorganization.instalist.model.Category;
 import org.noorganization.instalist.provider.InstalistProvider;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 import de.greenrobot.event.EventBus;
@@ -22,10 +25,12 @@ public class CategoryController implements ICategoryController {
 
     private EventBus mBus;
     private Context  mContext;
+    private ContentResolver mResolver;
 
     private CategoryController(@NonNull Context _context) {
         mContext = _context;
         mBus = EventBus.getDefault();
+        mResolver = mContext.getContentResolver();
     }
 
     static CategoryController getInstance(@NonNull Context _context) {
@@ -58,6 +63,27 @@ public class CategoryController implements ICategoryController {
     }
 
     @Override
+    public List<Category> getAllCategories() {
+        Cursor catIds = mResolver.query(
+                Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI, "category"),
+                new String[]{ Category.COLUMN.ID },
+                null, null, null);
+        if (catIds == null) {
+            Log.e(getClass().getCanonicalName(), "Querying for categories failed. " +
+                    "Returning error.");
+            return null;
+        }
+        ArrayList<Category> rtn = new ArrayList<>(catIds.getCount());
+        catIds.moveToFirst();
+        while (!catIds.isAfterLast()) {
+            rtn.add(getCategoryByID(catIds.getString(catIds.getColumnIndex(Category.COLUMN.ID))));
+            catIds.moveToNext();
+        }
+        catIds.close();
+        return rtn;
+    }
+
+    @Override
     public Category getCategoryByID(@NonNull String _uuid) {
         Cursor resultCursor = mContext.getContentResolver().query(
                 Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI, "category"),
@@ -80,6 +106,22 @@ public class CategoryController implements ICategoryController {
         rtn.mName = resultCursor.getString(resultCursor.getColumnIndex(
                 Category.COLUMN.NAME));
         resultCursor.close();
+        return rtn;
+    }
+
+    @Override
+    public int getCategoryCount() {
+        Cursor catIds = mResolver.query(
+                Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI, "category"),
+                new String[]{ Category.COLUMN.ID },
+                null, null, null);
+        if (catIds == null) {
+            Log.e(getClass().getCanonicalName(), "Querying for categories to count them failed. " +
+                    "Return 0.");
+            return 0;
+        }
+        int rtn = catIds.getCount();
+        catIds.close();
         return rtn;
     }
 
