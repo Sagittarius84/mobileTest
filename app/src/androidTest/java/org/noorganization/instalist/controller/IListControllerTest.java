@@ -12,10 +12,6 @@ import org.noorganization.instalist.model.ListEntry;
 import org.noorganization.instalist.model.Product;
 import org.noorganization.instalist.model.ShoppingList;
 import org.noorganization.instalist.provider.InstalistProvider;
-import org.noorganization.instalist.provider.ProviderTestUtils;
-import org.noorganization.instalist.provider.internal.ProductProvider;
-
-import java.util.List;
 import java.util.UUID;
 
 public class IListControllerTest extends AndroidTestCase {
@@ -49,7 +45,7 @@ public class IListControllerTest extends AndroidTestCase {
         Uri listWorkUri = mResolver.insert(Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI,
                 "category/-/list"), listWorkCV);
         assertNotNull(listWorkUri);
-        mListHome = new ShoppingList(listWorkUri.getLastPathSegment(), "_TEST_work", null);
+        mListWork = new ShoppingList(listWorkUri.getLastPathSegment(), "_TEST_work", null);
 
         ContentValues prodBreadCV = new ContentValues(1);
         prodBreadCV.put(Product.COLUMN.NAME, "_TEST_bread");
@@ -64,7 +60,7 @@ public class IListControllerTest extends AndroidTestCase {
         Uri prodButterUri = mResolver.insert(Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI,
                 "product"), prodButterCV);
         assertNotNull(prodButterUri);
-        mProductBread = new Product(prodButterUri.getLastPathSegment(), "_TEST_butter", null,
+        mProductButter = new Product(prodButterUri.getLastPathSegment(), "_TEST_butter", null,
                 Product.DEFAULTS.DEFAULT_AMOUNT, Product.DEFAULTS.STEP_AMOUNT);
 
         ContentValues catHardwareStoreCV = new ContentValues(1);
@@ -276,119 +272,110 @@ public class IListControllerTest extends AndroidTestCase {
     }
 
     public void testStrikeItem() throws Exception {
-        insertTestData();
+        // negative test
+        mListController.strikeItem(null, mProductButter);
+        mListController.strikeItem(new ShoppingList(), mProductButter);
+        mListController.strikeItem(mListHome, mProductButter);
+        mListController.strikeItem(mListWork, null);
+        mListController.strikeItem(mListWork, new Product());
+        assertEquals(mListEntryButterForWork, mListController.getEntryById(
+                mListEntryButterForWork.mUUID));
 
-        assertNull(mListController.strikeItem(mListHome, mProductBread));
+        ContentValues breadForWorkCV = new ContentValues(3);
+        breadForWorkCV.put(ListEntry.COLUMN.LIST, mListWork.mUUID);
+        breadForWorkCV.put(ListEntry.COLUMN.PRODUCT, mProductBread.mUUID);
+        breadForWorkCV.put(ListEntry.COLUMN.STRUCK, false);
+        Uri breadForWorkUri = mResolver.insert(
+                Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI,
+                        mListWork.getUriPath() + "/entry"), breadForWorkCV);
+        assertNotNull(breadForWorkUri);
 
-        ListEntry changedFirstListEntry = mListController.strikeItem(mListWork, mProductButter);
-        assertNotNull(changedFirstListEntry);
-        assertEquals(true, changedFirstListEntry.mStruck);
-
-        ListEntry changedSecondListEntry = mListController.strikeItem(mListEntryButterForWork);
-        assertNotNull(changedSecondListEntry);
-        assertEquals(changedFirstListEntry, changedSecondListEntry);
+        // positive test
+        mListController.strikeItem(mListWork, mProductButter);
+        assertTrue(mListController.getEntryById(mListEntryButterForWork.mUUID).mStruck);
+        assertFalse(mListController.getEntryById(breadForWorkUri.getLastPathSegment()).mStruck);
     }
 
     public void testUnstrikeItem() throws Exception {
-        insertTestData();
+        // negative test
+        mListController.unstrikeItem(null, mProductButter);
+        mListController.unstrikeItem(new ShoppingList(), mProductButter);
+        mListController.unstrikeItem(mListHome, mProductButter);
+        mListController.unstrikeItem(mListWork, null);
+        mListController.unstrikeItem(mListWork, new Product());
+        assertEquals(mListEntryButterForWork, mListController.getEntryById(
+                mListEntryButterForWork.mUUID));
 
-        mListEntryButterForWork = mListController.strikeItem(mListEntryButterForWork);
+        ContentValues breadForWorkCV = new ContentValues(3);
+        breadForWorkCV.put(ListEntry.COLUMN.LIST, mListWork.mUUID);
+        breadForWorkCV.put(ListEntry.COLUMN.PRODUCT, mProductBread.mUUID);
+        breadForWorkCV.put(ListEntry.COLUMN.STRUCK, true);
+        Uri breadForWorkUri = mResolver.insert(
+                Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI,
+                        mListWork.getUriPath() + "/entry"), breadForWorkCV);
+        assertNotNull(breadForWorkUri);
 
-        assertNotNull(mListEntryButterForWork);
-        assertNull(mListController.unstrikeItem(mListHome, mProductBread));
-
-        ListEntry changedFirstListEntry = mListController.unstrikeItem(mListWork, mProductButter);
-        assertNotNull(changedFirstListEntry);
-        assertFalse(changedFirstListEntry.mStruck);
-
-        ListEntry changedSecondListEntry = mListController.unstrikeItem(mListEntryButterForWork);
-        assertNotNull(changedSecondListEntry);
-        assertEquals(changedFirstListEntry, changedSecondListEntry);
-
+        // positive test
+        mListController.strikeItem(mListWork, mProductBread);
+        assertFalse(mListController.getEntryById(mListEntryButterForWork.mUUID).mStruck);
+        assertFalse(mListController.getEntryById(breadForWorkUri.getLastPathSegment()).mStruck);
     }
 
     public void testRemoveItem() throws Exception {
-        insertTestData();
+        int previousEntries = getEntryCount();
+        // negative tests
+        assertFalse(mListController.removeItem(null, mProductButter));
+        assertFalse(mListController.removeItem(mListWork, null));
         assertFalse(mListController.removeItem(mListHome, mProductBread));
+        assertEquals(previousEntries, getEntryCount());
 
+        // positive test
         assertTrue(mListController.removeItem(mListWork, mProductButter));
         assertNull(mListController.getEntryById(mListEntryButterForWork.mUUID));
-    }
-
-    public void testAddList() throws Exception {
-        insertTestData();
-        assertNull(mListController.addList("_TEST_work"));
-
-        ShoppingList returnedList = mListController.addList("_TEST_forMom");
-        assertEquals("_TEST_forMom", returnedList.mName);
-        assertNull(returnedList.mCategory);
-        ShoppingList savedList = mListController.getListById(returnedList.mUUID);
-        assertNotNull(savedList);
-        assertEquals(returnedList, savedList);
-
-        Category notSavedCat = new Category();
-        notSavedCat.mName = "_TEST_not saved";
-
-        assertNull(mListController.addList("_TEST_hardware", notSavedCat));
-        assertNull(mListController.addList(null, mCategoryHardwareStore));
-
-        ShoppingList returned2ndList = mListController.addList("_TEST_hardware", mCategoryHardwareStore);
-        assertNotNull(returned2ndList);
-        assertEquals(mCategoryHardwareStore, returned2ndList.mCategory);
-    }
-
-    public void testRemoveList() throws Exception {
-        insertTestData();
-
-        // list is filled, so should not be deletable
-        assertFalse(mListController.removeList(mListWork));
-        assertEquals(mListWork, mListController.getListById(mListWork.mUUID));
-
-        assertTrue(mListController.removeList(mListHome));
-        assertNull(mListController.getEntryById(mListHome.mUUID));
+        assertEquals(previousEntries - 1, getEntryCount());
     }
 
     public void testRenameList() throws Exception {
-        insertTestData();
+        // negative tests
+        assertNull(mListController.renameList(null, "_TEST_whatever"));
+        assertNull(mListController.renameList(new ShoppingList(), "_TEST_whatever"));
+        assertEquals(mListWork, mListController.renameList(mListWork, null));
+        assertEquals(mListWork, mListController.renameList(mListWork, ""));
+        assertEquals(mListWork, mListController.renameList(mListWork, "_TEST_home"));
 
-        ShoppingList changedList1 = mListController.renameList(mListWork, "_TEST_home");
-        assertEquals("_TEST_work", changedList1.mName);
-        assertEquals(changedList1, mListController.getListById(mListWork.mUUID));
-
-        ShoppingList changedList2 = mListController.renameList(mListWork, "_TEST_forMom");
-        assertEquals("_TEST_forMom", changedList2.mName);
-        assertEquals(changedList2, mListController.getListById(mListWork.mUUID));
+        // positive test
+        ShoppingList changedList = mListController.renameList(mListWork, "_TEST_forMom");
+        assertEquals("_TEST_forMom", changedList.mName);
+        assertNull(changedList.mCategory);
+        assertEquals(changedList, mListController.getListById(mListWork.mUUID));
     }
 
     public void testMoveToCategory() throws Exception {
-        insertTestData();
-
-        Category notSavedCat = new Category();
-        notSavedCat.mName = "_TEST_not saved";
-        assertEquals(mListWork, mListController.moveToCategory(mListWork, notSavedCat));
+        // negative tests
         assertNull(mListController.moveToCategory(null, mCategoryHardwareStore));
+        assertEquals(mListWork, mListController.moveToCategory(mListWork, new Category()));
 
-        ShoppingList returnedList1 = mListController.moveToCategory(mListWork, mCategoryHardwareStore);
-        assertNotNull(returnedList1);
-        assertEquals(mListWork.mName, returnedList1.mName);
-        assertEquals(mCategoryHardwareStore, returnedList1.mCategory);
-        assertEquals(returnedList1, mListController.getListById(mListWork.mUUID));
+        // positive test
+        ShoppingList movedList = mListController.moveToCategory(mListWork, mCategoryHardwareStore);
+        assertNotNull(movedList);
+        assertEquals("_TEST_work", movedList.mName);
+        assertEquals(mCategoryHardwareStore, movedList.mCategory);
+        assertEquals(movedList, mListController.getListById(mListWork.mUUID));
     }
 
     public void testSetItemPriority() throws Exception {
-        insertTestData();
-
+        // negative tests
         assertNull(mListController.setItemPriority(null, 5));
-        ListEntry notSavedEntry = new ListEntry(mListHome, mProductBread, 1.0f);
-        assertNull(mListController.setItemPriority(notSavedEntry, 5));
+        assertNull(mListController.setItemPriority(new ListEntry(mListHome, mProductBread, 1.0f), 5));
 
-        ListEntry returnedEntry1 = mListController.setItemPriority(mListEntryButterForWork, 5);
-        assertNotNull(returnedEntry1);
-        assertEquals(5, returnedEntry1.mPriority);
-        assertEquals(mListEntryButterForWork.mAmount, returnedEntry1.mAmount);
-        assertEquals(mListEntryButterForWork.mList, returnedEntry1.mList);
-        assertEquals(mListEntryButterForWork.mProduct, returnedEntry1.mProduct);
-        assertEquals(mListEntryButterForWork.mStruck, returnedEntry1.mStruck);
-        assertEquals(returnedEntry1, mListController.getEntryById(mListEntryButterForWork.mUUID));
+        // positive test
+        ListEntry priorizedEntry = mListController.setItemPriority(mListEntryButterForWork, 5);
+        assertNotNull(priorizedEntry);
+        assertEquals(5, priorizedEntry.mPriority);
+        assertEquals(2.0f, priorizedEntry.mAmount, 0.001f);
+        assertEquals(mListEntryButterForWork.mList, priorizedEntry.mList);
+        assertEquals(mListEntryButterForWork.mProduct, priorizedEntry.mProduct);
+        assertFalse(priorizedEntry.mStruck);
+        assertEquals(priorizedEntry, mListController.getEntryById(mListEntryButterForWork.mUUID));
     }
 }
