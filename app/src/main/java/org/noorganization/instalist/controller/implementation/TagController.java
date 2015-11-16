@@ -34,8 +34,11 @@ public class TagController implements ITagController {
 
     @Override
     public Tag createTag(String _title) {
+        if (_title == null) {
+            return null;
+        }
         Cursor tagCursor = mResolver.query(Uri.parse(TagProvider.MULTIPLE_TAG_CONTENT_URI), Tag.COLUMN.ALL_COLUMNS, Tag.COLUMN.NAME + "= ?", new String[]{_title}, null, null);
-        if (_title == null || tagCursor == null || tagCursor.getCount() > 0) {
+        if (tagCursor == null || tagCursor.getCount() > 0) {
             if (tagCursor != null) {
                 tagCursor.close();
             }
@@ -60,32 +63,34 @@ public class TagController implements ITagController {
         if (_toRename == null) {
             return null;
         }
+        if (_toRename.mName.equals(_newTitle)) {
+            return _toRename;
+        }
 
         Tag toChange = findById(_toRename.mUUID);
         if (toChange == null || _newTitle == null) {
-            return null;
+            return _toRename;
         }
 
         // check if name was changed
-        if (!_toRename.mName.equals(_newTitle)) {
-            Cursor cursor = mResolver.query(Uri.parse(TagProvider.MULTIPLE_TAG_CONTENT_URI),
-                    Tag.COLUMN.ALL_COLUMNS, Tag.COLUMN.NAME + "=? AND " + Tag.COLUMN.ID + " <> ?",
-                    new String[]{_toRename.mName, _toRename.mUUID},
-                    null);
-            if (cursor == null || cursor.getCount() > 0) {
-                if (cursor != null) {
-                    cursor.close();
-                }
-                return null;
+        Cursor cursor = mResolver.query(Uri.parse(TagProvider.MULTIPLE_TAG_CONTENT_URI),
+                Tag.COLUMN.ALL_COLUMNS, Tag.COLUMN.NAME + "=? AND " + Tag.COLUMN.ID + " <> ?",
+                new String[]{_newTitle, _toRename.mUUID},
+                null);
+        if (cursor == null || cursor.getCount() > 0) {
+            if (cursor != null) {
+                cursor.close();
             }
-            cursor.close();
+            return _toRename;
         }
+        cursor.close();
+
 
         toChange.mName = _newTitle;
         int updatedRows = mResolver.update(Uri.parse(TagProvider.SINGLE_TAG_CONTENT_URI.replace("*", toChange.mUUID)), toChange.toContentValues(), null, null);
 
         if (updatedRows == 0) {
-            return null;
+            return _toRename;
         }
 
         mBus.post(new TagChangedMessage(Change.CHANGED, toChange));
@@ -117,7 +122,7 @@ public class TagController implements ITagController {
     public Tag findById(String _uuid) {
         Cursor cursor = mResolver.query(Uri.parse(TagProvider.SINGLE_TAG_CONTENT_URI.replace("*", _uuid)), Tag.COLUMN.ALL_COLUMNS, null, null, null);
         if (cursor == null || cursor.getCount() == 0) {
-            if(cursor != null){
+            if (cursor != null) {
                 cursor.close();
             }
             return null;
@@ -137,7 +142,7 @@ public class TagController implements ITagController {
                 Tag.COLUMN.NAME + "=?",
                 new String[]{_name}, null);
         if (cursor == null || cursor.getCount() == 0) {
-            if(cursor != null){
+            if (cursor != null) {
                 cursor.close();
             }
             return null;

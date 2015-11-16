@@ -64,8 +64,14 @@ public class ProductController implements IProductController {
         if (Float.isInfinite(_stepAmount) || Float.isNaN(_stepAmount) || _stepAmount < 0.0f) {
             return null;
         }
+        Unit unit;
 
-        Unit unit = ControllerFactory.getUnitController(mContext).findById(_unit.mUUID);
+        if (_unit == null) {
+            unit = ControllerFactory.getUnitController(mContext).getDefaultUnit();
+        } else {
+            unit = ControllerFactory.getUnitController(mContext).findById(_unit.mUUID);
+        }
+
         if (unit == null) {
             return null;
         }
@@ -105,7 +111,16 @@ public class ProductController implements IProductController {
         product.mUUID = productCursor.getString(productCursor.getColumnIndex(Product.COLUMN.ID));
         product.mDefaultAmount = productCursor.getFloat(productCursor.getColumnIndex(Product.COLUMN.DEFAULT_AMOUNT));
         product.mStepAmount = productCursor.getFloat(productCursor.getColumnIndex(Product.COLUMN.STEP_AMOUNT));
-        product.mUnit = ControllerFactory.getUnitController(mContext).findById(productCursor.getString(productCursor.getColumnIndex(Product.COLUMN.UNIT)));
+
+        IUnitController unitController = ControllerFactory.getUnitController(mContext);
+        String unitID = productCursor.getString(productCursor.getColumnIndex(Product.COLUMN.UNIT));
+        if(unitID == null){
+            unitID = unitController.getDefaultUnit().mUUID;
+            if(unitID == null){
+                throw new NullPointerException("UUID is null");
+            }
+        }
+        product.mUnit = ControllerFactory.getUnitController(mContext).findById(unitID);
 
         /*
         if(product.mUnit == null){
@@ -317,7 +332,7 @@ public class ProductController implements IProductController {
 
     public Product parseProduct(Cursor _cursor) {
         Product product = new Product();
-        product.mUUID = _cursor.getString(_cursor.getColumnIndex(TaggedProduct.COLUMN_PREFIXED.PRODUCT_ID));
+        product.mUUID = _cursor.getString(_cursor.getColumnIndex(Product.PREFIXED_COLUMN.ID));
         product.mName = _cursor.getString(_cursor.getColumnIndex(Product.PREFIXED_COLUMN.NAME));
         product.mUUID = _cursor.getString(_cursor.getColumnIndex(Product.PREFIXED_COLUMN.ID));
         product.mDefaultAmount = _cursor.getFloat(_cursor.getColumnIndex(Product.PREFIXED_COLUMN.DEFAULT_AMOUNT));

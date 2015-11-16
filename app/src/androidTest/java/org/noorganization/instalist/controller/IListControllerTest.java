@@ -11,6 +11,7 @@ import org.noorganization.instalist.model.ListEntry;
 import org.noorganization.instalist.model.Product;
 import org.noorganization.instalist.model.ShoppingList;
 import org.noorganization.instalist.provider.InstalistProvider;
+import org.noorganization.instalist.provider.ProviderTestUtils;
 import org.noorganization.instalist.provider.internal.ProductProvider;
 
 import java.util.List;
@@ -33,6 +34,7 @@ public class IListControllerTest extends AndroidTestCase {
         super.setUp();
 
         mResolver = mContext.getContentResolver();
+        tearDown();
         mListController = ControllerFactory.getListController(mContext);
         mCategoryController = ControllerFactory.getCategoryController(mContext);
         mProductController = ControllerFactory.getProductController(mContext);
@@ -56,10 +58,13 @@ public class IListControllerTest extends AndroidTestCase {
 
     public void tearDown() throws Exception {
 
-        mResolver.delete(Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI, "list"), null, null);
-        mResolver.delete(Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI, "entry"), null, null);
+        //mResolver.delete(Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI, "list"), null, null);
+        // mResolver.delete(Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI, "entry"), null, null);
         mResolver.delete(Uri.parse(ProductProvider.MULTIPLE_PRODUCT_CONTENT_URI), null, null);
-        mResolver.delete(Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI, "category"), null, null);
+        ProviderTestUtils.deleteTestCategories(mResolver);
+        ProviderTestUtils.deleteTestLists(mResolver, "-");
+        //ProviderTestUtils.deleteTestEntries(mResolver);
+
     }
 
     public void testCreateShoppingList() {

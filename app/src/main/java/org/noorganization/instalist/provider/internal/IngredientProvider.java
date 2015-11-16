@@ -123,15 +123,23 @@ public class IngredientProvider implements IInternalProvider {
                     return null;
                     //throw new SQLiteException("Failed to add a record into " + _uri);
                 }
-                Cursor cursor = mDatabase.query(Ingredient.TABLE_NAME, new String[]{Ingredient.COLUMN.ID},
-                        SQLiteUtils.COLUMN_ROW_ID + "=?", new String[]{String.valueOf(rowId)},
-                        null, null, null, null);
-                cursor.moveToFirst();
+
                 newUri = Uri.parse(SINGLE_INGREDIENT_CONTENT_URI.replace("*",
-                        cursor.getString(cursor.getColumnIndex(Ingredient.COLUMN.ID))));
-                cursor.close();
+                        _values.getAsString(Ingredient.COLUMN.ID)));
                 break;
             case MULTIPLE_INGREDIENT:
+                String newId = SQLiteUtils.generateId(mDatabase, Ingredient.TABLE_NAME).toString();
+                _values.put(Ingredient.COLUMN.ID, newId);
+                rowId = mDatabase.insert(Ingredient.TABLE_NAME, null, _values);
+                // insertion went wrong
+                if (rowId == -1) {
+                    return null;
+                    //throw new SQLiteException("Failed to add a record into " + _uri);
+                }
+
+                newUri = Uri.parse(SINGLE_INGREDIENT_CONTENT_URI.replace("*",
+                        newId));
+                break;
             default:
                 throw new IllegalArgumentException("The given Uri is not supported: " + _uri);
         }

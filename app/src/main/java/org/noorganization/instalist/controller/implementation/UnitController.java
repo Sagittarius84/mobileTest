@@ -1,6 +1,7 @@
 package org.noorganization.instalist.controller.implementation;
 
 import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
@@ -126,7 +127,7 @@ public class UnitController implements IUnitController {
 
         Cursor cursor = mResolver.query(Uri.parse(UnitProvider.MULTIPLE_UNIT_CONTENT_URI),
                 Unit.COLUMN.ALL_COLUMNS, Unit.COLUMN.NAME + "=? AND " + Unit.COLUMN.ID + " <> ?",
-                new String[]{_unit.mName, _unit.mUUID},
+                new String[]{_newName, _unit.mUUID},
                 null);
 
         if (cursor == null) {
@@ -169,7 +170,12 @@ public class UnitController implements IUnitController {
                     Log.e(LOG_TAG, "MODE DELETE REFERENCES no cursor fetched.");
                     return false;
                 }
+                if(cursor.getCount() == 0){
+                    cursor.close();
+                    return true;
+                }
 
+                cursor.moveToFirst();
                 do {
                     productController.removeProduct(productController.parseProduct(cursor), true);
                 } while (cursor.moveToNext());
@@ -185,7 +191,12 @@ public class UnitController implements IUnitController {
                     Log.e(LOG_TAG, "MODE_UNLINK_REFERENCES no cursor fetched.");
                     return false;
                 }
+                if(cursor.getCount() == 0){
+                    cursor.close();
+                    return true;
+                }
 
+                cursor.moveToFirst();
                 do {
                     Product product = productController.parseProduct(cursor);
                     product.mUnit = null;
@@ -205,6 +216,7 @@ public class UnitController implements IUnitController {
                 }
 
                 if (cursor.getCount() != 0) {
+                    cursor.close();
                     return false;
                 }
 
@@ -252,6 +264,42 @@ public class UnitController implements IUnitController {
         Unit unit = new Unit();
         unit.mUUID = _cursor.getString(_cursor.getColumnIndex(Unit.COLUMN.ID));
         unit.mName = _cursor.getString(_cursor.getColumnIndex(Unit.COLUMN.NAME));
+        return unit;
+    }
+
+    @Override
+    public Unit getDefaultUnit() {
+        Cursor cursor = mResolver.query(Uri.parse(UnitProvider.SINGLE_UNIT_CONTENT_URI.replace("*", "-")),
+                Unit.COLUMN.ALL_COLUMNS,
+                null,
+                null,
+                null);
+
+        if(cursor == null){
+            return null;
+        }
+        Unit unit;
+
+        if(cursor.getCount() == 0){
+            ContentValues cv = new ContentValues();
+            cv.put(Unit.COLUMN.ID, "-");
+            cv.put(Unit.COLUMN.NAME, "-");
+
+            Uri insertedDefaultUnit = mResolver.insert(Uri.parse(UnitProvider.SINGLE_UNIT_CONTENT_URI.replace("*", "-")),
+                    cv
+                    );
+            if(insertedDefaultUnit==null){
+                cursor.close();
+                return null;
+            }
+            unit = new Unit();
+            unit.mUUID = "-";
+            unit.mName = "-";
+        }else{
+            cursor.moveToFirst();
+            unit = parse(cursor);
+        }
+        cursor.close();
         return unit;
     }
 }

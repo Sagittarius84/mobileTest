@@ -78,13 +78,13 @@ public class RecipeController implements IRecipeController {
 
         Recipe toRename = findById(_toChange.mUUID);
         if (toRename == null) {
-            return null;
+            return _toChange;
         }
 
         Cursor recipeCursor = mResolver.query(Uri.parse(RecipeProvider.MULTIPLE_RECIPE_CONTENT_URI),
                 Recipe.COLUMN.ALL_COLUMNS,
-                Recipe.COLUMN.NAME + " = ? AND " + Recipe.COLUMN.ID + "<>" + toRename.mUUID,
-                null,
+                Recipe.COLUMN.NAME + " = ? AND " + Recipe.COLUMN.ID + "<> ?",
+                new String[]{_newName, toRename.mUUID},
                 null,
                 null
         );
@@ -94,7 +94,7 @@ public class RecipeController implements IRecipeController {
             if (recipeCursor != null) {
                 recipeCursor.close();
             }
-            return null;
+            return _toChange;
         }
         recipeCursor.close();
 
@@ -107,7 +107,7 @@ public class RecipeController implements IRecipeController {
 
         if (updatedRows == 0) {
             Log.e(LOG_TAG, "Update Recipe name went wrong, no row was updated.");
-            return null;
+            return _toChange;
         }
 
         mBus.post(new RecipeChangedMessage(Change.CHANGED, toRename));
@@ -149,9 +149,7 @@ public class RecipeController implements IRecipeController {
         if (_recipe == null || _productToAdd == null) {
             return null;
         }
-        if (_amount < 0.001f) {
-            return null;
-        }
+
 
         Recipe savedRecipe = findById(_recipe.mUUID);
         Product savedProduct = mProductController.findById(_productToAdd.mUUID);
@@ -173,28 +171,42 @@ public class RecipeController implements IRecipeController {
             return null;
         }
 
-        Ingredient ingredient = parse(ingredientCursor);
-        if (ingredient == null) {
+        Ingredient ingredient;
+        if (ingredientCursor.getCount() == 0) {
+            if (_amount < 0.001f) {
+                ingredientCursor.close();
+                return null;
+            }
             ingredient = new Ingredient(savedProduct, savedRecipe, _amount);
-            Uri ingredientUri = mResolver.insert(Uri.parse(RecipeProvider.MULTIPLE_RECIPE_CONTENT_URI.replace("*", savedRecipe.mUUID)),
+            Uri ingredientUri = mResolver.insert(Uri.parse(RecipeProvider.MULTIPLE_RECIPE_INGREDIENT_CONTENT_URI.replace("*", savedRecipe.mUUID)),
                     ingredient.toContentValues());
             if (ingredientUri == null) {
                 Log.e(LOG_TAG, "AddOrChangeIngredient: insert ingredient went wrong.");
+                ingredientCursor.close();
                 return null;
             }
             ingredient.mUUID = ingredientUri.getLastPathSegment();
         } else {
+            ingredientCursor.moveToFirst();
+            ingredient = parse(ingredientCursor);
+
+            if (_amount < 0.001f) {
+                ingredientCursor.close();
+                return ingredient;
+            }
+
             ingredient.mAmount = _amount;
             int updatedElements = mResolver.update(Uri.parse(RecipeProvider.SINGLE_RECIPE_INGREDIENT_CONTENT_URI.replaceFirst("\\*", savedRecipe.mUUID).replace("*", ingredient.mUUID)),
                     ingredient.toContentValues(),
                     null,
                     null);
             if (updatedElements == 0) {
-                Log.e(LOG_TAG, "AddOrChangeIngredient: update ingredient went wrong. Nothing gets updated.");
+                Log.d(LOG_TAG, "AddOrChangeIngredient: update ingredient went wrong. Nothing gets updated.");
+                ingredientCursor.close();
                 return null;
             }
         }
-
+        ingredientCursor.close();
         return ingredient;
     }
 
@@ -232,6 +244,9 @@ public class RecipeController implements IRecipeController {
 
     @Override
     public Recipe findById(String _uuid) {
+        if (_uuid == null) {
+            return null;
+        }
         Cursor recipeCursor = mResolver.query(Uri.parse(RecipeProvider.SINGLE_RECIPE_CONTENT_URI.replace("*", _uuid)),
                 Recipe.COLUMN.ALL_COLUMNS,
                 null,
@@ -273,7 +288,8 @@ public class RecipeController implements IRecipeController {
         }
 
         if (recipeCursor.getCount() == 0) {
-            Log.e(LOG_TAG, "Recipe findByName: There is no recipe with the id: " + _name + " in the database.");
+            Log.e(LOG_TAG, "Recipe findByName: There is no recipe with the name: " + _name + " in the database.");
+            recipeCursor.close();
             return null;
         }
 
@@ -288,22 +304,22 @@ public class RecipeController implements IRecipeController {
 
     public List<Ingredient> getIngredients(@NonNull String _recipeUUID) {
         List<Ingredient> ingredients = new ArrayList<>();
-        Cursor cursor =mResolver.query(Uri.parse(RecipeProvider.MULTIPLE_RECIPE_INGREDIENT_CONTENT_URI.replace("*", _recipeUUID)),
+        Cursor cursor = mResolver.query(Uri.parse(RecipeProvider.MULTIPLE_RECIPE_INGREDIENT_CONTENT_URI.replace("*", _recipeUUID)),
                 Ingredient.COLUMN.ALL_COLUMNS,
                 null,
                 null,
                 null
         );
-        if(cursor == null || cursor.getCount() == 0){
-            if(cursor!= null){
+        if (cursor == null || cursor.getCount() == 0) {
+            if (cursor != null) {
                 cursor.close();
             }
             return ingredients;
         }
         cursor.moveToFirst();
-        do{
+        do {
             ingredients.add(parse(cursor));
-        }while(cursor.moveToNext());
+        } while (cursor.moveToNext());
 
         return ingredients;
     }
@@ -315,10 +331,6 @@ public class RecipeController implements IRecipeController {
      * @return the ingredient or null if no ingredient was found.
      */
     public Ingredient parse(@NonNull Cursor _cursor) {
-        if (_cursor.getCount() == 0) {
-            return null;
-        }
-        _cursor.moveToFirst();
         Ingredient ingredient = new Ingredient();
         ingredient.mUUID = _cursor.getString(_cursor.getColumnIndex(Ingredient.COLUMN.ID));
         ingredient.mAmount = _cursor.getFloat(_cursor.getColumnIndex(Ingredient.COLUMN.AMOUNT));
@@ -340,8 +352,19 @@ public class RecipeController implements IRecipeController {
                 null,
                 null
         );
+        if (cursor == null) {
+            return null;
+        }
+        if (cursor.getCount() == 0) {
+            Log.e(LOG_TAG, "No ingredient with id: " + _uuid + " found.");
+            cursor.close();
+            return null;
+        }
+        cursor.moveToFirst();
 
-        return parse(cursor);
+        Ingredient ingredient = parse(cursor);
+        cursor.close();
+        return ingredient;
     }
 
     @Override
@@ -364,7 +387,7 @@ public class RecipeController implements IRecipeController {
         return recipes;
     }
 
-    private Recipe parseRecipe(Cursor _cursor){
+    private Recipe parseRecipe(Cursor _cursor) {
         Recipe recipe = new Recipe();
         recipe.mUUID = _cursor.getString(_cursor.getColumnIndex(Recipe.COLUMN.ID));
         recipe.mName = _cursor.getString(_cursor.getColumnIndex(Recipe.COLUMN.NAME));

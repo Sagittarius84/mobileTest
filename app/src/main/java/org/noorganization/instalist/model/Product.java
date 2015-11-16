@@ -161,7 +161,7 @@ public class Product {
         cv.put(COLUMN.NAME, this.mName);
         cv.put(COLUMN.DEFAULT_AMOUNT, this.mDefaultAmount);
         cv.put(COLUMN.STEP_AMOUNT, this.mStepAmount);
-        cv.put(COLUMN.UNIT, this.mUnit.mUUID);
+        cv.put(COLUMN.UNIT, this.mUnit == null ? "-" : this.mUnit.mUUID);
         return cv;
     }
 }

@@ -159,13 +159,9 @@ public class RecipeProvider implements IInternalProvider {
                 if (rowId == -1) {
                     return null;
                 }
-                Cursor cursor = mDatabase.query(Recipe.TABLE_NAME, new String[]{Recipe.COLUMN_PREFIXED.ID},
-                        SQLiteUtils.COLUMN_ROW_ID + "=?", new String[]{String.valueOf(rowId)},
-                        null, null, null, null);
-                cursor.moveToFirst();
+
                 newUri = Uri.parse(SINGLE_RECIPE_CONTENT_URI.replace("*",
-                        cursor.getString(cursor.getColumnIndex(Recipe.COLUMN_PREFIXED.ID))));
-                cursor.close();
+                        _values.getAsString(Recipe.COLUMN.ID)));
                 break;
             case SINGLE_RECIPE_INGREDIENT:
                 rowId = mDatabase.insert(Ingredient.TABLE_NAME, null, _values);
@@ -173,7 +169,7 @@ public class RecipeProvider implements IInternalProvider {
                 if (rowId == -1) {
                     return null;
                 }
-                cursor = mDatabase.query(Ingredient.TABLE_NAME, Ingredient.COLUMN.ALL_COLUMNS,
+                Cursor cursor = mDatabase.query(Ingredient.TABLE_NAME, Ingredient.COLUMN.ALL_COLUMNS,
                         SQLiteUtils.COLUMN_ROW_ID + " = ?", new String[]{String.valueOf(rowId)},
                         null, null, null, null);
                 cursor.moveToFirst();
@@ -183,7 +179,32 @@ public class RecipeProvider implements IInternalProvider {
                 cursor.close();
                 break;
             case MULTIPLE_RECIPES:
+                String newUUID = SQLiteUtils.generateId(mDatabase,Recipe.TABLE_NAME).toString();
+                _values.put(Recipe.COLUMN.ID, newUUID);
+                rowId = mDatabase.insert(Recipe.TABLE_NAME, null, _values);
+                // insertion went wrong
+                if (rowId == -1) {
+                    return null;
+                }
+
+                newUri = Uri.parse(SINGLE_RECIPE_CONTENT_URI.replace("*",
+                        newUUID));
+                break;
             case MULTIPLE_RECIPE_INGREDIENT:
+                newUUID = SQLiteUtils.generateId(mDatabase, Ingredient.TABLE_NAME).toString();
+                _values.put(Ingredient.COLUMN.ID, newUUID);
+
+                rowId = mDatabase.insert(Ingredient.TABLE_NAME, null, _values);
+
+                // insertion went wrong
+                if (rowId == -1) {
+                    return null;
+                }
+
+                contentUri = SINGLE_RECIPE_INGREDIENT_CONTENT_URI.replaceFirst("\\*", _values.getAsString(Ingredient.COLUMN.RECIPE_ID));
+                contentUri = contentUri.replaceFirst("\\*", newUUID);
+                newUri = Uri.parse(contentUri);
+                break;
             default:
                 throw new IllegalArgumentException("The given Uri is not supported: " + _uri);
         }

@@ -58,4 +58,6 @@ public interface IUnitController {
     boolean deleteUnit(Unit _unit, int _mode);
 
     List<Unit> listAll(String _orderByColumn, boolean _asc);
+
+    Unit getDefaultUnit();
 }

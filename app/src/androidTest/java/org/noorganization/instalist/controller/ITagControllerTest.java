@@ -30,6 +30,8 @@ public class ITagControllerTest extends AndroidTestCase {
         mTagController = ControllerFactory.getTagController(mContext);
         mResolver = mContext.getContentResolver();
 
+        tearDown();
+
         mMetalware = mTagController.createTag("_TEST_metalware");
         mMilkProduct = mTagController.createTag(TEST_MILK_PRODUCT);
 

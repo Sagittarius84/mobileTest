@@ -10,6 +10,7 @@ import org.noorganization.instalist.controller.implementation.ControllerFactory;
 import org.noorganization.instalist.model.Category;
 import org.noorganization.instalist.model.ShoppingList;
 import org.noorganization.instalist.provider.InstalistProvider;
+import org.noorganization.instalist.provider.ProviderTestUtils;
 
 import java.util.UUID;
 
@@ -64,27 +65,7 @@ public class ICategoryControllerTest extends AndroidTestCase {
     }
 
     public void tearDown() throws Exception {
-        Cursor all = mResolver.query(
-                Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI, "category"),
-                Category.COLUMN.ALL_COLUMNS,
-                null,
-                null,
-                null);
-
-        assertNotNull(all);
-        if (!all.moveToFirst() || all.getCount() == 0) return;
-
-        do {
-            String id = all.getString(all.getColumnIndex(Category.COLUMN.ID));
-            if (id.equals("-")) {
-                continue;
-            }
-            assertEquals(1, mResolver.delete(
-                    Uri.withAppendedPath(
-                            InstalistProvider.BASE_CONTENT_URI,
-                            "category/" + id)
-                    , null, null));
-        } while (all.moveToNext());
+        ProviderTestUtils.deleteTestCategories(mResolver);
 
 
 

@@ -20,8 +20,8 @@ public class IRecipeControllerTest extends AndroidTestCase {
     Product mFlour;
     Product mEgg;
     Product mCurd;
-    Ingredient mFlourInCake;
-    Ingredient mCurdInCake;
+    Ingredient mIngredientFlourInCake;
+    Ingredient mIngredientCurdInCake;
 
     IRecipeController mRecipeController;
     IProductController mProductController;
@@ -33,6 +33,7 @@ public class IRecipeControllerTest extends AndroidTestCase {
         mRecipeController = ControllerFactory.getRecipeController(mContext);
         mProductController = ControllerFactory.getProductController(mContext);
         mResolver = mContext.getContentResolver();
+        tearDown();
 
         mCheeseCake = mRecipeController.createRecipe("_TEST_cheesecake");
         assertNotNull(mCheeseCake);
@@ -47,10 +48,11 @@ public class IRecipeControllerTest extends AndroidTestCase {
         mEgg = mProductController.createProduct("_TEST_egg", null, 1.0f, 1.0f);
         assertNotNull(mEgg);
 
-        mFlourInCake = mRecipeController.addOrChangeIngredient(mCheeseCake, mFlour, 0.3f);
-        assertNotNull(mFlourInCake);
-        mCurdInCake = mRecipeController.addOrChangeIngredient(mCheeseCake,mCurd, 0.5f);
-        assertNotNull(mCurdInCake);
+        mIngredientFlourInCake = mRecipeController.addOrChangeIngredient(mCheeseCake, mFlour, 0.3f);
+        assertNotNull(mIngredientFlourInCake);
+        mIngredientCurdInCake = mRecipeController.addOrChangeIngredient(mCheeseCake, mCurd, 0.5f);
+        assertNotNull(mIngredientCurdInCake);
+
     }
 
     public void tearDown() throws Exception {
@@ -77,17 +79,18 @@ public class IRecipeControllerTest extends AndroidTestCase {
         Recipe invalidRecipe = new Recipe("_TEST_pancakes");
         // also this should have no consequences.
         mRecipeController.removeRecipe(invalidRecipe);
-
+        assertNotNull(mCheeseCake.mUUID);
         mRecipeController.removeRecipe(mCheeseCake);
         assertNull(mRecipeController.findById(mCheeseCake.mUUID));
-
+        assertNotNull(mCheeseCake.mUUID);
         Cursor ingredientCursor = mResolver.query(Uri.parse(IngredientProvider.MULTIPLE_INGREDIENT_CONTENT_URI),
                 Ingredient.COLUMN.ALL_COLUMNS,
-                Ingredient.COLUMN.RECIPE_ID,
+                Ingredient.COLUMN.RECIPE_ID + "=?",
                 new String[]{mCheeseCake.mUUID},
                 null);
         assertNotNull(ingredientCursor);
         assertEquals(0, ingredientCursor.getCount());
+        ingredientCursor.close();
     }
 
     public void testAddOrChangeIngredient() throws Exception {
@@ -108,7 +111,7 @@ public class IRecipeControllerTest extends AndroidTestCase {
         Ingredient returnedUnchangedIngredient = mRecipeController.addOrChangeIngredient(mCheeseCake,
                 mFlour, -0.5f);
         assertNotNull(returnedUnchangedIngredient);
-        assertEquals(mFlourInCake, returnedUnchangedIngredient);
+        assertEquals(mIngredientFlourInCake, returnedUnchangedIngredient);
 
         Ingredient returnedChangedIngredient = mRecipeController.addOrChangeIngredient(mCheeseCake,
                 mFlour, 0.5f);
@@ -120,13 +123,18 @@ public class IRecipeControllerTest extends AndroidTestCase {
     public void testRemoveIngredient() throws Exception {
         // nothing should happen.
         mRecipeController.removeIngredient(null);
-        assertNotNull(mRecipeController.findIngredientById(mFlourInCake.mUUID));
+        assertNotNull(mRecipeController.findIngredientById(mIngredientFlourInCake.mUUID));
 
-        mRecipeController.removeIngredient(mFlourInCake);
-        assertNotNull(mRecipeController.findIngredientById(mFlourInCake.mUUID));
+        mRecipeController.removeIngredient(mIngredientFlourInCake);
+        // TODO why should that be notnull?
+        //assertNotNull(mRecipeController.findIngredientById(mIngredientFlourInCake.mUUID));
+        assertNull(mRecipeController.findIngredientById(mIngredientFlourInCake.mUUID));
 
+        assertNotNull(mRecipeController.findIngredientById(mIngredientCurdInCake.mUUID));
         mRecipeController.removeIngredient(mCheeseCake, mCurd);
-        assertNotNull(mRecipeController.findIngredientById(mCurdInCake.mUUID));
+        // TODO why should that be notnull?
+        //assertNotNull(mRecipeController.findIngredientById(mIngredientCurdInCake.mUUID));
+        assertNull(mRecipeController.findIngredientById(mIngredientCurdInCake.mUUID));
     }
 
     public void testRenameRecipe() throws Exception {

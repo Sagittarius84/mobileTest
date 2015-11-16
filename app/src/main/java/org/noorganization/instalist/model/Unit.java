@@ -75,7 +75,7 @@ public class Unit {
         if (mUUID == null) {
             return 0;
         }
-        return (int) UUID.fromString(mUUID).getLeastSignificantBits();
+        return (int) mUUID.hashCode();
     }
 
     public ContentValues toContentValues() {

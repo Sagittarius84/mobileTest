@@ -24,9 +24,10 @@ public class IUnitControllerTest extends AndroidTestCase {
 
     public void setUp() throws Exception {
         super.setUp();
+        mResolver = mContext.getContentResolver();
         mUnitController = ControllerFactory.getUnitController(mContext);
         mProductController = ControllerFactory.getProductController(mContext);
-        mResolver = mContext.getContentResolver();
+        tearDown();
 
         mLiter = mUnitController.createUnit("_TEST_liter");
         mGram = mUnitController.createUnit("_TEST_gram");
@@ -86,8 +87,12 @@ public class IUnitControllerTest extends AndroidTestCase {
         assertNull(mProductController.findById(mMilk.mUUID));
 
         assertTrue(mUnitController.deleteUnit(mMeter, IUnitController.MODE_UNLINK_REFERENCES));
-        Product changedProduct = mProductController.findById( mShelf.mUUID);
+        Product changedProduct = mProductController.findById(mShelf.mUUID);
         assertNotNull(changedProduct);
-        assertNull(changedProduct.mUnit);
+        if (changedProduct.mUnit != null) {
+            assertEquals("-", changedProduct.mUnit.mUUID);
+        } else {
+            assertNull(changedProduct.mUnit);
+        }
     }
 }
