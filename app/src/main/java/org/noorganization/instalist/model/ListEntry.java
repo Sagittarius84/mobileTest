@@ -103,6 +103,15 @@ public class ListEntry {
         mPriority = _prio;
     }
 
+    public ListEntry(String _uuid, ShoppingList _list, Product _product, float _amount, boolean _struck, int _prio) {
+        mUUID = _uuid;
+        mList = _list;
+        mProduct = _product;
+        mAmount = _amount;
+        mStruck = _struck;
+        mPriority = _prio;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {

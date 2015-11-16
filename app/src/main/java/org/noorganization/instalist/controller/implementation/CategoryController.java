@@ -9,9 +9,11 @@ import android.support.annotation.NonNull;
 import android.util.Log;
 
 import org.noorganization.instalist.controller.ICategoryController;
+import org.noorganization.instalist.controller.IListController;
 import org.noorganization.instalist.controller.event.CategoryChangedMessage;
 import org.noorganization.instalist.controller.event.Change;
 import org.noorganization.instalist.model.Category;
+import org.noorganization.instalist.model.ShoppingList;
 import org.noorganization.instalist.provider.InstalistProvider;
 
 import java.util.ArrayList;
@@ -66,7 +68,7 @@ public class CategoryController implements ICategoryController {
     public List<Category> getAllCategories() {
         Cursor catIds = mResolver.query(
                 Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI, "category"),
-                new String[]{ Category.COLUMN.ID },
+                new String[]{Category.COLUMN.ID},
                 null, null, null);
         if (catIds == null) {
             Log.e(getClass().getCanonicalName(), "Querying for categories failed. " +
@@ -87,9 +89,9 @@ public class CategoryController implements ICategoryController {
     public Category getCategoryByID(@NonNull String _uuid) {
         Cursor resultCursor = mContext.getContentResolver().query(
                 Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI, "category"),
-                new String[]{ Category.COLUMN.ID, Category.COLUMN.NAME},
+                new String[]{Category.COLUMN.ID, Category.COLUMN.NAME},
                 Category.COLUMN.ID + " = ?",
-                new String[]{ _uuid },
+                new String[]{_uuid},
                 null);
         if (resultCursor == null) {
             Log.e(getClass().getCanonicalName(), "Query result was null. Returning no result.");
@@ -113,7 +115,7 @@ public class CategoryController implements ICategoryController {
     public int getCategoryCount() {
         Cursor catIds = mResolver.query(
                 Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI, "category"),
-                new String[]{ Category.COLUMN.ID },
+                new String[]{Category.COLUMN.ID},
                 null, null, null);
         if (catIds == null) {
             Log.e(getClass().getCanonicalName(), "Querying for categories to count them failed. " +
@@ -158,13 +160,19 @@ public class CategoryController implements ICategoryController {
             return;
         }
 
-        if (getCategoryByID(_toRemove.mUUID) != null) {
-            // TODO Unlink or delete List previously.
+        Category savedCategory = getCategoryByID(_toRemove.mUUID);
+        if (savedCategory != null) {
+            IListController listController = ControllerFactory.getListController(mContext);
+            for (ShoppingList listToUnlink : listController.getListsByCategory(savedCategory)) {
+                if (listController.moveToCategory(listToUnlink, null).equals(listToUnlink)) {
+                    Log.e("CategoryController", "List could not be moved");
+                }
+            }
 
             if (mContext.getContentResolver().delete(
                     Uri.withAppendedPath(
                             InstalistProvider.BASE_CONTENT_URI,
-                            "category/"+_toRemove.mUUID.toString()),
+                            "category/"+_toRemove.mUUID),
                     null,
                     null) == 1) {
 

@@ -50,12 +50,17 @@ public class Product {
         };
     }
 
+    public static final class DEFAULTS {
+        public static final float DEFAULT_AMOUNT = 1.0f;
+        public static final float STEP_AMOUNT = 1.0f;
+    }
+
     public final static String DATABASE_CREATE = "CREATE TABLE " + TABLE_NAME
             + "(" + Product.COLUMN.ID + " TEXT PRIMARY KEY NOT NULL,"
             + Product.COLUMN.NAME + " TEXT NOT NULL,"
             + Product.COLUMN.UNIT + " TEXT,"
-            + Product.COLUMN.DEFAULT_AMOUNT + " REAL,"
-            + Product.COLUMN.STEP_AMOUNT + " REAL,"
+            + Product.COLUMN.DEFAULT_AMOUNT + " REAL DEFAULT " + DEFAULTS.DEFAULT_AMOUNT + ","
+            + Product.COLUMN.STEP_AMOUNT + " REAL DEFAULT " + DEFAULTS.STEP_AMOUNT + ","
             + "FOREIGN KEY ( " + Product.COLUMN.UNIT + ") REFERENCES " + Unit.TABLE_NAME + "(" + Unit.COLUMN.ID + ")"
             + "ON DELETE SET NULL ON UPDATE NO ACTION"
             + ");";
@@ -79,10 +84,17 @@ public class Product {
     public Product() {
         mUnit = null;
         mName = "";
-        mDefaultAmount = 1.0f;
-        mStepAmount = 1.0f;
+        mDefaultAmount = DEFAULTS.DEFAULT_AMOUNT;
+        mStepAmount = DEFAULTS.STEP_AMOUNT;
     }
 
+    public Product(String _uuid, String _name, Unit _unit, float _defaultAmount, float _stepAmount) {
+        mUUID = _uuid;
+        mUnit = _unit;
+        mName = _name;
+        mDefaultAmount = _defaultAmount;
+        mStepAmount = _stepAmount;
+    }
 
     public Product(String _name, Unit _unit, float _defaultAmount, float _stepAmount) {
         mUnit = _unit;
@@ -94,8 +106,8 @@ public class Product {
     public Product(String _name, Unit _unit) {
         mUnit = _unit;
         mName = _name;
-        mDefaultAmount = 1.0f;
-        mStepAmount = 1.0f;
+        mDefaultAmount = DEFAULTS.DEFAULT_AMOUNT;
+        mStepAmount = DEFAULTS.STEP_AMOUNT;
     }
 
     @Override

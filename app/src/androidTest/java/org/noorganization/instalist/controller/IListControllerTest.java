@@ -1,6 +1,7 @@
 package org.noorganization.instalist.controller;
 
 import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.database.Cursor;
 import android.net.Uri;
 import android.test.AndroidTestCase;
@@ -15,6 +16,7 @@ import org.noorganization.instalist.provider.ProviderTestUtils;
 import org.noorganization.instalist.provider.internal.ProductProvider;
 
 import java.util.List;
+import java.util.UUID;
 
 public class IListControllerTest extends AndroidTestCase {
 
@@ -27,8 +29,6 @@ public class IListControllerTest extends AndroidTestCase {
     private ContentResolver mResolver;
 
     private IListController mListController;
-    private ICategoryController mCategoryController;
-    private IProductController mProductController;
 
     public void setUp() throws Exception {
         super.setUp();
@@ -36,70 +36,125 @@ public class IListControllerTest extends AndroidTestCase {
         mResolver = mContext.getContentResolver();
         tearDown();
         mListController = ControllerFactory.getListController(mContext);
-        mCategoryController = ControllerFactory.getCategoryController(mContext);
-        mProductController = ControllerFactory.getProductController(mContext);
-    }
 
-    public void insertTestData() {
-        createLists();
-        // insert products
-        mProductBread = mProductController.createProduct("_TEST_bread", null, 1.0f, 1.0f);
-        assertNotNull(mProductBread);
+        ContentValues listHomeCV = new ContentValues(1);
+        listHomeCV.put(ShoppingList.COLUMN.NAME, "_TEST_home");
+        Uri listHomeUri = mResolver.insert(Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI,
+                "category/-/list"), listHomeCV);
+        assertNotNull(listHomeUri);
+        mListHome = new ShoppingList(listHomeUri.getLastPathSegment(), "_TEST_home", null);
 
-        mProductButter = mProductController.createProduct("_TEST_butter", null, 1.0f, 1.0f);
-        assertNotNull(mProductButter);
+        ContentValues listWorkCV = new ContentValues(1);
+        listWorkCV.put(ShoppingList.COLUMN.NAME, "_TEST_work");
+        Uri listWorkUri = mResolver.insert(Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI,
+                "category/-/list"), listWorkCV);
+        assertNotNull(listWorkUri);
+        mListHome = new ShoppingList(listWorkUri.getLastPathSegment(), "_TEST_work", null);
 
-        mListEntryButterForWork = mListController.addOrChangeItem(mListWork, mProductButter, 1.0f);
+        ContentValues prodBreadCV = new ContentValues(1);
+        prodBreadCV.put(Product.COLUMN.NAME, "_TEST_bread");
+        Uri prodBreadUri = mResolver.insert(Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI,
+                "product"), prodBreadCV);
+        assertNotNull(prodBreadUri);
+        mProductBread = new Product(prodBreadUri.getLastPathSegment(), "_TEST_bread", null,
+                Product.DEFAULTS.DEFAULT_AMOUNT, Product.DEFAULTS.STEP_AMOUNT);
 
-        mCategoryHardwareStore = mCategoryController.createCategory("_TEST_hardware store");
-        assertNotNull(mCategoryHardwareStore);
+        ContentValues prodButterCV = new ContentValues(1);
+        prodButterCV.put(Product.COLUMN.NAME, "_TEST_butter");
+        Uri prodButterUri = mResolver.insert(Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI,
+                "product"), prodButterCV);
+        assertNotNull(prodButterUri);
+        mProductBread = new Product(prodButterUri.getLastPathSegment(), "_TEST_butter", null,
+                Product.DEFAULTS.DEFAULT_AMOUNT, Product.DEFAULTS.STEP_AMOUNT);
 
+        ContentValues catHardwareStoreCV = new ContentValues(1);
+        catHardwareStoreCV.put(Category.COLUMN.NAME, "_TEST_hardware store");
+        Uri catHardwareStoreUri = mResolver.insert(
+                Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI, "category"),
+                catHardwareStoreCV);
+        assertNotNull(catHardwareStoreUri);
+        mCategoryHardwareStore = new Category(catHardwareStoreUri.getLastPathSegment(),
+                "_TEST_hardware store");
+
+        ContentValues entryButter4WorkCV = new ContentValues(3);
+        entryButter4WorkCV.put(ListEntry.COLUMN.PRODUCT, mProductButter.mUUID);
+        entryButter4WorkCV.put(ListEntry.COLUMN.LIST, mListWork.mUUID);
+        entryButter4WorkCV.put(ListEntry.COLUMN.AMOUNT, 2.0f);
+        Uri entryButter4WorkUri = mResolver.insert(Uri.withAppendedPath(
+                InstalistProvider.BASE_CONTENT_URI, mListWork.getUriPath() + "/entry"),
+                entryButter4WorkCV);
+        assertNotNull(entryButter4WorkUri);
+        mListEntryButterForWork = new ListEntry(entryButter4WorkUri.getLastPathSegment(), mListWork,
+                mProductButter, 2.0f, (ListEntry.DEFAULTS.STRUCK != 0), ListEntry.DEFAULTS.PRIORITY);
     }
 
     public void tearDown() throws Exception {
+        mResolver.delete(Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI, "category"),
+                Category.COLUMN.NAME + " LIKE '_TEST_%'", null);
+        mResolver.delete(Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI, "category/-/list"),
+                Category.COLUMN.NAME + " LIKE '_TEST_%'", null);
+        mResolver.delete(Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI, "product"),
+                Category.COLUMN.NAME + " LIKE '_TEST_%'", null);
+    }
 
-        //mResolver.delete(Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI, "list"), null, null);
-        // mResolver.delete(Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI, "entry"), null, null);
-        mResolver.delete(Uri.parse(ProductProvider.MULTIPLE_PRODUCT_CONTENT_URI), null, null);
-        ProviderTestUtils.deleteTestCategories(mResolver);
-        ProviderTestUtils.deleteTestLists(mResolver, "-");
-        //ProviderTestUtils.deleteTestEntries(mResolver);
+    private int getListCount() {
+        Cursor lists = mResolver.query(Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI,
+                "list"), null, null, null, null);
+        assertNotNull(lists);
+        int rtn = lists.getCount();
+        lists.close();
+        return rtn;
+    }
 
+    private int getEntryCount() {
+        Cursor entries = mResolver.query(Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI,
+                "entry"), null, null, null, null);
+        assertNotNull(entries);
+        int rtn = entries.getCount();
+        entries.close();
+        return rtn;
     }
 
     public void testCreateShoppingList() {
-        ShoppingList shoppingList = mListController.addList("test_list");
-        assertNotNull(shoppingList);
-        Cursor shoppingListCursor = mResolver.query(Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI, "list"),
-                ShoppingList.COLUMN.ALL_COLUMNS,
-                ShoppingList.COLUMN.ID + "=?",
-                new String[]{shoppingList.mUUID},
-                null
-        );
+        int previousCount = getListCount();
+        // negative test
+        assertNull(mListController.addList(null));
+        assertNull(mListController.addList(""));
+        assertNull(mListController.addList("_TEST_work"));
+        assertNull(mListController.addList(null, mCategoryHardwareStore));
+        assertEquals(previousCount, getListCount());
 
-        assertNotNull(shoppingListCursor);
-        assertEquals(1, shoppingListCursor.getCount());
+        // positive test: w/o category
+        ShoppingList createdListWOCat = mListController.addList("_TEST_list");
+        assertNotNull(createdListWOCat);
+        assertNotNull(createdListWOCat.mUUID);
+        assertEquals("_TEST_list", createdListWOCat.mName);
+        assertNull(createdListWOCat.mCategory);
 
-        assertTrue(shoppingListCursor.moveToFirst());
-        assertEquals(shoppingList.mUUID, shoppingListCursor.getString(shoppingListCursor.getColumnIndex(ShoppingList.COLUMN.ID)));
-        assertEquals(shoppingList.mName, shoppingListCursor.getString(shoppingListCursor.getColumnIndex(ShoppingList.COLUMN.NAME)));
-        assertEquals(shoppingList.mCategory.mUUID, shoppingListCursor.getString(shoppingListCursor.getColumnIndex(ShoppingList.COLUMN.CATEGORY)));
+        ShoppingList savedListWOCat = mListController.getListById(createdListWOCat.mUUID);
+        assertEquals(createdListWOCat, savedListWOCat);
+        assertEquals(previousCount + 1, getListCount());
 
-        shoppingListCursor.close();
+        // positive test: w category
+        ShoppingList createdListWCat = mListController.addList("_TEST_list2", mCategoryHardwareStore);
+        assertNotNull(createdListWCat);
+        assertNotNull(createdListWCat.mUUID);
+        assertEquals("_TEST_list2", createdListWCat.mName);
+        assertEquals(mCategoryHardwareStore, createdListWCat.mCategory);
+
+        ShoppingList savedListWCat = mListController.getListById(createdListWCat.mUUID);
+        assertEquals(createdListWCat, savedListWCat);
+        assertEquals(previousCount + 2, getListCount());
     }
 
     public void testFindShoppingListById() {
-        ShoppingList shoppingList1 = mListController.addList("test_list1");
-        ShoppingList shoppingList2 = mListController.addList("test_list2");
+        // negative test
+        assertNull(mListController.getListById(""));
+        assertNull(mListController.getListById(UUID.randomUUID().toString()));
 
-        assertNotNull(shoppingList1);
-        assertNotNull(shoppingList2);
-
-        ShoppingList shoppingListTest1 = mListController.getListById(shoppingList1.mUUID);
-        assertEquals(shoppingList1.mUUID, shoppingListTest1.mUUID);
-        assertEquals(shoppingList1.mName, shoppingListTest1.mName);
-        assertEquals(shoppingList1.mCategory.mUUID, shoppingListTest1.mCategory.mUUID);
-
+        // positive test
+        ShoppingList foundList = mListController.getListById(mListWork.mUUID);
+        assertEquals(mListWork, foundList);
     }
 
     public void testDeleteShoppingList() {
