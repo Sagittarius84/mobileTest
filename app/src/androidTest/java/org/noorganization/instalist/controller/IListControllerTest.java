@@ -158,50 +158,47 @@ public class IListControllerTest extends AndroidTestCase {
     }
 
     public void testDeleteShoppingList() {
-        ShoppingList shoppingList = mListController.addList("test_list");
-        ShoppingList shoppingList2 = mListController.addList("test_list2");
+        int previousCount = getListCount();
+        // negative test
+        assertFalse(mListController.removeList(null));
+        assertFalse(mListController.removeList(new ShoppingList()));
+        assertEquals(previousCount, getListCount());
 
-        assertNotNull(shoppingList);
-        assertTrue(mListController.removeList(shoppingList));
-
-        Cursor shoppingListCursor = mResolver.query(Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI, "list"),
-                ShoppingList.COLUMN.ALL_COLUMNS,
-                ShoppingList.COLUMN.ID + "=?",
-                new String[]{shoppingList.mUUID},
-                null
-        );
-
-        assertNotNull(shoppingListCursor);
-        assertEquals(0, shoppingListCursor.getCount());
+        // positive test
+        assertTrue(mListController.removeList(mListWork));
+        assertNull(mListController.getListById(mListWork.mUUID));
+        assertEquals(previousCount - 1, getListCount());
+        assertNotNull(mListController.getListById(mListHome.mUUID));
     }
 
     public void testAddOrChangeItem() throws Exception {
-        createLists();
-
+        int previousCount = getEntryCount();
+        // negative test: wrong inputs or not existing items
         assertNull(mListController.addOrChangeItem(null, mProductButter, 1.0f));
         assertNull(mListController.addOrChangeItem(mListHome, null, 1.0f));
         assertNull(mListController.addOrChangeItem(mListHome, mProductButter, -1.0f));
+        assertEquals(previousCount, getEntryCount());
 
+        // negative test: wrong inputs for existing item
         ListEntry returnedUnchangedEntry = mListController.addOrChangeItem(mListWork, mProductButter, -1.0f);
         assertNotNull(returnedUnchangedEntry);
         ListEntry unchangedEntry = mListController.getEntryById(mListEntryButterForWork.mUUID);
-
         assertEquals(mListEntryButterForWork, unchangedEntry);
         assertEquals(returnedUnchangedEntry, unchangedEntry);
 
-        ListEntry returnedEntry = mListController.addOrChangeItem(mListWork, mProductButter, 2.0f, 0);
+        // positive test: change existing product
+        ListEntry returnedEntry = mListController.addOrChangeItem(mListWork, mProductButter, 7.0f, 0);
         assertNotNull(returnedEntry);
         ListEntry changedEntry = mListController.getEntryById(mListEntryButterForWork.mUUID);
         assertNotNull(changedEntry);
-        assertNotNull(changedEntry.mProduct);
-        assertNotNull(changedEntry.mList);
-        assertEquals(2.0f, changedEntry.mAmount, 0.001f);
+        assertEquals(7.0f, changedEntry.mAmount, 0.001f);
         assertFalse(changedEntry.mStruck);
         assertEquals(0, returnedEntry.mPriority);
-        assertEquals(mListWork.mUUID, changedEntry.mList.mUUID);
-        assertEquals(mProductButter.mUUID, changedEntry.mProduct.mUUID);
+        assertEquals(mListWork, changedEntry.mList);
+        assertEquals(mProductButter, changedEntry.mProduct);
         assertEquals(changedEntry, returnedEntry);
 
+        // positive test: create entry
         ListEntry returnedEntry2 = mListController.addOrChangeItem(mListHome, mProductButter, 2.0f, 5);
         assertNotNull(returnedEntry2);
         assertEquals(mListHome, returnedEntry2.mList);
@@ -211,7 +208,9 @@ public class IListControllerTest extends AndroidTestCase {
         assertEquals(5, returnedEntry2.mPriority);
         ListEntry createdEntry2 = mListController.getEntryById(returnedEntry2.mUUID);
         assertEquals(createdEntry2, returnedEntry2);
+        assertEquals(previousCount + 1, getEntryCount());
 
+        // positive test create second entry
         ListEntry returnedSecondEntry = mListController.addOrChangeItem(mListHome, mProductBread, 1.0f);
         assertNotNull(returnedSecondEntry);
         assertEquals(mListHome, returnedSecondEntry.mList);
@@ -221,51 +220,59 @@ public class IListControllerTest extends AndroidTestCase {
         assertEquals(0, returnedSecondEntry.mPriority);
         ListEntry createdSecondEntry = mListController.getEntryById(returnedSecondEntry.mUUID);
         assertEquals(returnedSecondEntry, createdSecondEntry);
+        assertEquals(previousCount + 2, getEntryCount());
 
-        List<ListEntry> allEntriesOfHomeList = mListController.listAllListEntries(mListHome.mUUID, mListHome.mCategory.mUUID);
-        assertEquals(2, allEntriesOfHomeList.size());
-        assertTrue(allEntriesOfHomeList.contains(returnedEntry2));
-        assertTrue(allEntriesOfHomeList.contains(returnedSecondEntry));
-
+        // positive test: update second new entry
         ListEntry returnedThirdEntry = mListController.addOrChangeItem(mListHome, mProductBread, 1.0f, true);
         assertNotNull(returnedThirdEntry);
         assertEquals(2.0f, returnedThirdEntry.mAmount, 0.001f);
         assertEquals(returnedThirdEntry, mListController.getEntryById(returnedSecondEntry.mUUID));
     }
 
-    private void createLists() {
-
-        mListWork = mListController.addList("_Test_work");
-        mListHome = mListController.addList("TEST_home");
-
-        assertNotNull(mListWork);
-        assertNotNull(mListHome);
-    }
-
     public void testStrikeAllItems() throws Exception {
-        ListEntry breadForWork = mListController.addOrChangeItem(mListWork, mProductBread, 1.0f, false);
+        // negative test
+        mListController.strikeAllItems(null);
+        mListController.strikeAllItems(new ShoppingList());
+        assertEquals(mListEntryButterForWork,
+                mListController.getEntryById(mListEntryButterForWork.mUUID));
 
-        assertNotNull(breadForWork);
+        ContentValues breadForWorkCV = new ContentValues(3);
+        breadForWorkCV.put(ListEntry.COLUMN.LIST, mListWork.mUUID);
+        breadForWorkCV.put(ListEntry.COLUMN.PRODUCT, mProductBread.mUUID);
+        breadForWorkCV.put(ListEntry.COLUMN.STRUCK, false);
+        Uri breadForWorkUri = mResolver.insert(
+                Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI,
+                        mListWork.getUriPath() + "/entry"), breadForWorkCV);
+        assertNotNull(breadForWorkUri);
+        ListEntry entryBreadForWork = mListController.getEntryById(breadForWorkUri.
+                getLastPathSegment());
 
+        // positive test
         mListController.strikeAllItems(mListWork);
-
         assertTrue(mListController.getEntryById(mListEntryButterForWork.mUUID).mStruck);
-        assertTrue(mListController.getEntryById(breadForWork.mUUID).mStruck);
+        assertTrue(mListController.getEntryById(entryBreadForWork.mUUID).mStruck);
     }
 
     public void testUnstrikeAllItems() throws Exception {
-        insertTestData();
+        // negative test
+        mListController.unstrikeAllItems(null);
+        mListController.unstrikeAllItems(new ShoppingList());
 
-        ListEntry breadForWork = mListController.addOrChangeItem(mListWork, mProductBread, 1.0f, true);
+        ContentValues breadForWorkCV = new ContentValues(3);
+        breadForWorkCV.put(ListEntry.COLUMN.LIST, mListWork.mUUID);
+        breadForWorkCV.put(ListEntry.COLUMN.PRODUCT, mProductBread.mUUID);
+        breadForWorkCV.put(ListEntry.COLUMN.STRUCK, true);
+        Uri breadForWorkUri = mResolver.insert(
+                Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI,
+                        mListWork.getUriPath() + "/entry"), breadForWorkCV);
+        assertNotNull(breadForWorkUri);
+        ListEntry entryBreadForWork = mListController.getEntryById(breadForWorkUri.
+                getLastPathSegment());
 
-        assertNotNull(breadForWork);
-
-        mListController.strikeItem(breadForWork);
-
+        // positive test
         mListController.unstrikeAllItems(mListWork);
-
         assertFalse(mListController.getEntryById(mListEntryButterForWork.mUUID).mStruck);
-        assertFalse(mListController.getEntryById(breadForWork.mUUID).mStruck);
+        assertFalse(mListController.getEntryById(entryBreadForWork.mUUID).mStruck);
     }
 
     public void testStrikeItem() throws Exception {
