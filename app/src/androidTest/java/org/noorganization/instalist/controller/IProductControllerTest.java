@@ -13,6 +13,7 @@ import org.noorganization.instalist.model.Tag;
 import org.noorganization.instalist.model.TaggedProduct;
 import org.noorganization.instalist.model.Unit;
 import org.noorganization.instalist.provider.InstalistProvider;
+import org.noorganization.instalist.provider.ProviderTestUtils;
 import org.noorganization.instalist.provider.internal.ProductProvider;
 import org.noorganization.instalist.provider.internal.TagProvider;
 import org.noorganization.instalist.provider.internal.TaggedProductProvider;
@@ -44,6 +45,9 @@ public class IProductControllerTest extends AndroidTestCase {
 
         mLiter = mUnitController.createUnit("_TEST_l");
         assertNotNull(mLiter);
+        Uri productUri = ProviderTestUtils.insertProduct(mResolver, "_TEST_milk", 1.0f, 1.0f, mLiter.mUUID);
+        assertNotNull(productUri);
+
 
         mMilk = mController2Test.createProduct("_TEST_milk", mLiter, 1.0f, 1.0f);
         assertNotNull(mMilk);
