@@ -224,6 +224,19 @@ public class CategoryProvider implements IInternalProvider {
                     return null;
                 }
             }
+            case CATEGORY_ITEM: {
+                String uuid = _values.getAsString(Category.COLUMN.ID);
+                String name = _values.getAsString(Category.COLUMN.NAME);
+                if (uuid == null || name == null) {
+                    return null;
+                }
+                if (mDatabase.insert(Category.TABLE_NAME, null, _values) != -1) {
+                    return Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI,
+                            "category/" + uuid);
+                }
+                return null;
+
+            }
             case LIST_DIRECTORY: {
                 String name = _values.getAsString(ShoppingList.COLUMN.NAME);
                 if (name == null) {

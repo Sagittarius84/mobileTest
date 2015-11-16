@@ -162,7 +162,7 @@ public class IListControllerTest extends AndroidTestCase {
         ListEntry createdSecondEntry = mListController.getEntryById(returnedSecondEntry.mUUID);
         assertEquals(returnedSecondEntry, createdSecondEntry);
 
-        List<ListEntry> allEntriesOfHomeList = mListHome.getEntries();
+        List<ListEntry> allEntriesOfHomeList = mListController.listAllListEntries(mListHome.mUUID, mListHome.mCategory.mUUID);
         assertEquals(2, allEntriesOfHomeList.size());
         assertTrue(allEntriesOfHomeList.contains(returnedEntry2));
         assertTrue(allEntriesOfHomeList.contains(returnedSecondEntry));

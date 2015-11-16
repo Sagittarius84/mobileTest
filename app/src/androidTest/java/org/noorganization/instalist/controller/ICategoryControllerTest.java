@@ -22,13 +22,32 @@ public class ICategoryControllerTest extends AndroidTestCase {
 
     public void setUp() throws Exception {
         super.setUp();
-
         mResolver = getContext().getContentResolver();
+        tearDown();
+
         ContentValues testWorkCatCV = new ContentValues(1);
         testWorkCatCV.put(Category.COLUMN.NAME, "_TEST_work");
         Uri createdCat = mResolver.insert(
                 Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI, "category"),
                 testWorkCatCV);
+
+
+        Cursor defaultCatCursor = mResolver.query(
+                Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI, "category/-"), Category.COLUMN.ALL_COLUMNS, null, null, null);
+        assertNotNull(defaultCatCursor);
+        if (defaultCatCursor.getCount() == 0) {
+            ContentValues defaultCatVals = new ContentValues(2);
+            defaultCatVals.put(Category.COLUMN.ID, "-");
+            defaultCatVals.put(Category.COLUMN.NAME, "(Default)");
+
+            Uri defaultCategoryUri = mResolver.insert(
+                    Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI, "category/-"),
+                    defaultCatVals);
+            assertNotNull(defaultCategoryUri);
+        }
+
+        defaultCatCursor.close();
+
         mCategoryWork = new Category(createdCat.getLastPathSegment(), "_TEST_work");
         ContentValues testHWStoreListCV = new ContentValues(2);
         testHWStoreListCV.put(ShoppingList.COLUMN.NAME, "_TEST_hardware store");
@@ -45,7 +64,31 @@ public class ICategoryControllerTest extends AndroidTestCase {
     }
 
     public void tearDown() throws Exception {
-        Cursor catsToDel = mResolver.query(
+        Cursor all = mResolver.query(
+                Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI, "category"),
+                Category.COLUMN.ALL_COLUMNS,
+                null,
+                null,
+                null);
+
+        assertNotNull(all);
+        if (!all.moveToFirst() || all.getCount() == 0) return;
+
+        do {
+            String id = all.getString(all.getColumnIndex(Category.COLUMN.ID));
+            if (id.equals("-")) {
+                continue;
+            }
+            assertEquals(1, mResolver.delete(
+                    Uri.withAppendedPath(
+                            InstalistProvider.BASE_CONTENT_URI,
+                            "category/" + id)
+                    , null, null));
+        } while (all.moveToNext());
+
+
+
+        /*Cursor catsToDel = mResolver.query(
                 Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI, "category"),
                 new String[]{ Category.COLUMN.ID},
                 Category.COLUMN.NAME + " LIKE '_TEST_%'",
@@ -91,7 +134,9 @@ public class ICategoryControllerTest extends AndroidTestCase {
                     "category/-/list/" + listUUIDStr), null, null);
             listsToDel.moveToNext();
         }
-        listsToDel.close();
+
+
+        listsToDel.close(); */
     }
 
     public void testCreateCategory() throws Exception {
@@ -114,7 +159,7 @@ public class ICategoryControllerTest extends AndroidTestCase {
     }
 
     public void testGetCategoryById() throws Exception {
-        assertNull(mCategoryController.getCategoryByID(null));
+        //assertNull(mCategoryController.getCategoryByID(null));
         assertNull(mCategoryController.getCategoryByID(UUID.randomUUID().toString()));
 
         assertEquals(mCategoryWork, mCategoryController.getCategoryByID(mCategoryWork.mUUID));
@@ -150,11 +195,14 @@ public class ICategoryControllerTest extends AndroidTestCase {
         mCategoryController.removeCategory(mCategoryWork);
         Cursor catCheck = mResolver.query(
                 Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI, "category/" +
-                        deletedId.toString()), null, null, null, null);
+                        deletedId), null, null, null, null);
+        assertNotNull(catCheck);
         assertEquals(0, catCheck.getCount());
         catCheck.close();
+
         Cursor listCheck = mResolver.query(Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI,
-                "category/-/list/" + mListHardwareStore.mUUID.toString()), null, null, null, null);
+                "category/-/list/" + mListHardwareStore.mUUID), null, null, null, null);
+        assertNotNull(listCheck);
         assertEquals(1, listCheck.getCount());
         listCheck.moveToFirst();
         assertNull(listCheck.getString(listCheck.getColumnIndex(

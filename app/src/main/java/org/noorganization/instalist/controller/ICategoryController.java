@@ -30,7 +30,7 @@ public interface ICategoryController {
     /**
      * Searches a category by uuid.
      * @param _uuid The categories UUID. Not null.
-     * @return Either a found an d parsed Category or null, if not found.
+     * @return Either a found and parsed Category or null, if not found.
      */
     Category getCategoryByID(@NonNull String _uuid);
 
