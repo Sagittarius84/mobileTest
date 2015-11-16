@@ -51,6 +51,10 @@ public class Tag {
     public Tag(String _name) {
         mName = _name;
     }
+    public Tag(String _uuid, String _name) {
+        mUUID = _uuid;
+        mName = _name;
+    }
 
 
     @Override

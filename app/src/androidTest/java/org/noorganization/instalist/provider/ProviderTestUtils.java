@@ -170,7 +170,31 @@ public class ProviderTestUtils {
 
         return _contentResolver.insert(Uri.parse(TagProvider.MULTIPLE_TAG_CONTENT_URI), contentValues);
     }
+    /**
+     * Get a tag by Uri.
+     *
+     * @param _contentResolver the tagprovider where the actions should be done.
+     * @param _uri          the uri for the tag.
+     * @return the tag or null.
+     */
+    public static Tag getTag(ContentResolver _contentResolver, Uri _uri) {
+        Cursor tagCursor = _contentResolver.query(_uri, Tag.COLUMN.ALL_COLUMNS, null, null,null);
+        if(tagCursor == null){
+            return null;
+        }
+        if(tagCursor.getCount()== 0){
+            tagCursor.close();
+            return null;
+        }
 
+        tagCursor.moveToFirst();
+        Tag tag = new Tag();
+        tag.mUUID = tagCursor.getString(tagCursor.getColumnIndex(Tag.COLUMN.ID));
+        tag.mName = tagCursor.getString(tagCursor.getColumnIndex(Tag.COLUMN.NAME));
+        tagCursor.close();
+
+        return tag;
+    }
     /**
      * Inserts a recipe to the database.
      *

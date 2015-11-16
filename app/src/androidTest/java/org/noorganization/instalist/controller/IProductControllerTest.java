@@ -43,20 +43,21 @@ public class IProductControllerTest extends AndroidTestCase {
         mTagController = ControllerFactory.getTagController(mContext);
         mListController = ControllerFactory.getListController(mContext);
 
-        mLiter = mUnitController.createUnit("_TEST_l");
-        assertNotNull(mLiter);
+        Uri unitUri = ProviderTestUtils.insertUnit(mResolver, "_TEST_l");
+        assertNotNull(unitUri);
+        mLiter = new Unit(unitUri.getLastPathSegment(), "_TEST_1");//ProviderTestUtils.getUnit(mResolver, unitUri);
+
         Uri productUri = ProviderTestUtils.insertProduct(mResolver, "_TEST_milk", 1.0f, 1.0f, mLiter.mUUID);
         assertNotNull(productUri);
+        mMilk = new Product(productUri.getLastPathSegment(), "_TEST_milk", mLiter, 1.0f, 1.0f); // ProviderTestUtils.getProduct(mResolver, productUri.getLastPathSegment());
 
+        productUri = ProviderTestUtils.insertProduct(mResolver, "_TEST_broccoli", 1.0f, 1.0f, null);
+        assertNotNull(productUri);
+        mBroccoli = new Product(productUri.getLastPathSegment(), "_TEST_broccoli", null, 1.0f, 1.0f); //ProviderTestUtils.getProduct(mResolver, productUri.getLastPathSegment());
 
-        mMilk = mController2Test.createProduct("_TEST_milk", mLiter, 1.0f, 1.0f);
-        assertNotNull(mMilk);
-
-        mBroccoli = mController2Test.createProduct("_TEST_broccoli", null, 1.0f, 1.0f);
-        assertNotNull(mBroccoli);
-
-        mTag = mTagController.createTag("_TEST_vegetable");
-        assertNotNull(mTag);
+        Uri tagUri = ProviderTestUtils.insertTag(mResolver, "_TEST_vegetable");
+        assertNotNull(tagUri);
+        mTag = new Tag(tagUri.getLastPathSegment(), "_TEST_vegetable"); //ProviderTestUtils.getTag(mResolver, tagUri);
 
         mList = mListController.addList("_TEST_home");
         assertNotNull(mList);
