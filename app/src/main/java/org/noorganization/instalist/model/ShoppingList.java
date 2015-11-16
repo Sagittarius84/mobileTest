@@ -3,10 +3,6 @@ package org.noorganization.instalist.model;
 import android.content.ContentValues;
 import android.net.Uri;
 
-import com.orm.StringUtil;
-
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 
 /**

@@ -2,8 +2,6 @@ package org.noorganization.instalist.model;
 
 import android.content.ContentValues;
 
-import com.orm.StringUtil;
-
 /**
  * Represents a virtual category entry for a product. Since category usually make people think a
  * thing can only be in one category, the word "tag" is more fitting. For example: A tomato is
@@ -11,14 +9,6 @@ import com.orm.StringUtil;
  * Created by michi on 14.04.15.
  */
 public class TaggedProduct {
-    /**
-     * @deprecated us instead {@link COLUMN_PREFIXED#TAG_ID}
-     */
-    public final static String ATTR_TAG = StringUtil.toSQLName("mTag");
-    /**
-     * @deprecated use instead {@link COLUMN_PREFIXED#PRODUCT_ID}
-     */
-    public final static String ATTR_PRODUCT = StringUtil.toSQLName("mProduct");
 
     public final static String TABLE_NAME = "taggedProduct";
 

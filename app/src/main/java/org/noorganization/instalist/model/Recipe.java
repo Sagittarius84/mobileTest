@@ -2,18 +2,11 @@ package org.noorganization.instalist.model;
 
 import android.content.ContentValues;
 
-import com.orm.StringUtil;
-
 /**
  * Represents a logical recipe. Like ShoppingList, it does not contain a real java list.
  * Created by michi on 14.04.15.
  */
 public class Recipe {
-
-    /**
-     * @deprecated use instead {@link COLUMN_PREFIXED#NAME}
-     */
-    public final static String ATTR_NAME = StringUtil.toSQLName("mName");
 
     public final static String TABLE_NAME = "recipe";
 
