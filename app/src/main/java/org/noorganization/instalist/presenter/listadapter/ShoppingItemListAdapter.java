@@ -13,6 +13,7 @@ import org.noorganization.instalist.R;
 import org.noorganization.instalist.controller.IUnitController;
 import org.noorganization.instalist.controller.implementation.ControllerFactory;
 import org.noorganization.instalist.model.ListEntry;
+import org.noorganization.instalist.model.ShoppingList;
 import org.noorganization.instalist.model.Unit;
 import org.noorganization.instalist.presenter.customview.AmountPicker;
 import org.noorganization.instalist.presenter.interfaces.IShoppingListEntryAction;
@@ -253,6 +254,10 @@ public class ShoppingItemListAdapter extends RecyclerView.Adapter<RecyclerView.V
 
         notifyItemChanged(positionToUpdate);
         notifyItemMoved(positionToUpdate, newPositionOfElement);
+    }
+
+    public ListEntry getItem(int _Position){
+        return mListOfEntries.get(_Position).getListEntry();
     }
 
     @Override

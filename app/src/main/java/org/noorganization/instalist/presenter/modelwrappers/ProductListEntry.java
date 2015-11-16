@@ -4,14 +4,19 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.SparseBooleanArray;
 
+import org.noorganization.instalist.GlobalApplication;
+import org.noorganization.instalist.controller.implementation.ControllerFactory;
 import org.noorganization.instalist.model.Product;
 
+import java.util.UUID;
+
 /**
- * Wrapper for Products.
+ * Wrapper for Products to strike/unstrike them.
  * Created by TS on 25.05.2015.
  */
 public class ProductListEntry implements IBaseListEntry {
 
+    public static final int CHECKED_PROPERTY = 0;
     private Product mProduct;
     private boolean mChecked;
 
@@ -20,8 +25,8 @@ public class ProductListEntry implements IBaseListEntry {
     }
 
     private ProductListEntry(Parcel _In) {
-        mProduct = Product.findById(Product.class, _In.readLong());
-        mChecked = _In.readSparseBooleanArray().get(mProduct.getId().intValue());
+        mChecked = _In.readSparseBooleanArray().get(CHECKED_PROPERTY);
+        mProduct = ControllerFactory.getProductController(GlobalApplication.getContext()).findById(_In.readString());
     }
 
     @Override
@@ -55,8 +60,8 @@ public class ProductListEntry implements IBaseListEntry {
     }
 
     @Override
-    public long getId() {
-        return mProduct.getId();
+    public String getId() {
+        return mProduct.mUUID;
     }
 
     @Override
@@ -65,7 +70,7 @@ public class ProductListEntry implements IBaseListEntry {
         if (!(o instanceof ProductListEntry)) return false;
 
         ProductListEntry that = (ProductListEntry) o;
-        return mProduct.getId().equals(that.mProduct.getId()) && eItemType.PRODUCT_LIST_ENTRY == ((IBaseListEntry)o).getType();
+        return mProduct.mUUID.equals(that.mProduct.mUUID) && eItemType.PRODUCT_LIST_ENTRY == ((IBaseListEntry)o).getType();
     }
 
     @Override
@@ -81,9 +86,9 @@ public class ProductListEntry implements IBaseListEntry {
     @Override
     public void writeToParcel(Parcel _Dest, int _Flags) {
         SparseBooleanArray booleanArray = new SparseBooleanArray(1);
-        booleanArray.append(mProduct.getId().intValue(), mChecked);
+        booleanArray.append(CHECKED_PROPERTY, mChecked);
         _Dest.writeSparseBooleanArray(booleanArray);
-        _Dest.writeLong(mProduct.getId());
+        _Dest.writeString(mProduct.mUUID);
     }
 
     public static final Parcelable.Creator<ProductListEntry> CREATOR = new Parcelable.Creator<ProductListEntry>() {

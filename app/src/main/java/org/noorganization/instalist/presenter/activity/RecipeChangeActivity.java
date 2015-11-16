@@ -30,7 +30,7 @@ public class RecipeChangeActivity extends AppCompatActivity {
             if (intent.getExtras() == null || intent.getExtras().isEmpty()) {
                 ViewUtils.addFragment(this, RecipeEditorFragment.newCreationInstance());
             } else {
-                long recipeId = intent.getExtras().getLong(ARGS_RECIPE_ID);
+                String recipeId = intent.getExtras().getString(ARGS_RECIPE_ID);
                 ViewUtils.addFragment(this, RecipeEditorFragment.newUpdateInstance(recipeId));
             }
         }

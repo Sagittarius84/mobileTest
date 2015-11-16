@@ -278,7 +278,7 @@ public class ShoppingListOverviewFragment extends BaseFragment implements IFragm
 
         // assign other listname if none is assigned
         if (mCurrentShoppingList == null) {
-            List<ShoppingList> mShoppingLists = ShoppingList.listAll(ShoppingList.class);
+            List<ShoppingList> mShoppingLists = mListController.getAllLists();
             if (mShoppingLists.size() > 0) {
                 mCurrentShoppingList = mShoppingLists.get(0);
                 //mBaseActivityInterface.setToolbarTitle(mCurrentShoppingList.mName);
@@ -396,7 +396,7 @@ public class ShoppingListOverviewFragment extends BaseFragment implements IFragm
 
         mBaseActivityInterface.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
 
-        mShoppingItemListAdapter = new ShoppingItemListAdapter(getActivity(), mCurrentShoppingList.getEntries());
+        mShoppingItemListAdapter = new ShoppingItemListAdapter(getActivity(), mListController.listAllListEntries(mCurrentShoppingList.mUUID, mCurrentShoppingList.mCategory.mUUID));
         int sortIndex = PreferencesManager.getInstance().getIntValue(SORT_MODE);
         if (sortIndex >= 0) {
             mShoppingItemListAdapter.sortByComparator(mMapComperable.get(sortIndex));
@@ -427,15 +427,14 @@ public class ShoppingListOverviewFragment extends BaseFragment implements IFragm
             @Override
             public void onSwipeRight(View _ChildView, int _Position) {
                 super.onSwipeRight(_ChildView, _Position);
-                ListEntry entry = mListController.getEntryById(mShoppingItemListAdapter.getItemId(_Position));
+                ListEntry entry = mListController.getEntryById(mShoppingItemListAdapter.getItem(_Position).mUUID);
                 toggleStrike(entry);
             }
 
             @Override
             public void onSwipeLeft(View _ChildView, int _Position) {
                 super.onSwipeLeft(_ChildView, _Position);
-                ListEntry entry = mListController.getEntryById(mShoppingItemListAdapter.getItemId(_Position));
-                ;
+                ListEntry entry = mListController.getEntryById(mShoppingItemListAdapter.getItem(_Position).mUUID);
                 toggleStrike(entry);
 
             }
@@ -467,7 +466,7 @@ public class ShoppingListOverviewFragment extends BaseFragment implements IFragm
 
                 mShoppingItemListAdapter.setToEditMode(_Position);
 
-                mActionModeCallback = new OnShoppingListItemActionModeListener(mContext, _ChildView, mShoppingItemListAdapter.getItemId(_Position));
+                mActionModeCallback = new OnShoppingListItemActionModeListener(mContext, _ChildView, mShoppingItemListAdapter.getItem(_Position).mUUID);
                 // Start the CAB using the Callback defined above
                 mActionMode = ((AppCompatActivity) getActivity()).startSupportActionMode(mActionModeCallback);
                 _ChildView.setSelected(true);

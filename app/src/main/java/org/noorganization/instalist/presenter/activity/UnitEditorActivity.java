@@ -18,10 +18,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 
-import com.orm.SugarRecord;
-import com.orm.query.Condition;
-import com.orm.query.Select;
-
 import org.noorganization.instalist.R;
 import org.noorganization.instalist.controller.IUnitController;
 import org.noorganization.instalist.controller.event.UnitChangedMessage;
@@ -43,9 +39,10 @@ public class UnitEditorActivity extends AppCompatActivity {
     private static final String LOG_TAG = UnitEditorActivity.class.getCanonicalName();
 
     private FloatingActionButton mAddButton;
-    private UnitEditorAdapter    mUnitAdapter;
-    private LinearLayoutManager  mUnitLayoutManager;
-    private EventBus             mBus;
+    private UnitEditorAdapter mUnitAdapter;
+    private LinearLayoutManager mUnitLayoutManager;
+    private EventBus mBus;
+    private IUnitController mUnitController;
 
     @Override
     public void onCreate(Bundle _savedInstanceState) {
@@ -54,6 +51,7 @@ public class UnitEditorActivity extends AppCompatActivity {
         setContentView(R.layout.activity_w_actionbar_listview);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        mUnitController = ControllerFactory.getUnitController(this);
 
         ActionBar bar = getSupportActionBar();
         if (bar == null) {
@@ -108,14 +106,14 @@ public class UnitEditorActivity extends AppCompatActivity {
 
     private void initViews() {
         RecyclerView unitRecyclerView = (RecyclerView) findViewById(R.id.main_list);
-        mAddButton                    = (FloatingActionButton) findViewById(R.id.action_add_item);
+        mAddButton = (FloatingActionButton) findViewById(R.id.action_add_item);
 
         unitRecyclerView.addItemDecoration(new DividerItemListDecoration(getResources().
                 getDrawable(R.drawable.list_divider)));
         mUnitLayoutManager = new LinearLayoutManager(this);
         mUnitLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
         unitRecyclerView.setLayoutManager(mUnitLayoutManager);
-        mUnitAdapter = new UnitEditorAdapter(this, SugarRecord.listAll(Unit.class), new EditCallback());
+        mUnitAdapter = new UnitEditorAdapter(this, mUnitController.listAll(Unit.COLUMN.NAME, true), new EditCallback());
         unitRecyclerView.setAdapter(mUnitAdapter);
 
         mAddButton.setOnClickListener(new onCreateUnitListener());
@@ -123,7 +121,9 @@ public class UnitEditorActivity extends AppCompatActivity {
 
     private class onCreateUnitListener implements View.OnClickListener {
 
-        private static final @IdRes int ID_NAME = 0x6149c610;
+        private static final
+        @IdRes
+        int ID_NAME = 0x6149c610;
 
         @Override
         public void onClick(View v) {
@@ -184,8 +184,7 @@ public class UnitEditorActivity extends AppCompatActivity {
                     titleInput.setError(getString(R.string.error_no_input));
                     return;
                 }
-                IUnitController controller = ControllerFactory.getUnitController();
-                if (controller.createUnit(newName) == null) {
+                if (mUnitController.createUnit(newName) == null) {
                     titleInput.setError(getString(R.string.error_unit_already_exists));
                     return;
                 }
@@ -210,34 +209,33 @@ public class UnitEditorActivity extends AppCompatActivity {
 
         @Override
         public boolean onActionItemClicked(final ActionMode _mode, MenuItem _menuItem) {
-            final IUnitController controller = ControllerFactory.getUnitController();
             final Unit unit = mUnitAdapter.get(mUnitAdapter.getEditingPosition());
             switch (_menuItem.getItemId()) {
                 case R.id.menu_delete_action:
-                    if(!controller.deleteUnit(unit, IUnitController.MODE_BREAK_DELETION)) {
+                    if (!mUnitController.deleteUnit(unit, IUnitController.MODE_BREAK_DELETION)) {
                         AlertDialog.Builder builder = new AlertDialog.Builder(UnitEditorActivity.this);
                         builder.setMessage(R.string.remove_unit_question);
                         builder.setPositiveButton(R.string.unlink, new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                controller.deleteUnit(unit, IUnitController.MODE_UNLINK_REFERENCES);
+                                mUnitController.deleteUnit(unit, IUnitController.MODE_UNLINK_REFERENCES);
                                 _mode.finish();
                             }
                         });
                         builder.setNeutralButton(R.string.remove, new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                controller.deleteUnit(unit, IUnitController.MODE_DELETE_REFERENCES);
+                                mUnitController.deleteUnit(unit, IUnitController.MODE_DELETE_REFERENCES);
                                 _mode.finish();
                             }
                         });
                         builder.setNegativeButton(android.R.string.cancel,
                                 new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                _mode.finish();
-                            }
-                        });
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        _mode.finish();
+                                    }
+                                });
                         builder.show();
                     } else {
                         _mode.finish();
@@ -256,12 +254,11 @@ public class UnitEditorActivity extends AppCompatActivity {
                         editor.setError(getString(R.string.error_no_input));
                         break;
                     }
-                    if (Select.from(Unit.class).where(Condition.prop(Unit.ATTR_NAME).eq(newName)).
-                            count() > 0) {
+                    if (mUnitController.findByName(newName) != null) {
                         editor.setError(getString(R.string.error_unit_already_exists));
                         break;
                     }
-                    controller.renameUnit(unit, newName);
+                    mUnitController.renameUnit(unit, newName);
                     _mode.finish();
 
                     break;

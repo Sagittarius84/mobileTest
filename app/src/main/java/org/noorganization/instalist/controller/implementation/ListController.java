@@ -85,7 +85,7 @@ public class ListController implements IListController {
     public List<ShoppingList> getAllLists() {
         Cursor listIDs = mResolver.query(
                 Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI, "list"),
-                new String[]{ ShoppingList.COLUMN.ID }, null, null, null);
+                new String[]{ShoppingList.COLUMN.ID}, null, null, null);
         if (listIDs == null) {
             Log.e(getClass().getCanonicalName(), "Got null-cursor while retrieving all lists. " +
                     "Returning null for error.");
@@ -119,17 +119,11 @@ public class ListController implements IListController {
             return null;
         }
         entryCursor.moveToFirst();
-        ListEntry rtn = new ListEntry();
-        rtn.mUUID = entryCursor.getString(entryCursor.getColumnIndex(ListEntry.COLUMN.ID));
-        rtn.mList = getListById(entryCursor.getString(entryCursor.getColumnIndex(
-                ListEntry.COLUMN.LIST)));
-        rtn.mProduct = mProductController.findById(entryCursor.getString(
-                entryCursor.getColumnIndex(ListEntry.COLUMN.PRODUCT)));
-        rtn.mAmount = entryCursor.getFloat(entryCursor.getColumnIndex(ListEntry.COLUMN.AMOUNT));
-        rtn.mPriority = entryCursor.getInt(entryCursor.getColumnIndex(ListEntry.COLUMN.PRIORITY));
-        rtn.mStruck = (entryCursor.getInt(entryCursor.getColumnIndex(ListEntry.COLUMN.STRUCK)) != 0);
+        ListEntry rtn = parseListEntryFromCursor(entryCursor);
+        entryCursor.close();
         return rtn;
     }
+
 
     @Override
     public ListEntry getEntryByListAndProduct(@NonNull ShoppingList _list, @NonNull Product _product) {
@@ -149,17 +143,17 @@ public class ListController implements IListController {
             return null;
         }
         entrySearch.moveToFirst();
-        ListEntry listEntry =  getEntryById(entrySearch.getString(entrySearch.getColumnIndex(
+        ListEntry listEntry = getEntryById(entrySearch.getString(entrySearch.getColumnIndex(
                 ListEntry.COLUMN.ID)));
         entrySearch.close();
-        return  listEntry;
+        return listEntry;
     }
 
     @Override
     public int getEntryCount(@NonNull ShoppingList _list) {
         Cursor entryIDs = mResolver.query(
                 Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI, _list.getUriPath() + "/entry"),
-                new String[]{ ListEntry.COLUMN.ID },
+                new String[]{ListEntry.COLUMN.ID},
                 null, null, null);
         if (entryIDs == null) {
             Log.e(getClass().getCanonicalName(), "Retrieving ListEntry-IDs for counting them failed." +
@@ -208,7 +202,7 @@ public class ListController implements IListController {
         Cursor ListsInCat = mResolver.query(
                 Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI, "category/" +
                         (_category != null ? _category.mUUID : "-") + "/list"),
-                new String[]{ ShoppingList.COLUMN.ID }, null, null, null);
+                new String[]{ShoppingList.COLUMN.ID}, null, null, null);
         if (ListsInCat == null) {
             Log.e(getClass().getCanonicalName(), "Got null-cursor while retrieving lists in " +
                     "category. Returning null for error.");
@@ -367,7 +361,7 @@ public class ListController implements IListController {
         ContentValues newListCV = new ContentValues(2);
         newListCV.put(ShoppingList.COLUMN.NAME, _name);
 
-        String insertUri = InstalistProvider.BASE_CONTENT_URI.getPath().concat("category/").concat("?").concat("/list");
+        String insertUri = InstalistProvider.BASE_CONTENT_URI.toString().concat("/category/").concat("%s").concat("/list");
         if (_category == null) {
             // no category is selected, use default one
             newListCV.putNull(ShoppingList.COLUMN.CATEGORY);
@@ -411,7 +405,7 @@ public class ListController implements IListController {
         Cursor cursor = mResolver.query(_list.toUri(InstalistProvider.BASE_CONTENT_URI), ShoppingList.COLUMN.ALL_COLUMNS, null, null, null);
 
         boolean rtn = cursor != null && cursor.getCount() == 0;
-        if(cursor != null){
+        if (cursor != null) {
             cursor.close();
         }
         return rtn;
@@ -485,10 +479,50 @@ public class ListController implements IListController {
         return shoppingList;
     }
 
+    @Override
+    public List<ListEntry> listAllListEntries(String _shoppingListUUID, String _categoryUUID) {
+        Cursor listCursor = mResolver.query(
+                Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI, String.format("category/%s/list/%s/entry", new String[]{_categoryUUID, _shoppingListUUID})),
+                ListEntry.COLUMN.ALL_COLUMNS,
+                null,
+                null,
+                null);
+
+        if (listCursor == null) {
+            return null;
+        }
+
+        List<ListEntry> listEntries = new ArrayList<>(listCursor.getCount());
+        if (listCursor.getCount() == 0) {
+            listCursor.close();
+            return listEntries;
+        }
+
+        listCursor.moveToFirst();
+        do {
+            listEntries.add(parseListEntryFromCursor(listCursor));
+        } while (listCursor.moveToNext());
+        listCursor.close();
+
+        return listEntries;
+    }
+
 
     //endregion public methods
 
     //region Private methods
+    private ListEntry parseListEntryFromCursor(Cursor entryCursor) {
+        ListEntry rtn = new ListEntry();
+        rtn.mUUID = entryCursor.getString(entryCursor.getColumnIndex(ListEntry.COLUMN.ID));
+        rtn.mList = getListById(entryCursor.getString(entryCursor.getColumnIndex(
+                ListEntry.COLUMN.LIST)));
+        rtn.mProduct = mProductController.findById(entryCursor.getString(
+                entryCursor.getColumnIndex(ListEntry.COLUMN.PRODUCT)));
+        rtn.mAmount = entryCursor.getFloat(entryCursor.getColumnIndex(ListEntry.COLUMN.AMOUNT));
+        rtn.mPriority = entryCursor.getInt(entryCursor.getColumnIndex(ListEntry.COLUMN.PRIORITY));
+        rtn.mStruck = (entryCursor.getInt(entryCursor.getColumnIndex(ListEntry.COLUMN.STRUCK)) != 0);
+        return rtn;
+    }
 
     /**
      * Checks if an list with the given name already exists in the database.
@@ -513,11 +547,12 @@ public class ListController implements IListController {
     /**
      * Adds or updates a Listentry to a given {@link ShoppingList}.
      * // TODO: further description needed
-     * @param _list the list where the item should be added or updated.
-     * @param _product the product to insert/update.
-     * @param _amount the new amount of the product in the given list.
-     * @param _prioUsed flag that describes if the prio is used.
-     * @param _prio the prio that will be assigned.
+     *
+     * @param _list      the list where the item should be added or updated.
+     * @param _product   the product to insert/update.
+     * @param _amount    the new amount of the product in the given list.
+     * @param _prioUsed  flag that describes if the prio is used.
+     * @param _prio      the prio that will be assigned.
      * @param _addAmount the standard amount to add when hitting the inc/dec buttons.
      * @return the new listentry or null if some failure happened.
      */

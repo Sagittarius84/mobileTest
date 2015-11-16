@@ -42,7 +42,7 @@ public class OnSubmitClickListenerWithParentData implements View.OnClickListener
         }
 
         String   insertedText = mNameEditText.getText().toString();
-        Category oldCategory  = mAdapter.findCategoryById(mCategoryId);
+        Category oldCategory  = mCategoryController.getCategoryByID(mCategoryId);
         Category newCategory  = mCategoryController.renameCategory(oldCategory, insertedText);
         Context  context      = _View.getContext();
 

@@ -37,14 +37,12 @@ public class ProductController implements IProductController {
     private EventBus mBus;
     private Context mContext;
     private ContentResolver mResolver;
-    private IUnitController mUnitController;
     private ITagController mTagController;
 
     private ProductController(Context _context) {
         mBus = EventBus.getDefault();
         mContext = _context;
         mResolver = mContext.getContentResolver();
-        mUnitController = ControllerFactory.getUnitController(_context);
         mTagController = ControllerFactory.getTagController(_context);
     }
 
@@ -67,7 +65,7 @@ public class ProductController implements IProductController {
             return null;
         }
 
-        Unit unit = mUnitController.findById(_unit.mUUID);
+        Unit unit = ControllerFactory.getUnitController(mContext).findById(_unit.mUUID);
         if (unit == null) {
             return null;
         }
@@ -107,7 +105,7 @@ public class ProductController implements IProductController {
         product.mUUID = productCursor.getString(productCursor.getColumnIndex(Product.COLUMN.ID));
         product.mDefaultAmount = productCursor.getFloat(productCursor.getColumnIndex(Product.COLUMN.DEFAULT_AMOUNT));
         product.mStepAmount = productCursor.getFloat(productCursor.getColumnIndex(Product.COLUMN.STEP_AMOUNT));
-        product.mUnit = mUnitController.findById(productCursor.getString(productCursor.getColumnIndex(Product.COLUMN.UNIT)));
+        product.mUnit = ControllerFactory.getUnitController(mContext).findById(productCursor.getString(productCursor.getColumnIndex(Product.COLUMN.UNIT)));
 
         /*
         if(product.mUnit == null){
@@ -139,7 +137,7 @@ public class ProductController implements IProductController {
             return oldProduct;
         }
         // check if given unit exists
-        if (_toChange.mUnit != null && mUnitController.findById(_toChange.mUnit.mUUID) == null) {
+        if (_toChange.mUnit != null && ControllerFactory.getUnitController(mContext).findById(_toChange.mUnit.mUUID) == null) {
             return oldProduct;
         }
 

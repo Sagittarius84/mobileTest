@@ -87,7 +87,7 @@ public class CategoryController implements ICategoryController {
     public Category getCategoryByID(@NonNull String _uuid) {
         Cursor resultCursor = mContext.getContentResolver().query(
                 Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI, "category"),
-                new String[]{ Category.COLUMN.NAME},
+                new String[]{ Category.COLUMN.ID, Category.COLUMN.NAME},
                 Category.COLUMN.ID + " = ?",
                 new String[]{ _uuid },
                 null);

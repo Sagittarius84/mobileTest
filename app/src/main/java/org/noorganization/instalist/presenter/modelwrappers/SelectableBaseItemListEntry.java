@@ -1,6 +1,7 @@
 package org.noorganization.instalist.presenter.modelwrappers;
 
 /**
+ * // TODO docu!
  * Created by TS on 25.05.2015.
  */
 public class SelectableBaseItemListEntry {

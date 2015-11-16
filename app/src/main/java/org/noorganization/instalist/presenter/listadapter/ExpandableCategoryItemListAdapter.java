@@ -9,15 +9,17 @@ import android.widget.BaseExpandableListAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.noorganization.instalist.GlobalApplication;
 import org.noorganization.instalist.R;
+import org.noorganization.instalist.controller.ICategoryController;
 import org.noorganization.instalist.controller.IListController;
 import org.noorganization.instalist.controller.implementation.ControllerFactory;
 import org.noorganization.instalist.model.Category;
 import org.noorganization.instalist.model.ShoppingList;
-import org.noorganization.instalist.presenter.touchlistener.IOnShoppingListClickListenerEvents;
-import org.noorganization.instalist.presenter.touchlistener.OnShoppingListClickListener;
 import org.noorganization.instalist.presenter.interfaces.IBaseActivity;
 import org.noorganization.instalist.presenter.interfaces.ICategoryAdapter;
+import org.noorganization.instalist.presenter.touchlistener.IOnShoppingListClickListenerEvents;
+import org.noorganization.instalist.presenter.touchlistener.OnShoppingListClickListener;
 
 import java.util.List;
 import java.util.UUID;
@@ -29,8 +31,8 @@ import java.util.UUID;
 public class ExpandableCategoryItemListAdapter extends BaseExpandableListAdapter implements ICategoryAdapter {
 
 
-    private LayoutInflater                     mInflater;
-    private List<Category>                     mListOfCategories;
+    private LayoutInflater mInflater;
+    private List<Category> mListOfCategories;
     private IOnShoppingListClickListenerEvents mIOnShoppingListClickEvents;
 
     private IListController mListController;
@@ -94,7 +96,7 @@ public class ExpandableCategoryItemListAdapter extends BaseExpandableListAdapter
     @Override
     public View getGroupView(int groupPosition, boolean isExpanded, View convertView, ViewGroup parent) {
         ViewGroup view;
-        Category  category = mListOfCategories.get(groupPosition);
+        Category category = mListOfCategories.get(groupPosition);
 
         // check if the converted view is not null and check if it is already an expandable_list_view_category_item
         if (convertView != null && convertView.getId() == R.id.expandable_list_view_category_item) {
@@ -103,7 +105,7 @@ public class ExpandableCategoryItemListAdapter extends BaseExpandableListAdapter
             view = (ViewGroup) mInflater.inflate(R.layout.expandable_list_view_category, parent, false);
         }
 
-        TextView tvCategoryName      = (TextView) view.findViewById(R.id.expandable_list_view_category_name);
+        TextView tvCategoryName = (TextView) view.findViewById(R.id.expandable_list_view_category_name);
         TextView tvCategoryItemCount = (TextView) view.findViewById(R.id.expandable_list_view_category_entries);
 
         tvCategoryName.setSelected(true);
@@ -120,7 +122,7 @@ public class ExpandableCategoryItemListAdapter extends BaseExpandableListAdapter
 
     @Override
     public View getChildView(int groupPosition, int childPosition, boolean isLastChild, View convertView, ViewGroup parent) {
-        ViewGroup    view;
+        ViewGroup view;
         ShoppingList shoppingList = mListController.getListsByCategory(mListOfCategories.
                 get(groupPosition)).get(childPosition);
 
@@ -133,7 +135,7 @@ public class ExpandableCategoryItemListAdapter extends BaseExpandableListAdapter
 
         view.setLongClickable(true);
 
-        TextView tvListName      = (TextView) view.findViewById(R.id.expandable_list_view_list_name);
+        TextView tvListName = (TextView) view.findViewById(R.id.expandable_list_view_list_name);
         TextView tvListItemCount = (TextView) view.findViewById(R.id.expandable_list_view_list_entries);
         //ImageView deleteImage        = (ImageView) view.findViewById(R.id.expandable_list_view_edit_delete);
 
@@ -195,8 +197,8 @@ public class ExpandableCategoryItemListAdapter extends BaseExpandableListAdapter
      */
     private int indexOfCategory(Category _Category) {
         // loop through each item to find the desired item, binsearch won't work, because there is no sort list...
-        int indexToUpdate = - 1;
-        for (int Index = 0; Index < mListOfCategories.size(); ++ Index) {
+        int indexToUpdate = -1;
+        for (int Index = 0; Index < mListOfCategories.size(); ++Index) {
             if (mListOfCategories.get(Index).mUUID.equals(_Category.mUUID)) {
                 indexToUpdate = Index;
                 break;
@@ -225,16 +227,17 @@ public class ExpandableCategoryItemListAdapter extends BaseExpandableListAdapter
     // TODO: delete?
 
     private class OnDeleteCategoryClickListener implements View.OnClickListener {
-        private long mCategoryId;
+        private String mCategoryId;
 
-        public OnDeleteCategoryClickListener(long _CategoryId) {
+        public OnDeleteCategoryClickListener(String _CategoryId) {
             mCategoryId = _CategoryId;
         }
 
         @Override
         public void onClick(View v) {
-            Category category = findCategoryById(mCategoryId);
-            ControllerFactory.getCategoryController().removeCategory(category);
+            ICategoryController categoryController = ControllerFactory.getCategoryController(GlobalApplication.getContext());
+            Category category = categoryController.getCategoryByID(mCategoryId);
+            categoryController.removeCategory(category);
             mBaseAcitvity.removeCategory(category);
             //removeCategory(category);
         }
@@ -243,17 +246,18 @@ public class ExpandableCategoryItemListAdapter extends BaseExpandableListAdapter
     // TODO: delete?
 
     private class OnDeleteShoppingListClickListener implements View.OnClickListener {
-        private long mShoppingListId;
+        private String mShoppingListId;
 
-        public OnDeleteShoppingListClickListener(long _ShoppingListId) {
+        public OnDeleteShoppingListClickListener(String _ShoppingListId) {
             mShoppingListId = _ShoppingListId;
         }
 
         @Override
         public void onClick(View v) {
-            ShoppingList shoppingList = ShoppingList.findById(ShoppingList.class, mShoppingListId);
-            boolean      deleted      = ControllerFactory.getListController().removeList(shoppingList);
-            if (! deleted) {
+            IListController shoppingListController = ControllerFactory.getListController(GlobalApplication.getContext());
+            ShoppingList shoppingList = shoppingListController.getListById(mShoppingListId);
+            boolean deleted = shoppingListController.removeList(shoppingList);
+            if (!deleted) {
                 Toast.makeText(v.getContext(), v.getContext().getString(R.string.deletion_failed)
                         , Toast.LENGTH_SHORT).show();
                 return;

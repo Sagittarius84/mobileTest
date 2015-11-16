@@ -15,6 +15,7 @@ import org.noorganization.instalist.model.Tag;
 import java.util.List;
 
 /**
+ * Adapter to list all tags.
  * Created by TS on 28.05.2015.
  */
 public class TagAdapter extends ArrayAdapter<Tag> {

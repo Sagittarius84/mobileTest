@@ -29,13 +29,11 @@ public class UnitController implements IUnitController {
     private EventBus mBus;
     private Context mContext;
     private ContentResolver mResolver;
-    private IProductController mProductController;
 
     private UnitController(Context _context) {
         mBus = EventBus.getDefault();
         mContext = _context;
         mResolver = mContext.getContentResolver();
-        mProductController = ControllerFactory.getProductController(_context);
     }
 
     static UnitController getInstance(Context _context) {
@@ -157,6 +155,7 @@ public class UnitController implements IUnitController {
             return true;
         }
         Cursor cursor;
+        IProductController productController = ControllerFactory.getProductController(mContext);
 
         switch (_mode) {
             case MODE_DELETE_REFERENCES:
@@ -172,7 +171,7 @@ public class UnitController implements IUnitController {
                 }
 
                 do {
-                    mProductController.removeProduct(mProductController.parseProduct(cursor), true);
+                    productController.removeProduct(productController.parseProduct(cursor), true);
                 } while (cursor.moveToNext());
 
                 break;
@@ -188,9 +187,9 @@ public class UnitController implements IUnitController {
                 }
 
                 do {
-                    Product product = mProductController.parseProduct(cursor);
+                    Product product = productController.parseProduct(cursor);
                     product.mUnit = null;
-                    mProductController.modifyProduct(product);
+                    productController.modifyProduct(product);
                 } while (cursor.moveToNext());
 
                 break;

@@ -175,4 +175,12 @@ public interface IListController {
      * @return The changed ShoppingList or null if moving failed.
      */
     ShoppingList moveToCategory(ShoppingList _list, Category _category);
+
+    /**
+     * List all entries of a given shoppinglist
+     * @param _shoppingListUUID the uuid of the shoppingList
+     * @param _categoryUUID
+     * @return an empty list or a filled list with corresponding {@link ListEntry}s. Or null if an error occured.
+     */
+    List<ListEntry> listAllListEntries(String _shoppingListUUID, String _categoryUUID);
 }

@@ -128,6 +128,7 @@ public class MainShoppingListView extends AppCompatActivity implements IBaseActi
         // init PreferencesManager
         PreferencesManager.initializeInstance(this);
         mDefaultCategoryId = PreferencesManager.getInstance().getStringValue(PreferencesManager.KEY_DEFAULT_CATEGORY_ID);
+        mDefaultCategoryId = mDefaultCategoryId == null ? "-" : mDefaultCategoryId;
         Category category = mCategoryController.getCategoryByID(mDefaultCategoryId);
 
         if (category == null) {

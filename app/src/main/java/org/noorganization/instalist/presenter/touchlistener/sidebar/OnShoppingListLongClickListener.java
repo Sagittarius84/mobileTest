@@ -5,7 +5,9 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ViewSwitcher;
 
+import org.noorganization.instalist.GlobalApplication;
 import org.noorganization.instalist.R;
+import org.noorganization.instalist.controller.implementation.ControllerFactory;
 import org.noorganization.instalist.model.ShoppingList;
 
 // TODO: delete?
@@ -15,9 +17,9 @@ import org.noorganization.instalist.model.ShoppingList;
  */
 public class OnShoppingListLongClickListener implements View.OnLongClickListener {
 
-    private long mShoppingListId;
+    private String mShoppingListId;
 
-    public OnShoppingListLongClickListener(long _ShoppingListId) {
+    public OnShoppingListLongClickListener(String _ShoppingListId) {
         mShoppingListId = _ShoppingListId;
     }
 
@@ -35,10 +37,10 @@ public class OnShoppingListLongClickListener implements View.OnLongClickListener
         viewSwitcher = (ViewSwitcher) _View.findViewById(R.id.expandable_list_view_view_switcher);
         editText = (EditText) _View.findViewById(R.id.expandable_list_view_list_edit_name);
 
-        shoppingList = ShoppingList.findById(ShoppingList.class, mShoppingListId);
+        shoppingList = ControllerFactory.getListController(GlobalApplication.getContext()).getListById(mShoppingListId);
 
         cancelView.setOnClickListener(new OnCancelClickListenerWithData(viewSwitcher));
-        submitView.setOnClickListener(new OnSubmitClickListenerWithChildData(viewSwitcher, editText, mShoppingListId));
+        submitView.setOnClickListener(new OnSubmitClickListenerWithChildData(GlobalApplication.getContext(),viewSwitcher, editText, mShoppingListId));
 
         editText.setText(shoppingList.mName);
         viewSwitcher.showNext();
