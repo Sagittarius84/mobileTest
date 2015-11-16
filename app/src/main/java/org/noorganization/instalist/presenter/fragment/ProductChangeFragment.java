@@ -196,7 +196,7 @@ public class ProductChangeFragment extends DialogFragment {
                 }
             });
 
-            mUnitList = ControllerFactory.getUnitController(getContext()).listAll(Unit.COLUMN.NAME, true);
+            mUnitList = ControllerFactory.getUnitController(GlobalApplication.getContext()).listAll(Unit.COLUMN.NAME, true);
             mUnitList.add(0, null);
             String[] displayUnitStrings = new String[mUnitList.size()];
             displayUnitStrings[0] = mContext.getString(R.string.no_unit);

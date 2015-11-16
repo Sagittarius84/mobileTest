@@ -79,13 +79,36 @@ public class ExpandableCategoryItemListAdapter extends BaseExpandableListAdapter
 
     @Override
     public long getGroupId(int groupPosition) {
-        return UUID.fromString(mListOfCategories.get(groupPosition).mUUID).getLeastSignificantBits();
+        return mListOfCategories.get(groupPosition).mUUID.hashCode(); // UUID.fromString(mListOfCategories.get(groupPosition).mUUID).getLeastSignificantBits();
     }
 
     @Override
     public long getChildId(int groupPosition, int childPosition) {
-        return UUID.fromString(mListController.getListsByCategory(mListOfCategories.get(groupPosition))
-                .get(childPosition).mUUID).getLeastSignificantBits();
+        return mListController.getListsByCategory(mListOfCategories.get(groupPosition))
+                .get(childPosition).mUUID.hashCode();
+        //UUID.fromString(mListController.getListsByCategory(mListOfCategories.get(groupPosition))
+        // .get(childPosition).mUUID).getLeastSignificantBits();
+    }
+
+
+    /**
+     * Get the id of the group.
+     * @param _groupPosition the position of the group item in the adapter to get the id from.
+     * @return the UUID
+     */
+    public String getGroupUUID(int _groupPosition) {
+        return mListOfCategories.get(_groupPosition).mUUID;
+    }
+
+    /**
+     * Get the id of the child.
+     * @param _groupPosition the position of the group item in the adapter to get the id from.
+     * @param _childPosition the position of the child item in the adapter to get the id from.
+     * @return the UUID
+     */
+    public String getChildUUID(int _groupPosition, int _childPosition) {
+        return mListController.getListsByCategory(mListOfCategories.get(_groupPosition))
+                .get(_childPosition).mUUID;
     }
 
     @Override
@@ -113,8 +136,8 @@ public class ExpandableCategoryItemListAdapter extends BaseExpandableListAdapter
 
         //deleteImage.setOnClickListener(new OnDeleteCategoryClickListener(category.getId()));
         tvCategoryName.setText(category.mName);
-        tvCategoryItemCount.setText(String.valueOf(mListController.getListsByCategory(category).
-                size()));
+        /*tvCategoryItemCount.setText(String.valueOf(mListController.getListsByCategory(category).
+                size()));*/
 
         return view;
     }

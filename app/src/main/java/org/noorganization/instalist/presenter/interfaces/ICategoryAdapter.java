@@ -25,4 +25,6 @@ public interface ICategoryAdapter {
      * @param _Category the category that should be removed.
      */
     void removeCategory(Category _Category);
+
+
 }

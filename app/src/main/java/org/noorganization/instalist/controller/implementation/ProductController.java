@@ -394,7 +394,11 @@ public class ProductController implements IProductController {
         }
 
         productCursor.moveToFirst();
-        List<Product> products = new ArrayList<>();
+        List<Product> products = new ArrayList<>(productCursor.getCount());
+        if(productCursor.getCount() == 0){
+            return products;
+        }
+
         do {
             products.add(parseProduct(productCursor));
         } while (productCursor.moveToNext());

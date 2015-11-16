@@ -94,7 +94,11 @@ public class ListController implements IListController {
         ArrayList<ShoppingList> rtn = new ArrayList<>(listIDs.getCount());
         listIDs.moveToFirst();
         while (!listIDs.isAfterLast()) {
-            rtn.add(getListById(listIDs.getString(listIDs.getColumnIndex(ShoppingList.COLUMN.ID))));
+            try {
+                rtn.add(getListById(listIDs.getString(listIDs.getColumnIndex(ShoppingList.COLUMN.ID))));
+            } catch (IllegalArgumentException e) {
+                Log.e(LOG_TAG, "Illegal arguments passed in.");
+            }
             listIDs.moveToNext();
         }
         listIDs.close();
@@ -186,8 +190,11 @@ public class ListController implements IListController {
         ShoppingList rtn = new ShoppingList();
         rtn.mUUID = entryCursor.getString(entryCursor.getColumnIndex(ShoppingList.COLUMN.ID));
         rtn.mName = entryCursor.getString(entryCursor.getColumnIndex(ShoppingList.COLUMN.NAME));
-        rtn.mCategory = mCategoryController.getCategoryByID(entryCursor.getString(
-                entryCursor.getColumnIndex(ShoppingList.COLUMN.CATEGORY)));
+        String catId = entryCursor.getString(
+                entryCursor.getColumnIndex(ShoppingList.COLUMN.CATEGORY));
+        catId = catId == null ? "-" : catId;
+        rtn.mCategory = mCategoryController.getCategoryByID(catId);
+        entryCursor.close();
         return rtn;
     }
 
@@ -211,7 +218,8 @@ public class ListController implements IListController {
         ArrayList<ShoppingList> rtn = new ArrayList<>(ListsInCat.getCount());
         ListsInCat.moveToFirst();
         while (!ListsInCat.isAfterLast()) {
-            rtn.add(getListById(ListsInCat.getString(ListsInCat.getColumnIndex(ShoppingList.COLUMN.ID))));
+            String listId = ListsInCat.getString(ListsInCat.getColumnIndex(ShoppingList.COLUMN.ID));
+            rtn.add(getListById(listId));
             ListsInCat.moveToNext();
         }
         ListsInCat.close();

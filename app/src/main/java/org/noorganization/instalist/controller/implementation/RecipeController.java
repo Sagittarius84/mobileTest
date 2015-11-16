@@ -374,16 +374,20 @@ public class RecipeController implements IRecipeController {
                 null,
                 null,
                 null);
-
+        List<Recipe> recipes = new ArrayList<>();
         if (recipeCursor == null) {
-            return null;
+            return recipes;
         }
 
         recipeCursor.moveToFirst();
-        List<Recipe> recipes = new ArrayList<>();
+        if(recipeCursor.getCount() == 0){
+            recipeCursor.close();
+            return recipes;
+        }
         do {
             recipes.add(parseRecipe(recipeCursor));
         } while (recipeCursor.moveToNext());
+        recipeCursor.close();
         return recipes;
     }
 
