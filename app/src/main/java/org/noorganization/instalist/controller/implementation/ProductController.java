@@ -171,8 +171,8 @@ public class ProductController implements IProductController {
 
         _toChange.mUUID = oldProduct.mUUID;
 
-        Uri productUri = mResolver.insert(Uri.parse(ProductProvider.SINGLE_PRODUCT_CONTENT_URI.replace("*", _toChange.mUUID)), _toChange.toContentValues());
-        if (productUri == null) {
+        int updatedRows = mResolver.update(Uri.parse(ProductProvider.SINGLE_PRODUCT_CONTENT_URI.replace("*", _toChange.mUUID)), _toChange.toContentValues(),null,null);
+        if (updatedRows == 0) {
             return oldProduct;
         }
 

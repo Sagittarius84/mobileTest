@@ -14,13 +14,18 @@ import org.noorganization.instalist.model.Recipe;
 import org.noorganization.instalist.model.ShoppingList;
 import org.noorganization.instalist.model.Tag;
 import org.noorganization.instalist.model.Unit;
+import org.noorganization.instalist.provider.internal.CategoryProvider;
 import org.noorganization.instalist.provider.internal.IInternalProvider;
 import org.noorganization.instalist.provider.internal.ProductProvider;
 import org.noorganization.instalist.provider.internal.RecipeProvider;
+import org.noorganization.instalist.provider.internal.ShoppingListProvider;
 import org.noorganization.instalist.provider.internal.TagProvider;
 import org.noorganization.instalist.provider.internal.UnitProvider;
 
+import java.util.List;
+
 /**
+ * Testutils to support some easier operations in the other tests.
  * Created by Tino on 29.10.2015.
  */
 public class ProviderTestUtils {
@@ -170,6 +175,7 @@ public class ProviderTestUtils {
 
         return _contentResolver.insert(Uri.parse(TagProvider.MULTIPLE_TAG_CONTENT_URI), contentValues);
     }
+
     /**
      * Get a tag by Uri.
      *
@@ -195,6 +201,63 @@ public class ProviderTestUtils {
 
         return tag;
     }
+
+    /**
+     * Insert a category.
+     * @param _contentResolver the contentResolver.
+     * @param _name the name of category.
+     * @return the uri of the inserted category.
+     */
+    public static Uri insertCategory(ContentResolver _contentResolver, String _name){
+        ContentValues categoryValues = new ContentValues();
+        categoryValues.put(Category.COLUMN.NAME, _name);
+        return _contentResolver.insert(Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI,"category"), categoryValues);
+    }
+
+    /**
+     * Insert a list.
+     * @param _contentResolver the contentResolver.
+     * @param _categoryUUID the uuid of the category.
+     * @param _name the name of the list to insert.
+     * @return the uri of the new list.
+     */
+    public static Uri insertList(ContentResolver _contentResolver, String _categoryUUID, String _name){
+        ContentValues listValues = new ContentValues();
+        listValues.put(ShoppingList.COLUMN.NAME, _name);
+        listValues.put(ShoppingList.COLUMN.CATEGORY, _categoryUUID);
+
+        return _contentResolver.insert(Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI,"category/" + _categoryUUID  + "/list"), listValues);
+    }
+
+    /**
+     * Insert a listentry with the given credentials.
+     * @param _contentResolver the resolver itself.
+     * @param _categoryUUID the category uuid.
+     * @param _listUUID the list uuid.
+     * @param _productUUID the product uuid.
+     * @param _amount the amount of the entry.
+     * @param _struck true if the element should be struck. false then not.
+     * @param _priority the priority of the ListEntry.
+     * @return the Uri of the list entry or null.
+     */
+    public static Uri insertListEntry(ContentResolver _contentResolver, String _categoryUUID, String _listUUID, String _productUUID, float _amount, boolean _struck, int _priority){
+        if(_categoryUUID == null || _listUUID == null || _productUUID == null){
+            throw new NullPointerException("Category id, list id or product id is null! Please define those values");
+        }
+        if(_amount < 0.001f){
+            throw new NullPointerException("Amount is negative, Define a value greater than 0.001f!");
+        }
+
+        ContentValues listValues = new ContentValues();
+        listValues.put(ListEntry.COLUMN.AMOUNT, _amount);
+        listValues.put(ListEntry.COLUMN.STRUCK, _struck);
+        listValues.put(ListEntry.COLUMN.PRIORITY, _priority);
+        listValues.put(ListEntry.COLUMN.PRODUCT, _productUUID);
+        listValues.put(ListEntry.COLUMN.LIST, _listUUID);
+
+        return _contentResolver.insert(Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI, "category/" + _categoryUUID  + "/list/" + _listUUID + "/entry"), listValues);
+    }
+
     /**
      * Inserts a recipe to the database.
      *

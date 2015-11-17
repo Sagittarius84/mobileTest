@@ -88,14 +88,6 @@ public class Product {
         mStepAmount = DEFAULTS.STEP_AMOUNT;
     }
 
-    public Product(String _uuid, String _name, Unit _unit, float _defaultAmount, float _stepAmount) {
-        mUUID = _uuid;
-        mUnit = _unit;
-        mName = _name;
-        mDefaultAmount = _defaultAmount;
-        mStepAmount = _stepAmount;
-    }
-
     public Product(String _name, Unit _unit, float _defaultAmount, float _stepAmount) {
         mUnit = _unit;
         mName = _name;

@@ -6,6 +6,7 @@ import android.net.Uri;
 import android.test.AndroidTestCase;
 
 import org.noorganization.instalist.controller.implementation.ControllerFactory;
+import org.noorganization.instalist.model.Category;
 import org.noorganization.instalist.model.ListEntry;
 import org.noorganization.instalist.model.Product;
 import org.noorganization.instalist.model.ShoppingList;
@@ -43,6 +44,8 @@ public class IProductControllerTest extends AndroidTestCase {
         mTagController = ControllerFactory.getTagController(mContext);
         mListController = ControllerFactory.getListController(mContext);
 
+        tearDown();
+
         Uri unitUri = ProviderTestUtils.insertUnit(mResolver, "_TEST_l");
         assertNotNull(unitUri);
         mLiter = new Unit(unitUri.getLastPathSegment(), "_TEST_1");//ProviderTestUtils.getUnit(mResolver, unitUri);
@@ -59,11 +62,17 @@ public class IProductControllerTest extends AndroidTestCase {
         assertNotNull(tagUri);
         mTag = new Tag(tagUri.getLastPathSegment(), "_TEST_vegetable"); //ProviderTestUtils.getTag(mResolver, tagUri);
 
-        mList = mListController.addList("_TEST_home");
-        assertNotNull(mList);
-        ListEntry entry = mListController.addOrChangeItem(mList, mMilk, 1.0f);
-        assertNotNull(entry);
-        assertNotNull(mController2Test.addTagToProduct(mBroccoli, mTag));
+        Uri categoryUri = ProviderTestUtils.insertCategory(mResolver, "TEST_CATEGORY");
+        assertNotNull(categoryUri);
+        Category testCategory = new Category(categoryUri.getLastPathSegment(), "TEST_CATEGORY");
+        Uri listUri = ProviderTestUtils.insertList(mResolver, categoryUri.getLastPathSegment(), "TEST_LIST");
+        assertNotNull(listUri);
+
+        mList = new ShoppingList(listUri.getLastPathSegment(), "TEST_LIST", testCategory);
+
+        Uri newListEntryUri = ProviderTestUtils.insertListEntry(mResolver, mList.mCategory.mUUID, mList.mUUID, mMilk.mUUID, 1.0f, false, 0);
+        assertNotNull(newListEntryUri);
+//        assertNotNull(mController2Test.addTagToProduct(mBroccoli, mTag));
 
     }
 
@@ -75,6 +84,20 @@ public class IProductControllerTest extends AndroidTestCase {
         mResolver.delete(Uri.parse(TaggedProductProvider.MULTIPLE_TAGGED_PRODUCT_CONTENT_URI), null, null);
 
         mResolver.delete(Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI, "list"), null, null);
+        Cursor categoryCursor = mResolver.query(Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI, "category"), Category.COLUMN.ALL_COLUMNS, null, null, null);
+        if (categoryCursor == null) {
+            throw new IllegalStateException("No category Cursor found");
+        }
+        if (categoryCursor.getCount() > 0) {
+            categoryCursor.moveToFirst();
+            do {
+                String categoryId = categoryCursor.getString(categoryCursor.getColumnIndex(Category.COLUMN.ID));
+                if (!categoryId.equals("-")) {
+                    ProviderTestUtils.deleteTestLists(mResolver, categoryId);
+                }
+            } while (categoryCursor.moveToNext());
+        }
+        categoryCursor.close();
         mResolver.delete(Uri.parse(ProductProvider.MULTIPLE_PRODUCT_CONTENT_URI), null, null);
         mResolver.delete(Uri.parse(UnitProvider.MULTIPLE_UNIT_CONTENT_URI), null, null);
         mResolver.delete(Uri.parse(TagProvider.MULTIPLE_TAG_CONTENT_URI), null, null);
@@ -88,13 +111,23 @@ public class IProductControllerTest extends AndroidTestCase {
 
         Product createdProduct = mController2Test.createProduct("_TEST_butter", null, 1.0f, 0.25f);
         assertNotNull(createdProduct);
-        Product savedProduct = mController2Test.findById(createdProduct.mUUID);
-        assertNotNull(savedProduct);
-        assertEquals(createdProduct, savedProduct);
+
         assertEquals("_TEST_butter", createdProduct.mName);
-        assertNull(createdProduct.mUnit);
-        assertEquals(1.0f, createdProduct.mDefaultAmount, 0.001f);
         assertEquals(0.25f, createdProduct.mStepAmount, 0.001f);
+        assertEquals(1.0f, createdProduct.mDefaultAmount, 0.001);
+        assertEquals("-", createdProduct.mUnit.mUUID);
+
+        Cursor productsCursor = mResolver.query(Uri.parse(ProductProvider.MULTIPLE_PRODUCT_CONTENT_URI), Product.COLUMN.ALL_COLUMNS, Product.COLUMN.ID + "=?", new String []{createdProduct.mUUID}, null);
+        assertNotNull(productsCursor);
+        assertEquals(1, productsCursor.getCount());
+        productsCursor.moveToFirst();
+
+        assertEquals("_TEST_butter", productsCursor.getString(productsCursor.getColumnIndex(Product.COLUMN.NAME)));
+        assertEquals(0.25f, productsCursor.getFloat(productsCursor.getColumnIndex(Product.COLUMN.STEP_AMOUNT)), 0.001f);
+        assertEquals(1.0f, productsCursor.getFloat(productsCursor.getColumnIndex(Product.COLUMN.DEFAULT_AMOUNT)), 0.001);
+        assertEquals("-", productsCursor.getString(productsCursor.getColumnIndex(Product.COLUMN.UNIT)));
+
+        productsCursor.close();
     }
 
     public void testModifyProduct() throws Exception {
@@ -147,7 +180,7 @@ public class IProductControllerTest extends AndroidTestCase {
                 null
         );
         assertNotNull(listEntryCursor);
-        assertEquals(1, listEntryCursor.getCount());
+        assertEquals(0, listEntryCursor.getCount());
         listEntryCursor.close();
 
     }
