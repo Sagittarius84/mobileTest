@@ -46,6 +46,10 @@ public class Recipe {
         mName = _name;
     }
 
+    public Recipe(String _uuid, String _name){
+        mUUID = _uuid;
+        mName = _name;
+    }
     public ContentValues toContentValues() {
         ContentValues cv = new ContentValues(2);
         cv.put(COLUMN.ID, this.mUUID);

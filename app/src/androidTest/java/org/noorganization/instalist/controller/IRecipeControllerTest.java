@@ -9,6 +9,7 @@ import org.noorganization.instalist.controller.implementation.ControllerFactory;
 import org.noorganization.instalist.model.Ingredient;
 import org.noorganization.instalist.model.Product;
 import org.noorganization.instalist.model.Recipe;
+import org.noorganization.instalist.provider.ProviderTestUtils;
 import org.noorganization.instalist.provider.internal.IngredientProvider;
 import org.noorganization.instalist.provider.internal.ProductProvider;
 import org.noorganization.instalist.provider.internal.RecipeProvider;
@@ -35,23 +36,33 @@ public class IRecipeControllerTest extends AndroidTestCase {
         mResolver = mContext.getContentResolver();
         tearDown();
 
-        mCheeseCake = mRecipeController.createRecipe("_TEST_cheesecake");
-        assertNotNull(mCheeseCake);
+        Uri cheeseCakeUri = ProviderTestUtils.insertRecipe(mResolver, "_TEST_cheesecake");
+        assertNotNull(cheeseCakeUri);
+        mCheeseCake = new Recipe(cheeseCakeUri.getLastPathSegment(), "_TEST_cheesecake");
 
-        mPuffPastries = mRecipeController.createRecipe("_TEST_puffpastries");
-        assertNotNull(mPuffPastries);
+        Uri puffPastriesUri = ProviderTestUtils.insertRecipe(mResolver, "_TEST_puffpastries");
+        assertNotNull(puffPastriesUri);
+        mPuffPastries = new Recipe(puffPastriesUri.getLastPathSegment(), "_TEST_puffpastries");
 
-        mCurd = mProductController.createProduct("_TEST_curd", null, 1.0f, 1.0f);
-        assertNotNull(mCurd);
-        mFlour = mProductController.createProduct("_TEST_flour", null, 1.0f, 1.0f);
-        assertNotNull(mFlour);
-        mEgg = mProductController.createProduct("_TEST_egg", null, 1.0f, 1.0f);
-        assertNotNull(mEgg);
+        Uri curdUri = ProviderTestUtils.insertProduct(mResolver, "_TEST_curd", 1.0f, 1.0f, null);
+        assertNotNull(curdUri);
+        mCurd = new Product(curdUri.getLastPathSegment(), "_TEST_curd", null, 1.0f, 1.0f);
 
-        mIngredientFlourInCake = mRecipeController.addOrChangeIngredient(mCheeseCake, mFlour, 0.3f);
-        assertNotNull(mIngredientFlourInCake);
-        mIngredientCurdInCake = mRecipeController.addOrChangeIngredient(mCheeseCake, mCurd, 0.5f);
-        assertNotNull(mIngredientCurdInCake);
+        Uri flourUri = ProviderTestUtils.insertProduct(mResolver, "_TEST_flour", 1.0f, 1.0f, null);
+        assertNotNull(flourUri);
+        mFlour = new Product(flourUri.getLastPathSegment(), "_TEST_flour", null, 1.0f, 1.0f);
+
+        Uri eggUri = ProviderTestUtils.insertProduct(mResolver, "_TEST_egg", 1.0f, 1.0f, null);
+        assertNotNull(eggUri);
+        mEgg = new Product(eggUri.getLastPathSegment(), "_TEST_egg", null, 1.0f, 1.0f);
+
+        Uri cheeseCakeFlourUri = ProviderTestUtils.insertIngredient(mResolver, mCheeseCake.mUUID, mFlour.mUUID, 0.3f);
+        assertNotNull(cheeseCakeFlourUri);
+        Uri cheeseCakeCurdUri = ProviderTestUtils.insertIngredient(mResolver, mCheeseCake.mUUID, mCurd.mUUID, 0.5f);
+        assertNotNull(cheeseCakeCurdUri);
+
+        mIngredientFlourInCake = new Ingredient(cheeseCakeFlourUri.getLastPathSegment(), mFlour,mCheeseCake, 0.3f);
+        mIngredientCurdInCake  = new Ingredient(cheeseCakeCurdUri.getLastPathSegment(), mCurd,mCheeseCake, 0.5f);
 
     }
 

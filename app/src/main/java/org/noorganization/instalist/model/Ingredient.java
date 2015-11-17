@@ -62,6 +62,12 @@ public class Ingredient {
         mAmount = _amount;
     }
 
+    public Ingredient(String _uuid, Product _product, Recipe _recipe, float _amount) {
+        mUUID = _uuid;
+        mProduct = _product;
+        mRecipe = _recipe;
+        mAmount = _amount;
+    }
     public ContentValues toContentValues() {
         ContentValues cv = new ContentValues(4);
         cv.put(COLUMN.ID, this.mUUID);

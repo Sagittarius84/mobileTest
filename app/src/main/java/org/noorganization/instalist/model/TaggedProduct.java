@@ -81,6 +81,19 @@ public class TaggedProduct {
         mProduct = _product;
     }
 
+    /**
+     * Constructor of TaggedProduct to combine product with a tag and also set a uuid.
+     *
+     * @param _uuid    the uuid to be assigned.
+     * @param _tag     the tag to be assigned.
+     * @param _product the product to be connected with the tag.
+     */
+    public TaggedProduct(String _uuid, Tag _tag, Product _product) {
+        mUUID = _uuid;
+        mTag = _tag;
+        mProduct = _product;
+    }
+
     public ContentValues toContentValues() {
         ContentValues cv = new ContentValues();
         cv.put(COLUMN.ID, this.mUUID);

@@ -8,11 +8,13 @@ import android.net.Uri;
 import junit.framework.Assert;
 
 import org.noorganization.instalist.model.Category;
+import org.noorganization.instalist.model.Ingredient;
 import org.noorganization.instalist.model.ListEntry;
 import org.noorganization.instalist.model.Product;
 import org.noorganization.instalist.model.Recipe;
 import org.noorganization.instalist.model.ShoppingList;
 import org.noorganization.instalist.model.Tag;
+import org.noorganization.instalist.model.TaggedProduct;
 import org.noorganization.instalist.model.Unit;
 import org.noorganization.instalist.provider.internal.CategoryProvider;
 import org.noorganization.instalist.provider.internal.IInternalProvider;
@@ -20,6 +22,7 @@ import org.noorganization.instalist.provider.internal.ProductProvider;
 import org.noorganization.instalist.provider.internal.RecipeProvider;
 import org.noorganization.instalist.provider.internal.ShoppingListProvider;
 import org.noorganization.instalist.provider.internal.TagProvider;
+import org.noorganization.instalist.provider.internal.TaggedProductProvider;
 import org.noorganization.instalist.provider.internal.UnitProvider;
 
 import java.util.List;
@@ -33,22 +36,23 @@ public class ProviderTestUtils {
 
     /**
      * Insert an Unit.
+     *
      * @param _contentResolver the content resolver.
-     * @param _name the name of the unit.
+     * @param _name            the name of the unit.
      * @return null or the uri of the inserted unit.
      */
-    public static Uri insertUnit(ContentResolver _contentResolver, String _name){
+    public static Uri insertUnit(ContentResolver _contentResolver, String _name) {
         ContentValues unitValues = new ContentValues();
         unitValues.put(Unit.COLUMN.NAME, _name);
         return _contentResolver.insert(Uri.parse(UnitProvider.MULTIPLE_UNIT_CONTENT_URI), unitValues);
     }
 
-    public static Unit getUnit(ContentResolver _contentResolver, Uri _uri){
-        Cursor unitCursor = _contentResolver.query(_uri, Unit.COLUMN.ALL_COLUMNS, null, null,null);
-        if(unitCursor == null){
+    public static Unit getUnit(ContentResolver _contentResolver, Uri _uri) {
+        Cursor unitCursor = _contentResolver.query(_uri, Unit.COLUMN.ALL_COLUMNS, null, null, null);
+        if (unitCursor == null) {
             return null;
         }
-        if(unitCursor.getCount()== 0){
+        if (unitCursor.getCount() == 0) {
             unitCursor.close();
             return null;
         }
@@ -61,6 +65,7 @@ public class ProviderTestUtils {
 
         return unit;
     }
+
     /**
      * Inserts a product into the current database.
      *
@@ -107,10 +112,10 @@ public class ProviderTestUtils {
 
     public static Product getProduct(ContentResolver _contentResolver, String _UUID) {
         Cursor productCursor = _contentResolver.query(Uri.parse(ProductProvider.SINGLE_PRODUCT_CONTENT_URI.replace("*", _UUID)), Product.COLUMN.ALL_COLUMNS, null, null, null);
-        if(productCursor == null){
+        if (productCursor == null) {
             throw new NullPointerException("ProductCursor is null!");
         }
-        if(productCursor.getCount() == 0){
+        if (productCursor.getCount() == 0) {
             productCursor.close();
             throw new NullPointerException("ProductCursor does not contain any elements!");
         }
@@ -120,11 +125,11 @@ public class ProviderTestUtils {
                 Uri.parse(UnitProvider.SINGLE_UNIT_CONTENT_URI.replace("*", productCursor.getString(productCursor.getColumnIndex(Product.COLUMN.UNIT)))),
                 Unit.COLUMN.ALL_COLUMNS, null, null, null);
 
-        if(unitCursor == null){
+        if (unitCursor == null) {
             throw new NullPointerException("UnitCursor is null!");
         }
 
-        if(unitCursor.getCount() == 0){
+        if (unitCursor.getCount() == 0) {
             unitCursor.close();
             throw new NullPointerException("UnitCursor does not contain any elements!");
         }
@@ -180,15 +185,15 @@ public class ProviderTestUtils {
      * Get a tag by Uri.
      *
      * @param _contentResolver the tagprovider where the actions should be done.
-     * @param _uri          the uri for the tag.
+     * @param _uri             the uri for the tag.
      * @return the tag or null.
      */
     public static Tag getTag(ContentResolver _contentResolver, Uri _uri) {
-        Cursor tagCursor = _contentResolver.query(_uri, Tag.COLUMN.ALL_COLUMNS, null, null,null);
-        if(tagCursor == null){
+        Cursor tagCursor = _contentResolver.query(_uri, Tag.COLUMN.ALL_COLUMNS, null, null, null);
+        if (tagCursor == null) {
             return null;
         }
-        if(tagCursor.getCount()== 0){
+        if (tagCursor.getCount() == 0) {
             tagCursor.close();
             return null;
         }
@@ -204,48 +209,51 @@ public class ProviderTestUtils {
 
     /**
      * Insert a category.
+     *
      * @param _contentResolver the contentResolver.
-     * @param _name the name of category.
+     * @param _name            the name of category.
      * @return the uri of the inserted category.
      */
-    public static Uri insertCategory(ContentResolver _contentResolver, String _name){
+    public static Uri insertCategory(ContentResolver _contentResolver, String _name) {
         ContentValues categoryValues = new ContentValues();
         categoryValues.put(Category.COLUMN.NAME, _name);
-        return _contentResolver.insert(Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI,"category"), categoryValues);
+        return _contentResolver.insert(Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI, "category"), categoryValues);
     }
 
     /**
      * Insert a list.
+     *
      * @param _contentResolver the contentResolver.
-     * @param _categoryUUID the uuid of the category.
-     * @param _name the name of the list to insert.
+     * @param _categoryUUID    the uuid of the category.
+     * @param _name            the name of the list to insert.
      * @return the uri of the new list.
      */
-    public static Uri insertList(ContentResolver _contentResolver, String _categoryUUID, String _name){
+    public static Uri insertList(ContentResolver _contentResolver, String _categoryUUID, String _name) {
         ContentValues listValues = new ContentValues();
         listValues.put(ShoppingList.COLUMN.NAME, _name);
         listValues.put(ShoppingList.COLUMN.CATEGORY, _categoryUUID);
 
-        return _contentResolver.insert(Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI,"category/" + _categoryUUID  + "/list"), listValues);
+        return _contentResolver.insert(Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI, "category/" + _categoryUUID + "/list"), listValues);
     }
 
     /**
      * Insert a listentry with the given credentials.
+     *
      * @param _contentResolver the resolver itself.
-     * @param _categoryUUID the category uuid.
-     * @param _listUUID the list uuid.
-     * @param _productUUID the product uuid.
-     * @param _amount the amount of the entry.
-     * @param _struck true if the element should be struck. false then not.
-     * @param _priority the priority of the ListEntry.
+     * @param _categoryUUID    the category uuid.
+     * @param _listUUID        the list uuid.
+     * @param _productUUID     the product uuid.
+     * @param _amount          the amount of the entry.
+     * @param _struck          true if the element should be struck. false then not.
+     * @param _priority        the priority of the ListEntry.
      * @return the Uri of the list entry or null.
      */
-    public static Uri insertListEntry(ContentResolver _contentResolver, String _categoryUUID, String _listUUID, String _productUUID, float _amount, boolean _struck, int _priority){
-        if(_categoryUUID == null || _listUUID == null || _productUUID == null){
+    public static Uri insertListEntry(ContentResolver _contentResolver, String _categoryUUID, String _listUUID, String _productUUID, float _amount, boolean _struck, int _priority) {
+        if (_categoryUUID == null || _listUUID == null || _productUUID == null) {
             throw new NullPointerException("Category id, list id or product id is null! Please define those values");
         }
-        if(_amount < 0.001f){
-            throw new NullPointerException("Amount is negative, Define a value greater than 0.001f!");
+        if (_amount < 0.001f) {
+            throw new IllegalArgumentException("Amount is negative, Define a value greater than 0.001f!");
         }
 
         ContentValues listValues = new ContentValues();
@@ -255,7 +263,7 @@ public class ProviderTestUtils {
         listValues.put(ListEntry.COLUMN.PRODUCT, _productUUID);
         listValues.put(ListEntry.COLUMN.LIST, _listUUID);
 
-        return _contentResolver.insert(Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI, "category/" + _categoryUUID  + "/list/" + _listUUID + "/entry"), listValues);
+        return _contentResolver.insert(Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI, "category/" + _categoryUUID + "/list/" + _listUUID + "/entry"), listValues);
     }
 
     /**
@@ -355,4 +363,36 @@ public class ProviderTestUtils {
         } while (all.moveToNext());
     }
 
+    /**
+     * Inserts an ingredient into the database.
+     * @param _resolver the contentresolver to use.
+     * @param _recipeUUID the recipe uuid to get the ingredient associated with.
+     * @param _productUUID the product uuid which should be the product in the ingredient.
+     * @param _amount the amount of this ingredient.
+     * @return the new ingredient.
+     */
+    public static Uri insertIngredient(ContentResolver _resolver, String _recipeUUID, String _productUUID, float _amount) {
+        if (_recipeUUID == null || _productUUID == null || _amount <= 0.0f) {
+            throw new IllegalArgumentException("recipeUUID or productUUID id null or amoun is less than zero!");
+        }
+
+        ContentValues cv = new ContentValues();
+        cv.put(Ingredient.COLUMN.AMOUNT, _amount);
+        cv.put(Ingredient.COLUMN.PRODUCT_ID, _productUUID);
+        cv.put(Ingredient.COLUMN.RECIPE_ID, _recipeUUID);
+
+        return _resolver.insert(Uri.parse(RecipeProvider.MULTIPLE_RECIPE_INGREDIENT_CONTENT_URI.replace("*", _recipeUUID)), cv);
+    }
+
+    public static Uri insertTaggedProduct(ContentResolver _resolver, String _productUUID, String _tagUUID) {
+        if(_productUUID == null || _tagUUID == null || _resolver == null){
+            throw new NullPointerException("_productUUID or _tagUUID or _resolver is null!");
+        }
+
+        ContentValues cv = new ContentValues();
+        cv.put(TaggedProduct.COLUMN.PRODUCT_ID, _productUUID);
+        cv.put(TaggedProduct.COLUMN.TAG_ID, _tagUUID);
+
+        return _resolver.insert(Uri.parse(TaggedProductProvider.MULTIPLE_TAGGED_PRODUCT_CONTENT_URI), cv);
+    }
 }

@@ -119,7 +119,7 @@ public class TaggedProductProvider implements IInternalProvider {
                 sql += " WHERE " + TaggedProduct.COLUMN_PREFIXED.ID + "=\"" + _uri.getLastPathSegment() + "\"";
                 if (_selection != null && _selection.length() > 0) {
                     sql += " AND ";
-                    sql += String.format(_selection, _selectionArgs);
+                    sql += String.format(_selection, (Object[])_selectionArgs);
                 }
 
                 if (_sortOrder != null) {
@@ -134,7 +134,7 @@ public class TaggedProductProvider implements IInternalProvider {
                 sql += " INNER JOIN " + Product.TABLE_NAME + " ON " + TaggedProduct.COLUMN_PREFIXED.PRODUCT_ID + " = " + Product.PREFIXED_COLUMN.ID;
                 if (_selection != null && _selection.length() > 0) {
                     sql += " AND ";
-                    sql += String.format(_selection, _selectionArgs);
+                    sql += String.format(_selection, (Object[])_selectionArgs);
                 }
 
                 if (_sortOrder != null) {
@@ -151,7 +151,7 @@ public class TaggedProductProvider implements IInternalProvider {
                 sql += " WHERE " + TaggedProduct.COLUMN_PREFIXED.TAG_ID + "=\"" + tagId + "\"";
                 if (_selection != null && _selection.length() > 0) {
                     sql += " AND ";
-                    sql += String.format(_selection, _selectionArgs);
+                    sql += String.format(_selection, (Object[])_selectionArgs);
                 }
                 if (_sortOrder != null) {
                     sql += " ORDER BY " + _sortOrder;

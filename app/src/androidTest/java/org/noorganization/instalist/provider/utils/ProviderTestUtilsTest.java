@@ -7,10 +7,13 @@ import android.net.Uri;
 import android.test.AndroidTestCase;
 
 import org.noorganization.instalist.model.Category;
+import org.noorganization.instalist.model.Ingredient;
 import org.noorganization.instalist.model.ListEntry;
 import org.noorganization.instalist.model.Product;
+import org.noorganization.instalist.model.Recipe;
 import org.noorganization.instalist.model.ShoppingList;
 import org.noorganization.instalist.model.Tag;
+import org.noorganization.instalist.model.TaggedProduct;
 import org.noorganization.instalist.model.Unit;
 import org.noorganization.instalist.provider.ProviderTestUtils;
 import org.noorganization.instalist.provider.internal.ProductProvider;
@@ -140,6 +143,44 @@ public class ProviderTestUtilsTest extends AndroidTestCase {
         listEntryCursor.close();
     }
 
+    public void testInsertRecipe(){
+        Uri recipeUri = ProviderTestUtils.insertRecipe(mResolver, "TEST_RECIPE");
+        assertNotNull(recipeUri);
+
+        Cursor recipeCursor = mResolver.query(recipeUri, Recipe.COLUMN.ALL_COLUMNS, null,null,null);
+        assertNotNull(recipeCursor);
+        assertEquals(1, recipeCursor.getCount());
+        recipeCursor.moveToFirst();
+        assertEquals(recipeUri.getLastPathSegment(), recipeCursor.getString(recipeCursor.getColumnIndex(Recipe.COLUMN.ID)));
+        assertEquals("TEST_RECIPE", recipeCursor.getString(recipeCursor.getColumnIndex(Recipe.COLUMN.NAME)));
+        recipeCursor.close();
+    }
+
+    public void testInsertIngredient(){
+        Uri productUri = ProviderTestUtils.insertProduct(mResolver, "TEST_PRODUCT", 1.0f, 1.0f, null);
+        assertNotNull(productUri);
+        Uri recipeUri = ProviderTestUtils.insertRecipe(mResolver, "TEST_RECIPE");
+        assertNotNull(recipeUri);
+
+        String productUUID = productUri.getLastPathSegment();
+        String recipueUUID = recipeUri.getLastPathSegment();
+
+        Uri ingredientUri = ProviderTestUtils.insertIngredient(mResolver, recipueUUID, productUUID, 1.0f);
+        assertNotNull(ingredientUri);
+
+        Cursor ingredientCursor = mResolver.query(ingredientUri, Ingredient.COLUMN.ALL_COLUMNS, null, null, null);
+        assertNotNull(ingredientCursor);
+        assertEquals(1, ingredientCursor.getCount());
+        ingredientCursor.moveToFirst();
+
+        assertEquals(ingredientUri.getLastPathSegment(), ingredientCursor.getString(ingredientCursor.getColumnIndex(Ingredient.COLUMN.ID)));
+        assertEquals(productUUID, ingredientCursor.getString(ingredientCursor.getColumnIndex(Ingredient.COLUMN.PRODUCT_ID)));
+        assertEquals(recipueUUID, ingredientCursor.getString(ingredientCursor.getColumnIndex(Ingredient.COLUMN.RECIPE_ID)));
+        assertEquals(1.0f, ingredientCursor.getFloat(ingredientCursor.getColumnIndex(Ingredient.COLUMN.AMOUNT)));
+
+        ingredientCursor.close();
+    }
+
     public void testInsertProduct() {
         Uri newUnitUri = ProviderTestUtils.insertUnit(mResolver, "g");
         Uri insertedProductUri = ProviderTestUtils.insertProduct(mResolver, "TEST_PRODUCT", 1.0f, 0.5f, newUnitUri.getLastPathSegment());
@@ -156,6 +197,29 @@ public class ProviderTestUtilsTest extends AndroidTestCase {
         assertEquals(newUnitUri.getLastPathSegment(), productCursor.getString(productCursor.getColumnIndex(Product.COLUMN.UNIT)));
 
         productCursor.close();
+    }
+
+    public void testInsertTaggedProduct() {
+        Uri newTag = ProviderTestUtils.insertTag(mResolver, "FRESH");
+        assertNotNull(newTag);
+        Uri insertedProductUri = ProviderTestUtils.insertProduct(mResolver, "TEST_PRODUCT", 1.0f, 0.5f, null);
+        assertNotNull(insertedProductUri);
+
+        Uri newTaggedProductUri = ProviderTestUtils.insertTaggedProduct(mResolver, insertedProductUri.getLastPathSegment(), newTag.getLastPathSegment());
+
+        assertNotNull(newTaggedProductUri);
+
+        Cursor taggedProductCursor = mResolver.query(newTaggedProductUri, TaggedProduct.COLUMN.ALL_COLUMNS, null, null, null);
+        assertNotNull(taggedProductCursor);
+        assertEquals(1, taggedProductCursor.getCount());
+
+        taggedProductCursor.moveToFirst();
+
+        assertEquals(newTaggedProductUri.getLastPathSegment(), taggedProductCursor.getString(taggedProductCursor.getColumnIndex(TaggedProduct.COLUMN.ID)));
+        assertEquals(insertedProductUri.getLastPathSegment(), taggedProductCursor.getString(taggedProductCursor.getColumnIndex(TaggedProduct.COLUMN.PRODUCT_ID)));
+        assertEquals(newTag.getLastPathSegment(), taggedProductCursor.getString(taggedProductCursor.getColumnIndex(TaggedProduct.COLUMN.TAG_ID)));
+
+        taggedProductCursor.close();
     }
 
     public void testInsertProductWithoutUnit() {

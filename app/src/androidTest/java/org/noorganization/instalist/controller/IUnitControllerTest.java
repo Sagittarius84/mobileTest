@@ -7,6 +7,7 @@ import android.test.AndroidTestCase;
 import org.noorganization.instalist.controller.implementation.ControllerFactory;
 import org.noorganization.instalist.model.Product;
 import org.noorganization.instalist.model.Unit;
+import org.noorganization.instalist.provider.ProviderTestUtils;
 import org.noorganization.instalist.provider.internal.ProductProvider;
 import org.noorganization.instalist.provider.internal.UnitProvider;
 
@@ -29,21 +30,24 @@ public class IUnitControllerTest extends AndroidTestCase {
         mProductController = ControllerFactory.getProductController(mContext);
         tearDown();
 
-        mLiter = mUnitController.createUnit("_TEST_liter");
-        mGram = mUnitController.createUnit("_TEST_gram");
-        mMeter = mUnitController.createUnit("_TEST_meter");
+        Uri unitLiterUri = ProviderTestUtils.insertUnit(mResolver, "_TEST_liter");
+        assertNotNull(unitLiterUri);
+        Uri unitGramUri = ProviderTestUtils.insertUnit(mResolver, "_TEST_gram");
+        assertNotNull(unitLiterUri);
+        Uri unitMeterUri = ProviderTestUtils.insertUnit(mResolver, "_TEST_meter");
+        assertNotNull(unitLiterUri);
 
-        assertNotNull(mLiter);
-        assertNotNull(mGram);
-        assertNotNull(mMeter);
+        mLiter = new Unit(unitLiterUri.getLastPathSegment(), "_TEST_liter");
+        mGram = new Unit(unitGramUri.getLastPathSegment(), "_TEST_gram");
+        mMeter = new Unit(unitMeterUri.getLastPathSegment(), "_TEST_meter");
 
+        Uri milkProductUri = ProviderTestUtils.insertProduct(mResolver, "_TEST_milk", 1.0f, 1.0f, mLiter.mUUID);
+        Uri shelfProductUri = ProviderTestUtils.insertProduct(mResolver, "_TEST_shelf", 1.0f, 1.0f, mMeter.mUUID);
+        assertNotNull(milkProductUri);
+        assertNotNull(shelfProductUri);
 
-        mMilk = mProductController.createProduct("_TEST_milk", mLiter, 1.0f, 1.0f);
-        mShelf = mProductController.createProduct("_TEST_shelf", mMeter, 1.0f, 1.0f);
-
-        assertNotNull(mMilk);
-        assertNotNull(mShelf);
-
+        mMilk = new Product(milkProductUri.getLastPathSegment(), "_TEST_milk", mLiter, 1.0f, 1.0f);
+        mShelf = new Product(shelfProductUri.getLastPathSegment(), "_TEST_shelf", mMeter, 1.0f, 1.0f);
     }
 
     public void tearDown() throws Exception {

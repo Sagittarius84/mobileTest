@@ -490,7 +490,7 @@ public class ListController implements IListController {
     @Override
     public List<ListEntry> listAllListEntries(String _shoppingListUUID, String _categoryUUID) {
         Cursor listCursor = mResolver.query(
-                Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI, String.format("category/%s/list/%s/entry", new String[]{_categoryUUID, _shoppingListUUID})),
+                Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI, String.format("category/%s/list/%s/entry", _categoryUUID, _shoppingListUUID)),
                 ListEntry.COLUMN.ALL_COLUMNS,
                 null,
                 null,

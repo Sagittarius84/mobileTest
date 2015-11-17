@@ -8,6 +8,7 @@ import org.noorganization.instalist.controller.implementation.ControllerFactory;
 import org.noorganization.instalist.model.Product;
 import org.noorganization.instalist.model.Tag;
 import org.noorganization.instalist.model.TaggedProduct;
+import org.noorganization.instalist.provider.ProviderTestUtils;
 import org.noorganization.instalist.provider.internal.ProductProvider;
 import org.noorganization.instalist.provider.internal.TagProvider;
 import org.noorganization.instalist.provider.internal.TaggedProductProvider;
@@ -32,17 +33,28 @@ public class ITagControllerTest extends AndroidTestCase {
 
         tearDown();
 
-        mMetalware = mTagController.createTag("_TEST_metalware");
-        mMilkProduct = mTagController.createTag(TEST_MILK_PRODUCT);
+        Uri tagUri = ProviderTestUtils.insertTag(mResolver, "_TEST_metalware");
+        assertNotNull(tagUri);
+
+        mMetalware = new Tag(tagUri.getLastPathSegment(), "_TEST_metalware");
+
+        Uri milkProductTagUri = ProviderTestUtils.insertTag(mResolver, TEST_MILK_PRODUCT);
+        assertNotNull(milkProductTagUri);
+
+        mMilkProduct = new Tag(milkProductTagUri.getLastPathSegment(), TEST_MILK_PRODUCT);
 
         assertNotNull(mMetalware);
         assertNotNull(mMilkProduct);
 
-        mCheese = mProductController.createProduct("_TEST_cheese", null, 1.0f, 1.0f);
-        mCheeseMilkProductTag = mProductController.addTagToProduct(mCheese, mMilkProduct);
+        Uri productUri = ProviderTestUtils.insertProduct(mResolver, "_TEST_cheese", 1.0f, 1.0f, null);
+        assertNotNull(productUri);
 
-        assertNotNull(mCheese);
-        assertNotNull(mCheeseMilkProductTag);
+        mCheese = new Product(productUri.getLastPathSegment(), "_TEST_cheese",null, 1.0f, 1.0f);
+
+        Uri cheeseMilkProductTagUri = ProviderTestUtils.insertTaggedProduct(mResolver, mCheese.mUUID, mMilkProduct.mUUID);
+        assertNotNull(cheeseMilkProductTagUri);
+
+        mCheeseMilkProductTag  = new TaggedProduct(cheeseMilkProductTagUri.getLastPathSegment(), mMilkProduct, mCheese);
 
     }
 
