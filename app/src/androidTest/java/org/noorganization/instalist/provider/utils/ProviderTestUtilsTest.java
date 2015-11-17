@@ -16,7 +16,11 @@ import org.noorganization.instalist.model.Tag;
 import org.noorganization.instalist.model.TaggedProduct;
 import org.noorganization.instalist.model.Unit;
 import org.noorganization.instalist.provider.ProviderTestUtils;
+import org.noorganization.instalist.provider.internal.IngredientProvider;
 import org.noorganization.instalist.provider.internal.ProductProvider;
+import org.noorganization.instalist.provider.internal.RecipeProvider;
+import org.noorganization.instalist.provider.internal.TagProvider;
+import org.noorganization.instalist.provider.internal.TaggedProductProvider;
 import org.noorganization.instalist.provider.internal.UnitProvider;
 
 /**
@@ -40,6 +44,10 @@ public class ProviderTestUtilsTest extends AndroidTestCase {
         super.tearDown();
         mResolver.delete(Uri.parse(ProductProvider.MULTIPLE_PRODUCT_CONTENT_URI), null, null);
         mResolver.delete(Uri.parse(UnitProvider.MULTIPLE_UNIT_CONTENT_URI), null, null);
+        mResolver.delete(Uri.parse(RecipeProvider.MULTIPLE_RECIPE_CONTENT_URI), null, null);
+        mResolver.delete(Uri.parse(IngredientProvider.MULTIPLE_INGREDIENT_CONTENT_URI), null, null);
+        mResolver.delete(Uri.parse(TagProvider.MULTIPLE_TAG_CONTENT_URI), null, null);
+        mResolver.delete(Uri.parse(TaggedProductProvider.MULTIPLE_TAGGED_PRODUCT_CONTENT_URI), null, null);
     }
 
     public void testInsertUnit() {
@@ -143,11 +151,11 @@ public class ProviderTestUtilsTest extends AndroidTestCase {
         listEntryCursor.close();
     }
 
-    public void testInsertRecipe(){
+    public void testInsertRecipe() {
         Uri recipeUri = ProviderTestUtils.insertRecipe(mResolver, "TEST_RECIPE");
         assertNotNull(recipeUri);
 
-        Cursor recipeCursor = mResolver.query(recipeUri, Recipe.COLUMN.ALL_COLUMNS, null,null,null);
+        Cursor recipeCursor = mResolver.query(recipeUri, Recipe.COLUMN.ALL_COLUMNS, null, null, null);
         assertNotNull(recipeCursor);
         assertEquals(1, recipeCursor.getCount());
         recipeCursor.moveToFirst();
@@ -156,7 +164,7 @@ public class ProviderTestUtilsTest extends AndroidTestCase {
         recipeCursor.close();
     }
 
-    public void testInsertIngredient(){
+    public void testInsertIngredient() {
         Uri productUri = ProviderTestUtils.insertProduct(mResolver, "TEST_PRODUCT", 1.0f, 1.0f, null);
         assertNotNull(productUri);
         Uri recipeUri = ProviderTestUtils.insertRecipe(mResolver, "TEST_RECIPE");
@@ -209,15 +217,18 @@ public class ProviderTestUtilsTest extends AndroidTestCase {
 
         assertNotNull(newTaggedProductUri);
 
-        Cursor taggedProductCursor = mResolver.query(newTaggedProductUri, TaggedProduct.COLUMN.ALL_COLUMNS, null, null, null);
+        Cursor taggedProductCursor = mResolver.query(newTaggedProductUri,
+                new String[]{TaggedProduct.COLUMN_PREFIXED.ID, TaggedProduct.COLUMN_PREFIXED.PRODUCT_ID, TaggedProduct.COLUMN_PREFIXED.TAG_ID},
+                null, null, null);
+
         assertNotNull(taggedProductCursor);
         assertEquals(1, taggedProductCursor.getCount());
 
         taggedProductCursor.moveToFirst();
 
-        assertEquals(newTaggedProductUri.getLastPathSegment(), taggedProductCursor.getString(taggedProductCursor.getColumnIndex(TaggedProduct.COLUMN.ID)));
-        assertEquals(insertedProductUri.getLastPathSegment(), taggedProductCursor.getString(taggedProductCursor.getColumnIndex(TaggedProduct.COLUMN.PRODUCT_ID)));
-        assertEquals(newTag.getLastPathSegment(), taggedProductCursor.getString(taggedProductCursor.getColumnIndex(TaggedProduct.COLUMN.TAG_ID)));
+        assertEquals(newTaggedProductUri.getLastPathSegment(), taggedProductCursor.getString(taggedProductCursor.getColumnIndex(TaggedProduct.COLUMN_PREFIXED.ID)));
+        assertEquals(insertedProductUri.getLastPathSegment(), taggedProductCursor.getString(taggedProductCursor.getColumnIndex(TaggedProduct.COLUMN_PREFIXED.PRODUCT_ID)));
+        assertEquals(newTag.getLastPathSegment(), taggedProductCursor.getString(taggedProductCursor.getColumnIndex(TaggedProduct.COLUMN_PREFIXED.TAG_ID)));
 
         taggedProductCursor.close();
     }

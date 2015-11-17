@@ -117,9 +117,7 @@ public class ProductProvider implements IInternalProvider {
             case SINGLE_PRODUCT:
                 long rowId = mDatabase.insert(Product.TABLE_NAME, null, _values);
                 String unitId = _values.getAsString(Product.COLUMN.UNIT);
-                if(unitId == null){
-                    _values.put(Product.COLUMN.UNIT, "-");
-                }
+
                 // insertion went wrong
                 if (rowId == -1) {
                     return null;
@@ -132,10 +130,6 @@ public class ProductProvider implements IInternalProvider {
             case MULTIPLE_PRODUCTS:
 
                 _values.put(Product.COLUMN.ID, SQLiteUtils.generateId(mDatabase, Product.TABLE_NAME).toString());
-                unitId = _values.getAsString(Product.COLUMN.UNIT);
-                if(unitId == null){
-                    _values.put(Product.COLUMN.UNIT, "-");
-                }
                 rowId = mDatabase.insert(Product.TABLE_NAME, null, _values);
                 // insertion went wrong
                 if (rowId == -1) {
@@ -185,9 +179,6 @@ public class ProductProvider implements IInternalProvider {
                 String selection = ProviderUtils.prependIdToQuery(Product.PREFIXED_COLUMN.ID, null);
                 String[] selectionArgs = ProviderUtils.prependSelectionArgs(null, _uri.getLastPathSegment());
                 String unitId = _values.getAsString(Product.COLUMN.UNIT);
-                if(unitId == null){
-                    _values.put(Product.COLUMN.UNIT, "-");
-                }
                 affectedRows = mDatabase.update(Product.TABLE_NAME, _values, selection, selectionArgs);
                 break;
             case MULTIPLE_PRODUCTS:
