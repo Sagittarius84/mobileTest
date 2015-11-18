@@ -127,14 +127,20 @@ public class Product {
         if (Float.compare(anotherProduct.mStepAmount, mStepAmount) != 0) {
             return false;
         }
-        if (!mName.equals(anotherProduct.mName)) {
+        if ((mName == null && anotherProduct.mName != null) ||
+                (mName != null && !mName.equals(anotherProduct.mName))) {
             return false;
         }
-        if ((mUnit == null && anotherProduct.mUnit != null) || (mUnit != null && !mUnit.equals(anotherProduct.mUnit))) {
+        if ((mUnit == null && anotherProduct.mUnit != null) ||
+                (mUnit != null && !mUnit.equals(anotherProduct.mUnit))) {
+            return false;
+        }
+        if ((mUUID == null && anotherProduct.mUUID != null) ||
+                (mUUID != null && !mUUID.equals(anotherProduct.mUUID))) {
             return false;
         }
 
-        return mUUID.compareTo(anotherProduct.mUUID) == 0;
+        return true;
     }
 
 

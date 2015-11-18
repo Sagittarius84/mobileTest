@@ -178,9 +178,9 @@ public class IListControllerTest extends AndroidTestCase {
         // negative test: wrong inputs for existing item
         ListEntry returnedUnchangedEntry = mListController.addOrChangeItem(mListWork, mProductButter, -1.0f);
         assertNotNull(returnedUnchangedEntry);
-        ListEntry unchangedEntry = mListController.getEntryById(mListEntryButterForWork.mUUID);
-        assertEquals(mListEntryButterForWork, unchangedEntry);
-        assertEquals(returnedUnchangedEntry, unchangedEntry);
+        assertEquals(mListEntryButterForWork, returnedUnchangedEntry);
+        assertEquals(mListEntryButterForWork,
+                mListController.getEntryById(mListEntryButterForWork.mUUID));
 
         // positive test: change existing product
         ListEntry returnedEntry = mListController.addOrChangeItem(mListWork, mProductButter, 7.0f, 0);

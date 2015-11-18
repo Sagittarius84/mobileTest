@@ -123,11 +123,14 @@ public class ListEntry {
 
         ListEntry that = (ListEntry) o;
 
-        if (!mUUID.equals(that.mUUID) ||
+        if ((mUUID == null && that.mUUID != null) ||
+                (mUUID != null && !mUUID.equals(that.mUUID)) ||
                 Float.compare(that.mAmount, mAmount) != 0 ||
                 mStruck != that.mStruck ||
-                (mList == null && that.mList != null) || (mList != null && !mList.equals(that.mList)) ||
-                !mProduct.equals(that.mProduct) ||
+                (mList == null && that.mList != null) ||
+                (mList != null && !mList.equals(that.mList)) ||
+                (mProduct == null && that.mProduct != null) ||
+                (mProduct != null && !mProduct.equals(that.mProduct)) ||
                 mPriority != that.mPriority) {
             return false;
         }

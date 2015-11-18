@@ -76,11 +76,15 @@ public class ShoppingList {
         ShoppingList that = (ShoppingList) o;
 
         if ((mCategory == null && that.mCategory != null) ||
-                (mCategory != null && !mCategory.equals(that.mCategory))) {
+                (mCategory != null && !mCategory.equals(that.mCategory)) ||
+                (mName == null && that.mName != null) ||
+                (mName != null && !mName.equals(that.mName)) ||
+                (mUUID == null && that.mUUID != null) ||
+                (mUUID != null && !mUUID.equals(that.mUUID))) {
             return false;
         }
 
-        return (mUUID.equals(that.mUUID) && mName.equals(that.mName));
+        return true;
 
     }
 
