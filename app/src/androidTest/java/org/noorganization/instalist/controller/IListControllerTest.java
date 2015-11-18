@@ -202,8 +202,7 @@ public class IListControllerTest extends AndroidTestCase {
         assertEquals(2.0f, returnedEntry2.mAmount, 0.001f);
         assertFalse(returnedEntry2.mStruck);
         assertEquals(5, returnedEntry2.mPriority);
-        ListEntry createdEntry2 = mListController.getEntryById(returnedEntry2.mUUID);
-        assertEquals(createdEntry2, returnedEntry2);
+        assertEquals(returnedEntry2, mListController.getEntryById(returnedEntry2.mUUID));
         assertEquals(previousCount + 1, getEntryCount());
 
         // positive test create second entry

@@ -101,7 +101,8 @@ public class ProductController implements IProductController {
 
     @Override
     public Product findById(@NonNull String _uuid) {
-        Cursor productCursor = mResolver.query(Uri.parse(ProductProvider.SINGLE_PRODUCT_CONTENT_URI.replace("*", _uuid)), Product.COLUMN.ALL_COLUMNS, null, null, null);
+        Cursor productCursor = mResolver.query(Uri.parse(ProductProvider.SINGLE_PRODUCT_CONTENT_URI.replace("*", _uuid)),
+                Product.COLUMN.ALL_COLUMNS, null, null, null);
         if (productCursor == null || productCursor.getCount() != 1) {
             return null;
         }
@@ -115,12 +116,10 @@ public class ProductController implements IProductController {
         IUnitController unitController = ControllerFactory.getUnitController(mContext);
         String unitID = productCursor.getString(productCursor.getColumnIndex(Product.COLUMN.UNIT));
         if(unitID == null){
-            unitID = unitController.getDefaultUnit().mUUID;
-            if(unitID == null){
-                throw new NullPointerException("UUID is null");
-            }
+            product.mUnit = null;
+        } else {
+            product.mUnit = ControllerFactory.getUnitController(mContext).findById(unitID);
         }
-        product.mUnit = ControllerFactory.getUnitController(mContext).findById(unitID);
 
         /*
         if(product.mUnit == null){

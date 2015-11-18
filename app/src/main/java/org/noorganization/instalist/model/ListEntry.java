@@ -1,6 +1,7 @@
 package org.noorganization.instalist.model;
 
 import android.net.Uri;
+import android.util.Log;
 
 /**
  * Represents a product written on a shoppinglist.
@@ -73,9 +74,9 @@ public class ListEntry {
     public ListEntry() {
         mList = null;
         mProduct = null;
-        mAmount = 1.0f;
-        mStruck = false;
-        mPriority = 0;
+        mAmount = DEFAULTS.AMOUNT;
+        mStruck = (DEFAULTS.STRUCK != 0);
+        mPriority = DEFAULTS.PRIORITY;
     }
 
 
@@ -83,8 +84,8 @@ public class ListEntry {
         mList = _list;
         mProduct = _product;
         mAmount = _amount;
-        mStruck = false;
-        mPriority = 0;
+        mStruck = (DEFAULTS.STRUCK != 0);
+        mPriority = DEFAULTS.PRIORITY;
     }
 
     public ListEntry(ShoppingList _list, Product _product, float _amount, boolean _struck) {
@@ -92,7 +93,7 @@ public class ListEntry {
         mProduct = _product;
         mAmount = _amount;
         mStruck = _struck;
-        mPriority = 0;
+        mPriority = DEFAULTS.PRIORITY;
     }
 
     public ListEntry(ShoppingList _list, Product _product, float _amount, boolean _struck, int _prio) {
@@ -124,14 +125,30 @@ public class ListEntry {
         ListEntry that = (ListEntry) o;
 
         if ((mUUID == null && that.mUUID != null) ||
-                (mUUID != null && !mUUID.equals(that.mUUID)) ||
-                Float.compare(that.mAmount, mAmount) != 0 ||
-                mStruck != that.mStruck ||
-                (mList == null && that.mList != null) ||
-                (mList != null && !mList.equals(that.mList)) ||
-                (mProduct == null && that.mProduct != null) ||
-                (mProduct != null && !mProduct.equals(that.mProduct)) ||
-                mPriority != that.mPriority) {
+                (mUUID != null && !mUUID.equals(that.mUUID))) {
+            Log.d("ListEntry", "Equals failed: different uuid");
+            return false;
+        }
+        if (Float.compare(that.mAmount, mAmount) != 0) {
+            Log.d("ListEntry", "Equals failed: different amount");
+            return false;
+        }
+        if (mStruck != that.mStruck) {
+            Log.d("ListEntry", "Equals failed: different struck-status");
+            return false;
+        }
+        if ((mList == null && that.mList != null) ||
+                (mList != null && !mList.equals(that.mList))) {
+            Log.d("ListEntry", "Equals failed: different list");
+            return false;
+        }
+        if ((mProduct == null && that.mProduct != null) ||
+                (mProduct != null && !mProduct.equals(that.mProduct))) {
+            Log.d("ListEntry", "Equals failed: different product");
+            return false;
+        }
+        if (mPriority != that.mPriority) {
+            Log.d("ListEntry", "Equals failed: different priority");
             return false;
         }
 
@@ -148,7 +165,8 @@ public class ListEntry {
         return "ListEntry { id = " + mUUID + ", mList.id = " + (mList == null ? "none" :
                 mList.mUUID) +
                 ", mProduct.id = " + (mProduct == null ? "none" : mProduct.mUUID) +
-                ", mStruck = " + mStruck + ", mAmount" + mAmount + " }";
+                ", mStruck = " + mStruck + ", mAmount = " + mAmount + ", mPriority = " + mPriority +
+                " }";
     }
 
     public Uri toUri(Uri _baseUri) {

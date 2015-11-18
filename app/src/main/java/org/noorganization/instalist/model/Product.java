@@ -2,6 +2,7 @@ package org.noorganization.instalist.model;
 
 import android.content.ContentValues;
 import android.net.Uri;
+import android.util.Log;
 
 /**
  * Represents a product.
@@ -122,21 +123,26 @@ public class Product {
         Product anotherProduct = (Product) o;
 
         if (Float.compare(anotherProduct.mDefaultAmount, mDefaultAmount) != 0) {
+            Log.d("Product", "Equals failed: different default amount");
             return false;
         }
         if (Float.compare(anotherProduct.mStepAmount, mStepAmount) != 0) {
+            Log.d("Product", "Equals failed: different step amount");
             return false;
         }
         if ((mName == null && anotherProduct.mName != null) ||
                 (mName != null && !mName.equals(anotherProduct.mName))) {
+            Log.d("Product", "Equals failed: different name");
             return false;
         }
         if ((mUnit == null && anotherProduct.mUnit != null) ||
                 (mUnit != null && !mUnit.equals(anotherProduct.mUnit))) {
+            Log.d("Product", "Equals failed: different unit");
             return false;
         }
         if ((mUUID == null && anotherProduct.mUUID != null) ||
                 (mUUID != null && !mUUID.equals(anotherProduct.mUUID))) {
+            Log.d("Product", "Equals failed: different uuid");
             return false;
         }
 

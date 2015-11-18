@@ -124,7 +124,16 @@ public class ListController implements IListController {
             return null;
         }
         entryCursor.moveToFirst();
-        ListEntry rtn = parseListEntryFromCursor(entryCursor);
+        IProductController productController = ControllerFactory.getProductController(mContext);
+        String listUUID = entryCursor.getString(entryCursor.getColumnIndex(ListEntry.COLUMN.LIST));
+        String prodUUID = entryCursor.getString(entryCursor.getColumnIndex(ListEntry.COLUMN.PRODUCT));
+        ListEntry rtn = new ListEntry(
+                _UUID,
+                getListById(listUUID),
+                productController.findById(prodUUID),
+                entryCursor.getFloat(entryCursor.getColumnIndex(ListEntry.COLUMN.AMOUNT)),
+                entryCursor.getInt(entryCursor.getColumnIndex(ListEntry.COLUMN.STRUCK)) != 0,
+                entryCursor.getInt(entryCursor.getColumnIndex(ListEntry.COLUMN.PRIORITY)));
         entryCursor.close();
         return rtn;
     }
