@@ -90,8 +90,10 @@ public class IRecipeControllerTest extends AndroidTestCase {
         Recipe invalidRecipe = new Recipe("_TEST_pancakes");
         // also this should have no consequences.
         mRecipeController.removeRecipe(invalidRecipe);
+
         assertNotNull(mCheeseCake.mUUID);
         mRecipeController.removeRecipe(mCheeseCake);
+
         assertNull(mRecipeController.findById(mCheeseCake.mUUID));
         assertNotNull(mCheeseCake.mUUID);
         Cursor ingredientCursor = mResolver.query(Uri.parse(IngredientProvider.MULTIPLE_INGREDIENT_CONTENT_URI),
@@ -99,8 +101,10 @@ public class IRecipeControllerTest extends AndroidTestCase {
                 Ingredient.COLUMN.RECIPE_ID + "=?",
                 new String[]{mCheeseCake.mUUID},
                 null);
+
         assertNotNull(ingredientCursor);
         assertEquals(0, ingredientCursor.getCount());
+
         ingredientCursor.close();
     }
 

@@ -80,21 +80,43 @@ public class IProductControllerTest extends AndroidTestCase {
     public void tearDown() throws Exception {
         super.tearDown();
 
-        mResolver.delete(Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI, "entry"), null, null);
         mResolver.delete(Uri.parse(TaggedProductProvider.MULTIPLE_TAGGED_PRODUCT_CONTENT_URI), null, null);
 
-        mResolver.delete(Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI, "list"), null, null);
+        Cursor entryCursor = mResolver.query(Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI, "entry"), ListEntry.COLUMN.ALL_COLUMNS, null, null, null);
+        Cursor listCursor = mResolver.query(Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI, "list"), ShoppingList.COLUMN.ALL_COLUMNS, null, null, null);
         Cursor categoryCursor = mResolver.query(Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI, "category"), Category.COLUMN.ALL_COLUMNS, null, null, null);
+
+
         if (categoryCursor == null) {
-            throw new IllegalStateException("No category Cursor found");
+            throw new IllegalStateException("No category Cursor found.");
+        }
+        if (listCursor == null) {
+            throw new IllegalStateException("No ShoppingList Cursor found.");
+        }
+        if (entryCursor == null) {
+            throw new IllegalStateException("No ListEntry cursor found.");
+        }
+
+        if (entryCursor.getCount() > 0) {
+            entryCursor.moveToFirst();
+            do {
+                String listEntryId = entryCursor.getString(entryCursor.getColumnIndex(ListEntry.COLUMN.ID));
+                mResolver.delete(Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI, "entry/" + listEntryId), null, null);
+            } while (entryCursor.moveToNext());
+        }
+        if (listCursor.getCount() > 0) {
+            listCursor.moveToFirst();
+            do {
+                String shoppingListId = entryCursor.getString(entryCursor.getColumnIndex(ShoppingList.COLUMN.ID));
+                mResolver.delete(Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI, "list/" + shoppingListId), null, null);
+            } while (listCursor.moveToNext());
         }
         if (categoryCursor.getCount() > 0) {
             categoryCursor.moveToFirst();
             do {
                 String categoryId = categoryCursor.getString(categoryCursor.getColumnIndex(Category.COLUMN.ID));
-                if (!categoryId.equals("-")) {
-                    ProviderTestUtils.deleteTestLists(mResolver, categoryId);
-                }
+                ProviderTestUtils.deleteTestLists(mResolver, categoryId);
+
             } while (categoryCursor.moveToNext());
         }
         categoryCursor.close();
@@ -117,7 +139,7 @@ public class IProductControllerTest extends AndroidTestCase {
         assertEquals(1.0f, createdProduct.mDefaultAmount, 0.001);
         assertEquals("-", createdProduct.mUnit.mUUID);
 
-        Cursor productsCursor = mResolver.query(Uri.parse(ProductProvider.MULTIPLE_PRODUCT_CONTENT_URI), Product.COLUMN.ALL_COLUMNS, Product.COLUMN.ID + "=?", new String []{createdProduct.mUUID}, null);
+        Cursor productsCursor = mResolver.query(Uri.parse(ProductProvider.MULTIPLE_PRODUCT_CONTENT_URI), Product.COLUMN.ALL_COLUMNS, Product.COLUMN.ID + "=?", new String[]{createdProduct.mUUID}, null);
         assertNotNull(productsCursor);
         assertEquals(1, productsCursor.getCount());
         productsCursor.moveToFirst();

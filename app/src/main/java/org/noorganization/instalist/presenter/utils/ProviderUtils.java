@@ -1,6 +1,7 @@
 package org.noorganization.instalist.presenter.utils;
 
 /**
+ * Utils for provider usage.
  * Created by Tino on 24.10.2015.
  */
 public class ProviderUtils {

@@ -128,15 +128,14 @@ public class MainShoppingListView extends AppCompatActivity implements IBaseActi
         // init PreferencesManager
         PreferencesManager.initializeInstance(this);
         mDefaultCategoryId = PreferencesManager.getInstance().getStringValue(PreferencesManager.KEY_DEFAULT_CATEGORY_ID);
-        mDefaultCategoryId = mDefaultCategoryId == null ? "-" : mDefaultCategoryId;
         Category category = mCategoryController.getCategoryByID(mDefaultCategoryId);
 
-        if (category == null) {
+        /*if (category == null) {
             // if not set generate a standard category and set the id of it to preferences
             category = mCategoryController.createCategory(DEFAULT_CATEGORY_NAME);
             mDefaultCategoryId = category.mUUID;
             PreferencesManager.getInstance().setValue(PreferencesManager.KEY_DEFAULT_CATEGORY_ID, mDefaultCategoryId);
-        }
+        }*/
 
         // init and setup toolbar
         mToolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -364,7 +363,6 @@ public class MainShoppingListView extends AppCompatActivity implements IBaseActi
             throw new NullPointerException("Name of ShoppingList must be set.");
         }
 
-
         // always close the drawer
         mDrawerLayout.closeDrawer(mLeftMenuDrawerRelativeLayout);
 
@@ -576,7 +574,7 @@ public class MainShoppingListView extends AppCompatActivity implements IBaseActi
 
     @Override
     public void unregisterFragment(Fragment fragment) {
-        mFragments.remove((IFragment)fragment);
+        mFragments.remove(fragment);
     }
 
     /**

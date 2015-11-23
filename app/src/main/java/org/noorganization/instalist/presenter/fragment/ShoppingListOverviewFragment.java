@@ -52,7 +52,8 @@ import java.util.WeakHashMap;
 import de.greenrobot.event.EventBus;
 
 /**
- * A ShoppingListOverviewFragment containing a list view.
+ * This fragment handles the display of the content of an ShoppingList. This includes managing the
+ * listadapter for the shoppingList items and all click events.
  */
 public class ShoppingListOverviewFragment extends BaseFragment implements IFragment {
 
@@ -390,13 +391,12 @@ public class ShoppingListOverviewFragment extends BaseFragment implements IFragm
 
         ViewUtils.showSnackbar(getView(), R.string.category_not_found, Snackbar.LENGTH_LONG);
         mBaseActivityInterface.registerFragment(this);
-        // decl
         // init
         mRecyclerView = (RecyclerView) getActivity().findViewById(R.id.fragment_shopping_list);
 
         mBaseActivityInterface.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
 
-        mShoppingItemListAdapter = new ShoppingItemListAdapter(getActivity(), mListController.listAllListEntries(mCurrentShoppingList.mUUID, mCurrentShoppingList.mCategory.mUUID));
+        mShoppingItemListAdapter = new ShoppingItemListAdapter(getActivity(), mListController.listAllListEntries(mCurrentShoppingList.mUUID, mCurrentShoppingList.mCategory != null ? mCurrentShoppingList.mCategory.mUUID : null));
         int sortIndex = PreferencesManager.getInstance().getIntValue(SORT_MODE);
         if (sortIndex >= 0) {
             mShoppingItemListAdapter.sortByComparator(mMapComperable.get(sortIndex));
@@ -563,7 +563,6 @@ public class ShoppingListOverviewFragment extends BaseFragment implements IFragm
     @Override
     public void onShoppingListRemoved(ShoppingList _ShoppingList) {
         if (mCurrentShoppingList.equals(_ShoppingList)) {
-            // TODO: set text that there is no shopping list
             mBaseActivityInterface.setToolbarTitle(mContext.getResources().getString(R.string.shopping_list_not_choosen));
             ViewUtils.removeFragment(getActivity(), this);
         }
