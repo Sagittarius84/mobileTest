@@ -56,12 +56,12 @@ public class SideDrawerListManager implements ISideDrawerListManager {
         mExpandableShoppingListHelper = new ExpandableShoppingListHelper(mContext, mBaseActivityInterface, _ExpandableCategoryListView);
 
         // for initializing the views.
-        if (numOfCategories > 1) {
+        if (numOfCategories > 0) {
             // set Expandable list to viewable
             changeListView(mPlainShoppingListHelper, mExpandableShoppingListHelper);
             mShoppingListHelper = mExpandableShoppingListHelper;
             mIsPlainList = false;
-        } else if (numOfCategories == 1) {
+        } else if (numOfCategories == 0) {
             // set plain shoppinglist to viewable
             changeListView(mExpandableShoppingListHelper, mPlainShoppingListHelper);
             mShoppingListHelper = mPlainShoppingListHelper;

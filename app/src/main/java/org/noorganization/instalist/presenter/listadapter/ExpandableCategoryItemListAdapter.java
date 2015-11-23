@@ -63,7 +63,10 @@ public class ExpandableCategoryItemListAdapter extends BaseExpandableListAdapter
 
     @Override
     public int getChildrenCount(int groupPosition) {
-        return mListController.getListsByCategory(mListOfCategories.get(groupPosition)).size();
+        // TODO weird error, sometimes when deleting a category the category is null
+        Category category = mListOfCategories.get(groupPosition);
+        List<ShoppingList> lists = mListController.getListsByCategory( category.mUUID != null ? category : null);
+        return lists.size();
     }
 
     @Override
@@ -73,18 +76,18 @@ public class ExpandableCategoryItemListAdapter extends BaseExpandableListAdapter
 
     @Override
     public Object getChild(int groupPosition, int childPosition) {
-        return mListController.getListsByCategory(mListOfCategories.get(groupPosition)).
+        return mListController.getListsByCategory(mListOfCategories.get(groupPosition).mUUID != null ? mListOfCategories.get(groupPosition) : null).
                 get(childPosition);
     }
 
     @Override
     public long getGroupId(int groupPosition) {
-        return mListOfCategories.get(groupPosition).mUUID.hashCode(); // UUID.fromString(mListOfCategories.get(groupPosition).mUUID).getLeastSignificantBits();
+        return (mListOfCategories.get(groupPosition).mUUID != null) ? mListOfCategories.get(groupPosition).mUUID.hashCode() : 0; // UUID.fromString(mListOfCategories.get(groupPosition).mUUID).getLeastSignificantBits();
     }
 
     @Override
     public long getChildId(int groupPosition, int childPosition) {
-        return mListController.getListsByCategory(mListOfCategories.get(groupPosition))
+        return mListController.getListsByCategory(mListOfCategories.get(groupPosition).mUUID != null ? mListOfCategories.get(groupPosition) : null)
                 .get(childPosition).mUUID.hashCode();
         //UUID.fromString(mListController.getListsByCategory(mListOfCategories.get(groupPosition))
         // .get(childPosition).mUUID).getLeastSignificantBits();
@@ -93,6 +96,7 @@ public class ExpandableCategoryItemListAdapter extends BaseExpandableListAdapter
 
     /**
      * Get the id of the group.
+     *
      * @param _groupPosition the position of the group item in the adapter to get the id from.
      * @return the UUID
      */
@@ -102,12 +106,13 @@ public class ExpandableCategoryItemListAdapter extends BaseExpandableListAdapter
 
     /**
      * Get the id of the child.
+     *
      * @param _groupPosition the position of the group item in the adapter to get the id from.
      * @param _childPosition the position of the child item in the adapter to get the id from.
      * @return the UUID
      */
     public String getChildUUID(int _groupPosition, int _childPosition) {
-        return mListController.getListsByCategory(mListOfCategories.get(_groupPosition))
+        return mListController.getListsByCategory(mListOfCategories.get(_groupPosition).mUUID != null ? mListOfCategories.get(_groupPosition) : null)
                 .get(_childPosition).mUUID;
     }
 
@@ -136,7 +141,7 @@ public class ExpandableCategoryItemListAdapter extends BaseExpandableListAdapter
 
         //deleteImage.setOnClickListener(new OnDeleteCategoryClickListener(category.getId()));
         tvCategoryName.setText(category.mName);
-        /*tvCategoryItemCount.setText(String.valueOf(mListController.getListsByCategory(category).
+        /*tvCategoryItemCount.setText(String.valueOf(mListController.getListsByCategory(mListOfCategories.get(_groupPosition).mUUID != null ? mListOfCategories.get(_groupPosition) : null).
                 size()));*/
 
         return view;
@@ -144,10 +149,9 @@ public class ExpandableCategoryItemListAdapter extends BaseExpandableListAdapter
 
 
     @Override
-    public View getChildView(int groupPosition, int childPosition, boolean isLastChild, View convertView, ViewGroup parent) {
+    public View getChildView(int _groupPosition, int _childPosition, boolean isLastChild, View convertView, ViewGroup parent) {
         ViewGroup view;
-        ShoppingList shoppingList = mListController.getListsByCategory(mListOfCategories.
-                get(groupPosition)).get(childPosition);
+        ShoppingList shoppingList = mListController.getListsByCategory(mListOfCategories.get(_groupPosition).mUUID != null ? mListOfCategories.get(_groupPosition) : null).get(_childPosition);
 
         // check if the converted view is not null and check if it is already an expandable_list_view_list_item
         if (convertView != null && convertView.getId() == R.id.expandable_list_view_list_item) {

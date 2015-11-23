@@ -56,10 +56,6 @@ public class ProviderTestUtilsTest extends AndroidTestCase {
         if (categoryCursor == null) {
             throw new IllegalStateException("No Category cursor found.");
         }
-        
-        if (categoryCursor == null) {
-            throw new IllegalStateException("No Category cursor found.");
-        }
 
         if (categoryCursor.getCount() > 0) {
             categoryCursor.moveToFirst();
@@ -69,6 +65,28 @@ public class ProviderTestUtilsTest extends AndroidTestCase {
             } while (categoryCursor.moveToNext());
         }
         categoryCursor.close();
+
+        Cursor listsToDel = mResolver.query(
+                Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI, "list"),
+                new String[]{ShoppingList.COLUMN.ID, ShoppingList.COLUMN.CATEGORY},
+                ShoppingList.COLUMN.NAME + " LIKE '_TEST_%'",
+                null,
+                null);
+        assertNotNull(listsToDel);
+        listsToDel.moveToFirst();
+        while (!listsToDel.isAfterLast()) {
+            String listUUIDStr = listsToDel.getString(listsToDel.getColumnIndex(
+                    ShoppingList.COLUMN.ID));
+            String catUUIDStr = listsToDel.getString(listsToDel.getColumnIndex(
+                    ShoppingList.COLUMN.CATEGORY));
+            if (catUUIDStr == null) {
+                catUUIDStr = "-";
+            }
+            mResolver.delete(Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI,
+                    "category/" + catUUIDStr + "/list/" + listUUIDStr), null, null);
+            listsToDel.moveToNext();
+        }
+        listsToDel.close();
     }
 
     public void testInsertUnit() {

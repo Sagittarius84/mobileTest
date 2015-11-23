@@ -82,6 +82,9 @@ public class CategoryController implements ICategoryController {
             catIds.moveToNext();
         }
         catIds.close();
+
+        // add default list
+        rtn.add(new Category(null, "Default"));
         return rtn;
     }
 
