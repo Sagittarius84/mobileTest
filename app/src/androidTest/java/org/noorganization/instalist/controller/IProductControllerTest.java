@@ -107,7 +107,7 @@ public class IProductControllerTest extends AndroidTestCase {
         if (listCursor.getCount() > 0) {
             listCursor.moveToFirst();
             do {
-                String shoppingListId = entryCursor.getString(entryCursor.getColumnIndex(ShoppingList.COLUMN.ID));
+                String shoppingListId = listCursor.getString(listCursor.getColumnIndex(ShoppingList.COLUMN.ID));
                 mResolver.delete(Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI, "list/" + shoppingListId), null, null);
             } while (listCursor.moveToNext());
         }
@@ -116,10 +116,13 @@ public class IProductControllerTest extends AndroidTestCase {
             do {
                 String categoryId = categoryCursor.getString(categoryCursor.getColumnIndex(Category.COLUMN.ID));
                 ProviderTestUtils.deleteTestLists(mResolver, categoryId);
-
+                mResolver.delete(Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI, "category/" + categoryId), null, null);
             } while (categoryCursor.moveToNext());
         }
         categoryCursor.close();
+        listCursor.close();
+        entryCursor.close();
+
         mResolver.delete(Uri.parse(ProductProvider.MULTIPLE_PRODUCT_CONTENT_URI), null, null);
         mResolver.delete(Uri.parse(UnitProvider.MULTIPLE_UNIT_CONTENT_URI), null, null);
         mResolver.delete(Uri.parse(TagProvider.MULTIPLE_TAG_CONTENT_URI), null, null);

@@ -50,14 +50,14 @@ public class CategoryController implements ICategoryController {
 
         ContentValues newCatCV = new ContentValues(1);
         newCatCV.put(Category.COLUMN.NAME, _name);
-        Uri newlyCreatedCat = mContext.getContentResolver().insert(
+        Uri newCreatedCat = mContext.getContentResolver().insert(
                 Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI, "category"),
                 newCatCV);
-        if (newlyCreatedCat == null) {
+        if (newCreatedCat == null) {
             return null;
         }
 
-        Category rtn = new Category(newlyCreatedCat.getLastPathSegment(), _name);
+        Category rtn = new Category(newCreatedCat.getLastPathSegment(), _name);
 
         mBus.post(new CategoryChangedMessage(Change.CREATED, rtn));
 

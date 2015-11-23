@@ -67,7 +67,7 @@ public class ICategoryControllerTest extends AndroidTestCase {
     public void tearDown() throws Exception {
         Cursor listsToDel = mResolver.query(
                 Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI, "list"),
-                new String[]{ ShoppingList.COLUMN.ID, ShoppingList.COLUMN.CATEGORY },
+                new String[]{ShoppingList.COLUMN.ID, ShoppingList.COLUMN.CATEGORY},
                 ShoppingList.COLUMN.NAME + " LIKE '_TEST_%'",
                 null,
                 null);
@@ -87,14 +87,29 @@ public class ICategoryControllerTest extends AndroidTestCase {
         }
         listsToDel.close();
 
-        mResolver.delete(Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI,
-                "category"), Category.COLUMN.NAME + " LIKE '_TEST_%'", null);
+        Cursor categoryCursor = mResolver.query(Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI,
+                "category"), Category.COLUMN.ALL_COLUMNS, null, null, null);
+
+        if (categoryCursor == null) {
+            throw new IllegalStateException("No Category cursor found.");
+        }
+
+        if (categoryCursor.getCount() > 0) {
+            categoryCursor.moveToFirst();
+            do {
+                String categoryId = categoryCursor.getString(categoryCursor.getColumnIndex(Category.COLUMN.ID));
+                mResolver.delete(Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI, "category/" + categoryId), null, null);
+            } while (categoryCursor.moveToNext());
+        }
+        categoryCursor.close();
+
     }
 
     public void testCreateCategory() throws Exception {
         assertNull(mCategoryController.createCategory(null));
         assertNull(mCategoryController.createCategory(""));
         assertNull(mCategoryController.createCategory("_TEST_work"));
+
 
         Category returnedCreatedCategory1 = mCategoryController.createCategory("_TEST_home");
         assertNotNull(returnedCreatedCategory1);
