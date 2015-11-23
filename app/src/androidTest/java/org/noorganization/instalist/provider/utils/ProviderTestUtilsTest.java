@@ -15,6 +15,7 @@ import org.noorganization.instalist.model.ShoppingList;
 import org.noorganization.instalist.model.Tag;
 import org.noorganization.instalist.model.TaggedProduct;
 import org.noorganization.instalist.model.Unit;
+import org.noorganization.instalist.provider.InstalistProvider;
 import org.noorganization.instalist.provider.ProviderTestUtils;
 import org.noorganization.instalist.provider.internal.IngredientProvider;
 import org.noorganization.instalist.provider.internal.ProductProvider;
@@ -48,6 +49,26 @@ public class ProviderTestUtilsTest extends AndroidTestCase {
         mResolver.delete(Uri.parse(IngredientProvider.MULTIPLE_INGREDIENT_CONTENT_URI), null, null);
         mResolver.delete(Uri.parse(TagProvider.MULTIPLE_TAG_CONTENT_URI), null, null);
         mResolver.delete(Uri.parse(TaggedProductProvider.MULTIPLE_TAGGED_PRODUCT_CONTENT_URI), null, null);
+
+        Cursor categoryCursor = mResolver.query(Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI,
+                "category"), Category.COLUMN.ALL_COLUMNS, null, null, null);
+
+        if (categoryCursor == null) {
+            throw new IllegalStateException("No Category cursor found.");
+        }
+        
+        if (categoryCursor == null) {
+            throw new IllegalStateException("No Category cursor found.");
+        }
+
+        if (categoryCursor.getCount() > 0) {
+            categoryCursor.moveToFirst();
+            do {
+                String categoryId = categoryCursor.getString(categoryCursor.getColumnIndex(Category.COLUMN.ID));
+                mResolver.delete(Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI, "category/" + categoryId), null, null);
+            } while (categoryCursor.moveToNext());
+        }
+        categoryCursor.close();
     }
 
     public void testInsertUnit() {
