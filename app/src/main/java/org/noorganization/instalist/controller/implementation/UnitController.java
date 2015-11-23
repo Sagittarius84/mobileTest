@@ -196,10 +196,11 @@ public class UnitController implements IUnitController {
                     return true;
                 }
 
+                Unit defaultUnit = getDefaultUnit();
                 cursor.moveToFirst();
                 do {
                     Product product = productController.parseProduct(cursor);
-                    product.mUnit = null;
+                    product.mUnit = defaultUnit;
                     productController.modifyProduct(product);
                 } while (cursor.moveToNext());
 

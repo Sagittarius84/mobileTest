@@ -178,7 +178,6 @@ public class ProductProvider implements IInternalProvider {
             case SINGLE_PRODUCT:
                 String selection = ProviderUtils.prependIdToQuery(Product.PREFIXED_COLUMN.ID, null);
                 String[] selectionArgs = ProviderUtils.prependSelectionArgs(null, _uri.getLastPathSegment());
-                String unitId = _values.getAsString(Product.COLUMN.UNIT);
                 affectedRows = mDatabase.update(Product.TABLE_NAME, _values, selection, selectionArgs);
                 break;
             case MULTIPLE_PRODUCTS:

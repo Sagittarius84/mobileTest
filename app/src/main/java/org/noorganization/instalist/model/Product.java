@@ -181,7 +181,7 @@ public class Product {
      */
     public ContentValues toContentValues() {
         ContentValues cv = new ContentValues(5);
-        cv.put(COLUMN.ID, this.mUUID == null ? null : this.mUUID);
+        cv.put(COLUMN.ID, this.mUUID);
         cv.put(COLUMN.NAME, this.mName);
         cv.put(COLUMN.DEFAULT_AMOUNT, this.mDefaultAmount);
         cv.put(COLUMN.STEP_AMOUNT, this.mStepAmount);

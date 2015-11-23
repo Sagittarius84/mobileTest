@@ -93,10 +93,8 @@ public class IUnitControllerTest extends AndroidTestCase {
         assertTrue(mUnitController.deleteUnit(mMeter, IUnitController.MODE_UNLINK_REFERENCES));
         Product changedProduct = mProductController.findById(mShelf.mUUID);
         assertNotNull(changedProduct);
-        if (changedProduct.mUnit != null) {
-            assertEquals("-", changedProduct.mUnit.mUUID);
-        } else {
-            assertNull(changedProduct.mUnit);
-        }
+        assertNotNull(changedProduct.mUnit);
+        assertEquals(mUnitController.getDefaultUnit(), changedProduct.mUnit);
+
     }
 }
