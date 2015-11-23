@@ -65,59 +65,30 @@ public class ICategoryControllerTest extends AndroidTestCase {
     }
 
     public void tearDown() throws Exception {
-        ProviderTestUtils.deleteTestCategories(mResolver);
-
-
-
-        /*Cursor catsToDel = mResolver.query(
-                Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI, "category"),
-                new String[]{ Category.COLUMN.ID},
-                Category.COLUMN.NAME + " LIKE '_TEST_%'",
-                null,
-                null);
-        catsToDel.moveToFirst();
-        while (!catsToDel.isAfterLast()) {
-            String catUUIDStr = catsToDel.getString(catsToDel.getColumnIndex(
-                    Category.COLUMN.ID));
-            Cursor listsToDel = mResolver.query(
-                    Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI, "category/" +
-                            catUUIDStr + "/list"),
-                    new String[]{ ShoppingList.COLUMN.ID},
-                    ShoppingList.COLUMN.NAME + " LIKE '_TEST_%'",
-                    null,
-                    null);
-            listsToDel.moveToFirst();
-            while (!listsToDel.isAfterLast()) {
-                String listUUIDStr = listsToDel.getString(listsToDel.getColumnIndex(
-                        ShoppingList.COLUMN.ID));
-                mResolver.delete(Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI,
-                        "category/" + catUUIDStr + "/list/" + listUUIDStr), null, null);
-                listsToDel.moveToNext();
-            }
-            listsToDel.close();
-            mResolver.delete(Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI,
-                    "category/" + catUUIDStr), null, null);
-            catsToDel.moveToNext();
-        }
-        catsToDel.close();
-
         Cursor listsToDel = mResolver.query(
-                Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI, "category/-/list"),
-                new String[]{ShoppingList.COLUMN.ID},
+                Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI, "list"),
+                new String[]{ ShoppingList.COLUMN.ID, ShoppingList.COLUMN.CATEGORY },
                 ShoppingList.COLUMN.NAME + " LIKE '_TEST_%'",
                 null,
                 null);
+        assertNotNull(listsToDel);
         listsToDel.moveToFirst();
         while (!listsToDel.isAfterLast()) {
             String listUUIDStr = listsToDel.getString(listsToDel.getColumnIndex(
                     ShoppingList.COLUMN.ID));
+            String catUUIDStr = listsToDel.getString(listsToDel.getColumnIndex(
+                    ShoppingList.COLUMN.CATEGORY));
+            if (catUUIDStr == null) {
+                catUUIDStr = "-";
+            }
             mResolver.delete(Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI,
-                    "category/-/list/" + listUUIDStr), null, null);
+                    "category/" + catUUIDStr + "/list/" + listUUIDStr), null, null);
             listsToDel.moveToNext();
         }
+        listsToDel.close();
 
-
-        listsToDel.close(); */
+        mResolver.delete(Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI,
+                "category"), Category.COLUMN.NAME + " LIKE '_TEST_%'", null);
     }
 
     public void testCreateCategory() throws Exception {
@@ -142,6 +113,7 @@ public class ICategoryControllerTest extends AndroidTestCase {
     public void testGetCategoryById() throws Exception {
         //assertNull(mCategoryController.getCategoryByID(null));
         assertNull(mCategoryController.getCategoryByID(UUID.randomUUID().toString()));
+        assertNull(mCategoryController.getCategoryByID(null));
 
         assertEquals(mCategoryWork, mCategoryController.getCategoryByID(mCategoryWork.mUUID));
     }

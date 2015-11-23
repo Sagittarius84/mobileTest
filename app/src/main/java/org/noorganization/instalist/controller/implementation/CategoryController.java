@@ -87,6 +87,11 @@ public class CategoryController implements ICategoryController {
 
     @Override
     public Category getCategoryByID(@NonNull String _uuid) {
+        // Annotation does not always work. So check again.
+        if (_uuid == null) {
+            return null;
+        }
+
         Cursor resultCursor = mContext.getContentResolver().query(
                 Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI, "category"),
                 new String[]{Category.COLUMN.ID, Category.COLUMN.NAME},

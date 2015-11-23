@@ -1,5 +1,6 @@
 package org.noorganization.instalist.controller.implementation;
 
+import android.content.ContentProviderClient;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
@@ -108,6 +109,10 @@ public class ListController implements IListController {
 
     @Override
     public ListEntry getEntryById(@NonNull String _UUID) {
+        if (_UUID == null) {
+            // This check is needed because NonNull just works at compile time.
+            return null;
+        }
         Cursor entryCursor = mResolver.query(
                 Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI, "entry"),
                 ListEntry.COLUMN.ALL_COLUMNS,
@@ -141,6 +146,10 @@ public class ListController implements IListController {
 
     @Override
     public ListEntry getEntryByListAndProduct(@NonNull ShoppingList _list, @NonNull Product _product) {
+        if (_list == null || _list.mUUID == null || _product == null || _product.mUUID == null) {
+            // This check is needed because @NonNull does not work at runtime.
+            return null;
+        }
         Cursor entrySearch = mResolver.query(
                 Uri.withAppendedPath(
                         InstalistProvider.BASE_CONTENT_URI,
@@ -181,6 +190,11 @@ public class ListController implements IListController {
 
     @Override
     public ShoppingList getListById(@NonNull String _UUID) {
+        // This check is needed to make sure null-uuid will return null. @NonNull is just like a
+        // warning.
+        if (_UUID == null) {
+            return null;
+        }
         Cursor entryCursor = mContext.getContentResolver().query(
                 Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI, "list"),
                 ShoppingList.COLUMN.ALL_COLUMNS,
@@ -355,16 +369,20 @@ public class ListController implements IListController {
             return null;
         }
 
+        ListEntry savedEntry = getEntryById(_item.mUUID);
+        if (savedEntry == null) {
+            return null;
+        }
         ContentValues entryUpdateCV = new ContentValues(1);
         entryUpdateCV.put(ListEntry.COLUMN.PRIORITY, _newPrio);
-        int changedEntries = mResolver.update(_item.toUri(InstalistProvider.BASE_CONTENT_URI),
+        int changedEntries = mResolver.update(savedEntry.toUri(InstalistProvider.BASE_CONTENT_URI),
                 entryUpdateCV, null, null);
-        ListEntry entry = getEntryById(_item.mUUID);
+        savedEntry.mPriority = _newPrio;
         if (changedEntries > 0) {
-            mBus.post(new ListItemChangedMessage(Change.CHANGED, entry));
+            mBus.post(new ListItemChangedMessage(Change.CHANGED, savedEntry));
         }
 
-        return entry;
+        return savedEntry;
     }
 
     @Override
@@ -404,6 +422,7 @@ public class ListController implements IListController {
         ShoppingList shoppingList = new ShoppingList();
         shoppingList.mUUID = createdList.getLastPathSegment();
         shoppingList.mCategory = _category;
+        shoppingList.mName = _name;
         mBus.post(new ListChangedMessage(Change.CREATED, shoppingList));
 
         return shoppingList;
@@ -415,40 +434,42 @@ public class ListController implements IListController {
             return false;
         }
 
-        int deletedListCount = mResolver.delete(Uri.parse(_list.getUriPath()), null, null);
+        Uri listUri = _list.toUri(InstalistProvider.BASE_CONTENT_URI);
+        if (listUri == null) {
+            return false;
+        }
+        int deletedListCount = mResolver.delete(listUri, null, null);
 
         if (deletedListCount > 0) {
             mBus.post(new ListChangedMessage(Change.DELETED, _list));
             return true;
         }
 
-        Cursor cursor = mResolver.query(_list.toUri(InstalistProvider.BASE_CONTENT_URI), ShoppingList.COLUMN.ALL_COLUMNS, null, null, null);
-
-        boolean rtn = cursor != null && cursor.getCount() == 0;
-        if (cursor != null) {
-            cursor.close();
-        }
-        return rtn;
+        return false;
     }
 
     @Override
     public ShoppingList renameList(ShoppingList _list, String _newName) {
-        if (_list == null || _newName == null || _newName.length() == 0 ||
-                existsListName(_newName)) {
-            return _list;
+        if (_list == null) {
+            return null;
         }
 
-        String oldName = _list.mName;
-        _list.mName = _newName;
-        int affectedRows = mResolver.update(_list.toUri(InstalistProvider.BASE_CONTENT_URI), _list.toContentValues(), null, null);
+        ShoppingList savedList = getListById(_list.mUUID);
+        if (savedList == null || _newName == null || _newName.length() == 0 || existsListName(_newName)) {
+            return savedList;
+        }
+
+        ContentValues updateCV = new ContentValues(1);
+        updateCV.put(ShoppingList.COLUMN.NAME, _newName);
+        int affectedRows = mResolver.update(_list.toUri(InstalistProvider.BASE_CONTENT_URI),
+                updateCV, null, null);
 
         if (affectedRows > 0) {
+            savedList.mName = _newName;
             mBus.post(new ListChangedMessage(Change.CHANGED, _list));
-        } else {
-            _list.mName = oldName;
         }
 
-        return _list;
+        return savedList;
     }
 
     @Override

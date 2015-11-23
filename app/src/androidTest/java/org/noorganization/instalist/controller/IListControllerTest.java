@@ -85,9 +85,23 @@ public class IListControllerTest extends AndroidTestCase {
     }
 
     public void tearDown() throws Exception {
+        Cursor listsToDelete = mResolver.query(
+                Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI, "list"),
+                new String[]{ ShoppingList.COLUMN.ID, ShoppingList.COLUMN.CATEGORY },
+                ShoppingList.COLUMN.NAME + " LIKE '_TEST_%'",
+                null, null);
+        assertNotNull(listsToDelete);
+        listsToDelete.moveToFirst();
+        while (!listsToDelete.isAfterLast()) {
+            String catUUID = listsToDelete.getString(listsToDelete.getColumnIndex(
+                    ShoppingList.COLUMN.CATEGORY));
+            String listUUID = listsToDelete.getString(listsToDelete.getColumnIndex(
+                    ShoppingList.COLUMN.ID));
+            mResolver.delete(Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI, "category/" +
+                    (catUUID == null ? "-" : catUUID) + "/list/" + listUUID), null, null);
+            listsToDelete.moveToNext();
+        }
         mResolver.delete(Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI, "category"),
-                Category.COLUMN.NAME + " LIKE '_TEST_%'", null);
-        mResolver.delete(Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI, "category/-/list"),
                 Category.COLUMN.NAME + " LIKE '_TEST_%'", null);
         mResolver.delete(Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI, "product"),
                 Category.COLUMN.NAME + " LIKE '_TEST_%'", null);
@@ -317,7 +331,7 @@ public class IListControllerTest extends AndroidTestCase {
         // positive test
         mListController.strikeItem(mListWork, mProductBread);
         assertFalse(mListController.getEntryById(mListEntryButterForWork.mUUID).mStruck);
-        assertFalse(mListController.getEntryById(breadForWorkUri.getLastPathSegment()).mStruck);
+        assertTrue(mListController.getEntryById(breadForWorkUri.getLastPathSegment()).mStruck);
     }
 
     public void testRemoveItem() throws Exception {

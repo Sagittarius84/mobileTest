@@ -38,10 +38,12 @@ public class CategoryProviderTest extends AndroidTestCase {
     }
 
     public void testQueryMultipleCategories() {
-        Uri MULTIPLE_CATEGORIES = Uri.parse("content://" + InstalistProvider.AUTHORITY + "/category");
+        Uri MULTIPLE_CATEGORIES = Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI,
+                "category");
         Cursor noCategories = mCategoryProvider.query(MULTIPLE_CATEGORIES, null, null, null, null);
         assertNotNull(noCategories);
         assertEquals(0, noCategories.getCount());
+        noCategories.close();
 
         String stCategory = UUID.randomUUID().toString();
         mDatabase.execSQL("INSERT INTO category VALUES (?,?)", new String[]{
