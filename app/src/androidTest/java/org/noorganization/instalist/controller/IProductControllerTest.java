@@ -4,6 +4,7 @@ import android.content.ContentResolver;
 import android.database.Cursor;
 import android.net.Uri;
 import android.test.AndroidTestCase;
+import android.util.Log;
 
 import org.noorganization.instalist.controller.implementation.ControllerFactory;
 import org.noorganization.instalist.model.Category;
@@ -116,7 +117,11 @@ public class IProductControllerTest extends AndroidTestCase {
             do {
                 String categoryId = categoryCursor.getString(categoryCursor.getColumnIndex(Category.COLUMN.ID));
                 ProviderTestUtils.deleteTestLists(mResolver, categoryId);
-                mResolver.delete(Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI, "category/" + categoryId), null, null);
+                int deleted = mResolver.delete(Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI, "category/" + categoryId), null, null);
+                if(deleted == 0){
+                    Log.e("IProductControllerTest", "ID: " + categoryCursor.getString(categoryCursor.getColumnIndex(Category.COLUMN.ID)) + " " + categoryCursor.getString(categoryCursor.getColumnIndex(Category.COLUMN.NAME)) );
+                }
+                assertEquals(1, deleted);
             } while (categoryCursor.moveToNext());
         }
         categoryCursor.close();

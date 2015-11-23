@@ -309,9 +309,6 @@ public class ProviderTestUtils {
 
         do {
             String id = all.getString(all.getColumnIndex(Category.COLUMN.ID));
-            if (id.equals("-")) {
-                continue;
-            }
             Assert.assertEquals(1, _resolver.delete(
                     Uri.withAppendedPath(
                             InstalistProvider.BASE_CONTENT_URI,

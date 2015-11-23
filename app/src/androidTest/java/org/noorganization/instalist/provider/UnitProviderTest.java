@@ -31,6 +31,7 @@ public class UnitProviderTest extends AndroidTestCase {
 
     @Override
     public void tearDown() {
+        resetDb();
         mDatabase.close();
     }
 

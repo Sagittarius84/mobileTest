@@ -43,6 +43,7 @@ public class TaggedProductProviderTest extends AndroidTestCase {
 
     @Override
     public void tearDown() {
+        resetDb();
         mDatabase.close();
     }
 

@@ -37,6 +37,7 @@ public class RecipeProviderTest extends AndroidTestCase {
 
     @Override
     public void tearDown() {
+        resetDb();
         mDatabase.close();
     }
 

@@ -33,22 +33,6 @@ public class ICategoryControllerTest extends AndroidTestCase {
                 testWorkCatCV);
 
 
-        Cursor defaultCatCursor = mResolver.query(
-                Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI, "category/-"), Category.COLUMN.ALL_COLUMNS, null, null, null);
-        assertNotNull(defaultCatCursor);
-        if (defaultCatCursor.getCount() == 0) {
-            ContentValues defaultCatVals = new ContentValues(2);
-            defaultCatVals.put(Category.COLUMN.ID, "-");
-            defaultCatVals.put(Category.COLUMN.NAME, "(Default)");
-
-            Uri defaultCategoryUri = mResolver.insert(
-                    Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI, "category/-"),
-                    defaultCatVals);
-            assertNotNull(defaultCategoryUri);
-        }
-
-        defaultCatCursor.close();
-
         mCategoryWork = new Category(createdCat.getLastPathSegment(), "_TEST_work");
         ContentValues testHWStoreListCV = new ContentValues(2);
         testHWStoreListCV.put(ShoppingList.COLUMN.NAME, "_TEST_hardware store");

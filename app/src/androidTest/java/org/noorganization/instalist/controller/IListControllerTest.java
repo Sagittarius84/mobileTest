@@ -26,6 +26,7 @@ public class IListControllerTest extends AndroidTestCase {
 
     private IListController mListController;
 
+
     public void setUp() throws Exception {
         super.setUp();
 
@@ -105,6 +106,7 @@ public class IListControllerTest extends AndroidTestCase {
                 Category.COLUMN.NAME + " LIKE '_TEST_%'", null);
         mResolver.delete(Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI, "product"),
                 Category.COLUMN.NAME + " LIKE '_TEST_%'", null);
+        listsToDelete.close();
     }
 
     private int getListCount() {

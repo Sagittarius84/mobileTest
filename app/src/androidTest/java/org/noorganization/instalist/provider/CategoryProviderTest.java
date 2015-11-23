@@ -34,6 +34,7 @@ public class CategoryProviderTest extends AndroidTestCase {
 
     @Override
     public void tearDown() {
+        mDatabase.delete(Category.TABLE_NAME, null, null);
         mDatabase.close();
     }
 
@@ -406,7 +407,7 @@ public class CategoryProviderTest extends AndroidTestCase {
         assertNotNull(resultingLWCUri);
         String resultingLWCUUID = resultingLWCUri.getLastPathSegment();
         testCursor = mDatabase.rawQuery("SELECT name, category FROM list WHERE _id = ?",
-                new String[]{ resultingLWCUUID });
+                new String[]{resultingLWCUUID});
         assertEquals(1, testCursor.getCount());
         testCursor.moveToFirst();
         assertEquals("list w category", testCursor.getString(testCursor.getColumnIndex("name")));
@@ -447,7 +448,7 @@ public class CategoryProviderTest extends AndroidTestCase {
         assertNotNull(resultingMinimumEntryURI);
         String resultingMinimumEntryUUID = resultingMinimumEntryURI.getLastPathSegment();
         testCursor = mDatabase.rawQuery("SELECT " + ListEntry.COLUMN.ID + ", " +
-                ListEntry.COLUMN.PRODUCT + ", "+ ListEntry.COLUMN.LIST + " FROM " +
+                ListEntry.COLUMN.PRODUCT + ", " + ListEntry.COLUMN.LIST + " FROM " +
                 ListEntry.TABLE_NAME, null);
         assertEquals(1, testCursor.getCount());
         testCursor.moveToFirst();
@@ -476,7 +477,7 @@ public class CategoryProviderTest extends AndroidTestCase {
                         Category.COLUMN.NAME
                 },
                 Category.COLUMN.ID + " = ?",
-                new String[] {
+                new String[]{
                         categoryUUID
                 },
                 null, null, null);
@@ -493,7 +494,7 @@ public class CategoryProviderTest extends AndroidTestCase {
                         Category.COLUMN.NAME
                 },
                 Category.COLUMN.ID + " = ?",
-                new String[] {
+                new String[]{
                         categoryUUID
                 },
                 null, null, null);
@@ -529,7 +530,7 @@ public class CategoryProviderTest extends AndroidTestCase {
                         ShoppingList.COLUMN.CATEGORY
                 },
                 ShoppingList.COLUMN.ID + " = ?",
-                new String[] {
+                new String[]{
                         listUUID
                 },
                 null, null, null);
@@ -550,7 +551,7 @@ public class CategoryProviderTest extends AndroidTestCase {
                         ShoppingList.COLUMN.CATEGORY
                 },
                 ShoppingList.COLUMN.ID + " = ?",
-                new String[] {
+                new String[]{
                         listUUID
                 },
                 null, null, null);
@@ -571,7 +572,7 @@ public class CategoryProviderTest extends AndroidTestCase {
                         ShoppingList.COLUMN.CATEGORY
                 },
                 ShoppingList.COLUMN.ID + " = ?",
-                new String[] {
+                new String[]{
                         listUUID
                 },
                 null, null, null);
@@ -627,7 +628,7 @@ public class CategoryProviderTest extends AndroidTestCase {
                         ListEntry.COLUMN.STRUCK
                 },
                 ListEntry.COLUMN.ID + " = ?",
-                new String[] {
+                new String[]{
                         entryUUID
                 },
                 null, null, null);
@@ -653,7 +654,7 @@ public class CategoryProviderTest extends AndroidTestCase {
                         ListEntry.COLUMN.STRUCK
                 },
                 ListEntry.COLUMN.ID + " = ?",
-                new String[] {
+                new String[]{
                         entryUUID
                 },
                 null, null, null);
@@ -679,7 +680,7 @@ public class CategoryProviderTest extends AndroidTestCase {
                         ListEntry.COLUMN.STRUCK
                 },
                 ListEntry.COLUMN.ID + " = ?",
-                new String[] {
+                new String[]{
                         entryUUID
                 },
                 null, null, null);
@@ -694,8 +695,8 @@ public class CategoryProviderTest extends AndroidTestCase {
 
         // positive: all right
         assertEquals(1, mCategoryProvider.update(Uri.withAppendedPath(
-                InstalistProvider.BASE_CONTENT_URI,
-                "category/" + categoryUUID + "/list/" + listUUID + "/entry/" + entryUUID),
+                        InstalistProvider.BASE_CONTENT_URI,
+                        "category/" + categoryUUID + "/list/" + listUUID + "/entry/" + entryUUID),
                 entryUpdateCV, null, null));
         testCursor = mDatabase.query(
                 ListEntry.TABLE_NAME,
@@ -705,7 +706,7 @@ public class CategoryProviderTest extends AndroidTestCase {
                         ListEntry.COLUMN.STRUCK
                 },
                 ListEntry.COLUMN.ID + " = ?",
-                new String[] {
+                new String[]{
                         entryUUID
                 },
                 null, null, null);
@@ -723,8 +724,8 @@ public class CategoryProviderTest extends AndroidTestCase {
         entryFalseUpdateCV.put(ListEntry.COLUMN.PRODUCT, UUID.randomUUID().toString());
         entryFalseUpdateCV.put(ListEntry.COLUMN.LIST, UUID.randomUUID().toString());
         assertEquals(0, mCategoryProvider.update(Uri.withAppendedPath(
-                InstalistProvider.BASE_CONTENT_URI,
-                "category/" + categoryUUID + "/list/" + listUUID + "/entry/" + entryUUID),
+                        InstalistProvider.BASE_CONTENT_URI,
+                        "category/" + categoryUUID + "/list/" + listUUID + "/entry/" + entryUUID),
                 entryFalseUpdateCV, null, null));
         testCursor = mDatabase.query(
                 ListEntry.TABLE_NAME,
@@ -733,7 +734,7 @@ public class CategoryProviderTest extends AndroidTestCase {
                         ListEntry.COLUMN.LIST
                 },
                 ListEntry.COLUMN.ID + " = ?",
-                new String[] {
+                new String[]{
                         entryUUID
                 },
                 null, null, null);
