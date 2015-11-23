@@ -128,7 +128,7 @@ public class ExpandableShoppingListHelper implements IShoppingListHelper {
                             Toast.makeText(mContext, mContext.getString(R.string.delete_category_error_category_is_default), Toast.LENGTH_LONG).show();
                         } else {
                             mCategoryController.removeCategory(category);
-                            mBaseActivity.removeCategory(category);
+                            //mBaseActivity.removeCategory(category);
                         }
                         break;
                     case MenuStates.GROUP_MENU_EDIT_CATEGORY_ACTION:

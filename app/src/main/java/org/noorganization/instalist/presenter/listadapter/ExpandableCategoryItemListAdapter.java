@@ -226,7 +226,7 @@ public class ExpandableCategoryItemListAdapter extends BaseExpandableListAdapter
         // loop through each item to find the desired item, binsearch won't work, because there is no sort list...
         int indexToUpdate = -1;
         for (int Index = 0; Index < mListOfCategories.size(); ++Index) {
-            if (mListOfCategories.get(Index).mUUID.equals(_Category.mUUID)) {
+            if (mListOfCategories.get(Index).mUUID != null && mListOfCategories.get(Index).mUUID.equals(_Category.mUUID)) {
                 indexToUpdate = Index;
                 break;
             }
@@ -265,7 +265,7 @@ public class ExpandableCategoryItemListAdapter extends BaseExpandableListAdapter
             ICategoryController categoryController = ControllerFactory.getCategoryController(GlobalApplication.getContext());
             Category category = categoryController.getCategoryByID(mCategoryId);
             categoryController.removeCategory(category);
-            mBaseAcitvity.removeCategory(category);
+            //BaseAcitvity.removeCategory(category);
             //removeCategory(category);
         }
     }

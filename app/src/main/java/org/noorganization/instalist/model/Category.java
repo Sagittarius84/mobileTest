@@ -63,6 +63,9 @@ public class Category {
 
         Category anotherCategory = (Category) _another;
 
+        if(anotherCategory.mUUID == null || mUUID == null){
+            return false;
+        }
         return (mUUID.equals(anotherCategory.mUUID) && mName.equals(anotherCategory.mName));
     }
 

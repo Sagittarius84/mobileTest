@@ -59,7 +59,7 @@ public class OnSubmitClickListenerWithParentData implements View.OnClickListener
         ViewUtils.removeSoftKeyBoard(context, mNameEditText);
         mViewSwitcher.showNext();
         // TODO: remove this when callback for this kind is there.
-        ((IBaseActivity) context).updateCategory(newCategory);
+      //   ((IBaseActivity) context).updateCategory(newCategory);
 
 
     }

@@ -67,7 +67,7 @@ public class ContextItemClickedHelper implements IContextItemClickedHelper {
             Toast.makeText(mContext, mContext.getString(R.string.deletion_failed), Toast.LENGTH_SHORT).show();
             return;
         }*/
-        ((IBaseActivity) mContext).removeList(_ShoppingList);
+        //((IBaseActivity) mContext).removeList(_ShoppingList);
     }
 
     @Override

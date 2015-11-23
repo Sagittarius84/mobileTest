@@ -23,6 +23,7 @@ import android.view.ViewGroup;
 
 import org.noorganization.instalist.R;
 import org.noorganization.instalist.controller.IListController;
+import org.noorganization.instalist.controller.event.CategoryChangedMessage;
 import org.noorganization.instalist.controller.event.ListItemChangedMessage;
 import org.noorganization.instalist.controller.implementation.ControllerFactory;
 import org.noorganization.instalist.model.ListEntry;

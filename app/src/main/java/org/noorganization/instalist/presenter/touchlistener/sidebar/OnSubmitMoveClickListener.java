@@ -55,9 +55,9 @@ public class OnSubmitMoveClickListener implements View.OnClickListener {
         // TODO: remove this when callback for this kind is there.
         IBaseActivity baseActivity = ((IBaseActivity) context);
         if(oldCategory != null){
-            baseActivity.updateCategory(oldCategory);
+            //baseActivity.updateCategory(oldCategory);
         }
-        baseActivity.updateCategory(category);
+        //baseActivity.updateCategory(category);
         // ENDTODO
         mMoveCategoryLayout.setVisibility(View.GONE);
         mMainView.setVisibility(View.VISIBLE);

@@ -7,7 +7,7 @@ import android.view.View;
  * Provides standard functions to manipulate activity specific fields from a fragment.
  */
 // TODO: Remove ISideDrawerListDataEvents when events are propagated
-public interface IBaseActivity extends  ISideDrawerListDataEvents {
+public interface IBaseActivity {
     /**
      * Changes the current Fragment to the given Fragment.
      * @param _NewFragment The Fragment to move to.

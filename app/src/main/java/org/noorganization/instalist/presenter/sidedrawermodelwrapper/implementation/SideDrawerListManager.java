@@ -126,13 +126,13 @@ public class SideDrawerListManager implements ISideDrawerListManager {
         long                numOfCategories       = mCategoryController.getCategoryCount();
         IShoppingListHelper oldShoppingListHelper = mShoppingListHelper;
 
-        if (numOfCategories > 1 && mIsPlainList) {
+        if (numOfCategories >= 1 && mIsPlainList) {
             mIsPlainList = false;
             // set Expandable list to viewable
             mShoppingListHelper = mExpandableShoppingListHelper;
             changeListView(oldShoppingListHelper, mShoppingListHelper);
             mShoppingListHelper.updateAdapter();
-        } else if (numOfCategories == 1 && ! mIsPlainList) {
+        } else if (numOfCategories == 0 && ! mIsPlainList) {
             mIsPlainList = true;
             // set plain shoppinglist to viewable
             mShoppingListHelper = mPlainShoppingListHelper;

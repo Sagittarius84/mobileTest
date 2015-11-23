@@ -71,7 +71,7 @@ public class OnShoppingListAddClickListener implements View.OnClickListener {
         mNewNameEditText.clearFocus();
         // clear the field
         mNewNameEditText.setText("");
-        ((IBaseActivity) context).addList(shoppingList);
+        // ((IBaseActivity) context).addList(shoppingList);
 
         ((IBaseActivity) context).changeFragment(ShoppingListOverviewFragment.newInstance(shoppingList.mUUID));
     }

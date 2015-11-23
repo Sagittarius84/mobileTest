@@ -331,11 +331,11 @@ public class ProductController implements IProductController {
 
     public Product parseProduct(Cursor _cursor) {
         Product product = new Product();
-        product.mUUID = _cursor.getString(_cursor.getColumnIndex(Product.PREFIXED_COLUMN.ID));
-        product.mName = _cursor.getString(_cursor.getColumnIndex(Product.PREFIXED_COLUMN.NAME));
-        product.mUUID = _cursor.getString(_cursor.getColumnIndex(Product.PREFIXED_COLUMN.ID));
-        product.mDefaultAmount = _cursor.getFloat(_cursor.getColumnIndex(Product.PREFIXED_COLUMN.DEFAULT_AMOUNT));
-        product.mStepAmount = _cursor.getFloat(_cursor.getColumnIndex(Product.PREFIXED_COLUMN.STEP_AMOUNT));
+        product.mUUID = _cursor.getString(_cursor.getColumnIndex(Product.COLUMN.ID));
+        product.mName = _cursor.getString(_cursor.getColumnIndex(Product.COLUMN.NAME));
+        product.mUUID = _cursor.getString(_cursor.getColumnIndex(Product.COLUMN.ID));
+        product.mDefaultAmount = _cursor.getFloat(_cursor.getColumnIndex(Product.COLUMN.DEFAULT_AMOUNT));
+        product.mStepAmount = _cursor.getFloat(_cursor.getColumnIndex(Product.COLUMN.STEP_AMOUNT));
         return product;
     }
 
@@ -343,8 +343,8 @@ public class ProductController implements IProductController {
         TaggedProduct taggedProduct = new TaggedProduct();
 
         Tag tag = new Tag();
-        tag.mUUID = _cursor.getString(_cursor.getColumnIndex(TaggedProduct.COLUMN_PREFIXED.TAG_ID));
-        tag.mName = _cursor.getString(_cursor.getColumnIndex(Tag.COLUMN_PREFIXED.NAME));
+        tag.mUUID = _cursor.getString(_cursor.getColumnIndex(TaggedProduct.COLUMN.TAG_ID));
+        tag.mName = _cursor.getString(_cursor.getColumnIndex(Tag.COLUMN.NAME));
 
         Product product = parseProduct(_cursor);
 
