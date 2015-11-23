@@ -388,8 +388,6 @@ public class ShoppingListOverviewFragment extends BaseFragment implements IFragm
     public void onResume() {
         super.onResume();
 
-
-        ViewUtils.showSnackbar(getView(), R.string.category_not_found, Snackbar.LENGTH_LONG);
         mBaseActivityInterface.registerFragment(this);
         // init
         mRecyclerView = (RecyclerView) getActivity().findViewById(R.id.fragment_shopping_list);
