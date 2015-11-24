@@ -371,12 +371,16 @@ public class ProductController implements IProductController {
         if (taggedProductCursor == null) {
             return null;
         }
-
+        List<TaggedProduct> taggedProducts = new ArrayList<>(taggedProductCursor.getCount());
+        if(taggedProductCursor.getCount() == 0){
+            taggedProductCursor.close();
+            return taggedProducts;
+        }
         taggedProductCursor.moveToFirst();
-        List<TaggedProduct> taggedProducts = new ArrayList<>();
         do {
             taggedProducts.add(parse(taggedProductCursor));
         } while (taggedProductCursor.moveToNext());
+        taggedProductCursor.close();
         return taggedProducts;
     }
 
@@ -395,12 +399,14 @@ public class ProductController implements IProductController {
         productCursor.moveToFirst();
         List<Product> products = new ArrayList<>(productCursor.getCount());
         if(productCursor.getCount() == 0){
+            productCursor.close();
             return products;
         }
 
         do {
             products.add(parseProduct(productCursor));
         } while (productCursor.moveToNext());
+        productCursor.close();
         return products;
     }
 

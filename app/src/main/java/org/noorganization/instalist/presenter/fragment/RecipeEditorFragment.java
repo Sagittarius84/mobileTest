@@ -283,7 +283,7 @@ public class RecipeEditorFragment extends BaseFragment {
         @Override
         public void onClick(View view) {
             if (validate()) {
-                IRecipeController controller = ControllerFactory.getRecipeController(getContext());
+                IRecipeController controller = ControllerFactory.getRecipeController(GlobalApplication.getContext());
 
                 String newRecipeName = mRecipeName.getText().toString();
                 if (mRecipe == null) {

@@ -3,6 +3,9 @@ package org.noorganization.instalist.presenter.touchlistener;
 import android.view.View;
 
 import org.noorganization.instalist.model.ShoppingList;
+import org.noorganization.instalist.presenter.event.ShoppingListSelectedMessage;
+
+import de.greenrobot.event.EventBus;
 
 /**
  * Handles the clicks on a ShoppingList item.
@@ -26,5 +29,6 @@ public class OnShoppingListClickListener implements View.OnClickListener {
     @Override
     public void onClick(View v) {
         mOnShoppingListClickEvent.onShoppingListClicked(mShoppingList);
+        //EventBus.getDefault().post(new ShoppingListSelectedMessage(mShoppingList));
     }
 }

@@ -1,5 +1,6 @@
 package org.noorganization.instalist.presenter.interfaces;
 
+import org.noorganization.instalist.model.ListEntry;
 import org.noorganization.instalist.presenter.modelwrappers.ListEntryItemWrapper;
 
 import java.util.Comparator;
@@ -23,9 +24,9 @@ public interface IShoppingListEntryAction {
 
     /**
      * Updates the given ListEntry corresponding to the given Id.
-     * @param _ListEntryId The Id of the ListEntry to update.
+     * @param _ListEntry The Id of the ListEntry to update.
      */
-    void updateListEntry(String _ListEntryId);
+    void updateListEntry(ListEntry _ListEntry);
 
     /**
      * Resets the view back to normal view mode. So one unified view will be displayed.

@@ -372,7 +372,7 @@ public class ProductListDialogFragment extends BaseFragment {
     public void onPause() {
         super.onPause();
         mCreateProductButton.setOnClickListener(null);
-        mAddProductsButton.setOnClickListener(null);
+       //mAddProductsButton.setOnClickListener(null);
     }
 
     @Override

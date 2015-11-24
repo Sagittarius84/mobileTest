@@ -13,8 +13,6 @@ import org.noorganization.instalist.R;
 import org.noorganization.instalist.controller.IUnitController;
 import org.noorganization.instalist.controller.implementation.ControllerFactory;
 import org.noorganization.instalist.model.ListEntry;
-import org.noorganization.instalist.model.ShoppingList;
-import org.noorganization.instalist.model.Unit;
 import org.noorganization.instalist.presenter.customview.AmountPicker;
 import org.noorganization.instalist.presenter.interfaces.IShoppingListEntryAction;
 import org.noorganization.instalist.presenter.modelwrappers.ListEntryItemWrapper;
@@ -240,17 +238,16 @@ public class ShoppingItemListAdapter extends RecyclerView.Adapter<RecyclerView.V
     }
 
     @Override
-    public void updateListEntry(String _ListEntryId) {
-        ListEntry listEntry        = ControllerFactory.getListController(mContext).getEntryById(_ListEntryId);
-        int       positionToUpdate = getPositionForId(_ListEntryId);
+    public void updateListEntry(ListEntry _ListEntry) {
+        int       positionToUpdate = getPositionForId(_ListEntry.mUUID);
         if (positionToUpdate < 0 || positionToUpdate > mListOfEntries.size()) {
             Log.e(LOG_TAG, "Update ListEntry from position " + positionToUpdate + " is out of bounds");
             return;
         }
-        mListOfEntries.set(positionToUpdate, new ListEntryItemWrapper(listEntry));
+        mListOfEntries.set(positionToUpdate, new ListEntryItemWrapper(_ListEntry));
 
         Collections.sort(mListOfEntries, mCurrentComparator);
-        int newPositionOfElement = getPositionForId(_ListEntryId);
+        int newPositionOfElement = getPositionForId(_ListEntry.mUUID);
 
         notifyItemChanged(positionToUpdate);
         notifyItemMoved(positionToUpdate, newPositionOfElement);

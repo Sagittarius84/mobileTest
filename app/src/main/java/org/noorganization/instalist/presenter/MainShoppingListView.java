@@ -411,12 +411,6 @@ public class MainShoppingListView extends AppCompatActivity implements IBaseActi
         // always close the drawer
         mDrawerLayout.closeDrawer(mLeftMenuDrawerRelativeLayout);
 
-        // list is the same as the current one
-        // no need to do then something
-        if (_ShoppingList.mName.equals(mCurrentListName)) {
-            return;
-        }
-
         // decl
         Bundle args;
         Fragment fragment;

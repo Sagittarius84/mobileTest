@@ -271,6 +271,8 @@ public class ShoppingListOverviewFragment extends BaseFragment implements IFragm
         mMapComperable.put(0, new AlphabeticalListEntryComparator());
         mMapComperable.put(1, new PriorityListEntryComparator());
 
+        EventBus.getDefault().register(this);
+
         if (bundle == null) {
             return;
         }
@@ -292,7 +294,6 @@ public class ShoppingListOverviewFragment extends BaseFragment implements IFragm
         }
 
         mHandlingProductSelectedMessages = true;
-        EventBus.getDefault().register(this);
     }
 
 
@@ -478,7 +479,7 @@ public class ShoppingListOverviewFragment extends BaseFragment implements IFragm
                 // reset selected items ... (lazy resetting!)
                 SelectableBaseItemListEntryDataHolder.getInstance().clear();
                 ViewUtils.addFragment(getActivity(),
-                        ProductListDialogFragment.newInstance());
+                        ProductListDialogFragment.newInstance(mCurrentShoppingList.mUUID));
             }
         });
 
@@ -505,17 +506,20 @@ public class ShoppingListOverviewFragment extends BaseFragment implements IFragm
     }
 
     public void onEvent(ProductSelectMessage _message) {
-        if (mHandlingProductSelectedMessages) {
+        /*if (mHandlingProductSelectedMessages) {
             Map<Product, Float> productAmounts = _message.mProducts;
             IListController controller = ControllerFactory.getListController(mContext);
             for (Product currentProduct : productAmounts.keySet()) {
                 controller.addOrChangeItem(mCurrentShoppingList, currentProduct,
                         productAmounts.get(currentProduct), true);
             }
-        }
+        }*/
     }
 
     public void onEvent(ListItemChangedMessage _message) {
+        /*if(!_message.mEntry.mList.equals(mCurrentShoppingList)){
+            return;
+        }*/
         switch (_message.mChange) {
             case CHANGED:
                 onListItemUpdated(_message.mEntry);
@@ -536,7 +540,7 @@ public class ShoppingListOverviewFragment extends BaseFragment implements IFragm
      * @param _Entry the item that should be deleted.
      */
     public void onListItemUpdated(ListEntry _Entry) {
-        mShoppingItemListAdapter.updateListEntry(_Entry.mUUID);
+        mShoppingItemListAdapter.updateListEntry(_Entry);
     }
 
     /**
