@@ -193,7 +193,7 @@ public class RecipeProvider implements IInternalProvider {
             case MULTIPLE_RECIPE_INGREDIENT:
                 newUUID = SQLiteUtils.generateId(mDatabase, Ingredient.TABLE_NAME).toString();
                 _values.put(Ingredient.COLUMN.ID, newUUID);
-
+                
                 rowId = mDatabase.insert(Ingredient.TABLE_NAME, null, _values);
 
                 // insertion went wrong
@@ -270,6 +270,9 @@ public class RecipeProvider implements IInternalProvider {
 
                 selectionArgs = ProviderUtils.prependSelectionArgs(_selectionArgs, _uri.getLastPathSegment());
                 selectionArgs = ProviderUtils.prependSelectionArgs(selectionArgs, _uri.getPathSegments().get(1));
+
+                _values.put(Ingredient.COLUMN.ID, _uri.getLastPathSegment());
+                _values.put(Ingredient.COLUMN.RECIPE_ID, _uri.getPathSegments().get(1));
 
                 affectedRows = mDatabase.update(Ingredient.TABLE_NAME, _values, selection, selectionArgs);
                 break;

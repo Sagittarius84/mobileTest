@@ -136,12 +136,15 @@ public class ProductProviderTest extends AndroidTestCase {
     }
 
     public void testInsertSingleProduct() {
-        String uuid = UUID.randomUUID().toString();
+        String uuid;
 
-        Uri uri = ProviderTestUtils.insertProduct(mProductProvider, uuid, "TestProduct", 0.5f, 0.5f, (String) null);
+        Uri uri = ProviderTestUtils.insertProduct(mProductProvider, "TestProduct", 0.5f, 0.5f, (String) null);
+        assertNotNull(uri);
+
+        uuid = uri.getLastPathSegment();
 
         String pseudoUri = ProductProvider.SINGLE_PRODUCT_CONTENT_URI.replace("*", uuid);
-        assertNotNull(uri);
+
         assertEquals(pseudoUri, uri.toString());
 
         Cursor cursor = mProductProvider.query(uri, Product.PREFIXED_COLUMN.ALL_COLUMNS, null, null, null);
@@ -158,11 +161,8 @@ public class ProductProviderTest extends AndroidTestCase {
 
     public void testDeleteSingleProduct() {
 
-        ContentValues contentValues = new ContentValues();
-        String uuid = UUID.randomUUID().toString();
-
-        Uri uri = ProviderTestUtils.insertProduct(mProductProvider, uuid, "TestProduct", 0.5f, 0.5f, (String) null);
-
+        Uri uri = ProviderTestUtils.insertProduct(mProductProvider, "TestProduct", 0.5f, 0.5f, (String) null);
+        assertNotNull(uri);
         int affectedRows = mProductProvider.delete(uri, null, null);
         assertEquals(1, affectedRows);
         Cursor cursor = mProductProvider.query(uri, Product.PREFIXED_COLUMN.ALL_COLUMNS, null, null, null);
@@ -171,28 +171,24 @@ public class ProductProviderTest extends AndroidTestCase {
     }
 
     public void testDeleteMultipleProducts() {
-        ContentValues contentValues = new ContentValues();
-        String uuid = UUID.randomUUID().toString();
+        Uri uri1 = ProviderTestUtils.insertProduct(mProductProvider, "TestProduct1", 0.5f, 0.5f, (String) null);
+        Uri uri2 = ProviderTestUtils.insertProduct(mProductProvider, "TestProduct2", 0.5f, 0.5f, (String) null);
 
-        ProviderTestUtils.insertProduct(mProductProvider, uuid, "TestProduct1", 0.5f, 0.5f, (String) null);
+        assertNotNull(uri1);
+        assertNotNull(uri2);
 
-        mProductProvider.insert(Uri.parse(ProductProvider.SINGLE_PRODUCT_CONTENT_URI.replace("*", uuid)), contentValues);
-
-        String uuid2 = UUID.randomUUID().toString();
-
-        ProviderTestUtils.insertProduct(mProductProvider, uuid2, "TestProduct2", 0.5f, 0.5f, (String) null);
-
-        mProductProvider.insert(Uri.parse(ProductProvider.SINGLE_PRODUCT_CONTENT_URI.replace("*", uuid2)), contentValues);
 
         int affectedRows = mProductProvider.delete(Uri.parse(ProductProvider.MULTIPLE_PRODUCT_CONTENT_URI), Product.PREFIXED_COLUMN.NAME + " LIKE ?", new String[]{"%TestProduct%"});
 
         assertEquals(2, affectedRows);
 
-        ProviderTestUtils.insertProduct(mProductProvider, uuid, "TestProduct1", 0.5f, 0.5f, (String) null);
-        ProviderTestUtils.insertProduct(mProductProvider, uuid2, "TestProduct2", 0.5f, 0.5f, (String) null);
+        uri1 = ProviderTestUtils.insertProduct(mProductProvider, "TestProduct1", 0.5f, 0.5f, (String) null);
+        uri2 = ProviderTestUtils.insertProduct(mProductProvider, "TestProduct2", 0.5f, 0.5f, (String) null);
+
+        assertNotNull(uri1);
+        assertNotNull(uri2);
 
         affectedRows = mProductProvider.delete(Uri.parse(ProductProvider.MULTIPLE_PRODUCT_CONTENT_URI), Product.PREFIXED_COLUMN.NAME + " LIKE ?", new String[]{"%TestProduct1%"});
-
         assertEquals(1, affectedRows);
     }
 

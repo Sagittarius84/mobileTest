@@ -30,6 +30,7 @@ public class TaggedProductProviderTest extends AndroidTestCase {
 
     @Override
     public void setUp() {
+
         mDatabase = new DBOpenHelper(getContext(), null).getWritableDatabase();
         mTaggedProductProvider = new TaggedProductProvider(getContext());
         mProductProvider = new ProductProvider(getContext());
@@ -60,8 +61,14 @@ public class TaggedProductProviderTest extends AndroidTestCase {
         String tagUuid = UUID.randomUUID().toString();
         String taggedProductUuid = UUID.randomUUID().toString();
 
-        Uri productUri = ProviderTestUtils.insertProduct(mProductProvider, productUuid, "Product1", 0.5f, 0.5f, (String) null);
-        Uri tagUri = ProviderTestUtils.insertTag(mTagProvider, tagUuid, "Tag1");
+        Uri productUri = ProviderTestUtils.insertProduct(mProductProvider, "Product1", 0.5f, 0.5f, (String) null);
+        Uri tagUri = ProviderTestUtils.insertTag(mTagProvider, "Tag1");
+
+        assertNotNull(productUri);
+        assertNotNull(tagUri);
+
+        productUuid = productUri.getLastPathSegment();
+        tagUuid = tagUri.getLastPathSegment();
 
         mDatabase.execSQL("INSERT INTO " + TaggedProduct.TABLE_NAME + " VALUES (?,?,?)", new String[]{taggedProductUuid, tagUuid, productUuid});
 
@@ -81,29 +88,39 @@ public class TaggedProductProviderTest extends AndroidTestCase {
     public void testQueryMultipleTaggedProduct() {
 
 
-        String productUuid = UUID.randomUUID().toString();
-        String tagUuid = UUID.randomUUID().toString();
-        String taggedProductUuid = UUID.randomUUID().toString();
+        String productUuid;
+        String tagUuid    ;
 
-        String productUuid2 = UUID.randomUUID().toString();
-        String tagUuid2 = UUID.randomUUID().toString();
-        String taggedProductUuid2 = UUID.randomUUID().toString();
+        String productUuid2      ;
+        String tagUuid2          ;
 
+        String productUuid3      ;
+        String taggedProductUuid  = UUID.randomUUID().toString();
+        String taggedProductUuid2= UUID.randomUUID().toString();
+        String taggedProductUuid3= UUID.randomUUID().toString();
 
-        String productUuid3 = UUID.randomUUID().toString();
-        String taggedProductUuid3 = UUID.randomUUID().toString();
-
-        Uri productUri = ProviderTestUtils.insertProduct(mProductProvider, productUuid, "Product1", 0.5f, 0.5f, (String) null);
-        Uri tagUri = ProviderTestUtils.insertTag(mTagProvider, tagUuid, "Tag1");
+        Uri productUri = ProviderTestUtils.insertProduct(mProductProvider, "Product1", 0.5f, 0.5f, (String) null);
+        Uri tagUri = ProviderTestUtils.insertTag(mTagProvider, "Tag1");
 
         assertNotNull(productUri);
         assertNotNull(tagUri);
-        Uri productUri2 = ProviderTestUtils.insertProduct(mProductProvider, productUuid2, "Product2", 0.5f, 0.5f, (String) null);
-        Uri tagUri2 = ProviderTestUtils.insertTag(mTagProvider, tagUuid2, "Tag2");
+
+        productUuid = productUri.getLastPathSegment();
+        tagUuid = tagUri.getLastPathSegment();
+
+        Uri productUri2 = ProviderTestUtils.insertProduct(mProductProvider, "Product2", 0.5f, 0.5f, (String) null);
+        Uri tagUri2 = ProviderTestUtils.insertTag(mTagProvider, "Tag2");
+
         assertNotNull(productUri2);
         assertNotNull(tagUri2);
-        Uri productUri3 = ProviderTestUtils.insertProduct(mProductProvider, productUuid3, "Product3", 0.5f, 0.5f, (String) null);
+
+        productUuid2 = productUri2.getLastPathSegment();
+        tagUuid2 = tagUri2.getLastPathSegment();
+
+        Uri productUri3 = ProviderTestUtils.insertProduct(mProductProvider, "Product3", 0.5f, 0.5f, (String) null);
         assertNotNull(productUri3);
+
+        productUuid3 = productUri3.getLastPathSegment();
 
         mDatabase.execSQL("INSERT INTO " + TaggedProduct.TABLE_NAME + " VALUES (?,?,?)", new String[]{taggedProductUuid, tagUuid, productUuid});
         mDatabase.execSQL("INSERT INTO " + TaggedProduct.TABLE_NAME + " VALUES (?,?,?)", new String[]{taggedProductUuid2, tagUuid, productUuid2});
@@ -137,29 +154,41 @@ public class TaggedProductProviderTest extends AndroidTestCase {
 
     public void testQueryMultipleTaggedProductByTag() {
 
-        String productUuid = UUID.randomUUID().toString();
-        String tagUuid = UUID.randomUUID().toString();
-        String taggedProductUuid = UUID.randomUUID().toString();
+        String productUuid;
+        String tagUuid    ;
 
-        String productUuid2 = UUID.randomUUID().toString();
-        String tagUuid2 = UUID.randomUUID().toString();
-        String taggedProductUuid2 = UUID.randomUUID().toString();
+        String productUuid2      ;
+        String tagUuid2          ;
 
 
-        String productUuid3 = UUID.randomUUID().toString();
-        String taggedProductUuid3 = UUID.randomUUID().toString();
+        String productUuid3      ;
+        String taggedProductUuid  = UUID.randomUUID().toString();
+        String taggedProductUuid2= UUID.randomUUID().toString();
+        String taggedProductUuid3= UUID.randomUUID().toString();
 
-        Uri productUri = ProviderTestUtils.insertProduct(mProductProvider, productUuid, "Product1", 0.5f, 0.5f, (String) null);
-        Uri tagUri = ProviderTestUtils.insertTag(mTagProvider, tagUuid, "Tag1");
+
+        Uri productUri = ProviderTestUtils.insertProduct(mProductProvider, "Product1", 0.5f, 0.5f, (String) null);
+        Uri tagUri = ProviderTestUtils.insertTag(mTagProvider, "Tag1");
 
         assertNotNull(productUri);
         assertNotNull(tagUri);
-        Uri productUri2 = ProviderTestUtils.insertProduct(mProductProvider, productUuid2, "Product2", 0.5f, 0.5f, (String) null);
-        Uri tagUri2 = ProviderTestUtils.insertTag(mTagProvider, tagUuid2, "Tag2");
+
+        productUuid = productUri.getLastPathSegment();
+        tagUuid = tagUri.getLastPathSegment();
+
+        Uri productUri2 = ProviderTestUtils.insertProduct(mProductProvider, "Product2", 0.5f, 0.5f, (String) null);
+        Uri tagUri2 = ProviderTestUtils.insertTag(mTagProvider, "Tag2");
+
         assertNotNull(productUri2);
         assertNotNull(tagUri2);
-        Uri productUri3 = ProviderTestUtils.insertProduct(mProductProvider, productUuid3, "Product3", 0.5f, 0.5f, (String) null);
+
+        productUuid2 = productUri2.getLastPathSegment();
+        tagUuid2 = tagUri2.getLastPathSegment();
+
+        Uri productUri3 = ProviderTestUtils.insertProduct(mProductProvider, "Product3", 0.5f, 0.5f, (String) null);
         assertNotNull(productUri3);
+
+        productUuid3 = productUri3.getLastPathSegment();
 
         mDatabase.execSQL("INSERT INTO " + TaggedProduct.TABLE_NAME + " VALUES (?,?,?)", new String[]{taggedProductUuid, tagUuid, productUuid});
         mDatabase.execSQL("INSERT INTO " + TaggedProduct.TABLE_NAME + " VALUES (?,?,?)", new String[]{taggedProductUuid2, tagUuid, productUuid2});
@@ -179,29 +208,40 @@ public class TaggedProductProviderTest extends AndroidTestCase {
 
 
     public void testInsertSingleTaggedProduct() {
-
-
-        String productUuid = UUID.randomUUID().toString();
-        String tagUuid = UUID.randomUUID().toString();
+        String productUuid;
+        String tagUuid    ;
         String taggedProductUuid;
 
-        String productUuid2 = UUID.randomUUID().toString();
-        String tagUuid2 = UUID.randomUUID().toString();
+        String productUuid2      ;
+        String tagUuid2          ;
+        String taggedProductUuid2;
 
 
-        String productUuid3 = UUID.randomUUID().toString();
+        String productUuid3      ;
+        String taggedProductUuid3;
 
-        Uri productUri = ProviderTestUtils.insertProduct(mProductProvider, productUuid, "Product1", 0.5f, 0.5f, (String) null);
-        Uri tagUri = ProviderTestUtils.insertTag(mTagProvider, tagUuid, "Tag1");
+        Uri productUri = ProviderTestUtils.insertProduct(mProductProvider, "Product1", 0.5f, 0.5f, (String) null);
+        Uri tagUri = ProviderTestUtils.insertTag(mTagProvider, "Tag1");
 
         assertNotNull(productUri);
         assertNotNull(tagUri);
-        Uri productUri2 = ProviderTestUtils.insertProduct(mProductProvider, productUuid2, "Product2", 0.5f, 0.5f, (String) null);
-        Uri tagUri2 = ProviderTestUtils.insertTag(mTagProvider, tagUuid2, "Tag2");
+
+        productUuid = productUri.getLastPathSegment();
+        tagUuid = tagUri.getLastPathSegment();
+
+        Uri productUri2 = ProviderTestUtils.insertProduct(mProductProvider, "Product2", 0.5f, 0.5f, (String) null);
+        Uri tagUri2 = ProviderTestUtils.insertTag(mTagProvider, "Tag2");
+
         assertNotNull(productUri2);
         assertNotNull(tagUri2);
-        Uri productUri3 = ProviderTestUtils.insertProduct(mProductProvider, productUuid3, "Product3", 0.5f, 0.5f, (String) null);
+
+        productUuid2 = productUri2.getLastPathSegment();
+        tagUuid2 = tagUri2.getLastPathSegment();
+
+        Uri productUri3 = ProviderTestUtils.insertProduct(mProductProvider, "Product3", 0.5f, 0.5f, (String) null);
         assertNotNull(productUri3);
+
+        productUuid3 = productUri3.getLastPathSegment();
 
         ContentValues contentValues = new ContentValues();
         contentValues.put(TaggedProduct.COLUMN.PRODUCT_ID, productUuid);
@@ -228,27 +268,40 @@ public class TaggedProductProviderTest extends AndroidTestCase {
 
 
     public void testDeleteSingle(){
-        String productUuid = UUID.randomUUID().toString();
-        String tagUuid = UUID.randomUUID().toString();
-        String taggedProductUuid, taggedProductUuid2;
+        String productUuid;
+        String tagUuid    ;
+        String taggedProductUuid;
 
-        String productUuid2 = UUID.randomUUID().toString();
-        String tagUuid2 = UUID.randomUUID().toString();
+        String productUuid2      ;
+        String tagUuid2          ;
+        String taggedProductUuid2;
 
-        String productUuid3 = UUID.randomUUID().toString();
 
-        Uri productUri = ProviderTestUtils.insertProduct(mProductProvider, productUuid, "Product1", 0.5f, 0.5f, (String) null);
-        Uri tagUri = ProviderTestUtils.insertTag(mTagProvider, tagUuid, "Tag1");
+        String productUuid3      ;
+        String taggedProductUuid3;
+
+        Uri productUri = ProviderTestUtils.insertProduct(mProductProvider, "Product1", 0.5f, 0.5f, (String) null);
+        Uri tagUri = ProviderTestUtils.insertTag(mTagProvider, "Tag1");
 
         assertNotNull(productUri);
         assertNotNull(tagUri);
-        Uri productUri2 = ProviderTestUtils.insertProduct(mProductProvider, productUuid2, "Product2", 0.5f, 0.5f, (String) null);
-        Uri tagUri2 = ProviderTestUtils.insertTag(mTagProvider, tagUuid2, "Tag2");
+
+        productUuid = productUri.getLastPathSegment();
+        tagUuid = tagUri.getLastPathSegment();
+
+        Uri productUri2 = ProviderTestUtils.insertProduct(mProductProvider, "Product2", 0.5f, 0.5f, (String) null);
+        Uri tagUri2 = ProviderTestUtils.insertTag(mTagProvider, "Tag2");
+
         assertNotNull(productUri2);
         assertNotNull(tagUri2);
-        Uri productUri3 = ProviderTestUtils.insertProduct(mProductProvider, productUuid3, "Product3", 0.5f, 0.5f, (String) null);
+
+        productUuid2 = productUri2.getLastPathSegment();
+        tagUuid2 = tagUri2.getLastPathSegment();
+
+        Uri productUri3 = ProviderTestUtils.insertProduct(mProductProvider, "Product3", 0.5f, 0.5f, (String) null);
         assertNotNull(productUri3);
 
+        productUuid3 = productUri3.getLastPathSegment();
         ContentValues contentValues = new ContentValues();
         contentValues.put(TaggedProduct.COLUMN.PRODUCT_ID, productUuid);
         contentValues.put(TaggedProduct.COLUMN.TAG_ID, tagUuid);
@@ -278,45 +331,60 @@ public class TaggedProductProviderTest extends AndroidTestCase {
     }
 
     public void testDeleteMultiple(){
-        String productUuid = UUID.randomUUID().toString();
-        String tagUuid = UUID.randomUUID().toString();
-        String taggedProductUuid = UUID.randomUUID().toString();
+        String productUuid;
+        String tagUuid    ;
+        String taggedProductUuid;
 
-        String productUuid2 = UUID.randomUUID().toString();
-        String tagUuid2 = UUID.randomUUID().toString();
-        String taggedProductUuid2 = UUID.randomUUID().toString();
+        String productUuid2      ;
+        String tagUuid2          ;
+        String taggedProductUuid2;
 
 
-        String productUuid3 = UUID.randomUUID().toString();
-        String taggedProductUuid3 = UUID.randomUUID().toString();
+        String productUuid3      ;
+        String taggedProductUuid3;
 
-        Uri productUri = ProviderTestUtils.insertProduct(mProductProvider, productUuid, "Product1", 0.5f, 0.5f, (String) null);
-        Uri tagUri = ProviderTestUtils.insertTag(mTagProvider, tagUuid, "Tag1");
+        Uri productUri = ProviderTestUtils.insertProduct(mProductProvider, "Product1", 0.5f, 0.5f, (String) null);
+        Uri tagUri = ProviderTestUtils.insertTag(mTagProvider, "Tag1");
 
         assertNotNull(productUri);
         assertNotNull(tagUri);
-        Uri productUri2 = ProviderTestUtils.insertProduct(mProductProvider, productUuid2, "Product2", 0.5f, 0.5f, (String) null);
-        Uri tagUri2 = ProviderTestUtils.insertTag(mTagProvider, tagUuid2, "Tag2");
+
+        productUuid = productUri.getLastPathSegment();
+        tagUuid = tagUri.getLastPathSegment();
+
+        Uri productUri2 = ProviderTestUtils.insertProduct(mProductProvider, "Product2", 0.5f, 0.5f, (String) null);
+        Uri tagUri2 = ProviderTestUtils.insertTag(mTagProvider, "Tag2");
+
         assertNotNull(productUri2);
         assertNotNull(tagUri2);
-        Uri productUri3 = ProviderTestUtils.insertProduct(mProductProvider, productUuid3, "Product3", 0.5f, 0.5f, (String) null);
+
+        productUuid2 = productUri2.getLastPathSegment();
+        tagUuid2 = tagUri2.getLastPathSegment();
+
+        Uri productUri3 = ProviderTestUtils.insertProduct(mProductProvider, "Product3", 0.5f, 0.5f, (String) null);
         assertNotNull(productUri3);
 
+        productUuid3 = productUri3.getLastPathSegment();
+
         ContentValues contentValues = new ContentValues();
-        contentValues.put(TaggedProduct.COLUMN.ID, taggedProductUuid);
         contentValues.put(TaggedProduct.COLUMN.PRODUCT_ID, productUuid);
         contentValues.put(TaggedProduct.COLUMN.TAG_ID, tagUuid);
 
 
-        Uri uri = Uri.parse(TaggedProductProvider.SINGLE_TAGGED_PRODUCT_CONTENT_URI.replace("*", taggedProductUuid));
-        Uri uri2 = Uri.parse(TaggedProductProvider.SINGLE_TAGGED_PRODUCT_CONTENT_URI.replace("*", taggedProductUuid2));
+        Uri uri = Uri.parse(TaggedProductProvider.MULTIPLE_TAGGED_PRODUCT_CONTENT_URI);
+        Uri uri2 = Uri.parse(TaggedProductProvider.MULTIPLE_TAGGED_PRODUCT_CONTENT_URI);
         assertNotNull(uri);
         uri = mTaggedProductProvider.insert(uri, contentValues);
 
-        contentValues.put(TaggedProduct.COLUMN.ID, taggedProductUuid2);
         contentValues.put(TaggedProduct.COLUMN.PRODUCT_ID, productUuid2);
         contentValues.put(TaggedProduct.COLUMN.TAG_ID, tagUuid2);
         uri2 = mTaggedProductProvider.insert(uri2, contentValues);
+
+        assertNotNull(uri);
+        assertNotNull(uri2);
+
+        taggedProductUuid = uri.getLastPathSegment();
+        taggedProductUuid2 = uri2.getLastPathSegment();
 
         Cursor cursor  = mDatabase.query(TaggedProduct.TABLE_NAME, TaggedProduct.COLUMN_PREFIXED.ALL_COLUMNS, null, null, null, null, null);
         assertEquals(2, cursor.getCount());
@@ -329,27 +397,40 @@ public class TaggedProductProviderTest extends AndroidTestCase {
     }
 
     public void testDeleteMultipleByTag(){
-        String productUuid = UUID.randomUUID().toString();
-        String tagUuid = UUID.randomUUID().toString();
+        String productUuid;
+        String tagUuid    ;
         String taggedProductUuid;
+
+        String productUuid2      ;
+        String tagUuid2          ;
         String taggedProductUuid2;
 
-        String productUuid2         = UUID.randomUUID().toString();
-        String tagUuid2             = UUID.randomUUID().toString();
 
-        String productUuid3 = UUID.randomUUID().toString();
+        String productUuid3      ;
+        String taggedProductUuid3;
 
-        Uri productUri = ProviderTestUtils.insertProduct(mProductProvider, productUuid, "Product1", 0.5f, 0.5f, (String) null);
-        Uri tagUri = ProviderTestUtils.insertTag(mTagProvider, tagUuid, "Tag1");
+        Uri productUri = ProviderTestUtils.insertProduct(mProductProvider, "Product1", 0.5f, 0.5f, (String) null);
+        Uri tagUri = ProviderTestUtils.insertTag(mTagProvider, "Tag1");
 
         assertNotNull(productUri);
         assertNotNull(tagUri);
-        Uri productUri2 = ProviderTestUtils.insertProduct(mProductProvider, productUuid2, "Product2", 0.5f, 0.5f, (String) null);
-        Uri tagUri2 = ProviderTestUtils.insertTag(mTagProvider, tagUuid2, "Tag2");
+
+        productUuid = productUri.getLastPathSegment();
+        tagUuid = tagUri.getLastPathSegment();
+
+        Uri productUri2 = ProviderTestUtils.insertProduct(mProductProvider, "Product2", 0.5f, 0.5f, (String) null);
+        Uri tagUri2 = ProviderTestUtils.insertTag(mTagProvider, "Tag2");
+
         assertNotNull(productUri2);
         assertNotNull(tagUri2);
-        Uri productUri3 = ProviderTestUtils.insertProduct(mProductProvider, productUuid3, "Product3", 0.5f, 0.5f, (String) null);
+
+        productUuid2 = productUri2.getLastPathSegment();
+        tagUuid2 = tagUri2.getLastPathSegment();
+
+        Uri productUri3 = ProviderTestUtils.insertProduct(mProductProvider, "Product3", 0.5f, 0.5f, (String) null);
         assertNotNull(productUri3);
+
+        productUuid3 = productUri3.getLastPathSegment();
 
         ContentValues contentValues = new ContentValues();
         contentValues.put(TaggedProduct.COLUMN.PRODUCT_ID, productUuid);
@@ -360,16 +441,16 @@ public class TaggedProductProviderTest extends AndroidTestCase {
         Uri uri2 = Uri.parse(TaggedProductProvider.MULTIPLE_TAGGED_PRODUCT_CONTENT_URI);
 
         uri = mTaggedProductProvider.insert(uri, contentValues);
-        assertNotNull(uri);
-
-        taggedProductUuid = uri.getLastPathSegment();
 
         contentValues.put(TaggedProduct.COLUMN.PRODUCT_ID, productUuid2);
         contentValues.put(TaggedProduct.COLUMN.TAG_ID, tagUuid2);
 
         uri2 = mTaggedProductProvider.insert(uri2, contentValues);
-        assertNotNull(uri2);
 
+        assertNotNull(uri2);
+        assertNotNull(uri);
+
+        taggedProductUuid = uri.getLastPathSegment();
         taggedProductUuid2 = uri2.getLastPathSegment();
 
         Cursor cursor  = mDatabase.query(TaggedProduct.TABLE_NAME, TaggedProduct.COLUMN_PREFIXED.ALL_COLUMNS, null, null, null, null, null);
@@ -385,28 +466,40 @@ public class TaggedProductProviderTest extends AndroidTestCase {
 
 
     public void testUpdateSingle(){
-        String productUuid = UUID.randomUUID().toString();
-        String tagUuid = UUID.randomUUID().toString();
+        String productUuid;
+        String tagUuid    ;
         String taggedProductUuid;
+
+        String productUuid2      ;
+        String tagUuid2          ;
         String taggedProductUuid2;
 
-        String productUuid2         = UUID.randomUUID().toString();
-        String tagUuid2             = UUID.randomUUID().toString();
 
-        String productUuid3 = UUID.randomUUID().toString();
-        String taggedProductUuid3 = UUID.randomUUID().toString();
+        String productUuid3      ;
+        String taggedProductUuid3;
 
-        Uri productUri = ProviderTestUtils.insertProduct(mProductProvider, productUuid, "Product1", 0.5f, 0.5f, (String) null);
-        Uri tagUri = ProviderTestUtils.insertTag(mTagProvider, tagUuid, "Tag1");
+        Uri productUri = ProviderTestUtils.insertProduct(mProductProvider, "Product1", 0.5f, 0.5f, (String) null);
+        Uri tagUri = ProviderTestUtils.insertTag(mTagProvider, "Tag1");
 
         assertNotNull(productUri);
         assertNotNull(tagUri);
-        Uri productUri2 = ProviderTestUtils.insertProduct(mProductProvider, productUuid2, "Product2", 0.5f, 0.5f, (String) null);
-        Uri tagUri2 = ProviderTestUtils.insertTag(mTagProvider, tagUuid2, "Tag2");
+
+        productUuid = productUri.getLastPathSegment();
+        tagUuid = tagUri.getLastPathSegment();
+
+        Uri productUri2 = ProviderTestUtils.insertProduct(mProductProvider, "Product2", 0.5f, 0.5f, (String) null);
+        Uri tagUri2 = ProviderTestUtils.insertTag(mTagProvider, "Tag2");
+
         assertNotNull(productUri2);
         assertNotNull(tagUri2);
-        Uri productUri3 = ProviderTestUtils.insertProduct(mProductProvider, productUuid3, "Product3", 0.5f, 0.5f, (String) null);
+
+        productUuid2 = productUri2.getLastPathSegment();
+        tagUuid2 = tagUri2.getLastPathSegment();
+
+        Uri productUri3 = ProviderTestUtils.insertProduct(mProductProvider, "Product3", 0.5f, 0.5f, (String) null);
         assertNotNull(productUri3);
+
+        productUuid3 = productUri3.getLastPathSegment();
 
         ContentValues contentValues = new ContentValues();
         contentValues.put(TaggedProduct.COLUMN.PRODUCT_ID, productUuid);

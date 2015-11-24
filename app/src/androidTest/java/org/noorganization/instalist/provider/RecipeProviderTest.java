@@ -138,8 +138,9 @@ public class RecipeProviderTest extends AndroidTestCase {
     public void testInsertSingleRecipe() {
         ContentValues contentValues = new ContentValues();
         String uuid = UUID.randomUUID().toString();
-        Uri uri = ProviderTestUtils.insertRecipe(mRecipeProvider, uuid, "TestRecipe");
+        Uri uri = ProviderTestUtils.insertRecipe(mRecipeProvider, "TestRecipe");
         assertNotNull(uri);
+        uuid = uri.getLastPathSegment();
 
         String pseudoUri = RecipeProvider.SINGLE_RECIPE_CONTENT_URI.replace("*", uuid);
         assertNotNull(uri);
@@ -158,9 +159,11 @@ public class RecipeProviderTest extends AndroidTestCase {
     public void testDeleteSingleRecipe() {
 
         ContentValues contentValues = new ContentValues();
-        String uuid = UUID.randomUUID().toString();
-        Uri uri = ProviderTestUtils.insertRecipe(mRecipeProvider, uuid, "TestRecipe");
+        String uuid;
+        Uri uri = ProviderTestUtils.insertRecipe(mRecipeProvider, "TestRecipe");
         assertNotNull(uri);
+
+        uuid = uri.getLastPathSegment();
 
         int affectedRows = mRecipeProvider.delete(uri, null, null);
         assertEquals(1, affectedRows);
@@ -170,24 +173,31 @@ public class RecipeProviderTest extends AndroidTestCase {
     }
 
     public void testDeleteMultipleRecipes() {
-        ContentValues contentValues = new ContentValues();
 
-        String uuid = UUID.randomUUID().toString();
-        String uuid2 = UUID.randomUUID().toString();
+        String uuid;
+        String uuid2;
 
-        Uri uri = ProviderTestUtils.insertRecipe(mRecipeProvider, uuid, "TestRecipe1");
+        Uri uri = ProviderTestUtils.insertRecipe(mRecipeProvider, "TestRecipe1");
+        Uri uri2 = ProviderTestUtils.insertRecipe(mRecipeProvider, "TestRecipe2");
+
         assertNotNull(uri);
-        Uri uri2 = ProviderTestUtils.insertRecipe(mRecipeProvider, uuid2, "TestRecipe2");
         assertNotNull(uri2);
+
+        uuid = uri.getLastPathSegment();
+        uuid2 = uri2.getLastPathSegment();
 
         int affectedRows = mRecipeProvider.delete(Uri.parse(RecipeProvider.MULTIPLE_RECIPE_CONTENT_URI), Recipe.COLUMN_PREFIXED.NAME + " LIKE ?", new String[]{"%TestRecipe%"});
 
         assertEquals(2, affectedRows);
 
-        uri = ProviderTestUtils.insertRecipe(mRecipeProvider, uuid, "TestRecipe1");
+        uri = ProviderTestUtils.insertRecipe(mRecipeProvider, "TestRecipe1");
+        uri2 = ProviderTestUtils.insertRecipe(mRecipeProvider, "TestRecipe2");
+
         assertNotNull(uri);
-        uri2 = ProviderTestUtils.insertRecipe(mRecipeProvider, uuid2, "TestRecipe2");
         assertNotNull(uri2);
+
+        uuid = uri.getLastPathSegment();
+        uuid2 = uri2.getLastPathSegment();
 
         affectedRows = mRecipeProvider.delete(Uri.parse(RecipeProvider.MULTIPLE_RECIPE_CONTENT_URI), Recipe.COLUMN_PREFIXED.NAME + " LIKE ?", new String[]{"%TestRecipe1%"});
 
@@ -196,10 +206,17 @@ public class RecipeProviderTest extends AndroidTestCase {
 
     public void testUpdateSingleRecipe() {
         ContentValues contentValues = new ContentValues();
-        String uuid = UUID.randomUUID().toString();
+        String uuid;
+        String uuid2;
 
-        Uri uri = ProviderTestUtils.insertRecipe(mRecipeProvider, uuid, "TestRecipe1");
+        Uri uri = ProviderTestUtils.insertRecipe(mRecipeProvider, "TestRecipe1");
+        Uri uri2 = ProviderTestUtils.insertRecipe(mRecipeProvider, "TestRecipe2");
+
         assertNotNull(uri);
+        assertNotNull(uri2);
+
+        uuid = uri.getLastPathSegment();
+        uuid2 = uri2.getLastPathSegment();
 
         contentValues.put(Recipe.COLUMN.ID, uuid);
         contentValues.put(Recipe.COLUMN.NAME, "TestRecipe2");
@@ -217,36 +234,40 @@ public class RecipeProviderTest extends AndroidTestCase {
 
 
     public void testInsertSingleIngredient() {
+        String uuidRecipe;
 
-        ContentValues contentValues = new ContentValues();
-        String uuidRecipe = UUID.randomUUID().toString();
+        Uri uri = ProviderTestUtils.insertRecipe(mRecipeProvider, "TestRecipe1");
 
-        Uri uri = ProviderTestUtils.insertRecipe(mRecipeProvider, uuidRecipe, "TestRecipe1");
         assertNotNull(uri);
 
-        ContentValues contentValuesProduct = new ContentValues();
-        String uuidProduct = UUID.randomUUID().toString();
+        uuidRecipe = uri.getLastPathSegment();
 
-        contentValuesProduct.put(Product.COLUMN.ID, uuidProduct);
+
+        ContentValues contentValuesProduct = new ContentValues();
+        String uuidProduct;
+
         contentValuesProduct.put(Product.COLUMN.NAME, "TestProduct");
         contentValuesProduct.put(Product.COLUMN.DEFAULT_AMOUNT, 0.5f);
         contentValuesProduct.put(Product.COLUMN.STEP_AMOUNT, 0.5f);
         contentValuesProduct.put(Product.COLUMN.UNIT, (String) null);
 
-        Uri productUri = mProductProvider.insert(Uri.parse(ProductProvider.SINGLE_PRODUCT_CONTENT_URI.replace("*", uuidProduct)), contentValuesProduct);
+        Uri productUri = mProductProvider.insert(Uri.parse(ProductProvider.MULTIPLE_PRODUCT_CONTENT_URI), contentValuesProduct);
         assertNotNull(productUri);
+        uuidProduct = productUri.getLastPathSegment();
 
-        String uuid = UUID.randomUUID().toString();
-        uri = uri.buildUpon().appendPath("ingredient").appendPath(uuid).build();
+        String ingredientUuid;
+        uri = Uri.parse(RecipeProvider.MULTIPLE_RECIPE_INGREDIENT_CONTENT_URI.replace("*", uuidRecipe));
 
         ContentValues ingredientValues = new ContentValues();
-        ingredientValues.put(Ingredient.COLUMN.ID, uuid);
         ingredientValues.put(Ingredient.COLUMN.PRODUCT_ID, uuidProduct);
         ingredientValues.put(Ingredient.COLUMN.RECIPE_ID, uuidRecipe);
         ingredientValues.put(Ingredient.COLUMN.AMOUNT, 1.0f);
 
         Uri ingredientUri = mRecipeProvider.insert(uri, ingredientValues);
-        uri = Uri.parse(RecipeProvider.SINGLE_RECIPE_INGREDIENT_CONTENT_URI.replaceFirst("\\*", uuidRecipe).replaceFirst("\\*", uuid));
+        assertNotNull(ingredientUri);
+        ingredientUuid = ingredientUri.getLastPathSegment();
+
+        uri = Uri.parse(RecipeProvider.SINGLE_RECIPE_INGREDIENT_CONTENT_URI.replaceFirst("\\*", uuidRecipe).replaceFirst("\\*", ingredientUuid));
 
         assertNotNull(ingredientUri);
         assertEquals(true, uri.compareTo(ingredientUri) == 0);
@@ -258,7 +279,7 @@ public class RecipeProviderTest extends AndroidTestCase {
         assertEquals(1, cursor.getCount());
 
         cursor.moveToFirst();
-        assertEquals(uuid, cursor.getString(cursor.getColumnIndex(Ingredient.COLUMN.ID)));
+        assertEquals(ingredientUuid, cursor.getString(cursor.getColumnIndex(Ingredient.COLUMN.ID)));
 
     }
 
@@ -267,10 +288,11 @@ public class RecipeProviderTest extends AndroidTestCase {
         String uuidRecipe = UUID.randomUUID().toString();
 
         mDatabase.execSQL("INSERT INTO " + Recipe.TABLE_NAME + " VALUES (?,?)", new String[]{uuidRecipe, "TestRecipe1"});
-        String uuidProduct = UUID.randomUUID().toString();
+        String uuidProduct;
 
-        Uri productUri = ProviderTestUtils.insertProduct(mProductProvider, uuidProduct, "TestProduct", 0.5f, 0.5f, (String) null);
+        Uri productUri = ProviderTestUtils.insertProduct(mProductProvider, "TestProduct", 0.5f, 0.5f, (String) null);
         assertNotNull(productUri);
+        uuidProduct = productUri.getLastPathSegment();
 
         String uuid = UUID.randomUUID().toString();
 
@@ -297,14 +319,17 @@ public class RecipeProviderTest extends AndroidTestCase {
         mDatabase.execSQL("INSERT INTO " + Recipe.TABLE_NAME + " VALUES (?,?)", new String[]{uuidRecipe, "TestRecipe1"});
 
         ContentValues contentValuesProduct = new ContentValues();
-        String uuidProduct1 = UUID.randomUUID().toString();
-        String uuidProduct2 = UUID.randomUUID().toString();
+        String uuidProduct1;
+        String uuidProduct2;
 
-        Uri productUri1 = ProviderTestUtils.insertProduct(mProductProvider, uuidProduct1, "TestProduct1", 0.5f, 0.5f, (String) null);
-        Uri productUri2 = ProviderTestUtils.insertProduct(mProductProvider, uuidProduct2, "TestProduct2", 0.5f, 0.5f, (String) null);
+        Uri productUri1 = ProviderTestUtils.insertProduct(mProductProvider, "TestProduct1", 0.5f, 0.5f, (String) null);
+        Uri productUri2 = ProviderTestUtils.insertProduct(mProductProvider, "TestProduct2", 0.5f, 0.5f, (String) null);
 
         assertNotNull(productUri1);
         assertNotNull(productUri2);
+
+        uuidProduct1 = productUri1.getLastPathSegment();
+        uuidProduct2 = productUri2.getLastPathSegment();
 
         String uuid = UUID.randomUUID().toString();
         String uuid2 = UUID.randomUUID().toString();
@@ -331,26 +356,31 @@ public class RecipeProviderTest extends AndroidTestCase {
 
     public void testDeleteSingleIngredient() {
 
-        String uuidRecipe = UUID.randomUUID().toString();
+        String uuidRecipe;
+        String uuidProduct;
+        String ingredientUuid;
 
-        Uri uri = ProviderTestUtils.insertRecipe(mRecipeProvider, uuidRecipe, "TestRecipe1");
+        Uri uri = ProviderTestUtils.insertRecipe(mRecipeProvider, "TestRecipe1");
+        assertNotNull(uri);
+        uuidRecipe = uri.getLastPathSegment();
+
+        Uri productUri1 = ProviderTestUtils.insertProduct(mProductProvider, "TestProduct", 0.5f, 0.5f, (String) null);
+        assertNotNull(productUri1);
+        uuidProduct = productUri1.getLastPathSegment();
+
+
+        uri = Uri.parse(RecipeProvider.MULTIPLE_RECIPE_INGREDIENT_CONTENT_URI.replace("*", uuidRecipe));
         assertNotNull(uri);
 
-        String uuidProduct = UUID.randomUUID().toString();
-        Uri productUri1 = ProviderTestUtils.insertProduct(mProductProvider, uuidProduct, "TestProduct", 0.5f, 0.5f, (String) null);
-        assertNotNull(productUri1);
-
-        String uuid = UUID.randomUUID().toString();
-        uri = uri.buildUpon().appendPath("ingredient").appendPath(uuid).build();
-
         ContentValues ingredientValues = new ContentValues();
-        ingredientValues.put(Ingredient.COLUMN.ID, uuid);
         ingredientValues.put(Ingredient.COLUMN.PRODUCT_ID, uuidProduct);
         ingredientValues.put(Ingredient.COLUMN.RECIPE_ID, uuidRecipe);
         ingredientValues.put(Ingredient.COLUMN.AMOUNT, 1.0f);
 
         Uri ingredientUri = mRecipeProvider.insert(uri, ingredientValues);
-        uri = Uri.parse(RecipeProvider.SINGLE_RECIPE_INGREDIENT_CONTENT_URI.replaceFirst("\\*", uuidRecipe).replaceFirst("\\*", uuid));
+        assertNotNull(ingredientUri);
+        ingredientUuid = ingredientUri.getLastPathSegment();
+
         assertNotNull(ingredientUri);
 
         int affectedRows = mRecipeProvider.delete(ingredientUri, null, null);
@@ -368,39 +398,40 @@ public class RecipeProviderTest extends AndroidTestCase {
     public void testDeleteMultipleIngredient() {
 
         ContentValues contentValues = new ContentValues();
-        String uuidRecipe = UUID.randomUUID().toString();
+        String uuidRecipe;
 
-        Uri uri = ProviderTestUtils.insertRecipe(mRecipeProvider, uuidRecipe, "TestRecipe1");
+        Uri uri = ProviderTestUtils.insertRecipe(mRecipeProvider, "TestRecipe1");
         assertNotNull(uri);
+        uuidRecipe = uri.getLastPathSegment();
 
-        String uuidProduct = UUID.randomUUID().toString();
-        String uuidProduct2 = UUID.randomUUID().toString();
+        String uuidProduct;
+        String uuidProduct2;
 
-        Uri productUri1 = ProviderTestUtils.insertProduct(mProductProvider, uuidProduct, "TestProduct", 0.5f, 0.5f, (String) null);
-        Uri productUri2 = ProviderTestUtils.insertProduct(mProductProvider, uuidProduct2, "TestProduct2", 0.5f, 0.5f, (String) null);
+        Uri productUri1 = ProviderTestUtils.insertProduct(mProductProvider, "TestProduct", 0.5f, 0.5f, (String) null);
+        Uri productUri2 = ProviderTestUtils.insertProduct(mProductProvider, "TestProduct2", 0.5f, 0.5f, (String) null);
 
         assertNotNull(productUri1);
         assertNotNull(productUri2);
 
-        String uuid = UUID.randomUUID().toString();
-        String uuid2 = UUID.randomUUID().toString();
-        Uri uri1 = Uri.parse(RecipeProvider.SINGLE_RECIPE_INGREDIENT_CONTENT_URI.replaceFirst("\\*", uuidRecipe).replaceFirst("\\*", uuid));
-        Uri uri2 = Uri.parse(RecipeProvider.SINGLE_RECIPE_INGREDIENT_CONTENT_URI.replaceFirst("\\*", uuidRecipe).replaceFirst("\\*", uuid2));
+        uuidProduct = productUri1.getLastPathSegment();
+        uuidProduct2 = productUri2.getLastPathSegment();
+
+        Uri uri1 = Uri.parse(RecipeProvider.MULTIPLE_RECIPE_INGREDIENT_CONTENT_URI.replace("*", uuidRecipe));
+        Uri uri2 = Uri.parse(RecipeProvider.MULTIPLE_RECIPE_INGREDIENT_CONTENT_URI.replace("*", uuidRecipe));
 
         ContentValues ingredientValues = new ContentValues();
-        ingredientValues.put(Ingredient.COLUMN.ID, uuid);
         ingredientValues.put(Ingredient.COLUMN.PRODUCT_ID, uuidProduct);
         ingredientValues.put(Ingredient.COLUMN.RECIPE_ID, uuidRecipe);
         ingredientValues.put(Ingredient.COLUMN.AMOUNT, 1.0f);
 
-        mRecipeProvider.insert(uri1, ingredientValues);
-
-        ingredientValues.put(Ingredient.COLUMN.ID, uuid2);
+        Uri newIngredientUri = mRecipeProvider.insert(uri1, ingredientValues);
         ingredientValues.put(Ingredient.COLUMN.PRODUCT_ID, uuidProduct2);
-        mRecipeProvider.insert(uri2, ingredientValues);
+        Uri newIngredientUri2 =mRecipeProvider.insert(uri2, ingredientValues);
 
-        Uri recipeUri = Uri.parse(RecipeProvider.MULTIPLE_RECIPE_INGREDIENT_CONTENT_URI.replaceFirst("\\*", uuidRecipe));
+        assertNotNull(newIngredientUri);
+        assertNotNull(newIngredientUri2);
 
+        Uri recipeUri = Uri.parse(RecipeProvider.MULTIPLE_RECIPE_INGREDIENT_CONTENT_URI.replace("*", uuidRecipe));
         int affectedRows = mRecipeProvider.delete(recipeUri, null, null);
 
         assertEquals(2, affectedRows);
@@ -412,41 +443,48 @@ public class RecipeProviderTest extends AndroidTestCase {
     }
 
     public void testUpdateSingleIngredient() {
-        ContentValues contentValues = new ContentValues();
-        String uuidRecipe = UUID.randomUUID().toString();
-        Uri uri = ProviderTestUtils.insertRecipe(mRecipeProvider, uuidRecipe, "TestRecipe1");
-        assertNotNull(uri);
+        String uuidRecipe;
+        Uri testRecipeUri = ProviderTestUtils.insertRecipe(mRecipeProvider, "TestRecipe1");
+        assertNotNull(testRecipeUri);
 
-        String uuidProduct = UUID.randomUUID().toString();
-        String uuidProduct2 = UUID.randomUUID().toString();
+        uuidRecipe = testRecipeUri.getLastPathSegment();
 
-        Uri productUri1 = ProviderTestUtils.insertProduct(mProductProvider, uuidProduct, "TestProduct", 0.5f, 0.5f, (String) null);
-        Uri productUri2 = ProviderTestUtils.insertProduct(mProductProvider, uuidProduct2, "TestProduct2", 0.5f, 0.5f, (String) null);
+        String uuidProduct ;
+        String uuidProduct2;
+
+        Uri productUri1 = ProviderTestUtils.insertProduct(mProductProvider, "TestProduct", 0.5f, 0.5f, (String) null);
+        Uri productUri2 = ProviderTestUtils.insertProduct(mProductProvider, "TestProduct2", 0.5f, 0.5f, (String) null);
 
         assertNotNull(productUri1);
         assertNotNull(productUri2);
 
-        String uuid = UUID.randomUUID().toString();
-        String uuid2 = UUID.randomUUID().toString();
-        Uri uri1 = Uri.parse(RecipeProvider.SINGLE_RECIPE_INGREDIENT_CONTENT_URI.replaceFirst("\\*", uuidRecipe).replaceFirst("\\*", uuid));
-        Uri uri2 = Uri.parse(RecipeProvider.SINGLE_RECIPE_INGREDIENT_CONTENT_URI.replaceFirst("\\*", uuidRecipe).replaceFirst("\\*", uuid2));
+        uuidProduct = productUri1.getLastPathSegment();
+        uuidProduct2 = productUri2.getLastPathSegment();
+
+        String ingredient1Uuid ;
+        String ingredient2Uuid2;
+        Uri uri1 = Uri.parse(RecipeProvider.MULTIPLE_RECIPE_INGREDIENT_CONTENT_URI.replace("*", uuidRecipe));
+        Uri uri2 = Uri.parse(RecipeProvider.MULTIPLE_RECIPE_INGREDIENT_CONTENT_URI.replace("*", uuidRecipe));
 
         ContentValues ingredientValues = new ContentValues();
-        ingredientValues.put(Ingredient.COLUMN.ID, uuid);
         ingredientValues.put(Ingredient.COLUMN.PRODUCT_ID, uuidProduct);
         ingredientValues.put(Ingredient.COLUMN.RECIPE_ID, uuidRecipe);
         ingredientValues.put(Ingredient.COLUMN.AMOUNT, 1.0f);
 
-        mRecipeProvider.insert(uri1, ingredientValues);
+        Uri ingredient1Uri = mRecipeProvider.insert(uri1, ingredientValues);
 
-        ingredientValues.put(Ingredient.COLUMN.ID, uuid2);
         ingredientValues.put(Ingredient.COLUMN.PRODUCT_ID, uuidProduct2);
-        mRecipeProvider.insert(uri2, ingredientValues);
+        Uri ingredient2Uri = mRecipeProvider.insert(uri2, ingredientValues);
 
-        ingredientValues.put(Ingredient.COLUMN.ID, uuid);
+        assertNotNull(ingredient1Uri);
+        assertNotNull(ingredient2Uri);
+
+        ingredient1Uuid = ingredient1Uri.getLastPathSegment();
+        ingredient2Uuid2 = ingredient2Uri.getLastPathSegment();
+
         ingredientValues.put(Ingredient.COLUMN.AMOUNT, 5.0f);
 
-        Uri ingredientUri = Uri.parse(RecipeProvider.SINGLE_RECIPE_INGREDIENT_CONTENT_URI.replaceFirst("\\*", uuidRecipe).replaceFirst("\\*", uuid));
+        Uri ingredientUri = Uri.parse(RecipeProvider.SINGLE_RECIPE_INGREDIENT_CONTENT_URI.replaceFirst("\\*", uuidRecipe).replaceFirst("\\*", ingredient1Uuid));
         int affectedRows = mRecipeProvider.update(ingredientUri,
                 ingredientValues, null, null
         );
@@ -456,7 +494,7 @@ public class RecipeProviderTest extends AndroidTestCase {
         Cursor cursor = mRecipeProvider.query(ingredientUri, Ingredient.COLUMN.ALL_COLUMNS, null, null, null);
         assertNotNull(cursor);
         cursor.moveToFirst();
-        assertEquals(uuid, cursor.getString(cursor.getColumnIndex(Ingredient.COLUMN.ID)));
+        assertEquals(ingredient1Uuid, cursor.getString(cursor.getColumnIndex(Ingredient.COLUMN.ID)));
         assertEquals(5.0f, cursor.getFloat(cursor.getColumnIndex(Ingredient.COLUMN.AMOUNT)));
         cursor.close();
 

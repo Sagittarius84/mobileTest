@@ -16,16 +16,12 @@ import org.noorganization.instalist.model.ShoppingList;
 import org.noorganization.instalist.model.Tag;
 import org.noorganization.instalist.model.TaggedProduct;
 import org.noorganization.instalist.model.Unit;
-import org.noorganization.instalist.provider.internal.CategoryProvider;
 import org.noorganization.instalist.provider.internal.IInternalProvider;
 import org.noorganization.instalist.provider.internal.ProductProvider;
 import org.noorganization.instalist.provider.internal.RecipeProvider;
-import org.noorganization.instalist.provider.internal.ShoppingListProvider;
 import org.noorganization.instalist.provider.internal.TagProvider;
 import org.noorganization.instalist.provider.internal.TaggedProductProvider;
 import org.noorganization.instalist.provider.internal.UnitProvider;
-
-import java.util.List;
 
 /**
  * Testutils to support some easier operations in the other tests.
@@ -70,23 +66,21 @@ public class ProviderTestUtils {
      * Inserts a product into the current database.
      *
      * @param _productProvider the productProvider to insert the new product.
-     * @param _uuid            the generated uuid.
      * @param _name            the name of the product.
      * @param _defaultAmount   the default amount.
      * @param _stepAmount      the step amount.
      * @param _unit_ID         (String) null) when there should be no unit, else the id of the corresponding unit.
      * @return the uri for the inserted product.
      */
-    public static Uri insertProduct(IInternalProvider _productProvider, String _uuid, String _name, float _defaultAmount, float _stepAmount, String _unit_ID) {
+    public static Uri insertProduct(IInternalProvider _productProvider, String _name, float _defaultAmount, float _stepAmount, String _unit_ID) {
 
         ContentValues contentValues = new ContentValues();
-        contentValues.put(Product.COLUMN.ID, _uuid);
         contentValues.put(Product.COLUMN.NAME, _name);
         contentValues.put(Product.COLUMN.DEFAULT_AMOUNT, _defaultAmount);
         contentValues.put(Product.COLUMN.STEP_AMOUNT, _stepAmount);
         contentValues.put(Product.COLUMN.UNIT, _unit_ID);
 
-        return _productProvider.insert(Uri.parse(ProductProvider.SINGLE_PRODUCT_CONTENT_URI.replace("*", _uuid)), contentValues);
+        return _productProvider.insert(Uri.parse(ProductProvider.MULTIPLE_PRODUCT_CONTENT_URI), contentValues);
     }
 
     /**
@@ -155,16 +149,14 @@ public class ProviderTestUtils {
      * Inserts a tag into the database.
      *
      * @param _tagProvider the tagprovider where the actions should be done.
-     * @param _uuid        the uuid of the tag.
      * @param tagName      the name of the tag.
      * @return uri of the inserted tag.
      */
-    public static Uri insertTag(IInternalProvider _tagProvider, String _uuid, String tagName) {
+    public static Uri insertTag(IInternalProvider _tagProvider, String tagName) {
         ContentValues contentValues = new ContentValues();
-        contentValues.put(Tag.COLUMN.ID, _uuid);
         contentValues.put(Tag.COLUMN.NAME, tagName);
 
-        return _tagProvider.insert(Uri.parse(TagProvider.SINGLE_TAG_CONTENT_URI.replace("*", _uuid)), contentValues);
+        return _tagProvider.insert(Uri.parse(TagProvider.MULTIPLE_TAG_CONTENT_URI), contentValues);
     }
 
     /**
@@ -270,16 +262,14 @@ public class ProviderTestUtils {
      * Inserts a recipe to the database.
      *
      * @param mRecipeProvider the recipeprovider.
-     * @param uuidRecipe      the uuid of the recipe.
      * @param name            the name of the recipe.
      * @return the uri of the inserted recipe or null if failure happened.
      */
-    public static Uri insertRecipe(IInternalProvider mRecipeProvider, String uuidRecipe, String name) {
+    public static Uri insertRecipe(IInternalProvider mRecipeProvider, String name) {
         ContentValues contentValues = new ContentValues();
-        contentValues.put(Recipe.COLUMN.ID, uuidRecipe);
         contentValues.put(Recipe.COLUMN.NAME, name);
         // insert at begin a recipe
-        return mRecipeProvider.insert(Uri.parse(RecipeProvider.SINGLE_RECIPE_CONTENT_URI.replace("*", uuidRecipe)), contentValues);
+        return mRecipeProvider.insert(Uri.parse(RecipeProvider.MULTIPLE_RECIPE_CONTENT_URI), contentValues);
     }
 
     /**
@@ -362,10 +352,11 @@ public class ProviderTestUtils {
 
     /**
      * Inserts an ingredient into the database.
-     * @param _resolver the contentresolver to use.
-     * @param _recipeUUID the recipe uuid to get the ingredient associated with.
+     *
+     * @param _resolver    the contentresolver to use.
+     * @param _recipeUUID  the recipe uuid to get the ingredient associated with.
      * @param _productUUID the product uuid which should be the product in the ingredient.
-     * @param _amount the amount of this ingredient.
+     * @param _amount      the amount of this ingredient.
      * @return the new ingredient.
      */
     public static Uri insertIngredient(ContentResolver _resolver, String _recipeUUID, String _productUUID, float _amount) {
@@ -382,7 +373,7 @@ public class ProviderTestUtils {
     }
 
     public static Uri insertTaggedProduct(ContentResolver _resolver, String _productUUID, String _tagUUID) {
-        if(_productUUID == null || _tagUUID == null || _resolver == null){
+        if (_productUUID == null || _tagUUID == null || _resolver == null) {
             throw new NullPointerException("_productUUID or _tagUUID or _resolver is null!");
         }
 
