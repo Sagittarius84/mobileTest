@@ -9,6 +9,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.util.Log;
 
 import org.noorganization.instalist.provider.internal.CategoryProvider;
 import org.noorganization.instalist.provider.internal.IInternalProvider;
@@ -21,6 +22,7 @@ import org.noorganization.instalist.provider.internal.TagProvider;
 import org.noorganization.instalist.provider.internal.TaggedProductProvider;
 import org.noorganization.instalist.provider.internal.UnitProvider;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 
@@ -42,9 +44,14 @@ public class InstalistProvider extends ContentProvider {
 
     @Override
     public boolean onCreate() {
-
-        // TODO: Use persistent db.
-        mDatabase = new DBOpenHelper(getContext(), ":memory:").getWritableDatabase();
+        Context currentContext = getContext();
+        if (currentContext != null) {
+            String dbPath = currentContext.getFilesDir().getAbsolutePath() + File.separator +
+                    "org.noorganization.instalist.provider.db";
+            mDatabase = new DBOpenHelper(getContext(), dbPath).getWritableDatabase();
+        } else {
+            mDatabase = new DBOpenHelper(null, ":memory:").getWritableDatabase();
+        }
 
         IInternalProvider categoryProvider = new CategoryProvider();
         IInternalProvider productProvider = new ProductProvider(getContext());

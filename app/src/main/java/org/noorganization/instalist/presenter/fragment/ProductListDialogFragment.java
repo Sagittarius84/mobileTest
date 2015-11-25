@@ -180,7 +180,7 @@ public class ProductListDialogFragment extends BaseFragment {
         mCreateProductListener = new OnCreateProductListener();
 
         if (mCompatibility != null) {
-            EventBus.getDefault().register(mCompatibility);
+//            EventBus.getDefault().register(mCompatibility);
         }
         EventBus.getDefault().register(this);
     }
@@ -384,7 +384,7 @@ public class ProductListDialogFragment extends BaseFragment {
     @Override
     public void onDestroy() {
         if (mCompatibility != null) {
-            EventBus.getDefault().unregister(mCompatibility);
+//            EventBus.getDefault().unregister(mCompatibility);
         }
         EventBus.getDefault().unregister(this);
         super.onDestroy();
