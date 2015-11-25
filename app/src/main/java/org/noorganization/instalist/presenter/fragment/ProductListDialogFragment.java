@@ -413,12 +413,13 @@ public class ProductListDialogFragment extends BaseFragment {
             }
         }
 
+        // TODO: Discuss, for what this method was needed (or still is) and fix it.
         /**
          * EventBus-receiver for translation to listentries.
          *
          * @param _selectedProducts
          */
-        public void onEventMainThread(ProductSelectMessage _selectedProducts) {
+        /*public void onEventMainThread(ProductSelectMessage _selectedProducts) {
             IListController mListController = ControllerFactory.getListController(mContext);
 
             for (Product product : _selectedProducts.mProducts.keySet()) {
@@ -432,7 +433,7 @@ public class ProductListDialogFragment extends BaseFragment {
                     Log.e(ProductListDialogFragment.class.getName(), "Insertion failed.");
                 }
             }
-        }
+        }*/
 
 
     }

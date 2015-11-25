@@ -506,20 +506,22 @@ public class ShoppingListOverviewFragment extends BaseFragment implements IFragm
     }
 
     public void onEvent(ProductSelectMessage _message) {
-        /*if (mHandlingProductSelectedMessages) {
+        if (mHandlingProductSelectedMessages) {
             Map<Product, Float> productAmounts = _message.mProducts;
             IListController controller = ControllerFactory.getListController(mContext);
             for (Product currentProduct : productAmounts.keySet()) {
                 controller.addOrChangeItem(mCurrentShoppingList, currentProduct,
                         productAmounts.get(currentProduct), true);
             }
-        }*/
+        }
     }
 
     public void onEvent(ListItemChangedMessage _message) {
         /*if(!_message.mEntry.mList.equals(mCurrentShoppingList)){
             return;
         }*/
+        Log.d(getClass().getCanonicalName(), "ListItemChangedMessage: " + _message.mChange.toString()
+                + "; " + _message.mEntry.toString());
         switch (_message.mChange) {
             case CHANGED:
                 onListItemUpdated(_message.mEntry);

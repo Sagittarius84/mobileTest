@@ -238,6 +238,12 @@ public class IListControllerTest extends AndroidTestCase {
         assertNotNull(returnedThirdEntry);
         assertEquals(2.0f, returnedThirdEntry.mAmount, 0.001f);
         assertEquals(returnedThirdEntry, mListController.getEntryById(returnedSecondEntry.mUUID));
+
+        // positive test: update a second time
+        ListEntry returnedFourdEntry = mListController.addOrChangeItem(mListHome, mProductBread, 5.0f, true);
+        assertNotNull(returnedFourdEntry);
+        assertEquals(7.0f, returnedFourdEntry.mAmount, 0.001f);
+        assertEquals(returnedFourdEntry, mListController.getEntryById(returnedSecondEntry.mUUID));
     }
 
     public void testStrikeAllItems() throws Exception {
