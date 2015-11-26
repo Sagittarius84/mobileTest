@@ -26,5 +26,6 @@ public class OnShoppingListClickListener implements View.OnClickListener {
     @Override
     public void onClick(View v) {
         mOnShoppingListClickEvent.onShoppingListClicked(mShoppingList);
+        //EventBus.getDefault().post(new ShoppingListSelectedMessage(mShoppingList));
     }
 }

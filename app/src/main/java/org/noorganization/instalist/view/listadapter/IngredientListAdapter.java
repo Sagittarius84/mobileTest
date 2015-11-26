@@ -13,6 +13,7 @@ import org.noorganization.instalist.view.customview.AmountPicker;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * The adapter displays some ingredients for editing recipes.
@@ -57,7 +58,8 @@ public class IngredientListAdapter extends ArrayAdapter<Ingredient> {
     @Override
     public long getItemId(int _position) {
         if (_position < mUnderlyingIngredients.size()) {
-            return mUnderlyingIngredients.get(_position).mProduct.getId();
+            return UUID.fromString(mUnderlyingIngredients.get(_position).mProduct.mUUID).
+                    getLeastSignificantBits();
         }
         return 0;
     }

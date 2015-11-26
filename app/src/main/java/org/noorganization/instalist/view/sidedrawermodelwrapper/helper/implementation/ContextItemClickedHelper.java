@@ -10,13 +10,15 @@ import android.widget.SpinnerAdapter;
 import android.widget.ViewSwitcher;
 
 import org.noorganization.instalist.R;
+import org.noorganization.instalist.presenter.ICategoryController;
+import org.noorganization.instalist.presenter.IListController;
+import org.noorganization.instalist.presenter.implementation.ControllerFactory;
 import org.noorganization.instalist.model.Category;
 import org.noorganization.instalist.model.ShoppingList;
 import org.noorganization.instalist.view.touchlistener.sidebar.OnCancelClickListenerWithData;
 import org.noorganization.instalist.view.touchlistener.sidebar.OnCancelMoveClickListener;
 import org.noorganization.instalist.view.touchlistener.sidebar.OnSubmitClickListenerWithChildData;
 import org.noorganization.instalist.view.touchlistener.sidebar.OnSubmitMoveClickListener;
-import org.noorganization.instalist.view.interfaces.IBaseActivity;
 import org.noorganization.instalist.view.sidedrawermodelwrapper.helper.IContextItemClickedHelper;
 import org.noorganization.instalist.view.spinneradapter.CategorySpinnerAdapter;
 
@@ -29,9 +31,13 @@ import java.util.List;
 public class ContextItemClickedHelper implements IContextItemClickedHelper {
 
     private Context mContext;
+    private ICategoryController mCategoryController;
+    private IListController     mListController;
 
     public ContextItemClickedHelper(Context _Context){
         mContext = _Context;
+        mCategoryController = ControllerFactory.getCategoryController(mContext);
+        mListController = ControllerFactory.getListController(mContext);
     }
 
     @Override
@@ -45,7 +51,8 @@ public class ContextItemClickedHelper implements IContextItemClickedHelper {
         editText = (EditText) _View.findViewById(R.id.expandable_list_view_list_edit_name);
 
         cancelView.setOnClickListener(new OnCancelClickListenerWithData(_ViewSwitcher));
-        submitView.setOnClickListener(new OnSubmitClickListenerWithChildData(_ViewSwitcher, editText, _ShoppingList.getId()));
+        submitView.setOnClickListener(new OnSubmitClickListenerWithChildData(mContext, _ViewSwitcher,
+                editText, _ShoppingList.mUUID));
 
         editText.setText(_ShoppingList.mName);
         _ViewSwitcher.showNext();
@@ -53,13 +60,13 @@ public class ContextItemClickedHelper implements IContextItemClickedHelper {
 
     @Override
     public void removeList(ShoppingList _ShoppingList) {
-        _ShoppingList.delete();
+        mListController.removeList(_ShoppingList);
         /*boolean deleted = ControllerFactory.getListController().removeList(_ShoppingList);
         if (!deleted) {
             Toast.makeText(mContext, mContext.getString(R.string.deletion_failed), Toast.LENGTH_SHORT).show();
             return;
         }*/
-        ((IBaseActivity) mContext).removeList(_ShoppingList);
+        //((IBaseActivity) mContext).removeList(_ShoppingList);
     }
 
     @Override
@@ -76,7 +83,7 @@ public class ContextItemClickedHelper implements IContextItemClickedHelper {
         submitView = (ImageView) _View.findViewById(R.id.expandable_list_view_move_submit);
         spinner = (Spinner) _View.findViewById(R.id.expandable_list_view_list_move_spinner);
 
-        categories = Category.listAll(Category.class);
+        categories = mCategoryController.getAllCategories();
         categories.remove(_CategoryForShoppingList);
 
         SpinnerAdapter spinnerAdapter = new CategorySpinnerAdapter(mContext, categories);
@@ -86,6 +93,7 @@ public class ContextItemClickedHelper implements IContextItemClickedHelper {
         moveContainer.setVisibility(View.VISIBLE);
 
         cancelView.setOnClickListener(new OnCancelMoveClickListener(moveContainer, _ViewSwitcher));
-        submitView.setOnClickListener(new OnSubmitMoveClickListener(moveContainer, _ViewSwitcher, spinner, _ShoppingList));
+        submitView.setOnClickListener(new OnSubmitMoveClickListener(mContext, moveContainer,
+                _ViewSwitcher, spinner, _ShoppingList));
     }
 }

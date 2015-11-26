@@ -19,18 +19,19 @@
         <item name="android:background">@drawable/shadow_grey</item>
     </style>
     <!-- Probably for later tewaks-->
-    <style name="InstalistTheme1.expandable_list_first_linear_layout_container" parent="match_parent_width_height">
-    </style>
+    <style name="InstalistTheme1.expandable_list_first_linear_layout_container" parent="match_parent"></style>
 
-    <style name="InstalistTheme1.expandable_list_second_linear_layout_container" parent="match_parent_width_height"></style>
+    <style name="InstalistTheme1.expandable_list_second_linear_layout_container" parent="match_parent"></style>
 
-    <style name="InstalistTheme1.expandable_list_sublist_first_linear_layout_container" parent="match_parent_width_height">
-        <item name="android:layout_marginLeft">@dimen/expandable_list_sublist_item_margin_left</item>
+    <style name="InstalistTheme1.expandable_list_sublist_first_linear_layout_container" parent="match_parent">
+        <item name="android:layout_marginLeft">@dimen/expandable_list_sublist_item_margin_left
+        </item>
     </style>
 
     <style name="InstalistTheme1.shadow">
         <item name="android:layout_height">@dimen/design_appbar_elevation</item>
         <item name="android:background">@drawable/toolbar_dropshadow</item>
+        <item name="android:cacheColorHint">#00000000</item>
     </style>
     <!-- -->
 

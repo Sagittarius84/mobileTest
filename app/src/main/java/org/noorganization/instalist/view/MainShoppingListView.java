@@ -24,14 +24,15 @@ import android.widget.FrameLayout;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 
-import org.noorganization.instalist.GlobalApplication;
 import org.noorganization.instalist.R;
-import org.noorganization.instalist.controller.event.ListItemChangedMessage;
-import org.noorganization.instalist.controller.implementation.ControllerFactory;
+import org.noorganization.instalist.presenter.ICategoryController;
+import org.noorganization.instalist.presenter.IListController;
+import org.noorganization.instalist.presenter.event.CategoryChangedMessage;
+import org.noorganization.instalist.presenter.event.ListChangedMessage;
+import org.noorganization.instalist.presenter.event.ListItemChangedMessage;
+import org.noorganization.instalist.presenter.implementation.ControllerFactory;
 import org.noorganization.instalist.model.Category;
 import org.noorganization.instalist.model.ShoppingList;
-import org.noorganization.instalist.view.touchlistener.IOnShoppingListClickListenerEvents;
-import org.noorganization.instalist.view.touchlistener.sidebar.OnShoppingListAddClickListener;
 import org.noorganization.instalist.view.activity.SettingsActivity;
 import org.noorganization.instalist.view.event.ActivityStateMessage;
 import org.noorganization.instalist.view.event.ToolbarChangeMessage;
@@ -39,8 +40,9 @@ import org.noorganization.instalist.view.fragment.ShoppingListOverviewFragment;
 import org.noorganization.instalist.view.interfaces.IBaseActivity;
 import org.noorganization.instalist.view.interfaces.IBaseActivityListEvent;
 import org.noorganization.instalist.view.interfaces.IFragment;
-import org.noorganization.instalist.view.interfaces.ISideDrawerListDataEvents;
 import org.noorganization.instalist.view.sidedrawermodelwrapper.implementation.SideDrawerListManager;
+import org.noorganization.instalist.view.touchlistener.IOnShoppingListClickListenerEvents;
+import org.noorganization.instalist.view.touchlistener.sidebar.OnShoppingListAddClickListener;
 import org.noorganization.instalist.view.utils.PreferencesManager;
 import org.noorganization.instalist.view.utils.ViewUtils;
 
@@ -57,20 +59,23 @@ import de.greenrobot.event.EventBus;
  *
  * @author TS
  */
-public class MainShoppingListView extends AppCompatActivity implements IBaseActivity, IBaseActivityListEvent, IOnShoppingListClickListenerEvents, ISideDrawerListDataEvents {
+public class MainShoppingListView extends AppCompatActivity implements IBaseActivity, IBaseActivityListEvent, IOnShoppingListClickListenerEvents {
 
-    private final static String LOG_TAG               = MainShoppingListView.class.getName();
+    private final static String LOG_TAG = MainShoppingListView.class.getName();
     private final static String DEFAULT_CATEGORY_NAME = "(default)";
 
-    public final static String KEY_LISTNAME          = "list_name";
-    public final static String KEY_LISTID            = "list_id";
+    public final static String KEY_LISTNAME = "list_name";
+    public final static String KEY_LISTID = "list_id";
     public static final String SIDE_DRAWER_TRANSLATE = "side_drawer_translate";
 
-    private Toolbar              mToolbar;
+    private ICategoryController mCategoryController;
+    private IListController mListController;
+
+    private Toolbar mToolbar;
     private View.OnClickListener mToolbarClickListener;
-    private FrameLayout          mFrameLayout;
-    private RelativeLayout       mLeftMenuDrawerRelativeLayout;
-    private EditText             mNewNameEditText;
+    private FrameLayout mFrameLayout;
+    private RelativeLayout mLeftMenuDrawerRelativeLayout;
+    private EditText mNewNameEditText;
 
     private Button mAddListButton;
     private Button mAddCategoryButton;
@@ -97,7 +102,7 @@ public class MainShoppingListView extends AppCompatActivity implements IBaseActi
      */
     private String mCurrentListName;
 
-    private long mDefaultCategoryId;
+    private String mDefaultCategoryId;
 
     private SideDrawerListManager mDrawerListManager;
 
@@ -114,19 +119,23 @@ public class MainShoppingListView extends AppCompatActivity implements IBaseActi
         mFragments = new ArrayList<>(1);
         setContentView(R.layout.activity_main_shopping_list_view);
 
+        mCategoryController = ControllerFactory.getCategoryController(this);
+        mListController = ControllerFactory.getListController(this);
+
         ExpandableListView expandableListView;
-        ListView           plainListView;
+        ListView plainListView;
 
         // init PreferencesManager
         PreferencesManager.initializeInstance(this);
-        mDefaultCategoryId = PreferencesManager.getInstance().getLongValue(PreferencesManager.KEY_DEFAULT_CATEGORY_ID);
-        Category category = Category.findById(Category.class, mDefaultCategoryId);
+        mDefaultCategoryId = PreferencesManager.getInstance().getStringValue(PreferencesManager.KEY_DEFAULT_CATEGORY_ID);
+        Category category = mCategoryController.getCategoryByID(mDefaultCategoryId);
 
-        if (category == null) {
+        /*if (category == null) {
             // if not set generate a standard category and set the id of it to preferences
-            mDefaultCategoryId = ControllerFactory.getCategoryController().createCategory(DEFAULT_CATEGORY_NAME).getId();
+            category = mCategoryController.createCategory(DEFAULT_CATEGORY_NAME);
+            mDefaultCategoryId = category.mUUID;
             PreferencesManager.getInstance().setValue(PreferencesManager.KEY_DEFAULT_CATEGORY_ID, mDefaultCategoryId);
-        }
+        }*/
 
         // init and setup toolbar
         mToolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -155,8 +164,9 @@ public class MainShoppingListView extends AppCompatActivity implements IBaseActi
         // setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_OPEN);
 
         if (savedInstanceState == null) {
-            if (ShoppingList.count(ShoppingList.class, null, new String[]{}) > 0) {
-                selectList(ShoppingList.listAll(ShoppingList.class).get(0));
+            List<ShoppingList> foundListsInCat = mListController.getListsByCategory(category);
+            if (foundListsInCat.size() > 0) {
+                selectList(foundListsInCat.get(0));
             }
         }
     }
@@ -202,7 +212,53 @@ public class MainShoppingListView extends AppCompatActivity implements IBaseActi
         switch (_message.mChange) {
             case CREATED:
             case DELETED:
-                updateList(_message.mEntry.mList);
+                mDrawerListManager.updateList(_message.mEntry.mList);
+        }
+    }
+
+    /**
+     * Event when a category was changed.
+     *
+     * @param _message the message that was sent.
+     */
+    public void onEvent(CategoryChangedMessage _message) {
+        switch (_message.mChange) {
+            case CHANGED:
+                mDrawerListManager.updateCategory(_message.mCategory);
+                break;
+            case CREATED:
+                mDrawerListManager.addCategory(_message.mCategory);
+                break;
+            case DELETED:
+                Category category = mCategoryController.getCategoryByID(mDefaultCategoryId);
+                List<ShoppingList> shoppingLists = mListController.getListsByCategory(null);
+                for (ShoppingList shoppingList : shoppingLists) {
+                    ShoppingList shoppingList1 = mListController.moveToCategory(shoppingList, category);
+                    mDrawerListManager.updateList(shoppingList1);
+                }
+                mDrawerListManager.removeCategory(_message.mCategory);
+                break;
+        }
+    }
+
+    /**
+     * Event when a category was changed.
+     *
+     * @param _message the message that was sent.
+     */
+    public void onEvent(ListChangedMessage _message) {
+        switch (_message.mChange) {
+            case CHANGED:
+                mDrawerListManager.updateList(_message.mList);
+                break;
+            case CREATED:
+                mDrawerListManager.addList(_message.mList);
+                break;
+            case DELETED:
+                mDrawerListManager.removeList(_message.mList);
+                notifyFragmentsShoppingListRemoved(_message.mList);
+
+                break;
         }
     }
 
@@ -246,8 +302,7 @@ public class MainShoppingListView extends AppCompatActivity implements IBaseActi
     @Override
     protected void onResume() {
         super.onResume();
-        ((ChangeHandler) GlobalApplication.getChangeHandler()).setCurrentBaseActivity(this);
-        mAddListButton.setOnClickListener(new OnShoppingListAddClickListener(mDefaultCategoryId, mNewNameEditText));
+        mAddListButton.setOnClickListener(new OnShoppingListAddClickListener(this, mDefaultCategoryId, mNewNameEditText));
 
         mAddCategoryButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -259,12 +314,10 @@ public class MainShoppingListView extends AppCompatActivity implements IBaseActi
 
                 // create new category if insert of category failed, there will be shown an
                 // error hint to the user.
-                Category category = ControllerFactory.getCategoryController().createCategory(categoryName);
+                Category category = mCategoryController.createCategory(categoryName);
                 if (category == null) {
                     mNewNameEditText.setError(getResources().getString(R.string.category_exists));
-                    return;
                 } else {
-                    addCategory(category);
                     mAddCategoryButton.setVisibility(View.GONE);
                     ViewUtils.removeSoftKeyBoard(v.getContext(), mNewNameEditText);
                     mNewNameEditText.setText("");
@@ -314,7 +367,6 @@ public class MainShoppingListView extends AppCompatActivity implements IBaseActi
     @Override
     protected void onPause() {
         super.onPause();
-        ((ChangeHandler) GlobalApplication.getChangeHandler()).setCurrentBaseActivity(null);
         mAddListButton.setOnClickListener(null);
         mNewNameEditText.setOnKeyListener(null);
         mSettingsButton.setOnClickListener(null);
@@ -356,33 +408,26 @@ public class MainShoppingListView extends AppCompatActivity implements IBaseActi
             throw new NullPointerException("Name of ShoppingList must be set.");
         }
 
-
         // always close the drawer
         mDrawerLayout.closeDrawer(mLeftMenuDrawerRelativeLayout);
 
-        // list is the same as the current one
-        // no need to do then something
-        if (_ShoppingList.mName.equals(mCurrentListName)) {
-            return;
-        }
-
         // decl
-        Bundle   args;
+        Bundle args;
         Fragment fragment;
 
         // init
         mCurrentListName = _ShoppingList.mName;
-        fragment = ShoppingListOverviewFragment.newInstance(_ShoppingList.getId());
+        fragment = ShoppingListOverviewFragment.newInstance(_ShoppingList.mUUID);
         ViewUtils.addFragment(this, fragment);
     }
 
     @Override
     public boolean onKeyUp(int _KeyCode, KeyEvent _Event) {
-        if(_KeyCode == KeyEvent.KEYCODE_BACK){
-            if(mNewNameEditText.hasFocus()){
+        if (_KeyCode == KeyEvent.KEYCODE_BACK) {
+            if (mNewNameEditText.hasFocus()) {
                 mNewNameEditText.clearFocus();
                 return true;
-            } else if (mDrawerLayout.isDrawerOpen(mLeftMenuDrawerRelativeLayout)){
+            } else if (mDrawerLayout.isDrawerOpen(mLeftMenuDrawerRelativeLayout)) {
                 mDrawerLayout.closeDrawers();
                 return true;
             }
@@ -393,7 +438,7 @@ public class MainShoppingListView extends AppCompatActivity implements IBaseActi
     @Override
     public void setDrawerLockMode(int _DrawerLayoutMode) {
         // bindDrawerLayout();
-        if(_DrawerLayoutMode == DrawerLayout.LOCK_MODE_LOCKED_CLOSED){
+        if (_DrawerLayoutMode == DrawerLayout.LOCK_MODE_LOCKED_CLOSED) {
             mNavBarToggle.setDrawerIndicatorEnabled(false);
 
             mToolbar.setNavigationIcon(R.drawable.abc_ic_ab_back_mtrl_am_alpha);
@@ -403,7 +448,7 @@ public class MainShoppingListView extends AppCompatActivity implements IBaseActi
                     onBackPressed();
                 }
             });
-        }else {
+        } else {
             assignDrawer();
             //setNavigationClickListener(mToolbarClickListener);
             mNavBarToggle.setDrawerIndicatorEnabled(true);
@@ -451,45 +496,8 @@ public class MainShoppingListView extends AppCompatActivity implements IBaseActi
     }
 
     @Override
-    public void addCategory(Category _Category) {
-        mDrawerListManager.addCategory(_Category);
-    }
-
-    @Override
-    public void updateCategory(Category _Category) {
-        mDrawerListManager.updateCategory(_Category);
-    }
-
-    @Override
-    public void removeCategory(Category _Category) {
-        Category           category      = Category.findById(Category.class, mDefaultCategoryId);
-        List<ShoppingList> shoppingLists = Category.getListsWithoutCategory();
-        for (ShoppingList shoppingList : shoppingLists) {
-            ShoppingList shoppingList1 = ControllerFactory.getListController().moveToCategory(shoppingList, category);
-            updateList(shoppingList1);
-        }
-        mDrawerListManager.removeCategory(_Category);
-    }
-
-    @Override
-    public void addList(ShoppingList _ShoppingList) {
-        mDrawerListManager.addList(_ShoppingList);
-    }
-
-    @Override
-    public void updateList(ShoppingList _ShoppingList) {
-        mDrawerListManager.updateList(_ShoppingList);
-    }
-
-    @Override
-    public void removeList(ShoppingList _ShoppingList) {
-        mDrawerListManager.removeList(_ShoppingList);
-        notifyFragmentsShoppingListRemoved(_ShoppingList);
-    }
-
-    @Override
-    public void setSideDrawerAddListButtonListener(long _CategoryId) {
-        mAddListButton.setOnClickListener(new OnShoppingListAddClickListener(_CategoryId, mNewNameEditText));
+    public void setSideDrawerAddListButtonListener(String _CategoryId) {
+        mAddListButton.setOnClickListener(new OnShoppingListAddClickListener(this, _CategoryId, mNewNameEditText));
     }
 
     @Override
@@ -542,13 +550,10 @@ public class MainShoppingListView extends AppCompatActivity implements IBaseActi
         mNavBarToggle.setDrawerIndicatorEnabled(true);
     }
 
-    private void slideDrawer(float _MoveFactor){
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB)
-        {
+    private void slideDrawer(float _MoveFactor) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
             mFrameLayout.setTranslationX(_MoveFactor);
-        }
-        else
-        {
+        } else {
             TranslateAnimation anim = new TranslateAnimation(mLastDrawerTranslate, _MoveFactor, 0.0f, 0.0f);
             anim.setDuration(0);
             anim.setFillAfter(true);
@@ -560,24 +565,25 @@ public class MainShoppingListView extends AppCompatActivity implements IBaseActi
     @Override
     public void registerFragment(Fragment fragment) {
         try {
-            mFragments.add((IFragment)fragment);
-        }catch(ClassCastException e){
-            throw new  ClassCastException(fragment.getClass().toString() + " has no IFragment implemented");
+            mFragments.add((IFragment) fragment);
+        } catch (ClassCastException e) {
+            throw new ClassCastException(fragment.getClass().toString() + " has no IFragment implemented");
         }
     }
 
     @Override
     public void unregisterFragment(Fragment fragment) {
-        mFragments.remove((IFragment)fragment);
+        mFragments.remove(fragment);
     }
 
     /**
      * Notifies registered Fragments that an ShoppingList was removed.
+     *
      * @param _ShoppingList the shopping list that was removed.
      */
-    public void notifyFragmentsShoppingListRemoved(ShoppingList _ShoppingList){
-        for(IFragment fragment : mFragments){
-           fragment.onShoppingListRemoved(_ShoppingList);
+    public void notifyFragmentsShoppingListRemoved(ShoppingList _ShoppingList) {
+        for (IFragment fragment : mFragments) {
+            fragment.onShoppingListRemoved(_ShoppingList);
         }
     }
 }

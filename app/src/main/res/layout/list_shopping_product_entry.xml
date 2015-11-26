@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/list_product_shopping_view"
-    style="@style/single_line_list_view">
+    style="@style/single_line_list_item">
 
     <TextView
         android:id="@+id/list_product_shopping_product_amount"
-        style="@style/single_line_product_text_view"
+        style="@style/single_line_list_item_product_text_view"
         android:layout_width="0dp"
         android:layout_marginLeft="16dp"
         android:layout_marginStart="16dp"
@@ -13,13 +13,13 @@
 
     <TextView
         android:id="@+id/list_product_shopping_product_amount_type"
-        style="@style/single_line_product_text_view"
+        style="@style/single_line_list_item_product_text_view"
         android:layout_width="0dp"
         android:layout_weight="0.1" />
 
     <TextView
         android:id="@+id/list_product_shopping_product_name"
-        style="@style/single_line_product_text_view"
+        style="@style/single_line_list_item_product_text_view"
         android:layout_width="0dp"
         android:layout_weight="0.7"
         />

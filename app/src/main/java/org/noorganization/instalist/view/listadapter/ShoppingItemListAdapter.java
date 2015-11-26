@@ -10,8 +10,9 @@ import android.widget.Spinner;
 import android.widget.TextView;
 
 import org.noorganization.instalist.R;
+import org.noorganization.instalist.presenter.IUnitController;
+import org.noorganization.instalist.presenter.implementation.ControllerFactory;
 import org.noorganization.instalist.model.ListEntry;
-import org.noorganization.instalist.model.Unit;
 import org.noorganization.instalist.view.customview.AmountPicker;
 import org.noorganization.instalist.view.interfaces.IShoppingListEntryAction;
 import org.noorganization.instalist.view.modelwrappers.ListEntryItemWrapper;
@@ -23,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * The ShoppingItemListAdapter that handles the display of data.
@@ -54,6 +56,7 @@ public class ShoppingItemListAdapter extends RecyclerView.Adapter<RecyclerView.V
      * The current ListEntry that is in edit mode. Used to shorten acceess time.
      */
     private ListEntryItemWrapper mCurrentItemInEditMode;
+
     //endregion
 
     //region Constructor
@@ -133,6 +136,7 @@ public class ShoppingItemListAdapter extends RecyclerView.Adapter<RecyclerView.V
             public TextView     mProductName;
 
             private Context mContext;
+            private IUnitController mUnitController;
 
             public ShoppingListEditProductViewHolder(View _ItemView, Context _Context) {
                 super(_ItemView);
@@ -140,11 +144,13 @@ public class ShoppingItemListAdapter extends RecyclerView.Adapter<RecyclerView.V
                 mProductAmount = (AmountPicker) _ItemView.findViewById(R.id.list_product_shopping_product_amount_edit);
                 mProductType = (Spinner) _ItemView.findViewById(R.id.list_product_shopping_product_amount_type_edit);
                 mProductName = (TextView) _ItemView.findViewById(R.id.list_product_shopping_product_name);
+                mUnitController = ControllerFactory.getUnitController(mContext);
             }
 
             public void init(ListEntry _SingleEntry) {
                 mProductName.setText(_SingleEntry.mProduct.mName);
-                mProductType.setAdapter(new UnitSpinnerAdapter(mContext, Unit.listAll(Unit.class)));
+                mProductType.setAdapter(new UnitSpinnerAdapter(mContext, mUnitController.
+                        listAll(null, false)));
                 mProductAmount.setValue(_SingleEntry.mAmount);
             }
 
@@ -212,8 +218,8 @@ public class ShoppingItemListAdapter extends RecyclerView.Adapter<RecyclerView.V
     }
 
     @Override
-    public void addListEntry(long _ListEntryId) {
-        ListEntry listEntry = ListEntry.getListEntryById(_ListEntryId);
+    public void addListEntry(String _ListEntryId) {
+        ListEntry listEntry = ControllerFactory.getListController(mContext).getEntryById(_ListEntryId);
         mListOfEntries.add(new ListEntryItemWrapper(listEntry));
         Collections.sort(mListOfEntries, mCurrentComparator);
         // if here is a position like -1 there must be some strange effects going on.
@@ -221,7 +227,7 @@ public class ShoppingItemListAdapter extends RecyclerView.Adapter<RecyclerView.V
     }
 
     @Override
-    public void removeListEntry(long _ListEntryId) {
+    public void removeListEntry(String _ListEntryId) {
         int       positionToRemove = getPositionForId(_ListEntryId);
         if (positionToRemove < 0 || positionToRemove > mListOfEntries.size()) {
             Log.e(LOG_TAG, "Remove ListEntry from position " + positionToRemove + " is out of bounds");
@@ -232,30 +238,34 @@ public class ShoppingItemListAdapter extends RecyclerView.Adapter<RecyclerView.V
     }
 
     @Override
-    public void updateListEntry(long _ListEntryId) {
-        ListEntry listEntry        = ListEntry.getListEntryById(_ListEntryId);
-        int       positionToUpdate = getPositionForId(_ListEntryId);
+    public void updateListEntry(ListEntry _ListEntry) {
+        int       positionToUpdate = getPositionForId(_ListEntry.mUUID);
         if (positionToUpdate < 0 || positionToUpdate > mListOfEntries.size()) {
             Log.e(LOG_TAG, "Update ListEntry from position " + positionToUpdate + " is out of bounds");
             return;
         }
-        mListOfEntries.set(positionToUpdate, new ListEntryItemWrapper(listEntry));
+        mListOfEntries.set(positionToUpdate, new ListEntryItemWrapper(_ListEntry));
 
         Collections.sort(mListOfEntries, mCurrentComparator);
-        int newPositionOfElement = getPositionForId(_ListEntryId);
+        int newPositionOfElement = getPositionForId(_ListEntry.mUUID);
 
         notifyItemChanged(positionToUpdate);
         notifyItemMoved(positionToUpdate, newPositionOfElement);
     }
 
+    public ListEntry getItem(int _Position){
+        return mListOfEntries.get(_Position).getListEntry();
+    }
+
     @Override
     public long getItemId(int _Position) {
-        return mListOfEntries.get(_Position).getListEntry().getId();
+        return UUID.fromString(mListOfEntries.get(_Position).getListEntry().mUUID).
+                getLeastSignificantBits();
     }
 
     @Override
     public void resetEditModeView() {
-        int positionToUpdate = getPositionForId(mCurrentItemInEditMode.getListEntry().getId());
+        int positionToUpdate = getPositionForId(mCurrentItemInEditMode.getListEntry().mUUID);
         if(positionToUpdate < 0){
             return;
         }
@@ -282,10 +292,10 @@ public class ShoppingItemListAdapter extends RecyclerView.Adapter<RecyclerView.V
     }
 
     @Override
-    public int getPositionForId(long _Id) {
+    public int getPositionForId(String _Id) {
         int position = - 1;
         for (ListEntryItemWrapper listItem : mListOfEntries) {
-            if (listItem.getListEntry().getId().equals(_Id)) {
+            if (listItem.getListEntry().mUUID.equals(_Id)) {
                 position = mListOfEntries.indexOf(listItem);
                 break;
             }

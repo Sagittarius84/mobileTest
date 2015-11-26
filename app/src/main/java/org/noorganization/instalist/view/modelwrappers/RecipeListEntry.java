@@ -4,14 +4,17 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.SparseBooleanArray;
 
+import org.noorganization.instalist.GlobalApplication;
+import org.noorganization.instalist.presenter.implementation.ControllerFactory;
 import org.noorganization.instalist.model.Recipe;
 
 /**
- * The wrapper for Recipes.
+ * The wrapper for Recipes to strike/unstrike them.
  * Created by TS on 25.05.2015.
  */
 public class RecipeListEntry implements IBaseListEntry {
 
+    public static final int CHECKED_PROPERTY = 0;
     private Recipe mRecipe;
     private boolean mChecked;
 
@@ -20,8 +23,8 @@ public class RecipeListEntry implements IBaseListEntry {
     }
 
     private RecipeListEntry(Parcel _In) {
-        mRecipe = Recipe.findById(Recipe.class, _In.readLong());
-        mChecked = _In.readSparseBooleanArray().get(mRecipe.getId().intValue());
+        mRecipe = ControllerFactory.getRecipeController(GlobalApplication.getContext()).findById(_In.readString());
+        mChecked = _In.readSparseBooleanArray().get(CHECKED_PROPERTY);
     }
 
     @Override
@@ -55,8 +58,8 @@ public class RecipeListEntry implements IBaseListEntry {
     }
 
     @Override
-    public long getId() {
-        return mRecipe.getId();
+    public String getId() {
+        return mRecipe.mUUID;
     }
 
     @Override
@@ -65,7 +68,7 @@ public class RecipeListEntry implements IBaseListEntry {
         if (o == null || getClass() != o.getClass()) return false;
 
         RecipeListEntry that = (RecipeListEntry) o;
-        return mRecipe.getId().equals(that.mRecipe.getId()) && eItemType.RECIPE_LIST_ENTRY == ((IBaseListEntry) o).getType();
+        return mRecipe.mUUID.equals(that.mRecipe.mUUID) && eItemType.RECIPE_LIST_ENTRY == ((IBaseListEntry) o).getType();
     }
 
     @Override
@@ -81,9 +84,9 @@ public class RecipeListEntry implements IBaseListEntry {
     @Override
     public void writeToParcel(Parcel _Dest, int _Flags) {
         SparseBooleanArray booleanArray = new SparseBooleanArray(1);
-        booleanArray.append(mRecipe.getId().intValue(), mChecked);
+        booleanArray.append(CHECKED_PROPERTY, mChecked);
         _Dest.writeSparseBooleanArray(booleanArray);
-        _Dest.writeLong(mRecipe.getId());
+        _Dest.writeString(mRecipe.mUUID);
     }
 
     public static final Parcelable.Creator<RecipeListEntry> CREATOR = new Parcelable.Creator<RecipeListEntry>() {

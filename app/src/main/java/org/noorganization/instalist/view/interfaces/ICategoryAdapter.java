@@ -1,7 +1,6 @@
 package org.noorganization.instalist.view.interfaces;
 
 import org.noorganization.instalist.model.Category;
-import org.noorganization.instalist.model.ShoppingList;
 
 /**
  * Guarantees Access to the underlying adapter to modify the content of these adapters.
@@ -26,4 +25,6 @@ public interface ICategoryAdapter {
      * @param _Category the category that should be removed.
      */
     void removeCategory(Category _Category);
+
+
 }

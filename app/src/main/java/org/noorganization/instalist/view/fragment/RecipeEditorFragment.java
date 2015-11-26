@@ -1,7 +1,8 @@
 package org.noorganization.instalist.view.fragment;
 
-import android.app.Fragment;
+import android.content.Context;
 import android.os.Bundle;
+import android.support.v7.app.ActionBar;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,16 +12,15 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
 
-import com.orm.SugarRecord;
-import com.orm.query.Condition;
-import com.orm.query.Select;
-
+import org.noorganization.instalist.GlobalApplication;
 import org.noorganization.instalist.R;
-import org.noorganization.instalist.controller.IRecipeController;
-import org.noorganization.instalist.controller.implementation.ControllerFactory;
+import org.noorganization.instalist.presenter.IProductController;
+import org.noorganization.instalist.presenter.IRecipeController;
+import org.noorganization.instalist.presenter.implementation.ControllerFactory;
 import org.noorganization.instalist.model.Ingredient;
 import org.noorganization.instalist.model.Product;
 import org.noorganization.instalist.model.Recipe;
+import org.noorganization.instalist.view.activity.RecipeChangeActivity;
 import org.noorganization.instalist.view.event.ProductSelectMessage;
 import org.noorganization.instalist.view.listadapter.IngredientListAdapter;
 import org.noorganization.instalist.view.utils.ViewUtils;
@@ -36,23 +36,26 @@ import de.greenrobot.event.EventBus;
  * list the recipe has to get added first.
  * Created by michi on 01.07.15.
  */
-public class RecipeEditorFragment extends Fragment {
+public class RecipeEditorFragment extends BaseFragment {
 
-    private static final String BK_EDITOR_MODE  = "editorMode";
-    private static final String BK_RECIPE_ID    = "recipeId";
+    private static final String BK_EDITOR_MODE = "editorMode";
+    private static final String BK_RECIPE_ID = "recipeId";
     private static final String BK_ADD_PRODUCTS = "productIds";
-    private static final String BK_ADD_AMOUNTS  = "productAmounts";
+    private static final String BK_ADD_AMOUNTS = "productAmounts";
 
-    private static final int    EDITOR_MODE_CREATE = 1;
-    private static final int    EDITOR_MODE_EDIT   = 2;
+    private static final int EDITOR_MODE_CREATE = 1;
+    private static final int EDITOR_MODE_EDIT = 2;
 
-    private Recipe     mRecipe;
+    private Recipe mRecipe;
 
     private ListView mIngredients;
     private EditText mRecipeName;
-    private Button   mAddIngredient;
-    private Button   mSave;
+    private Button mAddIngredient;
+    private Button mSave;
     private IngredientListAdapter mIngredientAdapter;
+
+    private IRecipeController  mRecipeController;
+    private IProductController mProductController;
 
     /**
      * The default constructor needed by the FragmentManager. Use the newXXXInstance for creation
@@ -69,25 +72,25 @@ public class RecipeEditorFragment extends Fragment {
         return rtn;
     }
 
-    public static RecipeEditorFragment newUpdateInstance(long _recipeId) {
+    public static RecipeEditorFragment newUpdateInstance(String _recipeId) {
         RecipeEditorFragment rtn = new RecipeEditorFragment();
         Bundle parameters = new Bundle();
         parameters.putInt(BK_EDITOR_MODE, EDITOR_MODE_EDIT);
-        parameters.putLong(BK_RECIPE_ID, _recipeId);
+        parameters.putString(BK_RECIPE_ID, _recipeId);
 
-        List<Ingredient> currentIngredients = SugarRecord.findById(Recipe.class, _recipeId).
-                getIngredients();
+        List<Ingredient> currentIngredients = ControllerFactory.
+                getRecipeController(GlobalApplication.getContext()).getIngredients(_recipeId);
 
-        long resultingIds[] = new long[currentIngredients.size()];
+        String resultingIds[] = new String[currentIngredients.size()];
         float resultingAmounts[] = new float[currentIngredients.size()];
         int convertIndex = 0;
         for (Ingredient currentIngredient : currentIngredients) {
-            resultingIds[convertIndex] = currentIngredient.mProduct.getId();
+            resultingIds[convertIndex] = currentIngredient.mProduct.mUUID;
             resultingAmounts[convertIndex] = currentIngredient.mAmount;
             convertIndex++;
         }
 
-        parameters.putLongArray(BK_ADD_PRODUCTS, resultingIds);
+        parameters.putStringArray(BK_ADD_PRODUCTS, resultingIds);
         parameters.putFloatArray(BK_ADD_AMOUNTS, resultingAmounts);
 
         rtn.setArguments(parameters);
@@ -98,14 +101,32 @@ public class RecipeEditorFragment extends Fragment {
     public void onCreate(Bundle _savedInstanceState) {
         super.onCreate(_savedInstanceState);
 
+        mRecipeController = ControllerFactory.getRecipeController(getActivity());
+        mProductController = ControllerFactory.getProductController(getActivity());
+
         Bundle parameters = getArguments();
+        ActionBar supportActionBar = ((RecipeChangeActivity) getActivity()).getSupportActionBar();
+
         if (parameters != null) {
+
+            String title = "";
+
             if (parameters.getInt(BK_EDITOR_MODE) == EDITOR_MODE_EDIT) {
-                mRecipe = SugarRecord.findById(Recipe.class, parameters.getLong(BK_RECIPE_ID));
+                mRecipe = mRecipeController.findById(parameters.getString(BK_RECIPE_ID));
+                title = getString(R.string.edit_recipe);
+            } else {
+                title = getString(R.string.create_recipe);
+            }
+            if (supportActionBar != null) {
+                supportActionBar.setTitle(title);
             }
         }
-
         EventBus.getDefault().register(this);
+    }
+
+    @Override
+    protected void onAttachToContext(Context _Context) {
+
     }
 
     @Override
@@ -117,8 +138,8 @@ public class RecipeEditorFragment extends Fragment {
         mIngredients.addFooterView(actions);
 
         mAddIngredient = (Button) actions.findViewById(R.id.fragment_recipe_details_add_ingredient);
-        mSave          = (Button) actions.findViewById(R.id.fragment_recipe_details_save);
-        mRecipeName    = (EditText) mainView.findViewById(R.id.fragment_recipe_details_name);
+        mSave = (Button) actions.findViewById(R.id.fragment_recipe_details_save);
+        mRecipeName = (EditText) mainView.findViewById(R.id.fragment_recipe_details_name);
 
         fillViews();
         addArgIngredients();
@@ -136,10 +157,10 @@ public class RecipeEditorFragment extends Fragment {
      * EventBus-receiver for selections made via ProductListDialogFragment.
      */
     public void onEvent(ProductSelectMessage _selectedProducts) {
-        long previousIds[] = getArguments().getLongArray(BK_ADD_PRODUCTS);
+        String previousIds[] = getArguments().getStringArray(BK_ADD_PRODUCTS);
         float previousAmounts[] = getArguments().getFloatArray(BK_ADD_AMOUNTS);
 
-        ArrayList<Long> newProductIds = new ArrayList<>();
+        ArrayList<String> newProductIds = new ArrayList<>();
         ArrayList<Float> newAmounts = new ArrayList<>();
 
         if (previousIds != null && previousAmounts != null) {
@@ -151,25 +172,25 @@ public class RecipeEditorFragment extends Fragment {
 
         for (Product currentProduct : _selectedProducts.mProducts.keySet()) {
             float amount = _selectedProducts.mProducts.get(currentProduct);
-            if (newProductIds.contains(currentProduct.getId())) {
-                int position = newProductIds.indexOf(currentProduct.getId());
+            if (newProductIds.contains(currentProduct.mUUID)) {
+                int position = newProductIds.indexOf(currentProduct.mUUID);
                 newAmounts.set(position, newAmounts.get(position) + amount);
             } else {
-                newProductIds.add(currentProduct.getId());
+                newProductIds.add(currentProduct.mUUID);
                 newAmounts.add(amount);
             }
 
             mIngredientAdapter.addIngredient(new Ingredient(currentProduct, null, amount));
         }
 
-        long resultingIds[] = new long[newProductIds.size()];
+        String resultingIds[] = new String[newProductIds.size()];
         float resultingAmounts[] = new float[newProductIds.size()];
         for (int convertIndex = 0; convertIndex < resultingIds.length; convertIndex++) {
             resultingIds[convertIndex] = newProductIds.get(convertIndex);
             resultingAmounts[convertIndex] = newAmounts.get(convertIndex);
         }
 
-        getArguments().putLongArray(BK_ADD_PRODUCTS, resultingIds);
+        getArguments().putStringArray(BK_ADD_PRODUCTS, resultingIds);
         getArguments().putFloatArray(BK_ADD_AMOUNTS, resultingAmounts);
     }
 
@@ -178,30 +199,30 @@ public class RecipeEditorFragment extends Fragment {
 
         List<Ingredient> currentIngredients = mIngredientAdapter.getIngredients();
 
-        long resultingIds[] = new long[currentIngredients.size()];
+        String resultingIds[] = new String[currentIngredients.size()];
         float resultingAmounts[] = new float[currentIngredients.size()];
         int convertIndex = 0;
         for (Ingredient currentIngredient : currentIngredients) {
-            resultingIds[convertIndex] = currentIngredient.mProduct.getId();
+            resultingIds[convertIndex] = currentIngredient.mProduct.mUUID;
             resultingAmounts[convertIndex] = currentIngredient.mAmount;
             convertIndex++;
         }
 
-        getArguments().putLongArray(BK_ADD_PRODUCTS, resultingIds);
+        getArguments().putStringArray(BK_ADD_PRODUCTS, resultingIds);
         getArguments().putFloatArray(BK_ADD_AMOUNTS, resultingAmounts);
 
         super.onPause();
     }
 
-    private void addArgIngredients () {
-        long productIds[] = getArguments().getLongArray(BK_ADD_PRODUCTS);
+    private void addArgIngredients() {
+        String productIds[] = getArguments().getStringArray(BK_ADD_PRODUCTS);
         float amounts[] = getArguments().getFloatArray(BK_ADD_AMOUNTS);
         if (productIds == null || amounts == null || productIds.length != amounts.length) {
             return;
         }
 
         for (int currentIndex = 0; currentIndex < productIds.length; currentIndex++) {
-            Ingredient toAdd = new Ingredient(SugarRecord.findById(Product.class, productIds[currentIndex]),
+            Ingredient toAdd = new Ingredient(mProductController.findById(productIds[currentIndex]),
                     null,
                     amounts[currentIndex]);
             mIngredientAdapter.addIngredient(toAdd);
@@ -224,19 +245,29 @@ public class RecipeEditorFragment extends Fragment {
     private boolean validate() {
         boolean rtn = true;
         if (mIngredientAdapter.getIngredients().size() == 0) {
-            Toast.makeText(getActivity(), "Just a test.", Toast.LENGTH_LONG).show();
+            Toast.makeText(getActivity(), getString(R.string.no_ingredients), Toast.LENGTH_LONG).show();
             rtn = false;
         }
 
         String newName = mRecipeName.getText().toString();
-        List<Recipe> recipesToValidate = Select.from(Recipe.class).
-                where(Condition.prop(Recipe.ATTR_NAME).eq(newName)).list();
-        if (mRecipeName.getText().length() == 0 ||
-                (recipesToValidate.size() != 0 &&
-                        (mRecipe == null || !mRecipe.getId().equals(recipesToValidate.get(0).getId())))) {
-            mRecipeName.setError("Just a second test.");
+
+        // no title for recipe
+        if (newName.length() == 0) {
+            mRecipeName.setError(getString(R.string.error_no_input));
             rtn = false;
+        } else {
+            // title for recipe is set
+            Recipe recipeToValidate = mRecipeController.findByName(newName);
+
+            if (recipeToValidate != null && (mRecipe == null ||
+                    !mRecipe.mUUID.equals(recipeToValidate.mUUID))) {
+                // found elements that matches new name and recipe is new or recipe name is changed for another recipe
+                mRecipeName.setError(getString(R.string.name_exists));
+                rtn = false;
+            }
+
         }
+
         return rtn;
     }
 
@@ -253,7 +284,7 @@ public class RecipeEditorFragment extends Fragment {
         @Override
         public void onClick(View view) {
             if (validate()) {
-                IRecipeController controller = ControllerFactory.getRecipeController();
+                IRecipeController controller = ControllerFactory.getRecipeController(GlobalApplication.getContext());
 
                 String newRecipeName = mRecipeName.getText().toString();
                 if (mRecipe == null) {
@@ -263,7 +294,7 @@ public class RecipeEditorFragment extends Fragment {
                 }
 
                 if (mRecipe == null) {
-                    Toast.makeText(getActivity(), "Something went wrong while creating recipe.", Toast.LENGTH_LONG).show();
+                    Toast.makeText(getActivity(), getString(R.string.error_recipe_creation), Toast.LENGTH_LONG).show();
                     return;
                 }
 
@@ -275,7 +306,7 @@ public class RecipeEditorFragment extends Fragment {
                     controller.addOrChangeIngredient(mRecipe, toSave.mProduct, toSave.mAmount);
                 }
 
-                ViewUtils.removeFragment(getActivity(), RecipeEditorFragment.this);
+                // ViewUtils.removeFragment(getActivity(), RecipeEditorFragment.this); // to much
                 getActivity().finish();
             }
         }

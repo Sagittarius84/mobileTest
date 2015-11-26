@@ -1,7 +1,5 @@
 package org.noorganization.instalist.view.fragment;
 
-import android.app.Activity;
-import android.app.Fragment;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
@@ -11,7 +9,6 @@ import android.support.v7.widget.SearchView;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.text.style.ImageSpan;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -22,15 +19,11 @@ import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.ListView;
 
-import com.orm.SugarRecord;
-
 import org.noorganization.instalist.R;
-import org.noorganization.instalist.controller.IListController;
-import org.noorganization.instalist.controller.event.ProductChangedMessage;
-import org.noorganization.instalist.controller.event.RecipeChangedMessage;
-import org.noorganization.instalist.controller.implementation.ControllerFactory;
+import org.noorganization.instalist.presenter.event.ProductChangedMessage;
+import org.noorganization.instalist.presenter.event.RecipeChangedMessage;
+import org.noorganization.instalist.presenter.implementation.ControllerFactory;
 import org.noorganization.instalist.model.Ingredient;
-import org.noorganization.instalist.model.ListEntry;
 import org.noorganization.instalist.model.Product;
 import org.noorganization.instalist.model.Recipe;
 import org.noorganization.instalist.model.ShoppingList;
@@ -58,22 +51,22 @@ import de.greenrobot.event.EventBus;
  * Responsible to show a dialog with a list of selectable products to add them to an existing shopping
  * list.
  */
-public class ProductListDialogFragment extends Fragment {
+public class ProductListDialogFragment extends BaseFragment {
 
     private static final String LOG_TAG = ProductListDialogFragment.class.getName();
 
     public static final String FILTER_BY_PRODUCT = "0";
-    public static final String FILTER_BY_RECIPE  = "1";
-    public static final String FILTER_SHOW_ALL   = "2";
-    public static final String SAVED_ITEM_LIST   = "SAVED_ITEM_LIST";
+    public static final String FILTER_BY_RECIPE = "1";
+    public static final String FILTER_SHOW_ALL = "2";
+    public static final String SAVED_ITEM_LIST = "SAVED_ITEM_LIST";
 
-    private Button   mCreateProductButton;
-    private Button   mAddProductsButton;
-    private Button   mCreateRecipeButton;
+    private Button mCreateProductButton;
+    private Button mAddProductsButton;
+    private Button mCreateRecipeButton;
     private ListView mMixedListView;
 
-    private static final String BUNDLE_KEY_LIST_ID       = "listId";
-    private static final String BK_COMPABILITY           = "comp";
+    private static final String BUNDLE_KEY_LIST_ID = "listId";
+    private static final String BK_COMPABILITY = "comp";
     private static final String BK_ALLOW_RECIPE_CREATION = "recipeCreation";
 
     // create the abstract selectable list entries to show mixed entries
@@ -83,7 +76,7 @@ public class ProductListDialogFragment extends Fragment {
     private ListAddModeCompability mCompatibility;
 
     private IBaseActivity mBaseActivityInterface;
-    private Context       mContext;
+    private Context mContext;
 
 
     /**
@@ -94,7 +87,7 @@ public class ProductListDialogFragment extends Fragment {
      * @param _recipeCreationEnabled Whether recipe creation should be allowed or not.
      * @return The new instance.
      */
-    public static ProductListDialogFragment newInstance(long _listId, boolean _recipeCreationEnabled) {
+    public static ProductListDialogFragment newInstance(String _listId, boolean _recipeCreationEnabled) {
         ProductListDialogFragment instance = newInstance(_listId);
         instance.getArguments().putBoolean(BK_ALLOW_RECIPE_CREATION, _recipeCreationEnabled);
         return instance;
@@ -118,11 +111,11 @@ public class ProductListDialogFragment extends Fragment {
      * @param _ListId the id of the list where the products should be added.
      * @return the new instance of this fragment.
      */
-    public static ProductListDialogFragment newInstance(long _ListId) {
+    public static ProductListDialogFragment newInstance(String _ListId) {
         ProductListDialogFragment fragment = new ProductListDialogFragment();
-        Bundle                    args     = new Bundle();
+        Bundle args = new Bundle();
         args.putBoolean(BK_COMPABILITY, true);
-        args.putLong(BUNDLE_KEY_LIST_ID, _ListId);
+        args.putString(BUNDLE_KEY_LIST_ID, _ListId);
         args.putBoolean(BK_ALLOW_RECIPE_CREATION, true);
         fragment.setArguments(args);
         return fragment;
@@ -130,7 +123,7 @@ public class ProductListDialogFragment extends Fragment {
 
     public static ProductListDialogFragment newInstance() {
         ProductListDialogFragment fragment = new ProductListDialogFragment();
-        Bundle                    args     = new Bundle();
+        Bundle args = new Bundle();
         args.putBoolean(BK_COMPABILITY, false);
         args.putBoolean(BK_ALLOW_RECIPE_CREATION, true);
         fragment.setArguments(args);
@@ -138,16 +131,8 @@ public class ProductListDialogFragment extends Fragment {
     }
 
     @Override
-    public void onAttach(Activity _Activity) {
-        super.onAttach(_Activity);
-        mContext = _Activity;
-        /* TODO remove if possible (because of events)
-        try {
-            mBaseActivityInterface = (IBaseActivity) _Activity;
-        } catch (ClassCastException e) {
-            throw new ClassCastException(_Activity.toString()
-                    + " has no IBaseActivity interface attached.");
-        }*/
+    protected void onAttachToContext(Context _Context) {
+        mContext = _Context;
     }
 
     @Override
@@ -162,13 +147,13 @@ public class ProductListDialogFragment extends Fragment {
         setHasOptionsMenu(true);
 
         if (bundle.getBoolean(BK_COMPABILITY)) {
-            mCompatibility = new ListAddModeCompability(bundle.getLong(BUNDLE_KEY_LIST_ID));
+            mCompatibility = new ListAddModeCompability(bundle.getString(BUNDLE_KEY_LIST_ID));
         }
 
 
-        if (_savedInstanceState == null || ! _savedInstanceState.containsKey(SAVED_ITEM_LIST)) {
-            List<Product> productList = Product.listAll(Product.class);
-            List<Recipe> recipeList = Recipe.listAll(Recipe.class);
+        if (_savedInstanceState == null || !_savedInstanceState.containsKey(SAVED_ITEM_LIST)) {
+            List<Product> productList = ControllerFactory.getProductController(mContext).listAll();
+            List<Recipe> recipeList = ControllerFactory.getRecipeController(mContext).listAll();
             //List<ListEntry> listEntries = mCurrentShoppingList.getEntries();
 
             // remove all inserted list entries
@@ -192,7 +177,7 @@ public class ProductListDialogFragment extends Fragment {
         mCreateProductListener = new OnCreateProductListener();
 
         if (mCompatibility != null) {
-            EventBus.getDefault().register(mCompatibility);
+//            EventBus.getDefault().register(mCompatibility);
         }
         EventBus.getDefault().register(this);
     }
@@ -220,7 +205,7 @@ public class ProductListDialogFragment extends Fragment {
         mListAdapter.getFilter().filter(FILTER_SHOW_ALL);
         mMixedListView.setAdapter(mListAdapter);
 
-        if (! getArguments().getBoolean(BK_ALLOW_RECIPE_CREATION)) {
+        if (!getArguments().getBoolean(BK_ALLOW_RECIPE_CREATION)) {
             mCreateRecipeButton.setVisibility(View.GONE);
         }
 
@@ -234,7 +219,7 @@ public class ProductListDialogFragment extends Fragment {
         _Inflater.inflate(R.menu.menu_product_list_dialog, _Menu);
 
         // adds search ability to the toolbar
-        MenuItem      searchItem    = _Menu.findItem(R.id.menu_product_list_dialog_search);
+        MenuItem searchItem = _Menu.findItem(R.id.menu_product_list_dialog_search);
         SearchManager searchManager = (SearchManager) mContext.getSystemService(Context.SEARCH_SERVICE);
 
         SearchView searchView = null;
@@ -319,13 +304,13 @@ public class ProductListDialogFragment extends Fragment {
         if (_Menu == null) {
             return;
         }
-        MenuItem   searchMenuItem = _Menu.findItem(R.id.menu_product_list_dialog_search);
-        SearchView searchView     = (SearchView) searchMenuItem.getActionView();
+        MenuItem searchMenuItem = _Menu.findItem(R.id.menu_product_list_dialog_search);
+        SearchView searchView = (SearchView) searchMenuItem.getActionView();
         searchMenuItem.setIcon(R.drawable.ic_search_white_36dp);
 
 
-        int                  searchTextViewId = android.support.v7.appcompat.R.id.search_src_text;
-        AutoCompleteTextView searchTextView   = (AutoCompleteTextView) searchView.findViewById(searchTextViewId);
+        int searchTextViewId = android.support.v7.appcompat.R.id.search_src_text;
+        AutoCompleteTextView searchTextView = (AutoCompleteTextView) searchView.findViewById(searchTextViewId);
         searchTextView.setHintTextColor(getResources().getColor(R.color.white));
         searchTextView.setTextColor(getResources().getColor(android.R.color.white));
         searchTextView.setTextSize(16.0f);
@@ -334,7 +319,7 @@ public class ProductListDialogFragment extends Fragment {
         SpannableStringBuilder ssb = new SpannableStringBuilder("   "); // for the icon
         //ssb.append(hintText);
         Drawable searchIcon = getResources().getDrawable(R.drawable.ic_search_white_36dp);
-        int      textSize   = (int) (searchTextView.getTextSize() * 1.25);
+        int textSize = (int) (searchTextView.getTextSize() * 1.25);
         searchIcon.setBounds(0, 0, textSize, textSize);
         ssb.setSpan(new ImageSpan(searchIcon), 1, 2, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
         searchTextView.setHint(ssb);
@@ -384,7 +369,7 @@ public class ProductListDialogFragment extends Fragment {
     public void onPause() {
         super.onPause();
         mCreateProductButton.setOnClickListener(null);
-        mAddProductsButton.setOnClickListener(null);
+       //mAddProductsButton.setOnClickListener(null);
     }
 
     @Override
@@ -396,7 +381,7 @@ public class ProductListDialogFragment extends Fragment {
     @Override
     public void onDestroy() {
         if (mCompatibility != null) {
-            EventBus.getDefault().unregister(mCompatibility);
+//            EventBus.getDefault().unregister(mCompatibility);
         }
         EventBus.getDefault().unregister(this);
         super.onDestroy();
@@ -416,8 +401,8 @@ public class ProductListDialogFragment extends Fragment {
 
         private ShoppingList mCurrentShoppingList;
 
-        public ListAddModeCompability(long _id) {
-            mCurrentShoppingList = SugarRecord.findById(ShoppingList.class, _id);
+        public ListAddModeCompability(String _id) {
+            mCurrentShoppingList = ControllerFactory.getListController(mContext).getListById(_id);
 
             if (mCurrentShoppingList == null) {
                 throw new IllegalStateException(ProductListDialogFragment.class.toString() +
@@ -425,17 +410,18 @@ public class ProductListDialogFragment extends Fragment {
             }
         }
 
+        // TODO: Discuss, for what this method was needed (or still is) and fix it.
         /**
          * EventBus-receiver for translation to listentries.
          *
          * @param _selectedProducts
          */
-        public void onEventMainThread(ProductSelectMessage _selectedProducts) {
-            IListController mListController = ControllerFactory.getListController();
+        /*public void onEventMainThread(ProductSelectMessage _selectedProducts) {
+            IListController mListController = ControllerFactory.getListController(mContext);
 
             for (Product product : _selectedProducts.mProducts.keySet()) {
                 // 2 possible solutions for adding to current shoppinglist
-                // first would be like add all single items with the controller
+                // first would be like add all single items with the presenter
                 // second would be add all to added products to a list and persist it then to the database --> less db writes when recipes hold same items.
 
                 ListEntry listEntryIntern = mListController.addOrChangeItem(mCurrentShoppingList,
@@ -444,7 +430,7 @@ public class ProductListDialogFragment extends Fragment {
                     Log.e(ProductListDialogFragment.class.getName(), "Insertion failed.");
                 }
             }
-        }
+        }*/
 
 
     }
@@ -454,13 +440,13 @@ public class ProductListDialogFragment extends Fragment {
         @Override
         public void onClick(View v) {
             Iterator<IBaseListEntry> listEntryIterator = mListAdapter.getCheckedListEntries();
-            Map<Product, Float>      resultingProducts = new HashMap<>();
+            Map<Product, Float> resultingProducts = new HashMap<>();
 
             while (listEntryIterator.hasNext()) {
                 IBaseListEntry listEntry = listEntryIterator.next();
 
                 // skip this entry when not selected/checked
-                if (! listEntry.isChecked()) {
+                if (!listEntry.isChecked()) {
                     continue;
                 }
 
@@ -476,7 +462,7 @@ public class ProductListDialogFragment extends Fragment {
                         break;
                     case RECIPE_LIST_ENTRY:
                         Recipe recipe = (Recipe) (listEntry.getItem());
-                        List<Ingredient> ingredients = recipe.getIngredients();
+                        List<Ingredient> ingredients = ControllerFactory.getRecipeController(mContext).getIngredients(recipe.mUUID);
                         for (Ingredient ingredient : ingredients) {
                             if (resultingProducts.containsKey(ingredient.mProduct)) {
                                 resultingProducts.put(ingredient.mProduct,

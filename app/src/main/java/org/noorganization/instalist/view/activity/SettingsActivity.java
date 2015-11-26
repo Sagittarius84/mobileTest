@@ -1,7 +1,7 @@
 package org.noorganization.instalist.view.activity;
 
 import android.os.Bundle;
-import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 
@@ -12,7 +12,7 @@ import org.noorganization.instalist.view.fragment.settings.SettingsFragment;
  * The Activity for setting Settings.
  * Created by TS on 04.07.2015.
  */
-public class SettingsActivity extends ActionBarActivity {
+public class SettingsActivity extends AppCompatActivity {
 
     private Toolbar mToolbar;
 
