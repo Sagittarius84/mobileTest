@@ -75,4 +75,15 @@ public class Recipe {
     public int hashCode() {
         return mUUID.hashCode();
     }
+
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("Recipe { mUUID = ");
+        builder.append(mUUID == null ? "null" : mUUID);
+        builder.append("; mName = ");
+        builder.append(mName == null ? "null" : mName);
+        builder.append(" }");
+        return builder.toString();
+    }
 }

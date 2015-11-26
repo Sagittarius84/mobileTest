@@ -274,9 +274,14 @@ public class RecipeController implements IRecipeController {
 
     @Override
     public Recipe findByName(@NonNull String _name) {
+        if (_name == null) {
+            // NonNull-Annotation does not work in every case.
+            return null;
+        }
+
         Cursor recipeCursor = mResolver.query(Uri.parse(RecipeProvider.MULTIPLE_RECIPE_CONTENT_URI),
                 Recipe.COLUMN.ALL_COLUMNS,
-                Recipe.COLUMN.NAME + "=?",
+                Recipe.COLUMN.NAME + " = ?",
                 new String[]{_name},
                 null
         );
@@ -294,7 +299,7 @@ public class RecipeController implements IRecipeController {
 
         recipeCursor.moveToFirst();
         Recipe recipe = new Recipe();
-        recipe.mUUID = _name;
+        recipe.mUUID = recipeCursor.getString(recipeCursor.getColumnIndex(Recipe.COLUMN.ID));
         recipe.mName = recipeCursor.getString(recipeCursor.getColumnIndex(Recipe.COLUMN.NAME));
 
         recipeCursor.close();

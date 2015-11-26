@@ -164,4 +164,15 @@ public class IRecipeControllerTest extends AndroidTestCase {
         assertEquals("_TEST_filledbread", returnedChangedRecipe.mName);
 
     }
+
+    public void testFindByName() throws Exception {
+        // negative tests
+        assertNull(mRecipeController.findByName(null));
+        assertNull(mRecipeController.findByName("_TEST_not existent list"));
+
+        // positive test: get cheese cake!
+        Recipe cheeseCake = mRecipeController.findByName("_TEST_cheesecake");
+        assertNotNull(cheeseCake);
+        assertEquals(mCheeseCake, cheeseCake);
+    }
 }
