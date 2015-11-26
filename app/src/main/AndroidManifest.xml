@@ -19,21 +19,21 @@
         tools:replace="android:icon" >
 
         <activity
-            android:name=".presenter.MainShoppingListView"
+            android:name=".view.MainShoppingListView"
             android:label="@string/title_activity_main" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".presenter.activity.RecipeChangeActivity"
-            android:parentActivityName=".presenter.MainShoppingListView"
+        <activity android:name=".view.activity.RecipeChangeActivity"
+            android:parentActivityName=".view.MainShoppingListView"
             android:label="@string/edit_recipe" />
-        <activity android:name=".presenter.activity.SettingsActivity"
-            android:parentActivityName=".presenter.MainShoppingListView"
+        <activity android:name=".view.activity.SettingsActivity"
+            android:parentActivityName=".view.MainShoppingListView"
             android:label="@string/settings" />
-        <activity android:name=".presenter.activity.UnitEditorActivity"
-            android:parentActivityName=".presenter.activity.SettingsActivity"
+        <activity android:name=".view.activity.UnitEditorActivity"
+            android:parentActivityName=".view.activity.SettingsActivity"
             android:label="@string/unit_editor"
             android:windowSoftInputMode="adjustPan">
             <intent-filter>

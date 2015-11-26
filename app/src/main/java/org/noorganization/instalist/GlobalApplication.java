@@ -3,7 +3,7 @@ package org.noorganization.instalist;
 import android.app.Application;
 import android.content.Context;
 
-import org.noorganization.instalist.controller.database_seed.DatabaseSeeder;
+import org.noorganization.instalist.presenter.database_seed.DatabaseSeeder;
 
 /**
  * Global application class.

@@ -10,7 +10,7 @@ import android.net.Uri;
 import android.support.annotation.NonNull;
 
 import org.noorganization.instalist.model.Ingredient;
-import org.noorganization.instalist.presenter.utils.ProviderUtils;
+import org.noorganization.instalist.view.utils.ProviderUtils;
 import org.noorganization.instalist.provider.InstalistProvider;
 import org.noorganization.instalist.utils.SQLiteUtils;
 

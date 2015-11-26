@@ -1,7 +1,7 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
       xmlns:app="http://schemas.android.com/apk/res-auto"
       xmlns:tools="http://schemas.android.com/tools"
-      tools:context="org.noorganization.instalist.presenter.MainShoppingListView">
+      tools:context="org.noorganization.instalist.view.MainShoppingListView">
     <item
         android:id="@+id/menu_sort_action"
         android:icon="@drawable/ic_sort_by_alpha_white_36dp"

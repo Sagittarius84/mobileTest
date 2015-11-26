@@ -1,8 +1,8 @@
 /**
- * View part of the app.
+ * The presenter part of the app.
  *
- * Contains all presenter classes such as Activities, Views, Decorations, Events, Fragments, internal
- * Interfaces, Adapters, Wrappers for Model classes, Sorters, TouchEventListeners and some
- * Utilities.
+ * Contains all write methods in corresponding classes for the view part. The implementation is
+ * swappable. To get the current implementation, use the methods from
+ * {@link org.noorganization.instalist.presenter.implementation.CategoryController}.
  */
 package org.noorganization.instalist.presenter;

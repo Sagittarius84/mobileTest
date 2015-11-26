@@ -13,7 +13,7 @@ import org.noorganization.instalist.model.Ingredient;
 import org.noorganization.instalist.model.Recipe;
 import org.noorganization.instalist.provider.InstalistProvider;
 import org.noorganization.instalist.utils.SQLiteUtils;
-import org.noorganization.instalist.presenter.utils.ProviderUtils;
+import org.noorganization.instalist.view.utils.ProviderUtils;
 
 /**
  * // TODO in train :)
