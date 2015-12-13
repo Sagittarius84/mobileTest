@@ -8,6 +8,8 @@ import android.view.View;
 import android.widget.ExpandableListView;
 import android.widget.ListView;
 
+import org.noorganization.instalist.presenter.ICategoryController;
+import org.noorganization.instalist.presenter.implementation.ControllerFactory;
 import org.noorganization.instalist.model.Category;
 import org.noorganization.instalist.model.ShoppingList;
 import org.noorganization.instalist.view.interfaces.IBaseActivity;
@@ -29,6 +31,7 @@ public class SideDrawerListManager implements ISideDrawerListManager {
     private IBaseActivity       mBaseActivityInterface;
     private Context             mContext;
     private IShoppingListHelper mShoppingListHelper;
+    private ICategoryController mCategoryController;
 
     /**
      * Flag that indicates, when true, that currently the PlainList is selected,
@@ -45,19 +48,20 @@ public class SideDrawerListManager implements ISideDrawerListManager {
             throw new ClassCastException(_Activity.toString() + " has no IBaseActivity interface implemented.");
         }
         mContext = _Activity;
+        mCategoryController = ControllerFactory.getCategoryController(mContext);
 
-        long numOfCategories = Category.count(Category.class, null, new String[]{});
+        long numOfCategories = mCategoryController.getCategoryCount();
 
         mPlainShoppingListHelper = new PlainShoppingListHelper(mContext, mBaseActivityInterface, _PlainShoppingListView);
         mExpandableShoppingListHelper = new ExpandableShoppingListHelper(mContext, mBaseActivityInterface, _ExpandableCategoryListView);
 
         // for initializing the views.
-        if (numOfCategories > 1) {
+        if (numOfCategories > 0) {
             // set Expandable list to viewable
             changeListView(mPlainShoppingListHelper, mExpandableShoppingListHelper);
             mShoppingListHelper = mExpandableShoppingListHelper;
             mIsPlainList = false;
-        } else if (numOfCategories == 1) {
+        } else if (numOfCategories == 0) {
             // set plain shoppinglist to viewable
             changeListView(mExpandableShoppingListHelper, mPlainShoppingListHelper);
             mShoppingListHelper = mPlainShoppingListHelper;
@@ -119,16 +123,16 @@ public class SideDrawerListManager implements ISideDrawerListManager {
      */
     private void checkOfViewChange() {
 
-        long                numOfCategories       = Category.count(Category.class, null, new String[]{});
+        long                numOfCategories       = mCategoryController.getCategoryCount();
         IShoppingListHelper oldShoppingListHelper = mShoppingListHelper;
 
-        if (numOfCategories > 1 && mIsPlainList) {
+        if (numOfCategories >= 1 && mIsPlainList) {
             mIsPlainList = false;
             // set Expandable list to viewable
             mShoppingListHelper = mExpandableShoppingListHelper;
             changeListView(oldShoppingListHelper, mShoppingListHelper);
             mShoppingListHelper.updateAdapter();
-        } else if (numOfCategories == 1 && ! mIsPlainList) {
+        } else if (numOfCategories == 0 && ! mIsPlainList) {
             mIsPlainList = true;
             // set plain shoppinglist to viewable
             mShoppingListHelper = mPlainShoppingListHelper;

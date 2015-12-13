@@ -1,6 +1,7 @@
 package org.noorganization.instalist.view.utils;
 
 /**
+ * Utils for provider usage.
  * Created by Tino on 24.10.2015.
  */
 public class ProviderUtils {
@@ -12,7 +13,7 @@ public class ProviderUtils {
      * @param _selection the selection provided by content provider _selection.
      * @return the new selection string.
      */
-    public final static String getSelectionWithIdQuery(String _idString, String _selection){
+    public static String prependIdToQuery(String _idString, String _selection){
         return _idString + "=?" + ((_selection != null) ? " AND " + _selection : "");
     }
 
@@ -22,7 +23,7 @@ public class ProviderUtils {
      * @param _uuid the uuid of the table.
      * @return the selectionArgs extended by the id parameter.
      */
-    public final static String[] getSelectionArgsWithId(String[] _selectionArgs, String _uuid ){
+    public static String[] prependSelectionArgs(String[] _selectionArgs, String _uuid){
         String[] selectionArgs = new String[1 + (_selectionArgs != null ? _selectionArgs.length : 0)];
         selectionArgs[0] = _uuid;
         if (_selectionArgs != null) {

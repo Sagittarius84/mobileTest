@@ -3,15 +3,11 @@ package org.noorganization.instalist.view.interfaces;
 import android.app.Fragment;
 import android.view.View;
 
-import org.noorganization.instalist.R;
-import org.noorganization.instalist.model.Category;
-import org.noorganization.instalist.model.ShoppingList;
-
 /**
  * Provides standard functions to manipulate activity specific fields from a fragment.
  */
 // TODO: Remove ISideDrawerListDataEvents when events are propagated
-public interface IBaseActivity extends  ISideDrawerListDataEvents {
+public interface IBaseActivity {
     /**
      * Changes the current Fragment to the given Fragment.
      * @param _NewFragment The Fragment to move to.
@@ -60,7 +56,7 @@ public interface IBaseActivity extends  ISideDrawerListDataEvents {
     void unregisterForContextMenu(View _View);
 
     /**
-     * Register the vien view for the contextmenu.
+     * Register the view for the contextmenu.
      * @param _View The view to be registered for the contextmenu.
      */
     void registerForContextMenu(View _View);
@@ -69,7 +65,7 @@ public interface IBaseActivity extends  ISideDrawerListDataEvents {
      * Create a new listener with the given category id.
      * @param _CategoryId the Id of category where the category should be placed in.
      */
-    void setSideDrawerAddListButtonListener(long _CategoryId);
+    void setSideDrawerAddListButtonListener(String _CategoryId);
 
     void registerFragment(Fragment fragment);
     void unregisterFragment(Fragment fragment);

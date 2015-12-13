@@ -9,6 +9,8 @@ import android.widget.ListView;
 import android.widget.ViewSwitcher;
 
 import org.noorganization.instalist.R;
+import org.noorganization.instalist.presenter.IListController;
+import org.noorganization.instalist.presenter.implementation.ControllerFactory;
 import org.noorganization.instalist.model.Category;
 import org.noorganization.instalist.model.ShoppingList;
 import org.noorganization.instalist.view.interfaces.IBaseActivity;
@@ -28,6 +30,7 @@ public class PlainShoppingListHelper implements IShoppingListHelper {
     private Context mContext;
     private IContextItemClickedHelper mViewHelper;
     private IBaseActivity mBaseActivityInterface;
+    private IListController mListController;
 
     private boolean mIsActive;
 
@@ -35,7 +38,7 @@ public class PlainShoppingListHelper implements IShoppingListHelper {
         mListView   = _ListView;
         mContext    = _Context;
         mViewHelper = new ContextItemClickedHelper(_Context);
-
+        mListController = ControllerFactory.getListController(mContext);
         mBaseActivityInterface = _BaseActivityInterface;
         updateAdapter();
     }
@@ -127,7 +130,7 @@ public class PlainShoppingListHelper implements IShoppingListHelper {
 
     @Override
     public void updateAdapter() {
-        mListAdapter = new PlainShoppingListOverviewAdapter(mContext, ShoppingList.listAll(ShoppingList.class));
+        mListAdapter = new PlainShoppingListOverviewAdapter(mContext, mListController.getAllLists());
         mListView.setAdapter(mListAdapter);
     }
 }

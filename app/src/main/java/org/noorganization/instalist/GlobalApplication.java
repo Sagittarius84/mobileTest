@@ -1,14 +1,15 @@
 package org.noorganization.instalist;
 
-import com.orm.SugarApp;
+import android.app.Application;
+import android.content.Context;
 
-import org.noorganization.instalist.controller.database_seed.DatabaseSeeder;
+import org.noorganization.instalist.presenter.database_seed.DatabaseSeeder;
 
 /**
  * Global application class.
  * Created by TS on 21.04.2015.
  */
-public class GlobalApplication extends SugarApp {
+public class GlobalApplication extends Application{
 
     private final static String LOG_TAG = GlobalApplication.class.getName();
 
@@ -40,4 +41,7 @@ public class GlobalApplication extends SugarApp {
         return mInstance;
     }
 
+    public static Context getContext(){
+        return getInstance().getApplicationContext();
+    }
 }

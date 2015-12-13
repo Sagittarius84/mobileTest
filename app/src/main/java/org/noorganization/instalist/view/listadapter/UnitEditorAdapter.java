@@ -1,35 +1,21 @@
 package org.noorganization.instalist.view.listadapter;
 
 import android.app.Activity;
-import android.content.Context;
-import android.database.DataSetObserver;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.ActionMode;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
-import android.widget.ListAdapter;
 import android.widget.TextView;
 
-import com.orm.SugarRecord;
-import com.orm.query.Condition;
-import com.orm.query.Select;
-
 import org.noorganization.instalist.R;
-import org.noorganization.instalist.controller.IUnitController;
-import org.noorganization.instalist.controller.implementation.ControllerFactory;
-import org.noorganization.instalist.controller.implementation.UnitController;
 import org.noorganization.instalist.model.Unit;
 import org.noorganization.instalist.view.sorting.AlphabeticalUnitComparator;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -90,9 +76,9 @@ public class UnitEditorAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
         return rtn;
     }
 
-    public int getIndexOf(long _id) {
+    public int getIndexOf(String _id) {
         for (int position = 0; position < mUnderLyingUnits.size(); position++) {
-            if (mUnderLyingUnits.get(position).getId().compareTo(_id) == 0) {
+            if (mUnderLyingUnits.get(position).mUUID.compareTo(_id) == 0) {
                 return position;
             }
         }
@@ -176,7 +162,7 @@ public class UnitEditorAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
 
     public void update(Unit _toUpdate) {
         Comparator<Unit> comparator = AlphabeticalUnitComparator.getInstance();
-        int oldIndex = getIndexOf(_toUpdate.getId());
+        int oldIndex = getIndexOf(_toUpdate.mUUID);
         int newIndex = Collections.binarySearch(mUnderLyingUnits, _toUpdate, comparator);
 
         if (oldIndex == newIndex) {

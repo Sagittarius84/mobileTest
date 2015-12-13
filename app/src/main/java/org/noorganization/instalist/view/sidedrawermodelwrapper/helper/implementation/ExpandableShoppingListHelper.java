@@ -11,7 +11,9 @@ import android.widget.Toast;
 import android.widget.ViewSwitcher;
 
 import org.noorganization.instalist.R;
-import org.noorganization.instalist.controller.implementation.ControllerFactory;
+import org.noorganization.instalist.presenter.ICategoryController;
+import org.noorganization.instalist.presenter.IListController;
+import org.noorganization.instalist.presenter.implementation.ControllerFactory;
 import org.noorganization.instalist.model.Category;
 import org.noorganization.instalist.model.ShoppingList;
 import org.noorganization.instalist.view.touchlistener.sidebar.OnCancelClickListenerWithData;
@@ -34,6 +36,8 @@ public class ExpandableShoppingListHelper implements IShoppingListHelper {
     private Context                           mContext;
     private IContextItemClickedHelper         mContextItemClickedHelper;
     private IBaseActivity                     mBaseActivity;
+    private ICategoryController               mCategoryController;
+    private IListController                   mListController;
 
     private boolean mIsActive;
 
@@ -43,6 +47,8 @@ public class ExpandableShoppingListHelper implements IShoppingListHelper {
         mBaseActivity = _BaseActivityInterface;
         mExpandableListView = _ExpandableListView;
         mContextItemClickedHelper = new ContextItemClickedHelper(_Context);
+        mCategoryController = ControllerFactory.getCategoryController(mContext);
+        mListController = ControllerFactory.getListController(mContext);
         updateAdapter();
     }
 
@@ -83,7 +89,7 @@ public class ExpandableShoppingListHelper implements IShoppingListHelper {
                 flatPosition,
                 firstVisiblePosition;
 
-        long defaultCategoryId;
+        String defaultCategoryId;
 
         ExpandableListView.ExpandableListContextMenuInfo contextMenuInfo;
         View                                             view;
@@ -103,7 +109,7 @@ public class ExpandableShoppingListHelper implements IShoppingListHelper {
         viewSwitcher = (ViewSwitcher) view.findViewById(R.id.expandable_list_view_view_switcher);
 
         // fetch it in here, because it can change over time.
-        defaultCategoryId = PreferencesManager.getInstance().getLongValue(PreferencesManager.KEY_DEFAULT_CATEGORY_ID);
+        defaultCategoryId = PreferencesManager.getInstance().getStringValue(PreferencesManager.KEY_DEFAULT_CATEGORY_ID);
 
         switch (_Item.getGroupId()) {
             case MenuStates.GROUP_MENU:
@@ -114,15 +120,15 @@ public class ExpandableShoppingListHelper implements IShoppingListHelper {
                 switch (itemId) {
                     case MenuStates.GROUP_MENU_ADD_LIST_ACTION:
                         Toast.makeText(mContext, "Add list on category: " + categoryName, Toast.LENGTH_SHORT).show();
-                        ((IBaseActivity) mContext).setSideDrawerAddListButtonListener(category.getId());
+                        ((IBaseActivity) mContext).setSideDrawerAddListButtonListener(category.mUUID);
                         break;
                     case MenuStates.GROUP_MENU_REMOVE_CATEGORY_ACTION:
                         Toast.makeText(mContext, "Remove group: " + categoryName, Toast.LENGTH_SHORT).show();
-                        if (category.getId() == defaultCategoryId) {
+                        if (category.mUUID == null) {
                             Toast.makeText(mContext, mContext.getString(R.string.delete_category_error_category_is_default), Toast.LENGTH_LONG).show();
                         } else {
-                            ControllerFactory.getCategoryController().removeCategory(category);
-                            mBaseActivity.removeCategory(category);
+                            mCategoryController.removeCategory(category);
+                            //mBaseActivity.removeCategory(category);
                         }
                         break;
                     case MenuStates.GROUP_MENU_EDIT_CATEGORY_ACTION:
@@ -138,7 +144,9 @@ public class ExpandableShoppingListHelper implements IShoppingListHelper {
                         editText = (EditText) view.findViewById(R.id.expandable_list_view_category_name_edit);
 
                         cancelView.setOnClickListener(new OnCancelClickListenerWithData(viewSwitcher));
-                        submitView.setOnClickListener(new OnSubmitClickListenerWithParentData(viewSwitcher, editText, category.getId(), mExpandableListAdapter));
+                        submitView.setOnClickListener(new OnSubmitClickListenerWithParentData(
+                                mContext, viewSwitcher, editText, category.mUUID,
+                                mExpandableListAdapter));
 
                         editText.setText(category.mName);
 
@@ -160,7 +168,7 @@ public class ExpandableShoppingListHelper implements IShoppingListHelper {
                 categoryForShoppingList = (Category) mExpandableListAdapter.getGroup(groupPosition);
 
                 // get the shoppinglist from database
-                shoppingList = ShoppingList.findById(ShoppingList.class, shoppingList.getId());
+                shoppingList = mListController.getListById(shoppingList.mUUID);
                 switch (itemId) {
                     case MenuStates.CHILD_MENU_EDIT_LIST_NAME_ACTION:
                         mContextItemClickedHelper.editListName(view, shoppingList, viewSwitcher);
@@ -229,7 +237,8 @@ public class ExpandableShoppingListHelper implements IShoppingListHelper {
 
     @Override
     public void updateAdapter() {
-        mExpandableListAdapter = new ExpandableCategoryItemListAdapter(mContext, Category.listAll(Category.class));
+        mExpandableListAdapter = new ExpandableCategoryItemListAdapter(mContext,
+                mCategoryController.getAllCategories());
         mExpandableListView.setAdapter(mExpandableListAdapter);
     }
 }

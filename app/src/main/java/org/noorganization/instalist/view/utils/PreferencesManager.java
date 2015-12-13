@@ -2,7 +2,6 @@ package org.noorganization.instalist.view.utils;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.renderscript.RSInvalidStateException;
 
 /**
  * General Preference Manager for all preferences. Singleton, first call

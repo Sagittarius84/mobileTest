@@ -12,7 +12,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
-import android.widget.CursorAdapter;
 import android.widget.Filter;
 import android.widget.Filterable;
 import android.widget.PopupMenu;
@@ -20,9 +19,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import org.noorganization.instalist.R;
-import org.noorganization.instalist.controller.IProductController;
-import org.noorganization.instalist.controller.IRecipeController;
-import org.noorganization.instalist.controller.implementation.ControllerFactory;
+import org.noorganization.instalist.presenter.IProductController;
+import org.noorganization.instalist.presenter.IRecipeController;
+import org.noorganization.instalist.presenter.implementation.ControllerFactory;
 import org.noorganization.instalist.model.Product;
 import org.noorganization.instalist.model.Recipe;
 import org.noorganization.instalist.view.activity.RecipeChangeActivity;
@@ -380,7 +379,7 @@ public class SelectableItemListAdapter extends ArrayAdapter<IBaseListEntry> impl
                     switch (mListEntry.getType()) {
                         case PRODUCT_LIST_ENTRY:
                             ViewUtils.addFragment(mActivity, ProductChangeFragment.
-                                    newChangeInstance(((Product) mListEntry.getItem()).getId()));
+                                    newChangeInstance(((Product) mListEntry.getItem()).mUUID));
                             break;
                         case RECIPE_LIST_ENTRY:
                             Intent startEditor = new Intent(getContext(), RecipeChangeActivity.class);
@@ -421,7 +420,8 @@ public class SelectableItemListAdapter extends ArrayAdapter<IBaseListEntry> impl
 
                                 @Override
                                 public void onClick(DialogInterface dialogInterface, int i) {
-                                    IProductController productController = ControllerFactory.getProductController();
+                                    IProductController productController = ControllerFactory.
+                                            getProductController(getContext());
 
                                     if (productController.removeProduct((Product) mListEntry.getItem(), false)) {
                                         Toast.makeText(mContext, R.string.removed_product, Toast.LENGTH_SHORT).show();
@@ -444,7 +444,8 @@ public class SelectableItemListAdapter extends ArrayAdapter<IBaseListEntry> impl
                             new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialogInterface, int i) {
-                                    IRecipeController recipeController = ControllerFactory.getRecipeController();
+                                    IRecipeController recipeController = ControllerFactory.
+                                            getRecipeController(getContext());
                                     recipeController.removeRecipe((Recipe) mListEntry.getItem());
                                     Toast.makeText(mContext, R.string.removed_recipe, Toast.LENGTH_SHORT).show();
                                 }
@@ -461,7 +462,8 @@ public class SelectableItemListAdapter extends ArrayAdapter<IBaseListEntry> impl
             @Override
             public void onClick(DialogInterface _dialogInterface, int _whichButton) {
                 if (_whichButton == DialogInterface.BUTTON_POSITIVE) {
-                    IProductController productController = ControllerFactory.getProductController();
+                    IProductController productController = ControllerFactory.
+                            getProductController(getContext());
                     productController.removeProduct((Product) mListEntry.getItem(), true);
                     Toast.makeText(getContext(), R.string.removed_product, Toast.LENGTH_SHORT).show();
                 }

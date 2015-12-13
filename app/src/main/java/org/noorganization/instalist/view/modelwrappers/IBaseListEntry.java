@@ -56,7 +56,7 @@ public interface IBaseListEntry extends Parcelable {
      * Get the Id of this item.
      * @return the item of this item.
      */
-    long getId();
+    String getId();
 
     /**
      *

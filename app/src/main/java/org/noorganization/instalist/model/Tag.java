@@ -1,20 +1,48 @@
 package org.noorganization.instalist.model;
 
-import com.orm.SugarRecord;
-import com.orm.query.Condition;
-import com.orm.query.Select;
-
-import java.util.LinkedList;
-import java.util.List;
+import android.content.ContentValues;
 
 /**
  * A pseudo-category for products. See {@link org.noorganization.instalist.model.TaggedProduct} for
  * more details.
  * Created by michi on 14.04.15.
  */
-public class Tag extends SugarRecord<Tag> {
+public class Tag {
+
+    public final static String TABLE_NAME = "tag";
+
+    /**
+     * Column names that does not contain the table prefix.
+     */
+    public final static class COLUMN {
+
+        public final static String ID = "_id";
+        public final static String NAME = "name";
+        public final static String[] ALL_COLUMNS = {ID, NAME};
+    }
+
+    /**
+     * Column names that are prefixed with the table name. So like this TableName.ColumnName
+     */
+    public final static class COLUMN_PREFIXED {
+
+        public final static String ID = TABLE_NAME.concat("." + COLUMN.ID);
+        public final static String NAME = TABLE_NAME.concat("." + COLUMN.NAME);
+        public final static String[] ALL_COLUMNS = {ID, NAME};
+    }
+
+
+    public final static String DATABASE_CREATE = "CREATE TABLE " + TABLE_NAME
+            + "("
+            + COLUMN.ID + " TEXT PRIMARY KEY,"
+            + COLUMN.NAME + " TEXT"
+            + ");";
+
+    public String mUUID;
 
     public String mName;
+
+    // TODO: maybe a frequency parameter to track down usage?
 
     public Tag() {
         mName = "";
@@ -23,18 +51,11 @@ public class Tag extends SugarRecord<Tag> {
     public Tag(String _name) {
         mName = _name;
     }
-
-    public List<Product> findProducts() {
-        List<TaggedProduct> taggedProductList = Select.from(TaggedProduct.class).
-                where(Condition.prop("m_tag").eq(getId())).list();
-        List<Product> rtn = new LinkedList<>();
-
-        for (TaggedProduct currentTaggedProduct : taggedProductList) {
-            rtn.add(currentTaggedProduct.mProduct);
-        }
-
-        return rtn;
+    public Tag(String _uuid, String _name) {
+        mUUID = _uuid;
+        mName = _name;
     }
+
 
     @Override
     public boolean equals(Object otherObject) {
@@ -47,12 +68,24 @@ public class Tag extends SugarRecord<Tag> {
 
         Tag otherTag = (Tag) otherObject;
 
-        return mName.equals(otherTag.mName) && getId().compareTo(otherTag.getId()) == 0;
+        return mName.equals(otherTag.mName) && mUUID.compareTo(mUUID) == 0;
 
     }
 
     @Override
     public int hashCode() {
-        return getId().intValue();
+        return mUUID.hashCode();
+    }
+
+    /**
+     * Creates an {@link ContentValues} object that will include each attribute defined.
+     *
+     * @return the instance related ContentValues.
+     */
+    public ContentValues toContentValues() {
+        ContentValues cv = new ContentValues(2);
+        cv.put(COLUMN.ID, this.mUUID);
+        cv.put(COLUMN.NAME, this.mName);
+        return cv;
     }
 }

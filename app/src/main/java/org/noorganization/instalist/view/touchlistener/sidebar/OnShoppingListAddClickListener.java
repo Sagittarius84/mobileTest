@@ -5,7 +5,9 @@ import android.view.View;
 import android.widget.EditText;
 
 import org.noorganization.instalist.R;
-import org.noorganization.instalist.controller.implementation.ControllerFactory;
+import org.noorganization.instalist.presenter.ICategoryController;
+import org.noorganization.instalist.presenter.IListController;
+import org.noorganization.instalist.presenter.implementation.ControllerFactory;
 import org.noorganization.instalist.model.Category;
 import org.noorganization.instalist.model.ShoppingList;
 import org.noorganization.instalist.view.fragment.ShoppingListOverviewFragment;
@@ -21,20 +23,25 @@ public class OnShoppingListAddClickListener implements View.OnClickListener {
     /**
      * The Category Id.
      */
-    private long mCategoryId;
+    private String mCategoryId;
 
     /**
      * The EditText where the new ShoppingList name is placed.
      */
     private EditText mNewNameEditText;
 
+    private IListController mListController;
+    private ICategoryController mCategoryController;
+
     /**
      * Constructor of OnShoppingListAddClickListener
      * @param _CategoryId the CategoryId where the list should be added. If in PlainList Mode then use the default category.
      */
-    public OnShoppingListAddClickListener(long _CategoryId, EditText _NewNameEditText) {
+    public OnShoppingListAddClickListener(Context _context, String _CategoryId, EditText _NewNameEditText) {
         mCategoryId = _CategoryId;
         mNewNameEditText = _NewNameEditText;
+        mListController = ControllerFactory.getListController(_context);
+        mCategoryController = ControllerFactory.getCategoryController(_context);
     }
 
     @Override
@@ -46,17 +53,16 @@ public class OnShoppingListAddClickListener implements View.OnClickListener {
             return;
         }
 
-        ShoppingList shoppingList = ControllerFactory.getListController().addList(listName);
+        ShoppingList shoppingList = mListController.addList(listName);
         if (shoppingList == null) {
             mNewNameEditText.setError(context.getResources().getString(R.string.list_exists));
             return;
         }
-        Category category = Category.findById(Category.class, mCategoryId);
-        shoppingList = ControllerFactory.getListController().moveToCategory(shoppingList, category);
+        Category category = mCategoryController.getCategoryByID(mCategoryId);
+        shoppingList = mListController.moveToCategory(shoppingList, category);
 
         if(shoppingList == null){
             mNewNameEditText.setError(context.getResources().getString(R.string.list_to_category_failed));
-            ControllerFactory.getListController().removeList(shoppingList);
             return;
         }
 
@@ -65,8 +71,8 @@ public class OnShoppingListAddClickListener implements View.OnClickListener {
         mNewNameEditText.clearFocus();
         // clear the field
         mNewNameEditText.setText("");
-        ((IBaseActivity) context).addList(shoppingList);
+        // ((IBaseActivity) context).addList(shoppingList);
 
-        ((IBaseActivity) context).changeFragment(ShoppingListOverviewFragment.newInstance(shoppingList.getId()));
+        ((IBaseActivity) context).changeFragment(ShoppingListOverviewFragment.newInstance(shoppingList.mUUID));
     }
 }

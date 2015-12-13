@@ -15,6 +15,9 @@ import org.noorganization.instalist.utils.SQLiteUtils;
 import org.noorganization.instalist.view.utils.ProviderUtils;
 
 /**
+ * Provider to handle provider actions for Units. Supports actions for single
+ * ({@link UnitProvider#SINGLE_UNIT_CONTENT_URI}) and multiple units
+ * ({@link UnitProvider#MULTIPLE_UNIT_CONTENT_URI}).
  * Created by Tino on 26.10.2015.
  */
 public class UnitProvider implements IInternalProvider {
@@ -22,7 +25,6 @@ public class UnitProvider implements IInternalProvider {
     private SQLiteDatabase mDatabase;
     private UriMatcher mMatcher;
     private Context mContext;
-
 
     private static final int SINGLE_UNIT = 1;
     private static final int MULTIPLE_UNITS = 2;
@@ -33,12 +35,16 @@ public class UnitProvider implements IInternalProvider {
     //endregion private attributes
 
     //region public attributes
+
     /**
      * The content uri for actions for a single unit.
      */
     public static final String SINGLE_UNIT_CONTENT_URI = InstalistProvider.BASE_CONTENT_URI + "/" + SINGLE_UNIT_STRING;
+
     /**
-     * The content uri for actions with multiple unit.
+     * The content uri for actions with multiple units.
+     * Does not support {@link android.content.ContentProvider#insert(Uri, ContentValues)},
+     * {@link android.content.ContentProvider#update(Uri, ContentValues, String, String[])} ,
      */
     public static final String MULTIPLE_UNIT_CONTENT_URI = InstalistProvider.BASE_CONTENT_URI + "/" + MULTIPLE_UNIT_STRING;
 
@@ -66,8 +72,8 @@ public class UnitProvider implements IInternalProvider {
         mDatabase = _db;
         mMatcher = new UriMatcher(UriMatcher.NO_MATCH);
 
-        mMatcher.addURI(InstalistProvider.AUTHORITY, SINGLE_UNIT_STRING, SINGLE_UNIT);
         mMatcher.addURI(InstalistProvider.AUTHORITY, MULTIPLE_UNIT_STRING, MULTIPLE_UNITS);
+        mMatcher.addURI(InstalistProvider.AUTHORITY, SINGLE_UNIT_STRING, SINGLE_UNIT);
     }
 
     @Override
@@ -76,8 +82,8 @@ public class UnitProvider implements IInternalProvider {
         switch (mMatcher.match(_uri)) {
 
             case SINGLE_UNIT:
-                String selection = ProviderUtils.getSelectionWithIdQuery(Unit.COLUMN_ID, _selection);
-                String[] selectionArgs = ProviderUtils.getSelectionArgsWithId(_selectionArgs, _uri.getLastPathSegment());
+                String selection = ProviderUtils.prependIdToQuery(Unit.COLUMN.ID, _selection);
+                String[] selectionArgs = ProviderUtils.prependSelectionArgs(_selectionArgs, _uri.getLastPathSegment());
                 cursor = mDatabase.query(Unit.TABLE_NAME, _projection, selection, selectionArgs, null, null, _sortOrder);
                 break;
             case MULTIPLE_UNITS:
@@ -118,18 +124,20 @@ public class UnitProvider implements IInternalProvider {
                     return null;
                     //throw new SQLiteException("Failed to add a record into " + _uri);
                 }
-                Cursor cursor = mDatabase.query(Unit.TABLE_NAME, new String[]{Unit.COLUMN_ID},
-                        SQLiteUtils.COLUMN_ROW_ID + "=?", new String[]{String.valueOf(rowId)},
-                        null, null, null, null);
-                cursor.moveToFirst();
-                newUri = Uri.parse(SINGLE_UNIT_CONTENT_URI.replace("*",
-                        cursor.getString(cursor.getColumnIndex(Unit.COLUMN_ID))));
+
+                newUri = Uri.parse(SINGLE_UNIT_CONTENT_URI.replace("*", _values.getAsString(Unit.COLUMN.ID)));
                 break;
             case MULTIPLE_UNITS:
-                // TODO: implement for later purposes
-                //newUri = null; //Uri.parse(MULTIPLE_TAGGED_PRODUCT_CONTENT_URI);
-                throw new IllegalArgumentException("The given Uri is not supported: " + _uri);
-                // break;
+                _values.put(Unit.COLUMN.ID, SQLiteUtils.generateId(mDatabase, Unit.TABLE_NAME).toString());
+                rowId = mDatabase.insert(Unit.TABLE_NAME, null, _values);
+                // insertion went wrong
+                if (rowId == -1) {
+                    return null;
+                    //throw new SQLiteException("Failed to add a record into " + _uri);
+                }
+
+                newUri = Uri.parse(SINGLE_UNIT_CONTENT_URI.replace("*", _values.getAsString(Unit.COLUMN.ID)));
+                break;
             default:
                 throw new IllegalArgumentException("The given Uri is not supported: " + _uri);
         }
@@ -147,8 +155,8 @@ public class UnitProvider implements IInternalProvider {
 
         switch (mMatcher.match(_uri)) {
             case SINGLE_UNIT:
-                String selection = ProviderUtils.getSelectionWithIdQuery(Unit.COLUMN_ID, null);
-                String[] selectionArgs = ProviderUtils.getSelectionArgsWithId(null, _uri.getLastPathSegment());
+                String selection = ProviderUtils.prependIdToQuery(Unit.COLUMN.ID, null);
+                String[] selectionArgs = ProviderUtils.prependSelectionArgs(null, _uri.getLastPathSegment());
                 affectedRows = mDatabase.delete(Unit.TABLE_NAME, selection, selectionArgs);
                 break;
             case MULTIPLE_UNITS:
@@ -169,15 +177,13 @@ public class UnitProvider implements IInternalProvider {
         int affectedRows = 0;
         switch (mMatcher.match(_uri)) {
             case SINGLE_UNIT:
-                String selection = ProviderUtils.getSelectionWithIdQuery(Unit.COLUMN_ID, null);
-                String[] selectionArgs = ProviderUtils.getSelectionArgsWithId(null, _uri.getLastPathSegment());
+                String selection = ProviderUtils.prependIdToQuery(Unit.COLUMN.ID, null);
+                String[] selectionArgs = ProviderUtils.prependSelectionArgs(null, _uri.getLastPathSegment());
                 affectedRows = mDatabase.update(Unit.TABLE_NAME, _values, selection, selectionArgs);
                 break;
             case MULTIPLE_UNITS:
                 // TODO for later purposes maybe
                 // affectedRows = mDatabase.update(Unit.TABLE_NAME, _values, _selection, _selectionArgs);
-                throw new IllegalArgumentException("The given Uri is not supported: " + _uri);
-                //break;
             default:
                 throw new IllegalArgumentException("The given Uri is not supported: " + _uri);
         }

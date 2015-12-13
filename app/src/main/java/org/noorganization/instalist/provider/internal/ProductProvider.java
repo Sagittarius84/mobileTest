@@ -6,7 +6,6 @@ import android.content.Context;
 import android.content.UriMatcher;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteException;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 
@@ -18,6 +17,7 @@ import org.noorganization.instalist.view.utils.ProviderUtils;
 /**
  * Provider for the products used in the application. It provides the CRUD operations and makes usage of
  * the {@link IInternalProvider}.
+ * // TODO in train
  * Created by Tino on 24.10.2015.
  */
 public class ProductProvider implements IInternalProvider {
@@ -41,7 +41,7 @@ public class ProductProvider implements IInternalProvider {
      */
     public static final String SINGLE_PRODUCT_CONTENT_URI = InstalistProvider.BASE_CONTENT_URI + "/" + SINGLE_PRODUCT_STRING;
     /**
-     * The content uri for actions with multiple products.
+     * The content uri for actions with multiple products. Or for a single insertion with no specified id.
      */
     public static final String MULTIPLE_PRODUCT_CONTENT_URI = InstalistProvider.BASE_CONTENT_URI + "/" + MULTIPLE_PRODUCTS_STRING;
 
@@ -79,8 +79,8 @@ public class ProductProvider implements IInternalProvider {
         switch (mMatcher.match(_uri)) {
 
             case SINGLE_PRODUCT:
-                String selection = ProviderUtils.getSelectionWithIdQuery(Product.COLUMN_ID, _selection);
-                String[] selectionArgs = ProviderUtils.getSelectionArgsWithId(_selectionArgs, _uri.getLastPathSegment());
+                String selection = ProviderUtils.prependIdToQuery(Product.PREFIXED_COLUMN.ID, _selection);
+                String[] selectionArgs = ProviderUtils.prependSelectionArgs(_selectionArgs, _uri.getLastPathSegment());
                 cursor = mDatabase.query(Product.TABLE_NAME, _projection, selection, selectionArgs, null, null, _sortOrder);
                 break;
             case MULTIPLE_PRODUCTS:
@@ -116,23 +116,29 @@ public class ProductProvider implements IInternalProvider {
         switch (mMatcher.match(_uri)) {
             case SINGLE_PRODUCT:
                 long rowId = mDatabase.insert(Product.TABLE_NAME, null, _values);
+                String unitId = _values.getAsString(Product.COLUMN.UNIT);
+
                 // insertion went wrong
                 if (rowId == -1) {
                     return null;
                     //throw new SQLiteException("Failed to add a record into " + _uri);
                 }
-                Cursor cursor = mDatabase.query(Product.TABLE_NAME, new String[]{Product.COLUMN_ID},
-                        SQLiteUtils.COLUMN_ROW_ID + "=?", new String[]{String.valueOf(rowId)},
-                        null, null, null, null);
-                cursor.moveToFirst();
+
                 newUri = Uri.parse(SINGLE_PRODUCT_CONTENT_URI.replace("*",
-                        cursor.getString(cursor.getColumnIndex(Product.COLUMN_ID))));
+                        _values.getAsString(Product.COLUMN.ID)));
                 break;
             case MULTIPLE_PRODUCTS:
-                // TODO: implement for later purposes
-                //newUri = null; //Uri.parse(MULTIPLE_PRODUCT_CONTENT_URI);
-                throw new IllegalArgumentException("The given Uri is not supported: " + _uri);
-                // break;
+
+                _values.put(Product.COLUMN.ID, SQLiteUtils.generateId(mDatabase, Product.TABLE_NAME).toString());
+                rowId = mDatabase.insert(Product.TABLE_NAME, null, _values);
+                // insertion went wrong
+                if (rowId == -1) {
+                    return null;
+                    //throw new SQLiteException("Failed to add a record into " + _uri);
+                }
+                newUri = Uri.parse(SINGLE_PRODUCT_CONTENT_URI.replace("*",
+                        _values.getAsString(Product.COLUMN.ID)));
+                break;
             default:
                 throw new IllegalArgumentException("The given Uri is not supported: " + _uri);
         }
@@ -149,8 +155,8 @@ public class ProductProvider implements IInternalProvider {
 
         switch (mMatcher.match(_uri)) {
             case SINGLE_PRODUCT:
-                String selection = ProviderUtils.getSelectionWithIdQuery(Product.COLUMN_ID, null);
-                String[] selectionArgs = ProviderUtils.getSelectionArgsWithId(null, _uri.getLastPathSegment());
+                String selection = ProviderUtils.prependIdToQuery(Product.PREFIXED_COLUMN.ID, null);
+                String[] selectionArgs = ProviderUtils.prependSelectionArgs(null, _uri.getLastPathSegment());
                 affectedRows = mDatabase.delete(Product.TABLE_NAME, selection, selectionArgs);
                 break;
             case MULTIPLE_PRODUCTS:
@@ -170,8 +176,8 @@ public class ProductProvider implements IInternalProvider {
         int affectedRows = 0;
         switch (mMatcher.match(_uri)) {
             case SINGLE_PRODUCT:
-                String selection = ProviderUtils.getSelectionWithIdQuery(Product.COLUMN_ID, null);
-                String[] selectionArgs = ProviderUtils.getSelectionArgsWithId(null, _uri.getLastPathSegment());
+                String selection = ProviderUtils.prependIdToQuery(Product.PREFIXED_COLUMN.ID, null);
+                String[] selectionArgs = ProviderUtils.prependSelectionArgs(null, _uri.getLastPathSegment());
                 affectedRows = mDatabase.update(Product.TABLE_NAME, _values, selection, selectionArgs);
                 break;
             case MULTIPLE_PRODUCTS:
