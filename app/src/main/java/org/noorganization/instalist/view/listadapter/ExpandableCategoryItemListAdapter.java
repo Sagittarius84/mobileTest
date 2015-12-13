@@ -62,10 +62,10 @@ public class ExpandableCategoryItemListAdapter extends BaseExpandableListAdapter
 
     @Override
     public int getChildrenCount(int groupPosition) {
-        // TODO weird error, sometimes when deleting a category the category is null
+        // TODO weird NullPointerException error, sometimes when deleting a category that is currently opened and has no elements in it, remove this hotfix
         Category category = mListOfCategories.get(groupPosition);
         List<ShoppingList> lists = mListController.getListsByCategory( category.mUUID != null ? category : null);
-        return lists.size();
+        return lists == null ? 0 : lists.size();
     }
 
     @Override

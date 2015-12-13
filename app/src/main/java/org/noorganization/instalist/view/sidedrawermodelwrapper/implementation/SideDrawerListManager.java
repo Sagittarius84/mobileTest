@@ -2,6 +2,7 @@ package org.noorganization.instalist.view.sidedrawermodelwrapper.implementation;
 
 import android.app.Activity;
 import android.content.Context;
+import android.util.Log;
 import android.view.ContextMenu;
 import android.view.MenuItem;
 import android.view.View;
@@ -24,6 +25,7 @@ import org.noorganization.instalist.view.sidedrawermodelwrapper.helper.implement
  */
 public class SideDrawerListManager implements ISideDrawerListManager {
 
+    private static String LOG_TAG = SideDrawerListManager.class.getSimpleName();
     //region Private Attributes
     private ExpandableShoppingListHelper mExpandableShoppingListHelper;
     private PlainShoppingListHelper      mPlainShoppingListHelper;
@@ -97,6 +99,7 @@ public class SideDrawerListManager implements ISideDrawerListManager {
     @Override
     public void removeCategory(Category _Category) {
         mShoppingListHelper.removeCategory(_Category);
+        Log.i(LOG_TAG, "Removed category.");
         checkOfViewChange();
     }
 
@@ -125,7 +128,7 @@ public class SideDrawerListManager implements ISideDrawerListManager {
 
         long                numOfCategories       = mCategoryController.getCategoryCount();
         IShoppingListHelper oldShoppingListHelper = mShoppingListHelper;
-
+        Log.i(LOG_TAG, "Number of categories: " + numOfCategories);
         if (numOfCategories >= 1 && mIsPlainList) {
             mIsPlainList = false;
             // set Expandable list to viewable
