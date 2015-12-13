@@ -1,4 +1,4 @@
-package org.noorganization.instalist.view;
+package org.noorganization.instalist.view.activity;
 
 import android.app.Activity;
 import android.app.Fragment;
@@ -33,7 +33,6 @@ import org.noorganization.instalist.presenter.event.ListItemChangedMessage;
 import org.noorganization.instalist.presenter.implementation.ControllerFactory;
 import org.noorganization.instalist.model.Category;
 import org.noorganization.instalist.model.ShoppingList;
-import org.noorganization.instalist.view.activity.SettingsActivity;
 import org.noorganization.instalist.view.event.ActivityStateMessage;
 import org.noorganization.instalist.view.event.ToolbarChangeMessage;
 import org.noorganization.instalist.view.fragment.ShoppingListOverviewFragment;

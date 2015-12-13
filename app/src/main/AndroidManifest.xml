@@ -19,7 +19,7 @@
         tools:replace="android:icon" >
 
         <activity
-            android:name=".view.MainShoppingListView"
+            android:name=".view.activity.MainShoppingListView"
             android:label="@string/title_activity_main" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -27,10 +27,10 @@
             </intent-filter>
         </activity>
         <activity android:name=".view.activity.RecipeChangeActivity"
-            android:parentActivityName=".view.MainShoppingListView"
+            android:parentActivityName=".view.activity.MainShoppingListView"
             android:label="@string/edit_recipe" />
         <activity android:name=".view.activity.SettingsActivity"
-            android:parentActivityName=".view.MainShoppingListView"
+            android:parentActivityName=".view.activity.MainShoppingListView"
             android:label="@string/settings" />
         <activity android:name=".view.activity.UnitEditorActivity"
             android:parentActivityName=".view.activity.SettingsActivity"

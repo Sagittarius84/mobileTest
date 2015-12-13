@@ -8,6 +8,7 @@ import java.util.List;
 /**
  * Created by TS on 10.05.2015.
  * Holds data of selected product in SelectableProductListAdapter.
+ * @deprecated PLease do not use this any longer.
  */
 public class SelectedProductDataHolder {
 

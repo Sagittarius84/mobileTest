@@ -27,7 +27,7 @@ import org.noorganization.instalist.presenter.implementation.ControllerFactory;
 import org.noorganization.instalist.model.ListEntry;
 import org.noorganization.instalist.model.Product;
 import org.noorganization.instalist.model.ShoppingList;
-import org.noorganization.instalist.view.MainShoppingListView;
+import org.noorganization.instalist.view.activity.MainShoppingListView;
 import org.noorganization.instalist.view.customview.AmountPicker;
 import org.noorganization.instalist.view.dataholder.SelectableBaseItemListEntryDataHolder;
 import org.noorganization.instalist.view.decoration.DividerItemListDecoration;

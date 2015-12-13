@@ -7,6 +7,7 @@ import java.util.List;
 
 /**
  * Created by TS on 25.05.2015.
+ * @deprecated PLease do not use this any longer.
  */
 public class SelectableBaseItemListEntryDataHolder {
 

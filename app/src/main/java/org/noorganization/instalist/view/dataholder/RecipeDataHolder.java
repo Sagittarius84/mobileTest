@@ -9,6 +9,7 @@ import java.util.List;
  * Holds the data of a recipe currently created.
  * Important to note, this holder tries to not give any null values back.
  * Created by TS on 24.05.2015.
+ * @deprecated PLease do not use this any longer.
  */
 public class RecipeDataHolder {
 

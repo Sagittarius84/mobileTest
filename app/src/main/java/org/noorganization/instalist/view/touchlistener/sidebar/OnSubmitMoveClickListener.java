@@ -53,7 +53,7 @@ public class OnSubmitMoveClickListener implements View.OnClickListener {
             Toast.makeText(context, context.getString(R.string.change_of_category_of_list_failed), Toast.LENGTH_SHORT).show();
         }
         // TODO: remove this when callback for this kind is there.
-        IBaseActivity baseActivity = ((IBaseActivity) context);
+        // IBaseActivity baseActivity = ((IBaseActivity) context);
         if(oldCategory != null){
             //baseActivity.updateCategory(oldCategory);
         }
