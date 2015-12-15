@@ -1,3 +1,16 @@
+# Git submodule (Please read) #
+## Notes ##
+
+* Always publish (push) the submodule change before publishing (push) the change to the superproject that references it. [SO](http://stackoverflow.com/questions/1979167/git-submodule-update)
+
+* Eingabe im masterproject root(git erkennt die submodule aus der .gitmodules):  
+    * *git submodule init*
+* Dann zum Update:  
+    * *git submodule update*       (wahlweise auch --remote --rebase)
+* Späteres updaten dann über:
+    * normales pullen aus dem Subprojekt oder
+    * *git submodule foreach git pull*
+
 # README #
 InstaList. ShoppingList for Android.
 
