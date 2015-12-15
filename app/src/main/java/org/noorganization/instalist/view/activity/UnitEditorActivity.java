@@ -19,10 +19,10 @@ import android.view.View;
 import android.widget.EditText;
 
 import org.noorganization.instalist.R;
+import org.noorganization.instalist.model.Unit;
 import org.noorganization.instalist.presenter.IUnitController;
 import org.noorganization.instalist.presenter.event.UnitChangedMessage;
 import org.noorganization.instalist.presenter.implementation.ControllerFactory;
-import org.noorganization.instalist.model.Unit;
 import org.noorganization.instalist.view.decoration.DividerItemListDecoration;
 import org.noorganization.instalist.view.listadapter.UnitEditorAdapter;
 
@@ -44,6 +44,8 @@ public class UnitEditorActivity extends AppCompatActivity {
     private EventBus mBus;
     private IUnitController mUnitController;
 
+    private ActionBar mActionBar;
+
     @Override
     public void onCreate(Bundle _savedInstanceState) {
         super.onCreate(_savedInstanceState);
@@ -53,14 +55,13 @@ public class UnitEditorActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         mUnitController = ControllerFactory.getUnitController(this);
 
-        ActionBar bar = getSupportActionBar();
-        if (bar == null) {
+        mActionBar = getSupportActionBar();
+        if (mActionBar == null) {
             Log.e(LOG_TAG, "ActionBar is null.");
             return;
         }
-        bar.setDisplayHomeAsUpEnabled(true);
-        bar.setTitle(R.string.unit_editor);
-
+        mActionBar.setDisplayHomeAsUpEnabled(true);
+        mActionBar.setTitle(R.string.unit_editor);
         initViews();
 
         mBus = EventBus.getDefault();
@@ -82,13 +83,13 @@ public class UnitEditorActivity extends AppCompatActivity {
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
+    public boolean onOptionsItemSelected(MenuItem _item) {
+        switch (_item.getItemId()) {
             case android.R.id.home:
                 this.finish();
                 return true;
             default:
-                return super.onOptionsItemSelected(item);
+                return super.onOptionsItemSelected(_item);
         }
     }
 
@@ -126,7 +127,7 @@ public class UnitEditorActivity extends AppCompatActivity {
         int ID_NAME = 0x6149c610;
 
         @Override
-        public void onClick(View v) {
+        public void onClick(View _view) {
             AlertDialog.Builder builder = new AlertDialog.Builder(UnitEditorActivity.this);
             builder.setTitle(R.string.new_unit);
 
@@ -161,7 +162,7 @@ public class UnitEditorActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onShow(DialogInterface dialog) {
+            public void onShow(DialogInterface _dialog) {
                 mDialog.getButton(DialogInterface.BUTTON_POSITIVE).
                         setOnClickListener(new OnOkayClickListener(mDialog));
             }
@@ -195,15 +196,16 @@ public class UnitEditorActivity extends AppCompatActivity {
 
     private class EditCallback implements ActionMode.Callback {
         @Override
-        public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+        public boolean onCreateActionMode(ActionMode _mode, Menu _menu) {
             mAddButton.setVisibility(View.GONE);
-            mode.getMenuInflater().inflate(R.menu.menu_contextual_actionmode_options, menu);
+            _mode.getMenuInflater().inflate(R.menu.menu_contextual_actionmode_options, _menu);
+            _mode.setTitle(getString(R.string.edit_unit));
             return true;
         }
 
         @Override
-        public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
-            menu.removeItem(R.id.menu_cancel_action);
+        public boolean onPrepareActionMode(ActionMode _mode, Menu _menu) {
+            _menu.removeItem(R.id.menu_cancel_action);
             return true;
         }
 
@@ -269,7 +271,7 @@ public class UnitEditorActivity extends AppCompatActivity {
         }
 
         @Override
-        public void onDestroyActionMode(ActionMode mode) {
+        public void onDestroyActionMode(ActionMode _mode) {
             mAddButton.setVisibility(View.VISIBLE);
             mUnitAdapter.setEditorPosition(-1);
         }

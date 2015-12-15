@@ -1,14 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <EditText xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/edittext"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:textAppearance="?android:attr/textAppearanceListItemSmall"
+    style="@style/single_line_list_item"
     android:gravity="center_vertical"
-    android:paddingLeft="?android:attr/listPreferredItemPaddingLeft"
-    android:paddingRight="?android:attr/listPreferredItemPaddingRight"
-    android:paddingStart="?android:attr/listPreferredItemPaddingStart"
-    android:paddingEnd="?android:attr/listPreferredItemPaddingEnd"
-    android:minHeight="?android:attr/listPreferredItemHeightSmall" />
-    <!-- paddingLeft and -Right is needed for API 16, since Start and End is buggy, Google
+    android:inputType="text" /><!-- paddingLeft and -Right is needed for API 16, since Start and End is buggy, Google
     recommends to remove it for API 16 apps !-->
