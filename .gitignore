@@ -35,3 +35,6 @@ local.properties
 .Trashes
 ehthumbs.db
 Thumbs.db
+
+# remove keystore stuff from git
+keystore.properties
