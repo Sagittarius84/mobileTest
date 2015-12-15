@@ -19,8 +19,8 @@ public class OnRecyclerItemTouchListener implements RecyclerView.OnItemTouchList
     public OnRecyclerItemTouchListener(Context context, RecyclerView recyclerView){
         mGestureDetector = new GestureDetector(context, new GestureListener(this, recyclerView));
         mView   = recyclerView;
-
     }
+
     @Override
     public void onTouchEvent(RecyclerView rv, MotionEvent e) {
 

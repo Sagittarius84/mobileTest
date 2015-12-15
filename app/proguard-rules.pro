@@ -15,3 +15,9 @@
 #-keepclassmembers class fqcn.of.javascript.interfaces.for.webview {
 #   public *;
 #}
+
+# about lib
+-keep class .R
+-keep class **.R$* {
+    <fields>;
+}
