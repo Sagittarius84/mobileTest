@@ -29,7 +29,7 @@ public class SettingsFragment extends PreferenceFragment {
     @Override
     public boolean onPreferenceTreeClick(PreferenceScreen preferenceScreen, Preference preference) {
 
-        if(preference.getKey().equals("open_source_licenses")){
+        if(preference.getKey() != null && preference.getKey().equals("open_source_licenses")){
             WebView view = (WebView) LayoutInflater.from(this.getActivity()).inflate(R.layout.licenses, null);
             view.loadUrl("file:///android_asset/open_source_licenses.html");
             AlertDialog mAlertDialog = new AlertDialog.Builder(this.getActivity(), R.style.Theme_AppCompat_Light_Dialog_Alert)
