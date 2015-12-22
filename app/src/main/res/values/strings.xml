@@ -115,5 +115,6 @@
     <string name="name_exists">Recipe name exists already.</string>
     <string name="error_recipe_creation">Something went wrong while creating recipe.</string>
     <string name="edit_unit">Edit Unit</string>
+    <string name="abc_no_shopping_list_selected">No shoppinglist selected.</string>
 
 </resources>

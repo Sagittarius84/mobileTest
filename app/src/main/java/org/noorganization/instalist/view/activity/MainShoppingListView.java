@@ -112,10 +112,12 @@ public class MainShoppingListView extends AppCompatActivity implements IBaseActi
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-
         super.onCreate(savedInstanceState);
+        Log.i(LOG_TAG, "onCreate: " + this.toString());
+
         mActivity = this;
         mFragments = new ArrayList<>(1);
+
         setContentView(R.layout.activity_main_shopping_list_view);
 
         mCategoryController = ControllerFactory.getCategoryController(this);

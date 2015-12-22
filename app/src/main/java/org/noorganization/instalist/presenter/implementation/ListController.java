@@ -20,6 +20,7 @@ import org.noorganization.instalist.model.Product;
 import org.noorganization.instalist.model.ShoppingList;
 import org.noorganization.instalist.provider.InstalistProvider;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,17 +37,17 @@ public class ListController implements IListController {
     private static ListController mInstance;
 
     private EventBus mBus;
-    private Context mContext;
+    private WeakReference<Context> mContext;
     private IProductController mProductController;
     private ICategoryController mCategoryController;
     private ContentResolver mResolver;
 
     private ListController(Context _context) {
         mBus = EventBus.getDefault();
-        mContext = _context;
+        mContext = new WeakReference<>(_context);
         mProductController = ControllerFactory.getProductController(_context);
         mCategoryController = ControllerFactory.getCategoryController(_context);
-        mResolver = mContext.getContentResolver();
+        mResolver = mContext.get().getContentResolver();
     }
 
     public static ListController getInstance(Context _context) {
@@ -127,7 +128,7 @@ public class ListController implements IListController {
             return null;
         }
         entryCursor.moveToFirst();
-        IProductController productController = ControllerFactory.getProductController(mContext);
+        IProductController productController = ControllerFactory.getProductController(mContext.get());
         String listUUID = entryCursor.getString(entryCursor.getColumnIndex(ListEntry.COLUMN.LIST));
         String prodUUID = entryCursor.getString(entryCursor.getColumnIndex(ListEntry.COLUMN.PRODUCT));
         ListEntry rtn = new ListEntry(
@@ -193,7 +194,7 @@ public class ListController implements IListController {
         if (_UUID == null) {
             return null;
         }
-        Cursor entryCursor = mContext.getContentResolver().query(
+        Cursor entryCursor = mContext.get().getContentResolver().query(
                 Uri.withAppendedPath(InstalistProvider.BASE_CONTENT_URI, "list"),
                 ShoppingList.COLUMN.ALL_COLUMNS,
                 ShoppingList.COLUMN.ID + " = ?",
@@ -215,7 +216,7 @@ public class ListController implements IListController {
         if (entryCursor.isNull(entryCursor.getColumnIndex(ShoppingList.COLUMN.CATEGORY))) {
             rtn.mCategory = null;
         } else {
-            rtn.mCategory = ControllerFactory.getCategoryController(mContext).getCategoryByID(
+            rtn.mCategory = ControllerFactory.getCategoryController(mContext.get()).getCategoryByID(
                     entryCursor.getString(entryCursor.getColumnIndex(ShoppingList.COLUMN.CATEGORY)));
         }
         entryCursor.close();
@@ -487,7 +488,7 @@ public class ListController implements IListController {
         ContentValues toUpdate = new ContentValues(1);
         Category savedCategory;
         if (_category != null) {
-            ICategoryController categoryController = ControllerFactory.getCategoryController(mContext);
+            ICategoryController categoryController = ControllerFactory.getCategoryController(mContext.get());
             savedCategory = categoryController.getCategoryByID(_category.mUUID);
             if (savedCategory == null) {
                 return savedList;

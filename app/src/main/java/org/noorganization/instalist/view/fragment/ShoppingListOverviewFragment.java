@@ -33,6 +33,8 @@ import org.noorganization.instalist.view.dataholder.SelectableBaseItemListEntryD
 import org.noorganization.instalist.view.decoration.DividerItemListDecoration;
 import org.noorganization.instalist.view.event.ActivityStateMessage;
 import org.noorganization.instalist.view.event.ProductSelectMessage;
+import org.noorganization.instalist.view.event.ShoppingListOverviewFragmentActiveEvent;
+import org.noorganization.instalist.view.event.ShoppingListSelectedMessage;
 import org.noorganization.instalist.view.event.ToolbarChangeMessage;
 import org.noorganization.instalist.view.interfaces.IBaseActivity;
 import org.noorganization.instalist.view.interfaces.IFragment;
@@ -269,7 +271,6 @@ public class ShoppingListOverviewFragment extends BaseFragment implements IFragm
         mMapComperable.put(0, new AlphabeticalListEntryComparator());
         mMapComperable.put(1, new PriorityListEntryComparator());
 
-        EventBus.getDefault().register(this);
 
         if (bundle == null) {
             return;
@@ -290,7 +291,7 @@ public class ShoppingListOverviewFragment extends BaseFragment implements IFragm
                 return;
             }
         }
-
+        EventBus.getDefault().post(new ShoppingListSelectedMessage(mCurrentShoppingList));
         mHandlingProductSelectedMessages = true;
     }
 
@@ -371,13 +372,14 @@ public class ShoppingListOverviewFragment extends BaseFragment implements IFragm
     public void onPause() {
         super.onPause();
         mAddButton.setOnClickListener(null);
+        EventBus.getDefault().post(new ShoppingListOverviewFragmentActiveEvent(false));
         mBaseActivityInterface.unregisterFragment(this);
+        EventBus.getDefault().unregister(this);
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
-        EventBus.getDefault().unregister(this);
     }
 
 
@@ -387,6 +389,7 @@ public class ShoppingListOverviewFragment extends BaseFragment implements IFragm
     @Override
     public void onResume() {
         super.onResume();
+        EventBus.getDefault().register(this);
 
         mBaseActivityInterface.registerFragment(this);
         // init
@@ -483,6 +486,7 @@ public class ShoppingListOverviewFragment extends BaseFragment implements IFragm
 
         String title = (mCurrentShoppingList == null ? "" : mCurrentShoppingList.mName);
         EventBus.getDefault().post(new ToolbarChangeMessage(false, title));
+        EventBus.getDefault().post(new ShoppingListOverviewFragmentActiveEvent(true));
     }
 
     // --------------------------------------------------------------------------------------------
@@ -497,22 +501,24 @@ public class ShoppingListOverviewFragment extends BaseFragment implements IFragm
         return view;
     }
 
+
     public void onEvent(ActivityStateMessage _message) {
         if (_message.mActivity == getActivity()) {
             mHandlingProductSelectedMessages = (_message.mState == ActivityStateMessage.State.RESUMED);
         }
     }
-
-    public void onEvent(ProductSelectMessage _message) {
-        if (mHandlingProductSelectedMessages) {
-            Map<Product, Float> productAmounts = _message.mProducts;
-            IListController controller = ControllerFactory.getListController(mContext);
-            for (Product currentProduct : productAmounts.keySet()) {
-                controller.addOrChangeItem(mCurrentShoppingList, currentProduct,
-                        productAmounts.get(currentProduct), true);
+    /*
+        public void onEvent(ProductSelectMessage _message) {
+            if (mHandlingProductSelectedMessages) {
+                Map<Product, Float> productAmounts = _message.mProducts;
+                IListController controller = ControllerFactory.getListController(mContext);
+                for (Product currentProduct : productAmounts.keySet()) {
+                    controller.addOrChangeItem(mCurrentShoppingList, currentProduct,
+                            productAmounts.get(currentProduct), true);
+                }
             }
         }
-    }
+    */
 
     public void onEvent(ListItemChangedMessage _message) {
         /*if(!_message.mEntry.mList.equals(mCurrentShoppingList)){
