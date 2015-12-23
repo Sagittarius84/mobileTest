@@ -12,6 +12,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.ContextMenu;
+import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -34,6 +35,7 @@ import org.noorganization.instalist.presenter.implementation.ControllerFactory;
 import org.noorganization.instalist.model.Category;
 import org.noorganization.instalist.model.ShoppingList;
 import org.noorganization.instalist.view.event.ActivityStateMessage;
+import org.noorganization.instalist.view.event.DrawerControlMessage;
 import org.noorganization.instalist.view.event.ToolbarChangeMessage;
 import org.noorganization.instalist.view.fragment.ShoppingListOverviewFragment;
 import org.noorganization.instalist.view.interfaces.IBaseActivity;
@@ -115,6 +117,7 @@ public class MainShoppingListView extends AppCompatActivity implements IBaseActi
         super.onCreate(savedInstanceState);
         Log.i(LOG_TAG, "onCreate: " + this.toString());
 
+        EventBus.getDefault().register(this);
         mActivity = this;
         mFragments = new ArrayList<>(1);
 
@@ -168,6 +171,9 @@ public class MainShoppingListView extends AppCompatActivity implements IBaseActi
             List<ShoppingList> foundListsInCat = mListController.getListsByCategory(category);
             if (foundListsInCat.size() > 0) {
                 selectList(foundListsInCat.get(0));
+            } else {
+                EventBus.getDefault().post(new ToolbarChangeMessage(false, getString(R.string.abc_no_shopping_list_selected)));
+                EventBus.getDefault().post(new DrawerControlMessage(true));
             }
         }
     }
@@ -243,6 +249,20 @@ public class MainShoppingListView extends AppCompatActivity implements IBaseActi
     }
 
     /**
+     * Handle the open and close messages for the side drawer.
+     * @param _message the sent msg.
+     */
+    public void onEvent(DrawerControlMessage _message){
+        if(_message.mOpenDrawer){
+            mDrawerLayout.openDrawer(Gravity.LEFT);
+            mNewNameEditText.requestFocus();
+            // set the add buttons visible state
+            mAddCategoryButton.setVisibility(View.VISIBLE);
+            mAddListButton.setVisibility(View.VISIBLE);
+        }
+    }
+
+    /**
      * Event when a category was changed.
      *
      * @param _message the message that was sent.
@@ -303,6 +323,12 @@ public class MainShoppingListView extends AppCompatActivity implements IBaseActi
     @Override
     protected void onResume() {
         super.onResume();
+
+        EventBus bus = EventBus.getDefault();
+        if (!bus.isRegistered(this)) {
+            bus.register(this);
+        }
+
         mAddListButton.setOnClickListener(new OnShoppingListAddClickListener(this, mDefaultCategoryId, mNewNameEditText));
 
         mAddCategoryButton.setOnClickListener(new View.OnClickListener() {
@@ -359,8 +385,6 @@ public class MainShoppingListView extends AppCompatActivity implements IBaseActi
             }
         });
 
-        EventBus bus = EventBus.getDefault();
-        bus.register(this);
         bus.post(new ActivityStateMessage(this, ActivityStateMessage.State.RESUMED));
     }
 

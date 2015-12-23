@@ -32,6 +32,7 @@ import org.noorganization.instalist.view.customview.AmountPicker;
 import org.noorganization.instalist.view.dataholder.SelectableBaseItemListEntryDataHolder;
 import org.noorganization.instalist.view.decoration.DividerItemListDecoration;
 import org.noorganization.instalist.view.event.ActivityStateMessage;
+import org.noorganization.instalist.view.event.DrawerControlMessage;
 import org.noorganization.instalist.view.event.ProductSelectMessage;
 import org.noorganization.instalist.view.event.ShoppingListOverviewFragmentActiveEvent;
 import org.noorganization.instalist.view.event.ShoppingListSelectedMessage;
@@ -285,10 +286,6 @@ public class ShoppingListOverviewFragment extends BaseFragment implements IFragm
             if (mShoppingLists.size() > 0) {
                 mCurrentShoppingList = mShoppingLists.get(0);
                 //mBaseActivityInterface.setToolbarTitle(mCurrentShoppingList.mName);
-            } else {
-                //mBaseActivityInterface.setToolbarTitle(mContext.getResources().getString(R.string.shopping_list_overview_fragment_no_list_available));
-                // do something to show that there are no shoppinglists!
-                return;
             }
         }
         EventBus.getDefault().post(new ShoppingListSelectedMessage(mCurrentShoppingList));

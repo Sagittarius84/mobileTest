@@ -88,7 +88,7 @@
     <string name="menu_add_action">Add</string>
     <string name="menu_cancel_action">Cancel</string>
     <string name="move_category">Move to Category</string>
-    <string name="new_name">New name</string>
+    <string name="new_name">New name of ...</string>
     <string name="new_unit">Create new unit…</string>
     <string name="open_source_licenses">Open source licenses</string>
     <string name="prefs_privacy_policy_eula_terms">Privacy Policy, Eula and Terms</string>
@@ -115,6 +115,6 @@
     <string name="name_exists">Recipe name exists already.</string>
     <string name="error_recipe_creation">Something went wrong while creating recipe.</string>
     <string name="edit_unit">Edit Unit</string>
-    <string name="abc_no_shopping_list_selected">No shoppinglist selected.</string>
+    <string name="abc_no_shopping_list_selected">No Shoppinglist selected.</string>
 
 </resources>
