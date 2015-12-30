@@ -20,7 +20,7 @@ android {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             signingConfig signingConfigs.Keystore_luneyco
-            proguardFile 'C:/Users/tinos_000/Android Projekte/einkaufsliste/app/proguard-rules.pro'
+            //proguardFile 'C:/Users/tinos_000/Android Projekte/einkaufsliste/app/proguard-rules.pro'
         }
         debug {
         }
