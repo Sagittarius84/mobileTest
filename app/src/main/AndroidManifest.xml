@@ -46,6 +46,7 @@
             android:authorities="org.noorganization.instalist.provider"
             android:name=".provider.InstalistProvider"
             android:exported="true"
+            android:syncable="true"
             android:permission="org.noorganization.instalist.READWRITE_SHOPPING_LISTS" />
 
         <!-- SugarORM Settings -->
