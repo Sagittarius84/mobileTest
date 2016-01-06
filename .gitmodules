@@ -1,3 +1,6 @@
 [submodule "instalistsynch"]
 	path = instalistsynch
 	url = git@bitbucket.org:fhnoorg/instalistsynch.git
+[submodule "jsonimexport"]
+	path = jsonimexport
+	url = git@bitbucket.org:fhnoorg/jsonimexport.git
