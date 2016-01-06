@@ -49,6 +49,12 @@
             android:syncable="true"
             android:permission="org.noorganization.instalist.READWRITE_SHOPPING_LISTS" />
 
+        <receiver android:name=".presenter.implementation.PluginController" android:exported="true">
+            <intent-filter>
+                <action android:name="org.noorganization.instalist.action.PONG_PLUGIN" />
+            </intent-filter>
+        </receiver>
+
         <!-- SugarORM Settings -->
         <meta-data
             android:name="DATABASE"

@@ -6,6 +6,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.View;
 
 import org.noorganization.instalist.R;
+import org.noorganization.instalist.presenter.implementation.ControllerFactory;
 import org.noorganization.instalist.view.fragment.settings.SettingsFragment;
 
 /**
@@ -27,6 +28,8 @@ public class SettingsActivity extends AppCompatActivity {
 
         // init and setup toolbar
         mToolbar = (Toolbar) findViewById(R.id.toolbar);
+
+        ControllerFactory.getPluginController(this).searchPlugins();
 
         setSupportActionBar(mToolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);

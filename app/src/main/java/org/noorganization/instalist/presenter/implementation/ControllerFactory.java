@@ -4,6 +4,7 @@ import android.content.Context;
 
 import org.noorganization.instalist.presenter.ICategoryController;
 import org.noorganization.instalist.presenter.IListController;
+import org.noorganization.instalist.presenter.IPluginController;
 import org.noorganization.instalist.presenter.IProductController;
 import org.noorganization.instalist.presenter.IRecipeController;
 import org.noorganization.instalist.presenter.ITagController;
@@ -38,5 +39,9 @@ public class ControllerFactory {
 
     public static ICategoryController getCategoryController(Context _context) {
         return CategoryController.getInstance(_context);
+    }
+
+    public static IPluginController getPluginController(Context _context) {
+        return PluginController.getInstance(_context);
     }
 }
