@@ -26,14 +26,14 @@ import android.widget.ListView;
 import android.widget.RelativeLayout;
 
 import org.noorganization.instalist.R;
+import org.noorganization.instalist.model.Category;
+import org.noorganization.instalist.model.ShoppingList;
 import org.noorganization.instalist.presenter.ICategoryController;
 import org.noorganization.instalist.presenter.IListController;
 import org.noorganization.instalist.presenter.event.CategoryChangedMessage;
 import org.noorganization.instalist.presenter.event.ListChangedMessage;
 import org.noorganization.instalist.presenter.event.ListItemChangedMessage;
 import org.noorganization.instalist.presenter.implementation.ControllerFactory;
-import org.noorganization.instalist.model.Category;
-import org.noorganization.instalist.model.ShoppingList;
 import org.noorganization.instalist.view.event.ActivityStateMessage;
 import org.noorganization.instalist.view.event.DrawerControlMessage;
 import org.noorganization.instalist.view.event.ToolbarChangeMessage;
@@ -144,7 +144,8 @@ public class MainShoppingListView extends AppCompatActivity implements IBaseActi
         // init and setup toolbar
         mToolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(mToolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        if(getSupportActionBar() != null)
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         mDrawerLayout = (DrawerLayout) findViewById(R.id.main_drawer_layout_container);
         expandableListView = (ExpandableListView) findViewById(R.id.drawer_layout_custom_list_name_view);
@@ -250,10 +251,11 @@ public class MainShoppingListView extends AppCompatActivity implements IBaseActi
 
     /**
      * Handle the open and close messages for the side drawer.
+     *
      * @param _message the sent msg.
      */
-    public void onEvent(DrawerControlMessage _message){
-        if(_message.mOpenDrawer){
+    public void onEvent(DrawerControlMessage _message) {
+        if (_message.mOpenDrawer) {
             mDrawerLayout.openDrawer(Gravity.LEFT);
             mNewNameEditText.requestFocus();
             // set the add buttons visible state

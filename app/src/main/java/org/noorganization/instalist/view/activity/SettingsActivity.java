@@ -28,13 +28,14 @@ public class SettingsActivity extends AppCompatActivity {
 
         // init and setup toolbar
         mToolbar = (Toolbar) findViewById(R.id.toolbar);
-
         ControllerFactory.getPluginController(this).searchPlugins();
 
         setSupportActionBar(mToolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        if(getSupportActionBar() != null)
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
     }
+
 
     @Override
     protected void onResume() {
@@ -52,4 +53,5 @@ public class SettingsActivity extends AppCompatActivity {
         super.onPause();
         mToolbar.setNavigationOnClickListener(null);
     }
+
 }
