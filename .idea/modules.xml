@@ -5,8 +5,6 @@
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
       <module fileurl="file://$PROJECT_DIR$/einkaufsliste.iml" filepath="$PROJECT_DIR$/einkaufsliste.iml" />
       <module fileurl="file://$PROJECT_DIR$/instalistsynch/instalistsynch.iml" filepath="$PROJECT_DIR$/instalistsynch/instalistsynch.iml" />
-      <module fileurl="file://$PROJECT_DIR$/instalistsynch/instalistsynch.iml" filepath="$PROJECT_DIR$/instalistsynch/instalistsynch.iml" />
-      <module fileurl="file://$PROJECT_DIR$/jsonimexport/jsonimexport.iml" filepath="$PROJECT_DIR$/jsonimexport/jsonimexport.iml" />
       <module fileurl="file://$PROJECT_DIR$/jsonimexport/jsonimexport.iml" filepath="$PROJECT_DIR$/jsonimexport/jsonimexport.iml" />
     </modules>
   </component>
