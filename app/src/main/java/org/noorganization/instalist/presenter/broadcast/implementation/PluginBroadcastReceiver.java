@@ -3,6 +3,9 @@ package org.noorganization.instalist.presenter.broadcast.implementation;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.util.Log;
 
@@ -10,6 +13,11 @@ import org.noorganization.instalist.presenter.PluginControllerActions;
 import org.noorganization.instalist.presenter.broadcast.IPluginBroadCast;
 import org.noorganization.instalist.presenter.event.PluginFoundMessage;
 
+import java.io.File;
+import java.util.List;
+
+import dalvik.system.DexClassLoader;
+import dalvik.system.PathClassLoader;
 import de.greenrobot.event.EventBus;
 
 /**
@@ -72,8 +80,10 @@ public class PluginBroadcastReceiver extends BroadcastReceiver implements IPlugi
         Log.d(getClass().getCanonicalName(), "Trying find settings activity");
         if (pluginInfo.containsKey(PLUGIN_INFO_KEY_SETTINGS_ACTIVITY)) {
             try {
-                event.mSettingsActivity = Class.forName(
-                        pluginInfo.getString(PLUGIN_INFO_KEY_SETTINGS_ACTIVITY));
+                // load classes from other apks
+                String sourceDir = _context.getPackageManager().getApplicationInfo(pluginInfo.getString(PLUGIN_INFO_KEY_PACKAGE), PackageManager.GET_ACTIVITIES).sourceDir;
+                PathClassLoader pathClassLoader = new dalvik.system.PathClassLoader(sourceDir, ClassLoader.getSystemClassLoader());
+                event.mSettingsActivity = Class.forName(pluginInfo.getString(PLUGIN_INFO_KEY_SETTINGS_ACTIVITY), true, pathClassLoader);
             } catch (Exception e) {
                 Log.e(getClass().getCanonicalName(), "Plugin loading failed: " + e.getMessage());
                 return;

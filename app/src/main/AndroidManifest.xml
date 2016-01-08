@@ -4,6 +4,8 @@
     package="org.noorganization.instalist" >
 
     <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <!--Used to load external apks to retrieve info of plugin activities -->
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
 
     <permission
         android:name="org.noorganization.instalist.READWRITE_SHOPPING_LISTS"
