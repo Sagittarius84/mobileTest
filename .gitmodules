@@ -4,3 +4,6 @@
 [submodule "jsonimexport"]
 	path = jsonimexport
 	url = git@bitbucket.org:fhnoorg/jsonimexport.git
+[submodule "instantlistcommondata"]
+	path = instantlistcommondata
+	url = ./

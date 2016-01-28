@@ -3,6 +3,7 @@
   <component name="VcsDirectoryMappings">
     <mapping directory="" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/instalistsynch" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/instantlistcommondata" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/jsonimexport" vcs="Git" />
   </component>
 </project>
