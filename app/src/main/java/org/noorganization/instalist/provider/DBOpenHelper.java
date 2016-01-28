@@ -28,7 +28,6 @@ public class DBOpenHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase _db) {
-        // TODO: Create tables.
         _db.execSQL(Category.DB_CREATE);
         _db.execSQL(ShoppingList.DB_CREATE);
         _db.execSQL(Unit.DATABASE_CREATE);

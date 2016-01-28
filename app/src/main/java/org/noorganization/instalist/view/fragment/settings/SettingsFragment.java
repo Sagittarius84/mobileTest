@@ -1,5 +1,6 @@
 package org.noorganization.instalist.view.fragment.settings;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.PreferenceCategory;
@@ -70,7 +71,7 @@ public class SettingsFragment extends PreferenceFragment {
         EventBus.getDefault().unregister(this);
     }
 
-    public void onEvent(PluginFoundMessage _msg) {
+    public void onEvent(final PluginFoundMessage _msg) {
         if (mInflater == null || mViewContainer == null) {
             Log.e(LOG_TAG, "onEvent: Faster than light, onCreateView was not called yet.");
             return;
@@ -81,7 +82,13 @@ public class SettingsFragment extends PreferenceFragment {
 
 
         View prefView = preferenceGroup.getView(null, mViewContainer);
-
+        /*prefView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getActivity(), _msg.mSettingsActivity);
+                startActivity(intent);
+            }
+        });*/
         ViewGroup viewGroup = (ViewGroup) mViewContainer.getChildAt(0);
         viewGroup.addView(prefView, viewGroup.getChildCount());
 
