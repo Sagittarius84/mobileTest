@@ -6,4 +6,4 @@
 	url = git@bitbucket.org:fhnoorg/jsonimexport.git
 [submodule "instantlistcommondata"]
 	path = instantlistcommondata
-	url = ./
+	url = git@bitbucket.org:fhnoorg/instantlistcommondata.git
