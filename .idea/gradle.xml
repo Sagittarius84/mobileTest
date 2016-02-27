@@ -13,7 +13,6 @@
             <option value="$PROJECT_DIR$/app" />
             <option value="$PROJECT_DIR$/instalistsynch" />
             <option value="$PROJECT_DIR$/instantlistcommondata" />
-            <option value="$PROJECT_DIR$/jsonimexport" />
           </set>
         </option>
       </GradleProjectSettings>

@@ -1,1 +1,1 @@
-include ':app', ':instalistsynch', ':jsonimexport', ':instantlistcommondata'
+include ':app', ':instalistsynch', ':instantlistcommondata'
