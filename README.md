@@ -1,3 +1,21 @@
+# README #
+InstaList. ShoppingList for Android.
+
+## Reihenfolge ##
+1. git clone git@bitbucket.org:fhnoorg/einkaufsliste.git
+2. git submodule update --init --recursive
+3. In jedem submodule ordner einmal git checkout master ausführen (löst den detached head auf)
+
+##[Kurze Doku](https://bitbucket.org/fhnoorg/einkaufsliste/wiki/Dokumentation%20Synch)##
+
+##[Letzer Commit vor Abgabe](https://bitbucket.org/fhnoorg/einkaufsliste/get/51ca908.tar.gz) (Direkter Download Link) oder Commithash: 51ca908##
+
+## Documentation##
+[Documentation](https://bitbucket.org/fhnoorg/einkaufsliste/wiki/Dokumentation)
+## How to compile ##
+
+The repository contains a minimal Android Studio Project. Just clone and build the "app"-Module in Android Studio. The first build may need a internet connection as some libraries get downloaded by gradle.
+
 # Git submodule (Please read) #
 ## Notes ##
 
@@ -11,23 +29,6 @@
     * normales pullen aus dem Subprojekt oder
     * *git submodule foreach git pull*
 
-# README #
-InstaList. ShoppingList for Android.
-
-## Reihenfolge ##
-1. git clone git@bitbucket.org:fhnoorg/einkaufsliste.git
-2. git submodule update --init --recursive
-3. In jedem submodule ordner einmal git checkout master ausführen (löst den detached head auf)
-
-## Ablauf Gruppe erstellen/Member hinzufügen ##
-[YouTube Link](https://www.youtube.com/watch?v=fwmNDBMlAns)
-##[Letzer Commit vor Abgabe](https://bitbucket.org/fhnoorg/einkaufsliste/get/51ca908.tar.gz) (Direkter Download Link) oder Commithash: 51ca908##
-
-## Documentation##
-[Documentation](https://bitbucket.org/fhnoorg/einkaufsliste/wiki/Dokumentation)
-## How to compile ##
-
-The repository contains a minimal Android Studio Project. Just clone and build the "app"-Module in Android Studio. The first build may need a internet connection as some libraries get downloaded by gradle.
 
 ## Dependencies ##
 
