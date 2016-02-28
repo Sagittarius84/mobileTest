@@ -19,6 +19,8 @@ InstaList. ShoppingList for Android.
 2. git submodule update --init --recursive
 3. In jedem submodule ordner einmal git checkout master ausführen (löst den detached head auf)
 
+## Ablauf Gruppe erstellen/Member hinzufügen ##
+[YouTube Link](https://www.youtube.com/watch?v=fwmNDBMlAns)
 ##[Letzer Commit vor Abgabe](https://bitbucket.org/fhnoorg/einkaufsliste/get/51ca908.tar.gz) (Direkter Download Link) oder Commithash: 51ca908##
 
 ## Documentation##
