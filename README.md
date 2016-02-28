@@ -14,7 +14,7 @@
 # README #
 InstaList. ShoppingList for Android.
 
-##[Letzer Commit vor Abgabe](https://bitbucket.org/fhnoorg/einkaufsliste/get/f30886f.tar.gz) (Direkter Download Link) oder Commithash: f30886f##
+##[Letzer Commit vor Abgabe](https://bitbucket.org/fhnoorg/einkaufsliste/get/51ca908.tar.gz) (Direkter Download Link) oder Commithash: 51ca908##
 
 ## Documentation##
 [Documentation](https://bitbucket.org/fhnoorg/einkaufsliste/wiki/Dokumentation)
