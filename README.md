@@ -14,6 +14,11 @@
 # README #
 InstaList. ShoppingList for Android.
 
+## Reihenfolge ##
+1. git clone git@bitbucket.org:fhnoorg/einkaufsliste.git
+2. git submodule update --init --recursive
+3. In jedem submodule ordner einmal git checkout master ausführen (löst den detached head auf)
+
 ##[Letzer Commit vor Abgabe](https://bitbucket.org/fhnoorg/einkaufsliste/get/51ca908.tar.gz) (Direkter Download Link) oder Commithash: 51ca908##
 
 ## Documentation##
