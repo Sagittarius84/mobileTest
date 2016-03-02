@@ -14,4 +14,4 @@
  * limitations under the License.
  */
 
-include ':app', ':instalistsynch', ':instantlistcommondata'
+include ':app', ':instalist-synch', ':instalist-android-backend'

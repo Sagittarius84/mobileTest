@@ -10,8 +10,8 @@
           <set>
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/app" />
-            <option value="$PROJECT_DIR$/instalistsynch" />
-            <option value="$PROJECT_DIR$/instantlistcommondata" />
+            <option value="$PROJECT_DIR$/instalist-android-backend" />
+            <option value="$PROJECT_DIR$/instalist-synch" />
           </set>
         </option>
       </GradleProjectSettings>
