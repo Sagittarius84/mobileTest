@@ -1,6 +1,0 @@
-[submodule "instalistsynch"]
-	path = instalistsynch
-	url = https://github.com/InstaList/instalist-synch.git
-[submodule "instantlistcommondata"]
-	path = instantlistcommondata
-	url = https://github.com/InstaList/instalist-android-backend.git
