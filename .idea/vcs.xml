@@ -3,7 +3,7 @@
   <component name="VcsDirectoryMappings">
     <mapping directory="$PROJECT_DIR$" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/instalistsynch" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/instalistsynch/instalist-comm" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/instantlistcommondata" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/instantlistcommondata/instalist-comm" vcs="Git" />
   </component>
 </project>
