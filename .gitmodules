@@ -3,4 +3,4 @@
 	url = https://github.com/InstaList/instalist-synch.git
 [submodule "instantlistcommondata"]
 	path = instantlistcommondata
-	url = https://github.com/InstaList/instalist-adroid-backend.git
+	url = https://github.com/InstaList/instalist-android-backend.git
