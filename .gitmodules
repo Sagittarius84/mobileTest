@@ -1,0 +1,6 @@
+[submodule "instalist-android-backend"]
+	path = instalist-android-backend
+	url = https://github.com/InstaList/instalist-android-backend.git
+[submodule "instalist-synch"]
+	path = instalist-synch
+	url = https://github.com/InstaList/instalist-synch.git
