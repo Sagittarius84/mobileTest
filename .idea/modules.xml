@@ -6,8 +6,6 @@
       <module fileurl="file://$PROJECT_DIR$/instalist-android.iml" filepath="$PROJECT_DIR$/instalist-android.iml" />
       <module fileurl="file://$PROJECT_DIR$/instalist-android-backend/instalist-android-backend.iml" filepath="$PROJECT_DIR$/instalist-android-backend/instalist-android-backend.iml" />
       <module fileurl="file://$PROJECT_DIR$/instalist-synch/instalist-synch.iml" filepath="$PROJECT_DIR$/instalist-synch/instalist-synch.iml" />
-      <module fileurl="file://$PROJECT_DIR$/instalistsynch/instalistsynch.iml" filepath="$PROJECT_DIR$/instalistsynch/instalistsynch.iml" />
-      <module fileurl="file://$PROJECT_DIR$/instantlistcommondata/instantlistcommondata.iml" filepath="$PROJECT_DIR$/instantlistcommondata/instantlistcommondata.iml" />
     </modules>
   </component>
 </project>
