@@ -26,10 +26,7 @@ android {
             if (propsFile.exists() && android.signingConfigs.hasProperty(configName)) {
                 def props = new Properties()
                 props.load(new FileInputStream(propsFile))
-                keyAlias='AndroidKey'
-                keyPassword='h5$=!Mnd'
                 storeFile=file('C:/Users/tinos_000/ownCloud/Shared/AI-Sammelordner/3. Semester/Mobile Computing 2/keystore/android.jks')
-                storePassword='E5#3M@zj'
             }
         }
     }
