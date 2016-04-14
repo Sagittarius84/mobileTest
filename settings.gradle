@@ -14,4 +14,4 @@
  * limitations under the License.
  */
 
-include ':app', ':instalist-synch', ':instalist-android-backend'
+include ':app', ':instalist-synch', ':instalist-android-backend', ':instalist-synch:instalist-comm'
