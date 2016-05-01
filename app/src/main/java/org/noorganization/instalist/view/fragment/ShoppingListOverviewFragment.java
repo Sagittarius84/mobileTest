@@ -17,6 +17,7 @@
 package org.noorganization.instalist.view.fragment;
 
 import android.content.Context;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.PowerManager;
 import android.support.design.widget.FloatingActionButton;
@@ -37,19 +38,15 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import org.noorganization.instalist.R;
+import org.noorganization.instalist.model.ListEntry;
+import org.noorganization.instalist.model.ShoppingList;
 import org.noorganization.instalist.presenter.IListController;
 import org.noorganization.instalist.presenter.event.ListItemChangedMessage;
 import org.noorganization.instalist.presenter.implementation.ControllerFactory;
-import org.noorganization.instalist.model.ListEntry;
-import org.noorganization.instalist.model.Product;
-import org.noorganization.instalist.model.ShoppingList;
 import org.noorganization.instalist.view.activity.MainShoppingListView;
 import org.noorganization.instalist.view.customview.AmountPicker;
-import org.noorganization.instalist.view.dataholder.SelectableBaseItemListEntryDataHolder;
 import org.noorganization.instalist.view.decoration.DividerItemListDecoration;
 import org.noorganization.instalist.view.event.ActivityStateMessage;
-import org.noorganization.instalist.view.event.DrawerControlMessage;
-import org.noorganization.instalist.view.event.ProductSelectMessage;
 import org.noorganization.instalist.view.event.ShoppingListOverviewFragmentActiveEvent;
 import org.noorganization.instalist.view.event.ShoppingListSelectedMessage;
 import org.noorganization.instalist.view.event.ToolbarChangeMessage;
@@ -424,7 +421,11 @@ public class ShoppingListOverviewFragment extends BaseFragment implements IFragm
         mLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
 
         mRecyclerView.setLayoutManager(mLayoutManager);
-        mRecyclerView.addItemDecoration(new DividerItemListDecoration(getResources().getDrawable(R.drawable.list_divider), false, false));
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            mRecyclerView.addItemDecoration(new DividerItemListDecoration(getResources().getDrawable(R.drawable.list_divider, mContext.getTheme())));
+        } else {
+            mRecyclerView.addItemDecoration(new DividerItemListDecoration(getResources().getDrawable(R.drawable.list_divider)));
+        }
         mRecyclerView.setAdapter(mShoppingItemListAdapter);
         mRecyclerView.setItemAnimator(new DefaultItemAnimator());
 
@@ -491,7 +492,6 @@ public class ShoppingListOverviewFragment extends BaseFragment implements IFragm
             @Override
             public void onClick(View v) {
                 // reset selected items ... (lazy resetting!)
-                SelectableBaseItemListEntryDataHolder.getInstance().clear();
                 ViewUtils.addFragment(getActivity(),
                         ProductListDialogFragment.newInstance(mCurrentShoppingList.mUUID));
             }
