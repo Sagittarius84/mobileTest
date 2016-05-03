@@ -26,7 +26,6 @@ android {
             if (propsFile.exists() && android.signingConfigs.hasProperty(configName)) {
                 def props = new Properties()
                 props.load(new FileInputStream(propsFile))
-                storeFile=file('C:/Users/tinos_000/ownCloud/Shared/AI-Sammelordner/3. Semester/Mobile Computing 2/keystore/android.jks')
             }
         }
     }
@@ -57,7 +56,6 @@ android {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             signingConfig signingConfigs.release
-            //proguardFile 'C:/Users/tinos_000/Android Projekte/einkaufsliste/app/proguard-rules.pro'
         }
         debug {
         }
