@@ -1,6 +1,7 @@
 language: android
 android:
     components:
+      - tools
       # the current build tools version used by this project
       - build-tools-23.0.2
       # the sdk used to compile the project
