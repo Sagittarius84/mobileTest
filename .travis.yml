@@ -1,10 +1,16 @@
 language: android
 android:
+    jdk:
+      - openjdk8
     components:
       - tools
       # the current build tools version used by this project
       - build-tools-23.0.2
       # the sdk used to compile the project
       - android-23
-      - extra-android-support-23.1.1
-      - extra-android-m2repository-23.1.1
+      - extra-android-support-23.3.0
+      - extra-android-m2repository-23.3.0
+      
+       
+    before_install:
+      - chmod +x gradlew
