@@ -26,7 +26,7 @@ import android.view.View;
  * Created by TS on 04.05.2015.
  * Touchlistener that proceed gesturedetection of swiping and tapping.
  */
-public class OnSimpleSwipeGestureListener implements View.OnTouchListener, IOnItemTouchEvents{
+public class  OnSimpleSwipeGestureListener implements View.OnTouchListener, IOnItemTouchEvents{
 
     private final GestureDetector mGestureDetector;
 
