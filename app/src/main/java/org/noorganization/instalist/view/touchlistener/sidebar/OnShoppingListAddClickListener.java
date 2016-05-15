@@ -26,9 +26,12 @@ import org.noorganization.instalist.presenter.IListController;
 import org.noorganization.instalist.presenter.implementation.ControllerFactory;
 import org.noorganization.instalist.model.Category;
 import org.noorganization.instalist.model.ShoppingList;
+import org.noorganization.instalist.view.event.ShoppingListSelectedMessage;
 import org.noorganization.instalist.view.fragment.ShoppingListOverviewFragment;
 import org.noorganization.instalist.view.interfaces.IBaseActivity;
 import org.noorganization.instalist.view.utils.ViewUtils;
+
+import de.greenrobot.event.EventBus;
 
 /**
  * Used to process various add list processes to categories.
@@ -87,8 +90,6 @@ public class OnShoppingListAddClickListener implements View.OnClickListener {
         mNewNameEditText.clearFocus();
         // clear the field
         mNewNameEditText.setText("");
-        // ((IBaseActivity) context).addList(shoppingList);
-
-        ((IBaseActivity) context).changeFragment(ShoppingListOverviewFragment.newInstance(shoppingList.mUUID));
+        EventBus.getDefault().post(new ShoppingListSelectedMessage(shoppingList));
     }
 }
