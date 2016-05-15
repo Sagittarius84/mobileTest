@@ -16,6 +16,17 @@
 
 apply plugin: 'com.android.application'
 
+project.ext {
+    androidSupportLibVersion = '23.4.0'
+    greenrobotVersion = '2.4.0'
+    compileSdkVersion = 23
+    buildToolsVersion = '23.0.3'
+    appVersionCode = 2
+    appVersionName = '0.9a'
+    targetSdkVersion = 23
+    minSdkVersion = 16
+}
+
 android {
 
     signingConfigs {
@@ -41,14 +52,14 @@ android {
         exclude 'META-INF/NOTICE'
         exclude 'META-INF/notice.txt'
     }
-    compileSdkVersion 23
-    buildToolsVersion "23.0.2"
+    compileSdkVersion project.compileSdkVersion
+    buildToolsVersion project.buildToolsVersion
     defaultConfig {
         applicationId "org.noorganization.instalist"
-        minSdkVersion 16
-        targetSdkVersion 23
-        versionCode 2
-        versionName "0.9a"
+        minSdkVersion project.minSdkVersion
+        targetSdkVersion project.targetSdkVersion
+        versionCode project.appVersionCode
+        versionName project.appVersionName
         multiDexEnabled true
     }
     buildTypes {
@@ -62,12 +73,15 @@ android {
     }
 }
 
+
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
-    compile('com.android.support:multidex:1.0.0');
-    compile (project(':instalist-android-backend'))
-    compile 'com.android.support:appcompat-v7:23.3.0'
-    compile 'com.android.support:recyclerview-v7:23.3.0'
-    compile 'com.android.support:design:23.3.0'
-    compile 'de.greenrobot:eventbus:2.4.0'
+    compile(group: 'com.android.support', name: 'multidex', version: '1.0.0');
+    compile(project(':instalist-android-backend'))
+    compile group: 'com.android.support', name: 'appcompat-v7', version: project.androidSupportLibVersion
+    compile group: 'com.android.support', name: 'recyclerview-v7', version: project.androidSupportLibVersion
+    compile group: 'com.android.support', name: 'design', version: project.androidSupportLibVersion
+    compile group: 'de.greenrobot', name: 'eventbus', version: project.greenrobotVersion
+
+    // androidTestCompile group: 'tools.fastlane', name: 'screengrab', version: '0.3.2'
 }
