@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright 2016 Tino Siegmund, Michael Wodniok
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    package="org.noorganization.instalist" >
+
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <!--Used to load external apks to retrieve info of plugin activities -->
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+
+    <!-- Allows unlocking your device and activating its screen so UI tests can succeed -->
+    <uses-permission android:name="android.permission.DISABLE_KEYGUARD"/>
+    <uses-permission android:name="android.permission.WAKE_LOCK"/>
+
+    <!-- Allows for storing and retrieving screenshots -->
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+
+    <!-- Allows changing locales -->
+    <uses-permission android:name="android.permission.CHANGE_CONFIGURATION" />
+
+    <permission
+        android:name="org.noorganization.instalist.READWRITE_SHOPPING_LISTS"
+        android:description="@string/read_write_shoppinglists"
+        android:protectionLevel="normal" />
+
+    <application
+        android:name=".GlobalApplication"
+        android:allowBackup="true"
+        android:icon="@mipmap/logo"
+        android:label="@string/app_name"
+        android:theme="@style/InstalistTheme1"
+        tools:replace="android:icon" >
+
+        <activity
+            android:name=".view.activity.MainShoppingListView"
+            android:label="@string/title_activity_main" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity android:name=".view.activity.RecipeChangeActivity"
+            android:parentActivityName=".view.activity.MainShoppingListView"
+            android:label="@string/edit_recipe" />
+        <activity android:name=".view.activity.SettingsActivity"
+            android:parentActivityName=".view.activity.MainShoppingListView"
+            android:label="@string/settings" />
+        <activity android:name=".view.activity.UnitEditorActivity"
+            android:parentActivityName=".view.activity.SettingsActivity"
+            android:label="@string/unit_editor"
+            android:windowSoftInputMode="adjustPan">
+            <intent-filter>
+                <action android:name=".view.activity.UnitEditorActivity" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+
+        <provider
+            android:authorities="org.noorganization.instalist.provider"
+            android:name=".provider.InstalistProvider"
+            android:exported="true"
+            android:syncable="true"
+            android:permission="org.noorganization.instalist.READWRITE_SHOPPING_LISTS" />
+
+        <receiver android:name=".presenter.broadcast.implementation.PluginBroadcastReceiver" android:exported="true">
+            <intent-filter>
+                <action android:name="org.noorganization.instalist.action.PONG_PLUGIN" />
+            </intent-filter>
+        </receiver>
+
+        <!-- SugarORM Settings -->
+        <meta-data
+            android:name="DATABASE"
+            android:value="shopping.db" />
+        <meta-data
+            android:name="VERSION"
+            android:value="2" />
+        <meta-data
+            android:name="QUERY_LOG"
+            android:value="false" /> <!-- for debugging set this to true -->
+        <meta-data
+            android:name="DOMAIN_PACKAGE_NAME"
+            android:value="org.noorganization.instalist.model" />
+
+        <instrumentation android:name="android.test.InstrumentationTestRunner"
+            android:targetPackage="org.noorganization.instalist"
+            android:label="Tests for org.noorganization.instalist"/>
+    </application>
+
+</manifest>
