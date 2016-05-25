@@ -8,9 +8,10 @@ android:
       - build-tools-23.0.3
       # the sdk used to compile the project
       - android-23
-      - extra-android-support-23.4.0
-      - extra-android-m2repository-23.4.0
+      - extra-android-support
+      - extra-android-m2repository
       
-       
     before_install:
       - chmod +x gradlew
+
+script: ./gradlew build -x lint
