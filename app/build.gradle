@@ -93,7 +93,6 @@ dependencies {
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.1'){
         exclude group: 'javax.inject'
     }
+
     androidTestCompile group: 'tools.fastlane', name: 'screengrab', version: '0.3.2'
-
-
 }
