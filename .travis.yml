@@ -14,4 +14,8 @@ android:
     before_install:
       - chmod +x gradlew
 
-script: ./gradlew assembleDebug
+script: 
+  - ./gradlew assembleDebug
+  - ./gradlew build jacocoTestReport assembleAndroidTest
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
