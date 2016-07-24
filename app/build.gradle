@@ -70,10 +70,10 @@ android {
             signingConfig signingConfigs.release
         }
         debug {
+            testCoverageEnabled = true
         }
     }
 }
-
 
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
