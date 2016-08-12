@@ -1,5 +1,4 @@
-# Instalist #
-[![Build Status](https://travis-ci.org/InstaList/instalist-android.png)](https://travis-ci.org/InstaList/instalist-android)
+# Instalist # [![Build Status](https://travis-ci.org/InstaList/instalist-android.png)](https://travis-ci.org/InstaList/instalist-android)
 
 InstaList. ShoppingList for Android.
 
