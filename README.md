@@ -1,22 +1,22 @@
-# Instalist # [![Build Status](https://travis-ci.org/InstaList/instalist-android.png)](https://travis-ci.org/InstaList/instalist-android)
+# Instalist [![Build Status](https://travis-ci.org/InstaList/instalist-android.png)](https://travis-ci.org/InstaList/instalist-android)
 
 InstaList. ShoppingList for Android.
 
-## Project Download Order ##
+## Project Download Order
 1. git clone git@bitbucket.org:fhnoorg/einkaufsliste.git
 2. git submodule update --init --recursive
 3. In each submodule execute git checkout master  (prevents the detached head state)
 
-## How to compile ##
+## How to compile
 
 The repository contains a minimal Android Studio Project. Just clone and build the "app"-Module in Android Studio. The first build may need a internet connection as some libraries get downloaded by gradle.
 
-# Git submodule (Please read) #
-## Notes ##
+# Git submodule (Please read)
+## Notes
 
 * Always publish (push) the submodule change before publishing (push) the change to the superproject that references it. [SO](http://stackoverflow.com/questions/1979167/git-submodule-update)
 
-## Dependencies ##
+## Dependencies
 
 See app/build.gradle for an always up to date dependency-information.
 
