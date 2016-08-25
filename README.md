@@ -1,4 +1,4 @@
-# Instalist [![Build Status](https://travis-ci.org/InstaList/instalist-android.png)](https://travis-ci.org/InstaList/instalist-android)
+# Instalist [![Build Status](https://travis-ci.org/InstaList/instalist-android.png)](https://travis-ci.org/InstaList/instalist-android) [![Codacy branch grade](https://img.shields.io/codacy/grade/e27821fb6289410b8f58338c7e0bc686/master.svg?maxAge=2592000?style=plastic)](https://www.codacy.com/app/tinosiegmund/instalist-android/dashboard?bid=3633363)
 
 InstaList. ShoppingList for Android.
 
