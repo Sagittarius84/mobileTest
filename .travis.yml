@@ -15,4 +15,5 @@ android:
       - chmod +x gradlew
 
 script: 
-  - ./gradlew assembleDebug
+  # - ./gradlew assembleDebug -PdisablePreDex -Pcom.android.build.threadPoolSize=1 -Porg.gradle.parallel=false
+  - ./gradlew build -PpreDexEnable=false -Pcom.android.build.threadPoolSize=1 -Dorg.gradle.parallel=false -Dorg.gradle.jvmargs="-Xms512m -Xmx512m" -Dorg.gradle.daemon=false
