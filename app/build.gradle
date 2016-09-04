@@ -86,7 +86,7 @@ dependencies {
     compile group: 'de.greenrobot', name: 'eventbus', version: project.greenrobotVersion
 
 
-    androidTestCompile group: 'com.android.support', name: 'support-annotations', version:'23.4.0'
+    compile group: 'com.android.support', name: 'support-annotations', version:'23.4.0'
     androidTestCompile group: 'com.android.support.test', name:'runner',version:'0.5'
     androidTestCompile group: 'com.android.support.test', name:'rules', version:'0.5'
 
