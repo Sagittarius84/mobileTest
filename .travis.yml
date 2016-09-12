@@ -17,3 +17,4 @@ android:
 script: 
   # - ./gradlew assembleDebug -PdisablePreDex -Pcom.android.build.threadPoolSize=1 -Porg.gradle.parallel=false
   - ./gradlew assembleDebug -PpreDexEnable=false -Pcom.android.build.threadPoolSize=1 -Dorg.gradle.parallel=false -Dorg.gradle.jvmargs="-Xms512m -Xmx512m" -Dorg.gradle.daemon=false
+  - ./gradlew connectedAndroidTest -PdisablePreDex -Dorg.gradle.daemon=false --console=plain
