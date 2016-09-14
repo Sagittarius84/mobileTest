@@ -22,7 +22,7 @@ project.ext {
     compileSdkVersion = 23
     buildToolsVersion = '23.0.3'
     appVersionCode = 2
-    appVersionName = '0.9a'
+    appVersionName = '0.9.1'
     targetSdkVersion = 23
     minSdkVersion = 16
 }
