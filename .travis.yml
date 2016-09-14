@@ -1,7 +1,8 @@
 language: android
 env:
-    - ANDROID_ABI=armeabi-v7a
-    - ANDROID_TAG=google_apis
+    global:
+        - ANDROID_ABI=armeabi-v7a
+        - ANDROID_TAG=google_apis
 android:
     jdk:
       - openjdk8
@@ -17,13 +18,13 @@ android:
       
     before_install:
       - chmod +x gradlew
+      
 # Emulator Management: Create, Start and Wait
 before_script:
   - echo no | android create avd --force -n test -t "android-23" --abi $ANDROID_ABI --tag $ANDROID_TAG
   - emulator -avd test -no-skin -no-audio -no-window &
   - android-wait-for-emulator
-  - adb shell input keyevent 82 &
+
 script: 
-  # - ./gradlew assembleDebug -PdisablePreDex -Pcom.android.build.threadPoolSize=1 -Porg.gradle.parallel=false
   - ./gradlew assembleDebug -PpreDexEnable=false -Pcom.android.build.threadPoolSize=1 -Dorg.gradle.parallel=false -Dorg.gradle.jvmargs="-Xms512m -Xmx512m" -Dorg.gradle.daemon=false
   - ./gradlew connectedAndroidTest -PdisablePreDex -Dorg.gradle.daemon=false --console=plain
