@@ -27,7 +27,9 @@ android:
       - extra-android-support
       - extra-android-m2repository
 #      - sys-img-armeabi-v7a-google_apis-23
-      
+    licenses:
+      - android-sdk-license-.+
+      - google-gdk-license-.+
     before_install:
       - chmod +x gradlew
       
