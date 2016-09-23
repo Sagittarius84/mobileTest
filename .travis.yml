@@ -3,9 +3,21 @@ env:
     global:
         - ANDROID_ABI=armeabi-v7a
         - ANDROID_TAG=google_apis
+
+sudo: required
+
+jdk:
+  - oraclejdk8
+
+install: true
+
+script:
+  - sudo apt-get update && sudo apt-get install oracle-java8-installer
+  - java -version
+
 android:
     jdk:
-      - openjdk8
+      - oraclejdk8
     components:
       - tools
       # the current build tools version used by this project
