@@ -179,7 +179,7 @@ public class MainShoppingListView extends AppCompatActivity implements IBaseActi
 
         mDrawerLayout.setFitsSystemWindows(true);
         assignDrawer();
-        mNavBarToggle.setHomeAsUpIndicator(R.drawable.abc_ic_ab_back_mtrl_am_alpha);
+        // mNavBarToggle.setHomeAsUpIndicator(R.drawable.abc_ic_ab_back_mtrl_am_alpha);
         mToolbarClickListener = mNavBarToggle.getToolbarNavigationClickListener();
         //  setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
         // setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_OPEN);
@@ -484,7 +484,7 @@ public class MainShoppingListView extends AppCompatActivity implements IBaseActi
         if (_DrawerLayoutMode == DrawerLayout.LOCK_MODE_LOCKED_CLOSED) {
             mNavBarToggle.setDrawerIndicatorEnabled(false);
 
-            mToolbar.setNavigationIcon(R.drawable.abc_ic_ab_back_mtrl_am_alpha);
+            // mToolbar.setNavigationIcon(R.drawable.abc_ic_ab_back_mtrl_am_alpha);
             setNavigationClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
