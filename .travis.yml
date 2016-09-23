@@ -9,9 +9,9 @@ android:
     components:
       - tools
       # the current build tools version used by this project
-      - build-tools-23.0.3
+      - build-tools-24
       # the sdk used to compile the project
-      - android-23
+      - android-24
       - extra-android-support
       - extra-android-m2repository
 #      - sys-img-armeabi-v7a-google_apis-23
