@@ -15,24 +15,21 @@
   -->
 
 <resources xmlns:tools="http://schemas.android.com/tools">
-
     <!-- Base application theme. -->
     <style name="InstalistTheme1" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="colorPrimary">@color/primary_color</item>
-        <!--        <item name="colorAccent">@color/white</item>-->
         <item name="colorAccent">@color/light_blue_500</item>
-
         <item name="colorPrimaryDark">@color/primary_color_dark</item>w
+
         <item name="android:textViewStyle">@style/RobotoTextViewStyle</item>
         <item name="android:buttonStyle">@style/RobotoButtonStyle</item>
-        <item name="android:editTextStyle">@style/RobotoEditTextStyle</item>
 
         <item name="android:textSize">@dimen/text_size</item>
 
         <item name="android:textColor">@color/black</item>
         <item name="android:editTextColor">@color/black</item>
-        <item name="android:textColorPrimary">@color/white</item>
-        <item name="android:textColorSecondary">@color/black</item>
+        <item name="android:textColorPrimary">@color/black</item>
+        <item name="android:textColorSecondary">@color/white</item>
         <item name="colorControlNormal">@color/grey_light</item>
         <item name="colorControlHighlight">@color/control_highlight_color</item>k
         <!-- on API 21 the overflow icon ignores colorControlNormal attr in favor of the native version -->
@@ -51,30 +48,18 @@
         <item name="selectableItemBackground">@drawable/ripple</item>
 
         <item name="selectableItemBackgroundBorderless">@drawable/ripple</item>
-        <item name="android:selectableItemBackgroundBorderless" tools:targetApi="lollipop">@drawable/ripple</item>
+        <item name="android:selectableItemBackgroundBorderless" tools:targetApi="lollipop">
+            @drawable/ripple
+        </item>
     </style>
 
     <style name="InstalistTheme1.Window" parent="@android:style/Theme">
-            <item name="android:windowEnterAnimation">@android:anim/fade_in</item>
-            <item name="android:windowExitAnimation">@android:anim/fade_out</item>
+        <item name="android:windowEnterAnimation">@android:anim/fade_in</item>
+        <item name="android:windowExitAnimation">@android:anim/fade_out</item>
     </style>
     <!-- remove the default close button in actionmode -->
     <style name="NoCloseButton" parent="@android:style/Widget.ActionButton.CloseMode">
         <item name="android:visibility">invisible</item>
-    </style>
-
-    <style name="RobotoTextViewStyle" parent="android:Widget.TextView">
-        <item name="android:fontFamily">sans-serif-light</item>
-    </style>
-
-    <style name="RobotoButtonStyle" parent="android:Widget.Button">
-        <item name="android:fontFamily">sans-serif-light</item>
-        <item name="android:colorFocusedHighlight">@color/grey_light</item>
-        <item name="android:elevation" tools:ignore="NewApi">2dp</item>
-    </style>
-
-    <style name="RobotoEditTextStyle" parent="android:Widget.EditText">
-        <item name="android:fontFamily">sans-serif-light</item>
     </style>
 
     <style name="InstalistTheme1.Toolbar">
@@ -241,6 +226,7 @@
         <item name="android:src">@mipmap/ic_close_black_36dp</item>
         <item name="android:tint">@color/red_500</item>
     </style>
+
     <style name="single_line_list_item">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">?listPreferredItemHeightSmall</item>
