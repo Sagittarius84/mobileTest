@@ -40,14 +40,14 @@ import java.util.List;
  */
 public class UnitEditorAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
-    private static final int      TYPE_TEXTVIEW = 0;
-    private static final int      TYPE_EDITTEXT = 1;
+    private static final int TYPE_TEXTVIEW = 0;
+    private static final int TYPE_EDITTEXT = 1;
 
-    private Activity              mActivity;
-    private List<Unit>            mUnderLyingUnits;
-    private ActionMode.Callback   mEditingMode;
+    private Activity mActivity;
+    private List<Unit> mUnderLyingUnits;
+    private ActionMode.Callback mEditingMode;
 
-    private int                   mEditingPosition;
+    private int mEditingPosition;
 
     public UnitEditorAdapter(Activity _activity, List<Unit> _elements, ActionMode.Callback _editorCallback) {
         mActivity = _activity;
@@ -126,13 +126,14 @@ public class UnitEditorAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
     }
 
     @Override
-    public void onBindViewHolder(RecyclerView.ViewHolder _holder, final int _position) {
-        Unit unit = mUnderLyingUnits.get(_position);
+    public void onBindViewHolder(RecyclerView.ViewHolder _holder, int _position) {
+        final int position = _holder.getAdapterPosition(); // because position can be outdated.
+        Unit unit = mUnderLyingUnits.get(position);
         if (_holder instanceof UnitEditorHolder) {
             EditText editor = ((UnitEditorHolder) _holder).mEditor;
             editor.setText(unit.mName);
             editor.requestFocus();
-        } else if(_holder instanceof UnitTextHolder) {
+        } else if (_holder instanceof UnitTextHolder) {
             TextView entry = ((UnitTextHolder) _holder).mTextView;
             entry.setText(unit.mName);
             entry.setTag(unit);
@@ -142,7 +143,7 @@ public class UnitEditorAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
                     if (mEditingMode != null) {
                         mActivity.startActionMode(mEditingMode);
                     }
-                    setEditorPosition(_position);
+                    setEditorPosition(position);
                 }
             });
         }
@@ -206,18 +207,18 @@ public class UnitEditorAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
     }
 
     private class UnitEditorHolder extends RecyclerView.ViewHolder {
-        public EditText mEditor;
+        EditText mEditor;
 
-        public UnitEditorHolder(View itemView) {
+        UnitEditorHolder(View itemView) {
             super(itemView);
             mEditor = (EditText) itemView.findViewById(R.id.edittext);
         }
     }
 
     private class UnitTextHolder extends RecyclerView.ViewHolder {
-        public TextView mTextView;
+        TextView mTextView;
 
-        public UnitTextHolder(View itemView) {
+        UnitTextHolder(View itemView) {
             super(itemView);
             mTextView = (TextView) itemView.findViewById(android.R.id.text1);
         }
