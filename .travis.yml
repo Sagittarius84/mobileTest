@@ -43,5 +43,5 @@ android:
 #  - android-wait-for-emulator
 
 script: 
-  - ./gradlew assembleDebug -PpreDexEnable=false -Pcom.android.build.threadPoolSize=1 -Dorg.gradle.parallel=false -Dorg.gradle.jvmargs="-Xms512m -Xmx512m" -Dorg.gradle.daemon=false
+  - ./gradlew assembleDebug -PpreDexEnable=false -Pcom.android.build.threadPoolSize=1 -Dorg.gradle.parallel=false -Dorg.gradle.jvmargs="-Xms1024m -Xmx1536m" -Dorg.gradle.daemon=false
 #  - ./gradlew connectedAndroidTest -PdisablePreDex -Dorg.gradle.daemon=false --console=plain
