@@ -72,20 +72,6 @@
                 <action android:name="org.noorganization.instalist.action.PONG_PLUGIN" />
             </intent-filter>
         </receiver>
-
-        <!-- SugarORM Settings -->
-        <meta-data
-            android:name="DATABASE"
-            android:value="shopping.db" />
-        <meta-data
-            android:name="VERSION"
-            android:value="2" />
-        <meta-data
-            android:name="QUERY_LOG"
-            android:value="false" /> <!-- for debugging set this to true -->
-        <meta-data
-            android:name="DOMAIN_PACKAGE_NAME"
-            android:value="org.noorganization.instalist.model" />
     </application>
 
 </manifest>
